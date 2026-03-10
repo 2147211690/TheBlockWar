@@ -1,0 +1,40 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[addons]
+
+imgui/config="uid://bwanfg6gxoeee"
+
+[application]
+
+config/name="TheBlockWar"
+run/main_scene="uid://c5lqvqedob4yx"
+config/features=PackedStringArray("4.6", "C#")
+config/icon="res://icon.svg"
+
+[autoload]
+
+ImGuiRoot="*uid://dugmpnsxaagba"
+
+[display]
+
+window/stretch/mode="canvas_items"
+
+[dotnet]
+
+project/assembly_name="TheBlockWar"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/imgui-godot/plugin.cfg")
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

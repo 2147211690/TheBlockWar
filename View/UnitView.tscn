@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bccdls2vsjite"]
+
+[ext_resource type="Script" uid="uid://bxcvnfn0ji655" path="res://Scripts/Views/UnitView.cs" id="1_hq4fu"]
+[ext_resource type="Texture2D" uid="uid://cf6td8qmy77qj" path="res://Art/Img/units/player/mech_artillery.png" id="2_xr06a"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yjtre"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_xr06a")
+}],
+"loop": true,
+"name": &"Unit_0",
+"speed": 5.0
+}]
+
+[node name="UnitView" type="Node2D" unique_id=1880059611 node_paths=PackedStringArray("MainSprite", "Center")]
+script = ExtResource("1_hq4fu")
+Offsets = Dictionary[String, Vector2]({
+"Unit_0": Vector2(7, -5)
+})
+MainSprite = NodePath("Center/AnimatedSprite2D")
+Center = NodePath("Center")
+
+[node name="Center" type="Node2D" parent="." unique_id=1069590474]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Center" unique_id=341608040]
+sprite_frames = SubResource("SpriteFrames_yjtre")
+animation = &"Unit_0"
+offset = Vector2(7, -4)

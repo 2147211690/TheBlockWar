@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ImGuiConfig" format=3 uid="uid://bwanfg6gxoeee"]
+
+[ext_resource type="Script" uid="uid://c2b31nak3uah7" path="res://addons/imgui-godot/scripts/ImGuiConfig.gd" id="1_66g0s"]
+[ext_resource type="FontFile" uid="uid://br15mhkl342j5" path="res://deyihei.otf" id="1_n3lwf"]
+[ext_resource type="Script" uid="uid://b1cdh8hvdcucb" path="res://addons/imgui-godot/scripts/ImGuiFont.gd" id="2_32gwq"]
+
+[sub_resource type="Resource" id="Resource_bgr0q"]
+script = ExtResource("2_32gwq")
+FontData = ExtResource("1_n3lwf")
+metadata/_custom_type_script = "uid://b1cdh8hvdcucb"
+
+[resource]
+script = ExtResource("1_66g0s")
+Fonts = [SubResource("Resource_bgr0q")]
+metadata/_custom_type_script = "uid://c2b31nak3uah7"

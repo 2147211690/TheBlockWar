@@ -1,0 +1,83 @@
+# ========================== Godot 核心忽略 ==========================
+# 编辑器缓存（含项目设置缓存、插件状态等）
+.godot/
+# 导出配置（如果是团队协作，建议保留 export_presets.cfg 并提交，仅忽略 export.cfg）
+export.cfg
+# 素材导入缓存（.import目录由Godot自动生成，无需提交；但*.import文件需提交！）
+.import/
+# 临时文件/日志
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+# 二进制场景文件（如果用文本场景则无需忽略，推荐文本场景）
+*.tscn.binary
+# 自动生成的C#解决方案/项目（Godot会自动重建，无需提交）
+*.csproj
+*.sln
+*.godot_modules
+
+# ========================== C# 编译产物 ==========================
+# .NET 编译输出
+bin/
+obj/
+# NuGet 缓存
+packages/
+# C# 调试文件
+*.pdb
+*.mdb
+# 用户特定的项目配置（如调试路径、个人设置）
+*.csproj.user
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+# 代码分析/覆盖报告
+coverage/
+TestResults/
+
+# ========================== Rider/IDE 配置 ==========================
+# Rider 项目配置（含断点、运行配置、代码风格等）
+.idea/
+# Rider 日志/缓存
+*.iml
+*.iws
+# VS Code 配置（如果混用）
+.vscode/
+*.code-workspace
+# 通用 IDE 缓存
+.DS_Store       # macOS
+Thumbs.db       # Windows
+desktop.ini     # Windows
+*.directory     # Linux
+
+# ========================== 游戏素材/构建忽略 ==========================
+# 导出的游戏包（建议通过CI/CD自动导出，不提交到Git）
+exports/
+build/
+dist/
+*.exe
+*.pck
+*.apk
+*.x86_64
+*.zip
+*.7z
+# 超大素材（如果用Git LFS管理，需注释掉对应行！）
+# *.png
+# *.jpg
+# *.ogg
+# *.wav
+# *.glb
+
+# ========================== 其他忽略 ==========================
+# 本地测试素材/临时资源
+test_assets/
+temp_assets/
+# 敏感信息（如密钥、测试账号）
+*.env
+*.secret
+# 第三方工具生成文件
+.DS_Store?
+ehthumbs.db
+Icon?
