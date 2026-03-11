@@ -27,6 +27,7 @@ public partial class Test : Node2D
     private SchedulerEvnet _event2;
     private SchedulerEvnet _move;
     private SchedulerEvnet _damage;
+    private SchedulerEvnet _follow;
 
     public override void _Ready()
     {
@@ -189,7 +190,7 @@ public partial class Test : Node2D
         {
             _event0 = EventFactory.CreateEvent((s, a, r) =>
                 {
-                    Simulator.ApplyDamage(s, new(3, 3),
+                    s.ApplyDamage(new(3, 3),
                         10, r);
                 },
                 SimulationLayer.Waiting);
@@ -210,13 +211,13 @@ public partial class Test : Node2D
                 {
                     for (int j = 0; j < 10; j++)
                     {
-                        Simulator.ApplyPlaceTile(s, new(i,j), new TileState()
+                        s.ApplyPlaceTile(new(i,j), new TileState()
                         {
                             Tag = TileTag.Ground
                         }, r);
                     }
                 }
-                Simulator.ApplyPlaceUnit(s, new(2,2), UnitFactory.CreateUnit("Unit_0"), r);
+                s.ApplyPlaceUnit(new(2,2), UnitFactory.CreateUnit("Unit_0"), r);
             }));
         }
         if (ImGui.Button("测试放置2"))
@@ -228,7 +229,7 @@ public partial class Test : Node2D
                 {
                     for (int j = 0; j < 3; j++)
                     {
-                        Simulator.ApplyPlaceUnit(s, new(i,j), UnitFactory.CreateUnit("Unit_0"), r);
+                        s.ApplyPlaceUnit(new(i,j), UnitFactory.CreateUnit("Unit_0"), r);
                     }
                 }
             }, SimulationLayer.Waiting));
@@ -244,9 +245,9 @@ public partial class Test : Node2D
 
             _move = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
             {
-                Simulator.ApplyMoveUnit(s, new(2,2), new(6,3), r);
-                Simulator.ApplyMoveUnit(s, new(6,3), new(1,4), r);
-            }, SimulationLayer.Focused));
+                 s.ApplyMoveUnit(new(2,2), new(6,3), r);
+                s.ApplyMoveUnit(new(6,3), new(1,4), r);
+            }, SimulationLayer.Waiting));
         }
 
         if (ImGui.Button("使用移动"))
@@ -264,8 +265,8 @@ public partial class Test : Node2D
 
             _damage = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
             {
-                Simulator.ApplyDamage(s, new(2,2), 50, r);
-            }, SimulationLayer.Focused));
+                 s.ApplyDamage(new(2,2), 50, r);
+            }, SimulationLayer.Waiting));
         }
 
         if (ImGui.Button("使用伤害"))
@@ -276,6 +277,16 @@ public partial class Test : Node2D
         {
             _damage.Layer = _damage.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
+
+        if (ImGui.Button("添加跟随技能"))
+        {
+            _follow = _gameScheduler.AddEvent(EventFactory.CreateSkill(1, Skills.Skill1));
+        }
+        if (ImGui.Button("改变跟随的关注性"))
+        {
+            _follow.Layer = _follow.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+        }
         ImGui.End();
+        
     }
 }

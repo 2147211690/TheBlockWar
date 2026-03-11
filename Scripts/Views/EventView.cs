@@ -120,7 +120,7 @@ public class EventView
         public TypedPool<DrawNode> DrawNodePool { get; }
         public EventsStyle Style { get; }
         private Node2D _drawContainer;
-        private Stack<EventView> _pool = new();
+        private Stack<EventView> _eventViewPool = new();
         public EventViewPool(Node2D drawContainer, TilesView tilesView, EventsStyle style, UnitsView unitsView)
         {
             _drawContainer = drawContainer;
@@ -148,13 +148,13 @@ public class EventView
 
         public EventView Pop()
         {
-            var view = _pool.Count == 0 ? new EventView(this) : _pool.Pop();
+            var view = _eventViewPool.Count == 0 ? new EventView(this) : _eventViewPool.Pop();
             return view;
         }
         public void Push(EventView view)
         { 
             if (view._pool != this) throw new ArgumentException("EventView is not from this pool");
-            _pool.Push(view);
+            _eventViewPool.Push(view);
             view.Clear();
         }
 

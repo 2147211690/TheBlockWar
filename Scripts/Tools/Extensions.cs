@@ -50,4 +50,18 @@ public static class Extensions
             node2d.DrawTexture(texture, position - size * node2d.GlobalScale, modulate);
         }
     }
+
+    extension(Vector2I[] args)
+    {
+        public bool TryGetArgs(int index, out Vector2I result)
+        {
+            if (index < 0 || index >= args.Length)
+            {
+                result = default;
+                return false;
+            }
+            result = args[index];
+            return true;
+        }
+    }
 }

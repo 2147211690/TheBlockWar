@@ -25,7 +25,7 @@ public partial class TilesView : TileMapLayer
         (_tileViews.GetValueOrDefault(coords, null)?.Height ?? 0) + LocalRightDown.Y / (int)layer;
     public GDTask PlaceTile(Vector2I coords, TileState tile)
     {
-        GD.Print("PlaceTile");
+        //GD.Print("PlaceTile");
         if (!_tileViews.TryGetValue(coords, out var render))
         {
             render = _tileViews[coords] = _tileScene.Instantiate<TileView>();

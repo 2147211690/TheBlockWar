@@ -25,7 +25,7 @@ public partial class UnitView : Node2D
         get;
         set
         {
-            MainSprite.Animation = value;
+            MainSprite.Play(value);
             MainSprite.Offset = Offsets.GetValueOrDefault(value, Vector2.Zero);
             field = value;
         }

@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://bccdls2vsjite"]
 
 [ext_resource type="Script" uid="uid://bxcvnfn0ji655" path="res://Scripts/Views/UnitView.cs" id="1_hq4fu"]
-[ext_resource type="Texture2D" uid="uid://cf6td8qmy77qj" path="res://Art/Img/units/player/mech_artillery.png" id="2_xr06a"]
 [ext_resource type="Script" uid="uid://bcfsqru8ni8v0" path="res://Scripts/Views/HealthBar.cs" id="3_0gwqe"]
 [ext_resource type="Script" uid="uid://mat8tjuus2su" path="res://Scripts/Resources/UnitsStyle.cs" id="3_vsdra"]
+[ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="4_vsdra"]
 
 [sub_resource type="Resource" id="Resource_r4ymd"]
 script = ExtResource("3_vsdra")
@@ -11,11 +11,36 @@ HealthBarColor = Color(0.06637928, 0.104854204, 0.14329588, 1)
 SplitColor = Color(0.06666667, 0.105882354, 0.14509805, 1)
 metadata/_custom_type_script = "uid://mat8tjuus2su"
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_r4ymd"]
+atlas = ExtResource("4_vsdra")
+region = Rect2(0, 0, 44, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xcu2x"]
+atlas = ExtResource("4_vsdra")
+region = Rect2(44, 0, 44, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_87f3l"]
+atlas = ExtResource("4_vsdra")
+region = Rect2(88, 0, 44, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5mqhy"]
+atlas = ExtResource("4_vsdra")
+region = Rect2(132, 0, 44, 34)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_yjtre"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_xr06a")
+"texture": SubResource("AtlasTexture_r4ymd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xcu2x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_87f3l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5mqhy")
 }],
 "loop": true,
 "name": &"Unit_0",

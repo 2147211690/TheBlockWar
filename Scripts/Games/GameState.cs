@@ -12,6 +12,10 @@ public class GameState : IGameState
     private Dictionary<Vector2I, uint> _unitAt = new();
 
     public IEnumerable<UnitState> GetAllUnits() => _units.Values;
+    public bool HasUnit(uint id)
+    {
+        return _units.ContainsKey(id);
+    }
 
     public UnitState? GetUnit(uint id) => _units.GetValueOrDefault(id);
 
@@ -89,6 +93,15 @@ public class GameState : IGameState
         
         private Dictionary<Vector2I, uint> GetModifiedCoords() => 
             _modifiedUnitAt ??= new Dictionary<Vector2I, uint>();
+
+        public bool HasUnit(uint id)
+        {
+            if (_removedUnitIds?.Contains(id) == true)
+                return false;
+            if (_modifiedUnits?.ContainsKey(id) == true)
+                return true;
+            return _owner.HasUnit(id);
+        }
 
         public UnitState? GetUnit(uint id)
         {

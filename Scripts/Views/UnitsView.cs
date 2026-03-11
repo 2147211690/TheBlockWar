@@ -13,7 +13,6 @@ public partial class UnitsView : Node2D
     private readonly Dictionary<uint, UnitView> _unitViews = new();
     private readonly Dictionary<Vector2I, uint> _unitMaps = new();
     private bool _queueUpdateUnitPosition = false;
-    private (uint unitId, UnitView render)? _unitViewChache;
     private UnitView? _currentUnitView;
     public uint CurrentUnitId
     {
@@ -84,9 +83,9 @@ public partial class UnitsView : Node2D
     public async GDTask CurrentMoveUnit(Vector2I to)
     {
         await GDTask.Delay(1000);
-        _currentUnitView!.RealCoords = to;
+        _unitMaps.Remove(_currentUnitView!.RealCoords);
+        _currentUnitView.RealCoords = to;
         SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
-        _unitMaps.Remove(_currentUnitView.RealCoords);
         _unitMaps.Add(to, CurrentUnitId);
     }
     /// <summary>

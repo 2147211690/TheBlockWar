@@ -82,7 +82,7 @@ public class GameScheduler
         foreach (var a in SimulationResults)
         {
             if (a.Layer != SimulationLayer.Running) break;
-            Simulator.ApplyResult(GameState, a);
+            GameState.ApplyResult(a);
         }
         
         SimulationUpdated?.Invoke(this, EventArgs.Empty);
