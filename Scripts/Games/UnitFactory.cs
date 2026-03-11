@@ -4,7 +4,7 @@ namespace TheBlockWar.Scripts.Games;
 
 public static class UnitFactory
 {
-    private static uint _nextUnitId = 0;
+    private static uint _nextUnitId = 1;
 
     public static uint CreateUnitId()
     {

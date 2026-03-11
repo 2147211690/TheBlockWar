@@ -7,6 +7,7 @@ namespace TheBlockWar.Scripts.Views;
 public partial class EventsView : Node2D
 {
     [Export] public TilesView TilesView { get; set; }
+    [Export] public UnitsView UnitsView { get; set; }
     [Export] private Node2D _drawContainer;
     [Export] private EventsStyle _style;
     private EventView.EventViewPool _eventViewPool;
@@ -15,7 +16,7 @@ public partial class EventsView : Node2D
 
     public override void _Ready()
     {
-        _eventViewPool = new EventView.EventViewPool(_drawContainer, TilesView, _style);
+        _eventViewPool = new EventView.EventViewPool(_drawContainer, TilesView, _style, UnitsView);
         TreeExiting += () =>
         {
             _eventViewPool.Dispose();

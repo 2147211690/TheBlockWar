@@ -25,6 +25,8 @@ public partial class Test : Node2D
     private SchedulerEvnet _event0;
     [Export] private GameView _view;
     private SchedulerEvnet _event2;
+    private SchedulerEvnet _move;
+    private SchedulerEvnet _damage;
 
     public override void _Ready()
     {
@@ -235,6 +237,44 @@ public partial class Test : Node2D
         if (ImGui.Button("使用事件2"))
         {
             _event2.Layer = SimulationLayer.Running;
+        }
+        
+        if (ImGui.Button("测试移动2,2 -> 6,3"))
+        {
+
+            _move = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
+            {
+                Simulator.ApplyMoveUnit(s, new(2,2), new(6,3), r);
+                Simulator.ApplyMoveUnit(s, new(6,3), new(1,4), r);
+            }, SimulationLayer.Focused));
+        }
+
+        if (ImGui.Button("使用移动"))
+        {
+            _move.Layer = SimulationLayer.Running;
+        }
+
+        if (ImGui.Button("改变移动的关注性"))
+        {
+            _move.Layer = _move.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+        }
+        
+        if (ImGui.Button("测试伤害"))
+        {
+
+            _damage = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
+            {
+                Simulator.ApplyDamage(s, new(2,2), 50, r);
+            }, SimulationLayer.Focused));
+        }
+
+        if (ImGui.Button("使用伤害"))
+        {
+            _damage.Layer = SimulationLayer.Running;
+        }
+        if (ImGui.Button("改变伤害的关注性"))
+        {
+            _damage.Layer = _damage.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
         ImGui.End();
     }

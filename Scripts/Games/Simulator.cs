@@ -28,6 +28,9 @@ public static class Simulator
                 case PlaceUnitStep placeUnitStep:
                     ApplyPlaceUnit(state, placeUnitStep.Coords, placeUnitStep.Unit, null);
                     break;
+                case MoveUnitStep moveStep:
+                    ApplyMoveUnit(state, moveStep.Coords, moveStep.To, null);
+                    break;
                 case null:
                     break;
             }
@@ -64,7 +67,7 @@ public static class Simulator
         validDamage = Math.Min(damage, unitValue.Health);
         unitValue.Health -= validDamage;
         GD.Print($"修改 {unit.Value.Id} 健康值 {unitValue.Health} - {validDamage}");
-        state.ModifyUnit(unit.Value.Id, u => unitValue);
+        state.ModifyUnit(unit.Value.Id,  u => unitValue);
         result?.Steps.Add(new DamageStep(coords, damage, unit.Value.Id, validDamage));
         if (unitValue.Health <= 0)
         {
@@ -116,7 +119,8 @@ public static class Simulator
         var unit = state.GetUnit(coords);
         var targetTile = state.MapState.GetTile(to);
         var targetUnit = state.GetUnit(to);
-        bool isValid = targetTile.Tag != TileTag.Empty && targetUnit == null && unit?.IsDead == false;
+        //bool isValid = targetTile.Tag != TileTag.Empty && targetUnit == null && unit?.IsDead == false;
+        bool isValid = true;
         if (result?.Layer == SimulationLayer.Waiting)
         {
             result.Steps.Add(new MoveUnitStep(coords, to, unit?.Id ?? 0, isValid));
@@ -129,4 +133,5 @@ public static class Simulator
         }
         result?.Steps.Add(new MoveUnitStep(coords, to, unit?.Id ?? 0, isValid));
     }
+    
 }

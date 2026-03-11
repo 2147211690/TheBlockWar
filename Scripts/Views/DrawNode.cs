@@ -5,7 +5,7 @@ namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class DrawNode : Node2D
 {
-    public Action<DrawNode>? DrawAction { get; set; }
+    public Action<DrawNode, bool>? DrawAction { get; set; }
     public bool ProcessRedraw { get; set; }
     public float Time => (float)Godot.Time.GetTicksMsec() / 1000 - ResetTime;
     public float DeltaTime { get; private set; }
@@ -16,7 +16,17 @@ public partial class DrawNode : Node2D
         DeltaTime = 0;
         ResetTime = 0;
     }
-    
+
+    public DrawNode()
+    {
+        VisibilityChanged += OnVisibilityChanged;
+    }
+
+    private void OnVisibilityChanged()
+    {
+        if (!IsVisibleInTree()) DrawAction?.Invoke(this, false);
+    }
+
     public override void _Process(double delta)
     {
         DeltaTime = (float)delta;
@@ -26,6 +36,7 @@ public partial class DrawNode : Node2D
     public override void _Draw()
     {
         base._Draw();
-        DrawAction?.Invoke(this);
+        DrawAction?.Invoke(this, true);
     }
+    
 }

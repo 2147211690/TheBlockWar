@@ -43,9 +43,10 @@ _unitScene = ExtResource("6_ivycn")
 TilesView = NodePath("../TilesView")
 metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
 
-[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("TilesView", "_drawContainer")]
+[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("TilesView", "UnitsView", "_drawContainer")]
 script = ExtResource("7_q1uvj")
 TilesView = NodePath("../TilesView")
+UnitsView = NodePath("../UnitsView")
 _drawContainer = NodePath("../DrawContainer")
 _style = SubResource("Resource_cqdos")
 

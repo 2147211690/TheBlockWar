@@ -13,6 +13,37 @@ public partial class UnitsView : Node2D
     private readonly Dictionary<uint, UnitView> _unitViews = new();
     private readonly Dictionary<Vector2I, uint> _unitMaps = new();
     private bool _queueUpdateUnitPosition = false;
+    private (uint unitId, UnitView render)? _unitViewChache;
+    private UnitView? _currentUnitView;
+    public uint CurrentUnitId
+    {
+        get;
+        set
+        {
+            field = value;
+            _unitViews.TryGetValue(value, out _currentUnitView);
+        }
+    }
+
+    public Vector2I? CurrentUnitAimCoords
+    {
+        get => _currentUnitView?.AimCoords;
+        set
+        {
+            _currentUnitView?.AimCoords = value; 
+            SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
+        }
+    }
+
+    public float CurrentUnitHealthChange
+    { get => _currentUnitView?.HealthBar.HealthChange ?? 0; set => _currentUnitView?.HealthBar.HealthChange = value; }
+    public float CurrentUnitShieldChange
+    { get => _currentUnitView?.HealthBar.ShieldChange ?? 0; set => _currentUnitView?.HealthBar.ShieldChange = value; }
+    public float CurrentUnitShield
+    { get => _currentUnitView?.HealthBar.CurrentShield ?? 0; set => _currentUnitView?.HealthBar.CurrentShield = value; }
+    public float CurrentUnitHealth
+    { get => _currentUnitView?.HealthBar.CurrentHealth ?? 0; set => _currentUnitView?.HealthBar.CurrentHealth = value; }
+    
     public GDTask PlaceUnit(Vector2I coords, UnitState unit)
     {
         if (!_unitViews.TryGetValue(unit.Id, out var render))
@@ -20,11 +51,43 @@ public partial class UnitsView : Node2D
             render = _unitViews[unit.Id] = _unitScene.Instantiate<UnitView>();
             _nodeContainer.AddChild(render);
             _unitMaps.Add(coords, unit.Id);
+            if (unit.Id == CurrentUnitId) _currentUnitView = render;
         }
-        SetUnitMapPosition(coords, render);
+        //设置单位位置和动画
+        render!.RealCoords = coords;
+        SetUnitMapPosition(render.WishCoords, render);
         render.UnitName = unit.Name;
         render.PlayPlaceDownAnim();
+        //血条
+        render.HealthBar.MaxHealth = unit.MaxHealth;
+        render.HealthBar.CurrentHealth = unit.Health;
+        //护盾条
+        render.HealthBar.CurrentShield = unit.Shield;
+        
         return GDTask.CompletedTask;
+    }
+    
+    public void CurrentAddUnitFack(Vector2I coords)
+    {
+        var s = _currentUnitView!.AddFack(coords);
+        _nodeContainer.AddChild(s);
+        s.Position = TilesView.MapToLocal(coords, Layer.Underground) +
+                     new Vector2(0, -TilesView.GetTileHeight(coords, Layer.Underground));
+        
+    }
+
+    public void CurrentRemoveUnitFack(Vector2I coords)
+    {
+        _currentUnitView!.RemoveFack(coords);
+    }
+    
+    public async GDTask CurrentMoveUnit(Vector2I to)
+    {
+        await GDTask.Delay(1000);
+        _currentUnitView!.RealCoords = to;
+        SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
+        _unitMaps.Remove(_currentUnitView.RealCoords);
+        _unitMaps.Add(to, CurrentUnitId);
     }
     /// <summary>
     /// 对于会影响瓦片高度的操作，需要调用此方法更新单位位置
@@ -44,7 +107,7 @@ public partial class UnitsView : Node2D
         render.Position = TilesView.MapToLocal(coords, Layer.Underground);
         render.SetGroundHeight(TilesView.GetTileHeight(coords, Layer.Underground));
     }
-    
+
     public override void _Process(double delta)
     {
         base._Process(delta);

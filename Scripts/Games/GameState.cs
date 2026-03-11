@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Godot;
 
 namespace TheBlockWar.Scripts.Games;
@@ -10,20 +11,12 @@ public class GameState : IGameState
     private Dictionary<uint, UnitState> _units = new();
     private Dictionary<Vector2I, uint> _unitAt = new();
 
-    public IEnumerable<UnitState> GetAllUnits()
-    {
-        return _units.Values;
-    }
+    public IEnumerable<UnitState> GetAllUnits() => _units.Values;
 
-    public UnitState? GetUnit(uint id)
-    {
-        return _units.GetValueOrDefault(id);
-    }
+    public UnitState? GetUnit(uint id) => _units.GetValueOrDefault(id);
 
-    public UnitState? GetUnit(Vector2I coords)
-    {
-        return _unitAt.TryGetValue(coords, out var id) ? _units.GetValueOrDefault(id) : null;
-    }
+    public UnitState? GetUnit(Vector2I coords) => 
+        _unitAt.TryGetValue(coords, out var id) ? _units.GetValueOrDefault(id) : null;
 
     public void RemoveUnit(uint id)
     {
@@ -38,7 +31,7 @@ public class GameState : IGameState
         var newUnit = modifier(oldUnit);
         newUnit.Id = id;
         _units[id] = newUnit;
-        _unitAt.Add(newUnit.Coords, id);
+        _unitAt[newUnit.Coords] = id;
     }
 
     public void AddUnit(in UnitState unit)
@@ -51,157 +44,232 @@ public class GameState : IGameState
         _units[unit.Id] = unit;
         _unitAt[unit.Coords] = unit.Id;
     }
-    public IGameState GetSnapshot()
-    {
-        return new GameStateSnapshot(this);
-    }
+
+    public IGameState GetSnapshot() => new GameStateSnapshot(this);
+
     public GameState(Vector2I mapSize)
     {
         MapState = new MapState(mapSize);
     }
 
-
     /// <summary>
-    /// 游戏状态快照 - 实现写时复制（Copy-on-Write）模式
-    /// 读取时优先查看本地修改，未修改则回退到原状态
+    /// 增量游戏状态快照 - 写时复制（COW）实现
+    /// 内存优化：仅存储变更，未变更数据保持对原状态的引用
     /// </summary>
-    public class GameStateSnapshot : IGameState
+    public sealed class GameStateSnapshot : IGameState
     {
-        private readonly IGameState _owner;
-        // 存储被修改的单位：(新状态, 是否存在于地图中)
-        private readonly Dictionary<uint, (UnitState unit, bool inMap)> _dirtyUnits = new();
-        // 本地坐标到ID的映射（仅包含被修改的坐标）
-        private readonly Dictionary<Vector2I, uint> _dirtyUnitAt = new();
-        // 记录被删除的坐标，用于遮挡原状态的查询
-        private readonly HashSet<Vector2I> _removedCoords = new();
-
-        public GameStateSnapshot(IGameState owner)
-        {
-            _owner = owner;
-            MapState = owner.MapState.GetSnapshot();
-        }
+        // 父状态引用 - 未修改数据的回退源
+        private readonly GameState _owner;
+        
+        // 增量存储：仅包含相对于owner的变更
+        private Dictionary<uint, UnitState>? _modifiedUnits;      // 修改/新增的单位
+        private HashSet<uint>? _removedUnitIds;                    // 删除的单位ID
+        private Dictionary<Vector2I, uint>? _modifiedUnitAt;       // 坐标变更（仅包含变更的坐标）
+        
+        // 脏标记：用于延迟初始化
+        private bool _isModified;
 
         public IMapState MapState { get; }
 
+        public GameStateSnapshot(IGameState owner)
+        {
+            // 只能是GameState或其快照
+            _owner = owner as GameState 
+                ?? (owner as GameStateSnapshot)?._owner 
+                ?? throw new ArgumentException("Invalid owner type");
+            
+            MapState = owner.MapState.GetSnapshot();
+        }
+        
+        private Dictionary<uint, UnitState> GetModifiedUnits() => 
+            _modifiedUnits ??= new Dictionary<uint, UnitState>();
+        
+        private HashSet<uint> GetRemovedIds() => 
+            _removedUnitIds ??= new HashSet<uint>();
+        
+        private Dictionary<Vector2I, uint> GetModifiedCoords() => 
+            _modifiedUnitAt ??= new Dictionary<Vector2I, uint>();
+
         public UnitState? GetUnit(uint id)
         {
-            if (_dirtyUnits.TryGetValue(id, out var dirty))
-            {
-                return dirty.inMap ? dirty.unit : null;
-            }
+            // 1. 检查是否被删除
+            if (_removedUnitIds?.Contains(id) == true)
+                return null;
+
+            // 2. 检查本地修改
+            if (_modifiedUnits?.TryGetValue(id, out var modified) == true)
+                return modified;
+
+            // 3. 回退到父状态
             return _owner.GetUnit(id);
         }
 
         public UnitState? GetUnit(Vector2I coords)
         {
-            if (_dirtyUnitAt.TryGetValue(coords, out var dirtyId))
+            // 1. 检查坐标是否被本地修改（包括删除导致的空位）
+            if (_modifiedUnitAt?.TryGetValue(coords, out var localId) == true)
             {
-                return _dirtyUnits.TryGetValue(dirtyId, out var dirty) && dirty.inMap 
-                    ? dirty.unit 
-                    : null;
+                // 如果是0表示该坐标被清空
+                if (localId == 0) return null;
+                return _modifiedUnits?.GetValueOrDefault(localId) 
+                    ?? _owner.GetUnit(localId);
             }
-            
-            if (_removedCoords.Contains(coords))
-            {
+
+            // 2. 检查该坐标的单位是否被删除
+            var ownerUnit = _owner.GetUnit(coords);
+            if (ownerUnit != null && _removedUnitIds?.Contains(ownerUnit.Value.Id) == true)
                 return null;
-            }
-            
-            return _owner.GetUnit(coords);
+
+            return ownerUnit;
         }
 
-        public void RemoveUnit(uint id)
+        public IEnumerable<UnitState> GetAllUnits()
         {
-            var current = GetUnit(id);
-            if (current == null) return;
+            // 合并父状态和本地修改的迭代器
+            var processedIds = new HashSet<uint>();
+            
+            // 1. 先遍历父状态（排除被删除的）
+            foreach (var unit in _owner.GetAllUnits())
+            {
+                if (_removedUnitIds?.Contains(unit.Id) == true) continue;
+                
+                // 如果被修改，使用修改后的版本
+                if (_modifiedUnits?.TryGetValue(unit.Id, out var modified) == true)
+                {
+                    yield return modified;
+                    processedIds.Add(unit.Id);
+                }
+                else
+                {
+                    yield return unit;
+                    processedIds.Add(unit.Id);
+                }
+            }
 
-            _dirtyUnits[id] = (default, false);
-            _removedCoords.Add(current.Value.Coords);
-            _dirtyUnitAt.Remove(current.Value.Coords);
+            // 2. 补充新增的单位（父状态中不存在的）
+            if (_modifiedUnits != null)
+            {
+                foreach (var (id, unit) in _modifiedUnits)
+                {
+                    if (!processedIds.Contains(id))
+                        yield return unit;
+                }
+            }
         }
 
         public void AddUnit(in UnitState unit)
         {
-            var existing = GetUnit(unit.Coords);
-            if (existing != null)
+            var id = unit.Id;
+            
+            // 从删除集合中移除（如果存在）
+            _removedUnitIds?.Remove(id);
+            
+            // 检查是否已存在（可能是修改）
+            var existing = GetUnit(id);
+            
+            GetModifiedUnits()[id] = unit;
+            _isModified = true;
+            
+            // 更新坐标映射
+            var coordsMap = GetModifiedCoords();
+            
+            // 如果该坐标在父状态中有其他单位，需要处理冲突
+            var ownerUnitAtCoord = _owner.GetUnit(unit.Coords);
+            if (ownerUnitAtCoord != null && ownerUnitAtCoord.Value.Id != id)
             {
-                RemoveUnit(existing.Value.Id);
-            }
-
-            if (_dirtyUnits.ContainsKey(unit.Id))
-            {
-                var oldDirty = _dirtyUnits[unit.Id];
-                if (oldDirty.inMap)
+                // 标记原位置单位被移除（如果未被修改）
+                if (_modifiedUnits?.ContainsKey(ownerUnitAtCoord.Value.Id) != true)
                 {
-                    _removedCoords.Add(oldDirty.unit.Coords);
-                    _dirtyUnitAt.Remove(oldDirty.unit.Coords);
+                    GetRemovedIds().Add(ownerUnitAtCoord.Value.Id);
                 }
             }
-            else
+            
+            // 清除该坐标上的旧映射（如果有）
+            foreach (var (coord, uid) in coordsMap)
             {
-                var oldUnit = _owner.GetUnit(unit.Id);
-                if (oldUnit != null)
+                if (uid == id) 
                 {
-                    _removedCoords.Add(oldUnit.Value.Coords);
+                    coordsMap[coord] = 0; // 标记为空
+                    break;
                 }
             }
+            
+            coordsMap[unit.Coords] = id;
+        }
 
-            _dirtyUnits[unit.Id] = (unit, true);
-            _dirtyUnitAt[unit.Coords] = unit.Id;
-            _removedCoords.Remove(unit.Coords);
+        public void RemoveUnit(uint id)
+        {
+            var unit = GetUnit(id);
+            if (unit == null) return;
+
+            // 标记为删除
+            GetRemovedIds().Add(id);
+            
+            // 从修改集合中移除（如果存在）
+            _modifiedUnits?.Remove(id);
+            
+            // 标记坐标为空
+            GetModifiedCoords()[unit.Value.Coords] = 0;
+            _isModified = true;
         }
 
         public void ModifyUnit(uint id, Func<UnitState, UnitState> modifier)
         {
-            var oldUnit = GetUnit(id);
-            if (oldUnit == null) return;
-            var unit = modifier(oldUnit.Value);
-            unit.Id = id;
-            if (oldUnit.Value.Coords != unit.Coords)
+            var current = GetUnit(id);
+            if (current == null) return;
+
+            var newUnit = modifier(current.Value);
+            newUnit.Id = id; // 确保ID不变
+
+            // 如果坐标改变，需要更新坐标映射
+            if (newUnit.Coords != current.Value.Coords)
             {
-                _removedCoords.Add(oldUnit.Value.Coords);
-                _dirtyUnitAt.Remove(oldUnit.Value.Coords);
-                _dirtyUnitAt[unit.Coords] = id;
-                _removedCoords.Remove(unit.Coords);
+                var coordsMap = GetModifiedCoords();
+                
+                // 旧坐标清空
+                coordsMap[current.Value.Coords] = 0;
+                
+                // 检查新坐标是否被占用
+                var occupant = GetUnit(newUnit.Coords);
+                if (occupant != null && occupant.Value.Id != id)
+                {
+                    // 移除占用者
+                    GetRemovedIds().Add(occupant.Value.Id);
+                    _modifiedUnits?.Remove(occupant.Value.Id);
+                }
+                
+                coordsMap[newUnit.Coords] = id;
             }
 
-            _dirtyUnits[id] = (unit, true);
+            GetModifiedUnits()[id] = newUnit;
+            _removedUnitIds?.Remove(id); // 确保不在删除集合中
+            _isModified = true;
         }
 
         public IGameState GetSnapshot()
         {
+            // 优化：如果当前快照未被修改，直接返回自身或父状态
+            if (!_isModified)
+                return this;
+
+            // 创建新的快照层级
             return new GameStateSnapshot(this);
         }
 
         /// <summary>
-        /// 获取所有单位（快照视图）
-        /// 合并原状态 + 本地修改 - 本地删除
+        /// 可选：将快照压缩为独立的GameState（扁平化）
+        /// 适用于长链快照或需要释放父状态的场景
         /// </summary>
-        public IEnumerable<UnitState> GetAllUnits()
+        public GameState Flatten()
         {
-            // 1. 先收集所有需要处理的ID
-            var allIds = new HashSet<uint>();
+            var flattened = new GameState(MapState.Size);
             
-            // 添加原状态的所有单位ID
-            foreach (var unit in _owner.GetAllUnits())
+            foreach (var unit in GetAllUnits())
             {
-                allIds.Add(unit.Id);
+                flattened.AddUnit(unit);
             }
             
-            // 添加本地修改过的单位ID
-            foreach (var id in _dirtyUnits.Keys)
-            {
-                allIds.Add(id);
-            }
-
-            // 2. 通过GetUnit获取每个ID的最终状态（自动处理脏标记）
-            foreach (var id in allIds)
-            {
-                var unit = GetUnit(id);
-                if (unit != null)
-                {
-                    yield return unit.Value;
-                }
-            }
+            return flattened;
         }
     }
 }
