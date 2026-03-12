@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using GodotTask;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Player;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
@@ -17,7 +18,7 @@ public partial class GameView : Node2D
     private GameScheduler? _gameScheduler;
     private Queue<SimulationResult[]> _simulationCache = new();
     public GDTask RunSimulationTask { get; private set; } = GDTask.CompletedTask;
-
+    public IPlayer? Player { get; set; }
     public void Bind(GameScheduler gameScheduler)
     {
         _gameScheduler = gameScheduler;
@@ -33,9 +34,15 @@ public partial class GameView : Node2D
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event is InputEventMouse { ButtonMask: MouseButtonMask.Left } e)
+        if (!RunSimulationTask.Status.IsCompleted()) return;
+        switch (@event)
         {
-            _gameScheduler?.FocusCoords(_tilesView.GlobalMouseToTileCoords(GetGlobalMousePosition()));
+            case InputEventMouseButton e:
+                Player?.OnInput(new PlayerInputClick(e.ButtonMask));
+                break;
+            case InputEventMouseMotion e:
+                Player?.OnInput(new PlayerInputMousceCoords(_tilesView.GlobalMouseToTileCoords(GetGlobalMousePosition())));
+                break;
         }
     }
     

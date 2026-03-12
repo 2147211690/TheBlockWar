@@ -4,17 +4,12 @@ using Godot;
 
 namespace TheBlockWar.Scripts.Games;
 
-public interface IGameState
+public interface IGameState : IReadOnlyGameState
 {
-    IMapState MapState { get; }
-    IEnumerable<UnitState> GetAllUnits();
-    uint FocusedUnitId { get; set; }
-    bool HasUnit(uint id);
-    UnitState? GetUnit(uint id);
-    UnitState? GetUnit(Vector2I coords);
+    new uint FocusedUnitId { get; set; }
+    new IMapState MapState { get; }
     void RemoveUnit(uint id);
     void AddUnit(in UnitState unit);
     void ModifyUnit(uint id, Func<UnitState, UnitState> modifier);
     
-    IGameState GetSnapshot();
 }

@@ -12,14 +12,12 @@ public static class EventFactory
     }
 
     public static SchedulerEvnet CreateEvent(
-        SchedulerEvnet.EventAction? action = null,
-        SimulationLayer layer = SimulationLayer.Running,
+        ISchedulerEvnet.EventAction? action = null,
         int priority = 0,
         object? args = null)
     {
         return new SchedulerEvnet(CreateEventId())
         {
-            Layer = layer,
             Priority = priority,
             Args = args,
             Action = action,
@@ -28,13 +26,11 @@ public static class EventFactory
     public static SkillEvent CreateSkill(
         uint bindUnitId,
         ISkill skill,
-        SimulationLayer layer = SimulationLayer.Waiting,
         int priority = int.MaxValue)
     {
         return new SkillEvent(CreateEventId(), skill)
         {
             BindUnitId = bindUnitId,
-            Layer = layer,
             Priority = priority,
         };
     }

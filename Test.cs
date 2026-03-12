@@ -1,6 +1,7 @@
 using Godot;
 using ImGuiNET;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Player;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
 
@@ -28,11 +29,20 @@ public partial class Test : Node2D
     private SchedulerEvnet _move;
     private SchedulerEvnet _damage;
     private SchedulerEvnet _follow;
-
+    private StatePlayer _player;
     public override void _Ready()
     {
+        _currentGameState = new GameState(new Vector2I(10, 10));
+        _gameState = _currentGameState;
+        _gameScheduler.SetGameState(_currentGameState);
+        _snapshot = null;
+
+        _player = new StatePlayer();
+        _player.GameScheduler = _gameScheduler;
+        AddChild(_player);
         
-        
+        _view.Bind(_gameScheduler);
+        _view.Player = _player;
         
     }
 
@@ -47,7 +57,7 @@ public partial class Test : Node2D
             {
                 _currentGameState = new GameState(new Vector2I(10, 10));
                 _gameState = _currentGameState;
-                _gameScheduler.GameState  = _currentGameState;
+                _gameScheduler.SetGameState(_currentGameState);
                 _snapshot = null;
                 _view.Bind(_gameScheduler);
             }
@@ -192,14 +202,13 @@ public partial class Test : Node2D
                 {
                     s.ApplyDamage(new(3, 3),
                         10, r);
-                },
-                SimulationLayer.Waiting);
+                });
             _gameScheduler.AddEvent(_event0);
         }
 
         if (ImGui.Button("触发调度事件"))
         {
-            _event0.Layer = SimulationLayer.Running;
+            (_event0 as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
         }
 
         if (ImGui.Button("测试放置"))
@@ -211,14 +220,14 @@ public partial class Test : Node2D
                 {
                     for (int j = 0; j < 10; j++)
                     {
-                        s.ApplyPlaceTile(new(i,j), new TileState()
+                        s.ApplyPlaceTile(new(i, j), new TileState()
                         {
                             Tag = TileTag.Ground
                         }, r);
                     }
                 }
-                s.ApplyPlaceUnit(new(2,2), UnitFactory.CreateUnit("Unit_0"), r);
-            }));
+                s.ApplyPlaceUnit(new(2, 2), UnitFactory.CreateUnit("Unit_0"), r);
+            }), true);
         }
         if (ImGui.Button("测试放置2"))
         {
@@ -232,12 +241,12 @@ public partial class Test : Node2D
                         s.ApplyPlaceUnit(new(i,j), UnitFactory.CreateUnit("Unit_0"), r);
                     }
                 }
-            }, SimulationLayer.Waiting));
+            }));
         }
 
         if (ImGui.Button("使用事件2"))
         {
-            _event2.Layer = SimulationLayer.Running;
+            (_event2 as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
         }
         
         if (ImGui.Button("测试移动2,2 -> 6,3"))
@@ -247,17 +256,17 @@ public partial class Test : Node2D
             {
                  s.ApplyMoveUnit(new(2,2), new(6,3), r);
                 s.ApplyMoveUnit(new(6,3), new(1,4), r);
-            }, SimulationLayer.Waiting));
+            }));
         }
 
         if (ImGui.Button("使用移动"))
         {
-            _move.Layer = SimulationLayer.Running;
+            (_move as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
         }
 
         if (ImGui.Button("改变移动的关注性"))
         {
-            _move.Layer = _move.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+            (_move as ISchedulerEvnet)?.Layer = _move.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
         
         if (ImGui.Button("测试伤害"))
@@ -266,16 +275,16 @@ public partial class Test : Node2D
             _damage = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
             {
                  s.ApplyDamage(new(2,2), 50, r);
-            }, SimulationLayer.Waiting));
+            }));
         }
 
         if (ImGui.Button("使用伤害"))
         {
-            _damage.Layer = SimulationLayer.Running;
+            (_damage as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
         }
         if (ImGui.Button("改变伤害的关注性"))
         {
-            _damage.Layer = _damage.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+            (_damage as ISchedulerEvnet)?.Layer = _damage.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
 
         if (ImGui.Button("添加跟随技能"))
@@ -284,7 +293,7 @@ public partial class Test : Node2D
         }
         if (ImGui.Button("改变跟随的关注性"))
         {
-            _follow.Layer = _follow.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+            (_follow as ISchedulerEvnet)?.Layer = _follow.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
         ImGui.End();
         

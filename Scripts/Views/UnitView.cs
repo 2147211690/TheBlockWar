@@ -10,11 +10,12 @@ public partial class UnitView : Node2D
     [Export] public AnimatedSprite2D MainSprite { get; set; }
     [Export] public Node2D Center { get; set; }
     [Export] public HealthBar HealthBar { get; set; }
-    [Export,ExportGroup("PlaceDown")] public float DropHeight { get; set; } = 50f;
-    [Export,ExportGroup("PlaceDown")] public float DropDuration { get; set; } = 0.1f;
-    [Export,ExportGroup("PlaceDown")] public float ImpactSquashY { get; set; } = 1.3f;
-    [Export,ExportGroup("PlaceDown")] public float ImpactStretchX { get; set; } = 0.25f;
-    [Export,ExportGroup("PlaceDown")] public float RecoveryDuration { get; set; } = 0.04f;
+    [ExportGroup("PlaceDown")]
+    [Export] public float DropHeight { get; set; } = 50f;
+    [Export] public float DropDuration { get; set; } = 0.1f;
+    [Export] public float ImpactSquashY { get; set; } = 1.3f;
+    [Export] public float ImpactStretchX { get; set; } = 0.25f;
+    [Export] public float RecoveryDuration { get; set; } = 0.04f;
     public IReadOnlyList<(Vector2I coords, Sprite2D sprite)> Fakes => _fakes ?? [];
     public Vector2I? AimCoords { get; set; }
     public Vector2I RealCoords { get; set; }

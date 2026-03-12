@@ -8,9 +8,9 @@ namespace TheBlockWar.Scripts.Games;
 public class GameState : IGameState
 {
     public IMapState MapState { get; }
+    IReadOnlyMapState IReadOnlyGameState.MapState => MapState;
     private Dictionary<uint, UnitState> _units = new();
     private Dictionary<Vector2I, uint> _unitAt = new();
-
     public IEnumerable<UnitState> GetAllUnits() => _units.Values;
     public uint FocusedUnitId { get; set; } = 0;
 
@@ -76,6 +76,7 @@ public class GameState : IGameState
         private bool _isModified;
 
         public IMapState MapState { get; }
+        IReadOnlyMapState IReadOnlyGameState.MapState => MapState;
         public uint FocusedUnitId { get; set; }
         public GameStateSnapshot(IGameState owner)
         {
@@ -273,7 +274,6 @@ public class GameState : IGameState
             // 创建新的快照层级
             return new GameStateSnapshot(this);
         }
-
         /// <summary>
         /// 可选：将快照压缩为独立的GameState（扁平化）
         /// 适用于长链快照或需要释放父状态的场景

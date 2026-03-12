@@ -18,4 +18,10 @@ public class SkillEvent : SchedulerEvnet
             Skill.SkillCore(s, r, unit.Value, a as Vector2I[] ?? []);
         };
     }
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}-技能绑定id:{BindUnitId} 技能类型:{Skill.GetType()} 技能哈希:{Skill.GetHashCode()}";
+        
+    }
 }

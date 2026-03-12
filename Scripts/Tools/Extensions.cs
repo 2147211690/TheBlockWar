@@ -31,7 +31,7 @@ public static class Extensions
             return sb.ToString();
         }
     }
-
+    
     extension(Node2D node2d)
     {
         public void DrawTextureCentered(Texture2D texture, Vector2 position, Color? modulate = null)

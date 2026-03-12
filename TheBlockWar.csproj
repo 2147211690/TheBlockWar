@@ -12,10 +12,16 @@
     <PackageReference Include="GDTask" Version="2.0.0" />
     <PackageReference Include="GodotSharp.SourceGenerators" Version="2.6.0" />
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
+    <PackageReference Include="NLog" Version="6.1.1" />
   </ItemGroup>
   <ItemGroup>
     <!-- 防止裁剪必要的程序集 -->
     <TrimmerRootAssembly Include="GodotSharp" />
     <TrimmerRootAssembly Include="$(TargetName)" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
