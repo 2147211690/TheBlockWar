@@ -28,7 +28,7 @@ public class EventView
     /// <param name="isFocus">是否为关注操作</param>
     public void PlaceUnit(bool isFocus, Vector2I coords, in UnitState unit, bool isValid)
     {
-        GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
+        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
         node.DrawAction += (u, v) =>

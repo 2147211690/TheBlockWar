@@ -25,23 +25,17 @@ public static class EventFactory
             Action = action,
         };
     }
-    public static SchedulerEvnet CreateSkill(
+    public static SkillEvent CreateSkill(
         uint bindUnitId,
-        ISkill skill = null,
+        ISkill skill,
         SimulationLayer layer = SimulationLayer.Waiting,
-        int priority = 0)
+        int priority = int.MaxValue)
     {
-        return new SchedulerEvnet(CreateEventId())
+        return new SkillEvent(CreateEventId(), skill)
         {
+            BindUnitId = bindUnitId,
             Layer = layer,
             Priority = priority,
-            Args = null,
-            Action = (s, a, r) =>
-            {
-                var unit = s.GetUnit(bindUnitId);
-                if (unit == null) return;
-                skill.SkillCore(s, r, unit.Value, a as Vector2I[] ?? []);
-            },
         };
     }
 }

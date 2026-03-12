@@ -20,6 +20,12 @@ public partial class UnitView : Node2D
     public Vector2I RealCoords { get; set; }
     public Vector2I WishCoords => AimCoords ?? RealCoords;
     private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
+    private ShaderMaterial _shaderMaterial = null!;
+    public Color OutlineColor
+    {
+        get => _shaderMaterial.GetShaderParameter("outline1_color").AsColor();
+        set => _shaderMaterial.SetShaderParameter("outline1_color", value);
+    }
     public string UnitName
     {
         get;
@@ -33,6 +39,7 @@ public partial class UnitView : Node2D
 
     public override void _Ready()
     {
+        _shaderMaterial = MainSprite.Material as ShaderMaterial;
         MainSprite.FrameChanged += MainSpriteOnFrameChanged;
         TreeExiting += () =>
         {

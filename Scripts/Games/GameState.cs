@@ -12,6 +12,8 @@ public class GameState : IGameState
     private Dictionary<Vector2I, uint> _unitAt = new();
 
     public IEnumerable<UnitState> GetAllUnits() => _units.Values;
+    public uint FocusedUnitId { get; set; } = 0;
+
     public bool HasUnit(uint id)
     {
         return _units.ContainsKey(id);
@@ -74,7 +76,7 @@ public class GameState : IGameState
         private bool _isModified;
 
         public IMapState MapState { get; }
-
+        public uint FocusedUnitId { get; set; }
         public GameStateSnapshot(IGameState owner)
         {
             // 只能是GameState或其快照
@@ -83,6 +85,7 @@ public class GameState : IGameState
                 ?? throw new ArgumentException("Invalid owner type");
             
             MapState = owner.MapState.GetSnapshot();
+            FocusedUnitId = owner.FocusedUnitId;
         }
         
         private Dictionary<uint, UnitState> GetModifiedUnits() => 
@@ -169,6 +172,8 @@ public class GameState : IGameState
                 }
             }
         }
+
+
 
         public void AddUnit(in UnitState unit)
         {

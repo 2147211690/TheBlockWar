@@ -88,6 +88,7 @@ public static class Simulator
             if (result?.Layer == SimulationLayer.Waiting)
             {
                 result.Steps.Add(new DeathStep(coords, 0, false));
+                
                 return;
             }
 

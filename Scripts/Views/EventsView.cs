@@ -38,9 +38,14 @@ public partial class EventsView : Node2D
 
     public EventView? BeginAddEventView(uint id)
     {
-        if (_eventViews.ContainsKey(id) || _currentView != null)
+        if (_eventViews.ContainsKey(id))
         {
-            GD.PrintErr($"EventView with id {id} already exists or CurrentView is not null");
+            GD.PrintErr($"EventView with id {id} already exists");
+            return null;
+        }
+        if (_currentView != null)
+        {
+            GD.PrintErr($"CurrentView is not null");
             return null;
         }
         _currentView = _eventViewPool.Pop();

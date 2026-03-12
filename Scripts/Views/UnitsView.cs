@@ -14,6 +14,7 @@ public partial class UnitsView : Node2D
     private readonly Dictionary<Vector2I, uint> _unitMaps = new();
     private bool _queueUpdateUnitPosition = false;
     private UnitView? _currentUnitView;
+    private UnitView? _focusedUnitView;
     public uint CurrentUnitId
     {
         get;
@@ -42,7 +43,14 @@ public partial class UnitsView : Node2D
     { get => _currentUnitView?.HealthBar.CurrentShield ?? 0; set => _currentUnitView?.HealthBar.CurrentShield = value; }
     public float CurrentUnitHealth
     { get => _currentUnitView?.HealthBar.CurrentHealth ?? 0; set => _currentUnitView?.HealthBar.CurrentHealth = value; }
-    
+
+    public void FocusUnit(uint unitId)
+    {
+        _focusedUnitView?.OutlineColor = new Color("#3aa2003c");
+        if (!_unitViews.TryGetValue(unitId, out var render)) return;
+        _focusedUnitView = render;
+        _focusedUnitView.OutlineColor = new Color("#3aa200");
+    }
     public GDTask PlaceUnit(Vector2I coords, UnitState unit)
     {
         if (!_unitViews.TryGetValue(unit.Id, out var render))

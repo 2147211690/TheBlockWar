@@ -11,6 +11,7 @@ public partial class DrawNode : Node2D
     public float DeltaTime { get; private set; }
     public float ResetTime { get; private set; }
     public object? Args { get; set; }
+    private bool _hadDrawn = false;
     public void Reset()
     {
         DeltaTime = 0;
@@ -24,7 +25,7 @@ public partial class DrawNode : Node2D
 
     private void OnVisibilityChanged()
     {
-        if (!IsVisibleInTree()) DrawAction?.Invoke(this, false);
+        if (!IsVisibleInTree() && _hadDrawn) DrawAction?.Invoke(this, false);
     }
 
     public override void _Process(double delta)
@@ -37,6 +38,7 @@ public partial class DrawNode : Node2D
     {
         base._Draw();
         DrawAction?.Invoke(this, true);
+        _hadDrawn = true;
     }
     
 }

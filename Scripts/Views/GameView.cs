@@ -22,12 +22,31 @@ public partial class GameView : Node2D
     {
         _gameScheduler = gameScheduler;
         _gameScheduler.SimulationUpdated += GameSchedulerOnSimulationUpdated;
+        _gameScheduler.OtherStateUpdated += GameSchedulerOnOtherStateUpdated;
         
         TreeExiting += () =>
         {
             _gameScheduler.SimulationUpdated -= GameSchedulerOnSimulationUpdated;
+            _gameScheduler.OtherStateUpdated -= GameSchedulerOnOtherStateUpdated;
         };
     }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventMouse { ButtonMask: MouseButtonMask.Left } e)
+        {
+            _gameScheduler?.FocusCoords(_tilesView.GlobalMouseToTileCoords(GetGlobalMousePosition()));
+        }
+    }
+    
+    private void GameSchedulerOnOtherStateUpdated(object? sender, GameScheduler.OtherStateUpdateTypeEnum e)
+    {
+        if (e == GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId)
+        {
+            _unitsView.FocusUnit(_gameScheduler!.GameState?.FocusedUnitId ?? 0);
+        }
+    }
+
     private void GameSchedulerOnSimulationUpdated(object? sender, EventArgs e)
     {
         SetSimulations(_gameScheduler!.SimulationResults);

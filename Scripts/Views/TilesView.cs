@@ -10,6 +10,7 @@ public partial class TilesView : TileMapLayer
     private readonly Dictionary<Vector2I, TileView> _tileViews = new();
     [Export] private Node2D _nodeContainer;
     [Export] private PackedScene _tileScene;
+    [Export] public float NormalGroundHeight = 32f;
     public Vector2 LocalLeft { get; private set; }
     public Vector2 LocalUp { get; private set; }
     public Vector2 LocalRightDown{ get; private set; }
@@ -23,6 +24,12 @@ public partial class TilesView : TileMapLayer
 
     public float GetTileHeight(Vector2I coords, Layer layer = Layer.Ground) =>
         (_tileViews.GetValueOrDefault(coords, null)?.Height ?? 0) + LocalRightDown.Y / (int)layer;
+    public Vector2I GlobalMouseToTileCoords(Vector2 globalMousePos)
+    {
+        var local = ToLocal(globalMousePos);
+        local.Y += NormalGroundHeight;
+        return LocalToMap(local);
+    }
     public GDTask PlaceTile(Vector2I coords, TileState tile)
     {
         //GD.Print("PlaceTile");
