@@ -16,7 +16,7 @@ public class SkillEvent : SchedulerEvnet
             {
                 var unit = s.GetUnit(BindUnitId);
                 if (unit == null) return;
-                Skill?.SkillCore(s, r, unit.Value, a as Vector2I[] ?? []);
+                Skill?.SkillCore(s, r, unit, a as Vector2I[] ?? []);
             };
         }
     }

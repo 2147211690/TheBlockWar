@@ -41,7 +41,7 @@ public static class Simulator
             return;
         }
 
-        public void ApplyPlaceUnit(Vector2I coords, in UnitState unitState,
+        public void ApplyPlaceUnit(Vector2I coords, UnitState unitState,
             SimulationResult? result)
         {
             bool isValid = state.GetUnit(coords) == null;
@@ -50,8 +50,8 @@ public static class Simulator
                 result?.Steps.Add(new PlaceUnitStep(coords, UnitState.Default, unitState.Id, isValid));
                 return;
             }
-
-            state.AddUnit(unitState with { Coords = coords });
+            unitState.Coords = coords;
+            state.AddUnit(unitState);
             result?.Steps.Add(new PlaceUnitStep(coords, unitState, unitState.Id, isValid));
         }
 
@@ -65,18 +65,17 @@ public static class Simulator
 
             var unit = state.GetUnit(coords);
             float validDamage = 0;
-            if (unit == null || unit.Value.IsDead)
+            if (unit == null || unit.IsDead)
             {
                 result?.Steps.Add(new DamageStep(coords, damage, unit?.Id ?? 0, validDamage));
                 return;
             }
 
-            var unitValue = unit.Value;
+            var unitValue = unit;
             validDamage = Math.Min(damage, unitValue.Health);
-            unitValue.Health -= validDamage;
             //GD.Print($"修改 {unit.Value.Id} 健康值 {unitValue.Health} - {validDamage}");
-            state.ModifyUnit(unit.Value.Id, u => unitValue);
-            result?.Steps.Add(new DamageStep(coords, damage, unit.Value.Id, validDamage));
+            state.ModifyUnit(unit.Id, u => u.Health -= validDamage);
+            result?.Steps.Add(new DamageStep(coords, damage, unit.Id, validDamage));
             if (unitValue.Health <= 0)
             {
                 ApplyDeath(state, coords, result);
@@ -93,14 +92,14 @@ public static class Simulator
             }
 
             var unit = state.GetUnit(coords);
-            if (unit == null || unit.Value.IsDead)
+            if (unit == null || unit.IsDead)
             {
                 result?.Steps.Add(new DeathStep(coords, unit?.Id ?? 0, false));
                 return;
             }
 
-            result?.Steps.Add(new DeathStep(coords, unit.Value.Id, true));
-            state.ModifyUnit(unit.Value.Id, u => u with { IsDead = true });
+            result?.Steps.Add(new DeathStep(coords, unit.Id, true));
+            state.ModifyUnit(unit.Id, u => u.IsDead = true);
         }
 
         public void ApplyDropTile(Vector2I coords, SimulationResult? result)
@@ -111,27 +110,30 @@ public static class Simulator
                 return;
             }
 
-            state.MapState.SetTile(coords, TileState.Empty);
             //TODO:测试上方单位等处理
             result?.Steps.Add(new DropTileStep(coords));
         }
 
-        public void ApplyPlaceTile(Vector2I coords, in TileState tile, SimulationResult? result)
+        public void ApplyPlaceTile(Vector2I coords, TileState tile, SimulationResult? result)
         {
             if (result?.Layer == SimulationLayer.Waiting)
             {
                 result.Steps.Add(new PlaceTileStep(coords, tile));
                 return;
             }
-
-            state.MapState.SetTile(coords, tile);
+            state.TilesState.ModifyTile(coords, t =>
+            {
+                t.IsOccupied = tile.IsOccupied;
+                t.Name = tile.Name;
+                t.Tag = tile.Tag;
+            });
             result?.Steps.Add(new PlaceTileStep(coords, tile));
         }
 
         public void ApplyMoveUnit(Vector2I coords, Vector2I to, SimulationResult? result)
         {
             var unit = state.GetUnit(coords);
-            var targetTile = state.MapState.GetTile(to);
+            var targetTile = state.TilesState.GetTile(to);
             var targetUnit = state.GetUnit(to);
             bool isValid = targetTile.Tag != TileTag.Empty && targetUnit == null && unit?.IsDead == false;
             if (result?.Layer == SimulationLayer.Waiting)
@@ -142,7 +144,7 @@ public static class Simulator
 
             if (isValid)
             {
-                state.ModifyUnit(unit!.Value.Id, u => u with { Coords = to });
+                state.ModifyUnit(unit!.Id, u => u.Coords = to);
                 //TODO:引入坐标改变带来的其他影响
             }
 

@@ -2,11 +2,11 @@ using System;
 
 namespace TheBlockWar.Scripts.Games;
 
-public struct TileState
+public class TileState : IReadOnlyTileState
 {
     public static readonly TileState Empty = new() { Tag = TileTag.Empty };
     public TileTag Tag { get; set; }
-    public string Id { get; set; }
+    public string Name { get; set; } = string.Empty;
     public bool IsOccupied { get; set; }
 
     public TileState Clone()
@@ -14,7 +14,7 @@ public struct TileState
         return new TileState
         {
             Tag = Tag,
-            Id = Id,
+            Name = Name,
             IsOccupied = IsOccupied,
         };
     }

@@ -6,11 +6,11 @@ namespace TheBlockWar.Scripts.Games;
 
 public interface IReadOnlyGameState
 {
-    IReadOnlyMapState MapState { get; }
-    IEnumerable<UnitState> GetAllUnits();
+    IReadOnlyTilesState TilesState { get; }
+    IEnumerable<IReadOnlyUnitState> GetAllUnits();
     bool HasUnit(uint id);
-    UnitState? GetUnit(uint id);
-    UnitState? GetUnit(Vector2I coords);
+    IReadOnlyUnitState? GetUnit(uint id);
+    IReadOnlyUnitState? GetUnit(Vector2I coords);
     
     IGameState GetSnapshot();
 }

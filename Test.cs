@@ -101,10 +101,10 @@ public partial class Test : Node2D
             if (ImGui.Button("修改单位"))
             {
                 var unit = _currentGameState.GetUnit((uint)unitId);
-                if (unit.HasValue)
+                if (unit is not null)
                 {
                     var newCoords = new Vector2I(newX, newY);
-                    _currentGameState.ModifyUnit((uint)unitId, u => u with { Coords = newCoords });
+                    _currentGameState.ModifyUnit((uint)unitId, u => u.Coords = newCoords);
                 }
             }
             
@@ -127,9 +127,9 @@ public partial class Test : Node2D
             if (ImGui.Button("获取单位(按ID)"))
             {
                 var unit = _currentGameState.GetUnit((uint)getById);
-                if (unit.HasValue)
+                if (unit is not null)
                 {
-                    GD.Print($"找到单位: ID={unit.Value.Id}, 坐标=({unit.Value.Coords.X}, {unit.Value.Coords.Y})");
+                    GD.Print($"找到单位: ID={unit.Id}, 坐标=({unit.Coords.X}, {unit.Coords.Y})");
                 }
                 else
                 {
@@ -142,9 +142,9 @@ public partial class Test : Node2D
             if (ImGui.Button("获取单位(按坐标)"))
             {
                 var unit = _currentGameState.GetUnit(new Vector2I(getByX, getByY));
-                if (unit.HasValue)
+                if (unit is not null)
                 {
-                    GD.Print($"找到单位: ID={unit.Value.Id}, 坐标=({unit.Value.Coords.X}, {unit.Value.Coords.Y})");
+                    GD.Print($"找到单位: ID={unit.Id}, 坐标=({unit.Coords.X}, {unit.Coords.Y})");
                 }
                 else
                 {

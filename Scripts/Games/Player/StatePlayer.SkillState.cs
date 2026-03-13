@@ -12,7 +12,7 @@ public partial class StatePlayer
         private ISkill? _currentSkill;
         private int _currentSkillIndex = 0;
         private Vector2I[]? _currentSkillArgs;
-        private UnitState? _unitState;
+        private IReadOnlyUnitState? _unitState;
         
         private HashSet<Vector2I> _validSkillCoords = new();
         private bool _validSkillCoordsDirty = true;

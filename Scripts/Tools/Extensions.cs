@@ -12,7 +12,7 @@ public static class Extensions
         public string ToInfoString()
         {
             var units = gameState.GetAllUnits().ToList();
-            var mapSize = gameState.MapState.Size;
+            var mapSize = gameState.TilesState.Size;
             
             var sb = new StringBuilder();
             sb.AppendLine($"GameState - Map Size: {mapSize.X}x{mapSize.Y}");

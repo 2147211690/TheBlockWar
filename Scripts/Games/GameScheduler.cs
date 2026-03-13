@@ -53,6 +53,8 @@ public class GameScheduler
         var skillEvent = _skillEvents.Find(e => e.BindUnitId == FocusedUnitId);
         (skillEvent as ISchedulerEvnet)?.Layer = SimulationLayer.Waiting;
 
+        FocusedUnitId = id;
+        
         //调整对应技能层
         skillEvent = _skillEvents.Find(e => e.BindUnitId == FocusedUnitId);
         (skillEvent as ISchedulerEvnet)?.Layer = SimulationLayer.Focused;
@@ -203,7 +205,7 @@ public class GameScheduler
             Logger.Info("应用结果 {result}", a);
             _gameState.ApplyResult(a);
         }
-        
+        Logger.Info("更新结果:\n{results}", string.Join("\n", SimulationResults));
         SimulationUpdated?.Invoke(this, EventArgs.Empty);
     }
 

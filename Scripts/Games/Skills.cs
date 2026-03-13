@@ -10,7 +10,7 @@ public static class Skills
     private static void Skill1Core(
         IGameState gameState,
         SimulationResult result,
-        UnitState unit,
+        IReadOnlyUnitState unit,
         Vector2I[] args)
     {
         gameState.ApplyDamage(unit.Coords + Vector2I.Up, 10, result);
@@ -26,8 +26,11 @@ public static class Skills
     public class ActionSkill : ISkill
     {
         private Func<Vector2I, int, Vector2I[], IEnumerable<Vector2I>> _getSkillArgs;
-        private Action<IGameState, SimulationResult, UnitState, Vector2I[]> _skillCore;
-        public ActionSkill(int argCount, Func<Vector2I, int, Vector2I[], IEnumerable<Vector2I>> getSkillArgs, Action<IGameState, SimulationResult, UnitState, Vector2I[]> skillCore)
+        private Action<IGameState, SimulationResult, IReadOnlyUnitState, Vector2I[]> _skillCore;
+        public ActionSkill(
+            int argCount,
+            Func<Vector2I, int, Vector2I[], IEnumerable<Vector2I>> getSkillArgs,
+            Action<IGameState, SimulationResult, IReadOnlyUnitState, Vector2I[]> skillCore)
         {
             ArgCount = argCount;
             _getSkillArgs = getSkillArgs;
@@ -39,7 +42,7 @@ public static class Skills
             return _getSkillArgs(unitCoords, argsIndex, args);
         }
 
-        public void SkillCore(IGameState gameState, SimulationResult result, in UnitState unit, Vector2I[] args)
+        public void SkillCore(IGameState gameState, SimulationResult result, IReadOnlyUnitState unit, Vector2I[] args)
         {
             _skillCore(gameState, result, unit, args);
         }

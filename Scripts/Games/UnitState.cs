@@ -2,16 +2,16 @@ using Godot;
 
 namespace TheBlockWar.Scripts.Games;
 
-public struct UnitState
+public class UnitState : IReadOnlyUnitState
 {
     public static readonly UnitState Default = new();
     public uint Id { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } =  string.Empty;
     public Vector2I Coords { get; set; }
-    public float Health { get; set; }
-    public float MaxHealth { get; set; }
-    public float Shield { get; set; }
-    public float MaxShield { get; set; }
+    public float Health { get; set; } = 100;
+    public float MaxHealth { get; set; } = 100;
+    public float Shield { get; set; } = 100;
+    public float MaxShield { get; set; } = 100;
     public bool IsDead { get; set; }
 
 
@@ -20,7 +20,13 @@ public struct UnitState
         return new UnitState
         {
             Id = Id,
+            Name = Name,
             Coords = Coords,
+            Health = Health,
+            MaxHealth = MaxHealth,
+            Shield = Shield,
+            MaxShield = MaxShield,
+            IsDead = IsDead,
         };
     }
 
