@@ -27,7 +27,7 @@ public class SchedulerEvnet : ISchedulerEvnet
     public SimulationLayer Layer => ((ISchedulerEvnet)this).Layer;
     public int Priority { get => field; set => SetField(ref field, value); }
     public object? Args { get => field; set => SetField(ref field, value, false); }
-    public ISchedulerEvnet.EventAction? Action { get => field; set => SetField(ref field, value); }
+    public ISchedulerEvnet.EventAction? Action { get => field; set => SetField(ref field, value, false); }
     public void UpdateEvent() => Update?.Invoke(this, EventArgs.Empty);
     protected void SetField<T>(ref T field, in T value, bool checkEqual = true)
     {

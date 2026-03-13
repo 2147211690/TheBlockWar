@@ -17,6 +17,8 @@ public partial class GameView : Node2D
     [Export] private EventsView _eventsView;
     private GameScheduler? _gameScheduler;
     private Queue<SimulationResult[]> _simulationCache = new();
+    private Vector2I? _previousMousceCoords = null;
+    private Vector2I _currentCoords;
     public GDTask RunSimulationTask { get; private set; } = GDTask.CompletedTask;
     public IPlayer? Player { get; set; }
     public void Bind(GameScheduler gameScheduler)
@@ -37,11 +39,16 @@ public partial class GameView : Node2D
         if (!RunSimulationTask.Status.IsCompleted()) return;
         switch (@event)
         {
-            case InputEventMouseButton e:
-                Player?.OnInput(new PlayerInputClick(e.ButtonMask));
-                break;
             case InputEventMouseMotion e:
-                Player?.OnInput(new PlayerInputMousceCoords(_tilesView.GlobalMouseToTileCoords(GetGlobalMousePosition())));
+                _currentCoords = _tilesView.GlobalMouseToTileCoords(GetGlobalMousePosition());
+                if (_previousMousceCoords == null || _currentCoords != _previousMousceCoords)
+                {
+                    _previousMousceCoords = _currentCoords;
+                    Player?.OnInput(new PlayerInputMousceCoords(_currentCoords));
+                }
+                break;
+            case InputEventMouseButton e:
+                Player?.OnInput(new PlayerInputClick(_currentCoords, e.ButtonMask));
                 break;
         }
     }
@@ -50,7 +57,7 @@ public partial class GameView : Node2D
     {
         if (e == GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId)
         {
-            _unitsView.FocusUnit(_gameScheduler!.GameState?.FocusedUnitId ?? 0);
+            _unitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
         }
     }
 

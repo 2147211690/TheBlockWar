@@ -25,7 +25,7 @@ public static class EventFactory
     }
     public static SkillEvent CreateSkill(
         uint bindUnitId,
-        ISkill skill,
+        ISkill? skill = null,
         int priority = int.MaxValue)
     {
         return new SkillEvent(CreateEventId(), skill)

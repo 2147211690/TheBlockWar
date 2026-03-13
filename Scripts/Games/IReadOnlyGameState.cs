@@ -8,7 +8,6 @@ public interface IReadOnlyGameState
 {
     IReadOnlyMapState MapState { get; }
     IEnumerable<UnitState> GetAllUnits();
-    uint FocusedUnitId { get; }
     bool HasUnit(uint id);
     UnitState? GetUnit(uint id);
     UnitState? GetUnit(Vector2I coords);

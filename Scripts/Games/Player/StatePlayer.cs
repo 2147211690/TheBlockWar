@@ -8,11 +8,12 @@ public partial class StatePlayer : Node, IPlayer
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     private StateMachine<State> _stateMachine;
     private FreeState _freeState;
+    private SkillState _skillState;
     public GameScheduler? GameScheduler { get; set; }
     public StatePlayer()
     {
         _freeState = new(this);
-        
+        _skillState = new(this);
         _stateMachine = new StateMachine<State>(_freeState);
     }
     

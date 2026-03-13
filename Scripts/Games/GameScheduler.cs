@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using NLog;
 
@@ -16,6 +17,7 @@ public class GameScheduler
     public IReadOnlyList<SchedulerEvnet> RunningSimulations => _runningSimulations;
     public IReadOnlyList<SimulationResult> SimulationResults => _simulationResults;
     public IReadOnlyGameState? GameState => _gameState;
+    public uint FocusedUnitId { get; private set; }
     
     private List<SchedulerEvnet> _waitingSimulations = new();
     private List<SchedulerEvnet> _focusedSimulations = new();
@@ -30,7 +32,8 @@ public class GameScheduler
     private Comparer<SchedulerEvnet> _removeComparer =
         Comparer<SchedulerEvnet>.Create(
             (a, b) => ReferenceEquals(a, b) ? 0 : a.Priority.CompareTo(b.Priority));
-    
+    private Dictionary<uint, (Vector2I[] Coords, int type)> _coordsRegions = new();
+    private uint _coordsRegionsId;
     
     public event EventHandler? SimulationUpdated;
     public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
@@ -44,16 +47,14 @@ public class GameScheduler
     public void SetGameState(IGameState? gameState) => this._gameState = gameState;
     public void FocusUnit(uint id)
     {
-        if (_gameState?.FocusedUnitId == id) return;
+        if (FocusedUnitId == id) return;
         //调整对应技能层
         BlockUpdate();
-        var skillEvent = _skillEvents.Find(e => e.BindUnitId == _gameState?.FocusedUnitId);
+        var skillEvent = _skillEvents.Find(e => e.BindUnitId == FocusedUnitId);
         (skillEvent as ISchedulerEvnet)?.Layer = SimulationLayer.Waiting;
-        
-        _gameState?.FocusedUnitId = id;
-        
+
         //调整对应技能层
-        skillEvent = _skillEvents.Find(e => e.BindUnitId == _gameState?.FocusedUnitId);
+        skillEvent = _skillEvents.Find(e => e.BindUnitId == FocusedUnitId);
         (skillEvent as ISchedulerEvnet)?.Layer = SimulationLayer.Focused;
         UnblockUpdate();
         
@@ -78,9 +79,9 @@ public class GameScheduler
         //调整对应技能层
         if (ev is SkillEvent skillEvent)
         {
-            Logger.Debug("添加技能{event}", skillEvent.ToString());
+            Logger.Debug("添加技能{event}", skillEvent);
             _skillEvents.Add(skillEvent);
-            if (_gameState?.FocusedUnitId == skillEvent.BindUnitId)
+            if (FocusedUnitId == skillEvent.BindUnitId)
                 (skillEvent as ISchedulerEvnet).Layer = SimulationLayer.Focused;
         }
         
@@ -103,6 +104,19 @@ public class GameScheduler
         UpdateSimulation();
     }
 
+    public uint AddCoordsRegion(IEnumerable<Vector2I> coords, int type)
+    {
+        var id = _coordsRegionsId++;
+        _coordsRegions[id] = (coords.ToArray(), type);
+        OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
+        return id;
+    }
+
+    public void RemoveCoordsRegion(uint id)
+    {
+        _coordsRegions.Remove(id);
+        OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
+    }
 
     private void AddEventList(SchedulerEvnet ev)
     {
@@ -213,5 +227,6 @@ public class GameScheduler
     {
         None,
         FocusedUnitId,
+        CoordsRegion,
     }
 }

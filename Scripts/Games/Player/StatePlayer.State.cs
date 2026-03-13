@@ -1,0 +1,18 @@
+using TheBlockWar.Scripts.Tools;
+
+namespace TheBlockWar.Scripts.Games.Player;
+public partial class StatePlayer
+{
+    private abstract class State(StatePlayer player) : IState
+    {
+        protected StatePlayer _player = player;
+        protected Logger Logger => StatePlayer.Logger;
+        public IReadOnlyGameState? GameState => _player.GameScheduler?.GameState;
+        public GameScheduler? GameScheduler => _player.GameScheduler;
+        public StateMachine<State> StateMachine => _player._stateMachine;
+        public uint FocusedUnitId => _player.GameScheduler?.FocusedUnitId ?? 0;
+        public virtual void OnEnter() {}
+        public virtual void OnExit() {}
+        public virtual void OnInput<T>(in T input) {}
+    }
+}
