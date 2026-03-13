@@ -1,6 +1,6 @@
 using Godot;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IReadOnlyUnitState
 {

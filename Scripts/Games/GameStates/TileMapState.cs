@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.GameStates;
 
-public class TilesState : ITilesState
+public class TileMapState : ITileMapState
 {
     public Vector2I Size { get; }
     private readonly TileState[,] _tiles;
-    public TilesState(Vector2I size)
+    public TileMapState(Vector2I size)
     {
         Size = size;
         _tiles = new TileState[size.X, size.Y];
@@ -22,6 +22,7 @@ public class TilesState : ITilesState
     }
     public IReadOnlyTileState GetTile(Vector2I coords)
     {
+        if (coords.X < 0 || coords.X >= Size.X || coords.Y < 0 || coords.Y >= Size.Y) return TileState.Empty;
         return _tiles[coords.X, coords.Y];
     }
     
@@ -30,30 +31,31 @@ public class TilesState : ITilesState
         modifier(_tiles[coords.X, coords.Y]);
     }
 
-    public ITilesState GetSnapshot()
+    public ITileMapState GetSnapshot()
     {
-        return new TilesStateSnapshot(this);
+        return new TileMapStateSnapshot(this);
     }
     
     
-    public class TilesStateSnapshot : ITilesState
+    public class TileMapStateSnapshot : ITileMapState
     {
-        private ITilesState _owner;
-        public TilesStateSnapshot(ITilesState owner)
+        private IReadOnlyTileMapState _owner;
+        public TileMapStateSnapshot(IReadOnlyTileMapState owner)
         {
             _owner = owner;
         }
         public Vector2I Size => _owner.Size;
-        private Dictionary<Vector2I, TileState> _tiles = new();
+        private Dictionary<Vector2I, TileState>? _tiles = new();
+        private Dictionary<Vector2I, TileState> GetTiles() => _tiles ??= new();
         public IReadOnlyTileState GetTile(Vector2I coords)
         {
-            if (_tiles.TryGetValue(coords, out var tile)) return tile; 
+            if (_tiles?.TryGetValue(coords, out var tile) == true) return tile; 
             return _owner.GetTile(coords);
         }
         
         public void ModifyTile(Vector2I coords, Action<TileState> modifier)
         {
-            if (_tiles.TryGetValue(coords, out var tile))
+            if (_tiles?.TryGetValue(coords, out var tile) == true)
             {
                 modifier(tile);
             }
@@ -61,13 +63,13 @@ public class TilesState : ITilesState
             {
                 tile = _owner.GetTile(coords).Clone();
                 modifier(tile);
-                _tiles[coords] = tile;
+                GetTiles()[coords] = tile;
             }
         }
 
-        public ITilesState GetSnapshot()
+        public ITileMapState GetSnapshot()
         {
-            return new TilesStateSnapshot(this);
+            return new TileMapStateSnapshot(this);
         }
     }
 }

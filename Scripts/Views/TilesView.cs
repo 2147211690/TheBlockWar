@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Godot;
 using GodotTask;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]

@@ -1,6 +1,7 @@
 using Godot;
 using ImGuiNET;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Player;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
@@ -87,7 +88,7 @@ public partial class Test : Node2D
             {
                 var coords = new Vector2I(x, y);
                 var unit = UnitFactory.CreateUnit("Unit_0");
-                _currentGameState.AddUnit(unit);
+                _currentGameState.UnitMapState.AddUnit(unit);
             }
             
             // 测试修改单位
@@ -100,11 +101,11 @@ public partial class Test : Node2D
             
             if (ImGui.Button("修改单位"))
             {
-                var unit = _currentGameState.GetUnit((uint)unitId);
+                var unit = _currentGameState.UnitMapState.GetUnit((uint)unitId);
                 if (unit is not null)
                 {
                     var newCoords = new Vector2I(newX, newY);
-                    _currentGameState.ModifyUnit((uint)unitId, u => u.Coords = newCoords);
+                    _currentGameState.UnitMapState.ModifyUnit((uint)unitId, u => u.Coords = newCoords);
                 }
             }
             
@@ -116,7 +117,7 @@ public partial class Test : Node2D
             
             if (ImGui.Button("删除单位"))
             {
-                _currentGameState.RemoveUnit((uint)deleteId);
+                _currentGameState.UnitMapState.RemoveUnit((uint)deleteId);
             }
             
             // 测试获取单位
@@ -126,7 +127,7 @@ public partial class Test : Node2D
             ImGui.InputInt("按ID获取", ref getById);
             if (ImGui.Button("获取单位(按ID)"))
             {
-                var unit = _currentGameState.GetUnit((uint)getById);
+                var unit = _currentGameState.UnitMapState.GetUnit((uint)getById);
                 if (unit is not null)
                 {
                     GD.Print($"找到单位: ID={unit.Id}, 坐标=({unit.Coords.X}, {unit.Coords.Y})");
@@ -141,7 +142,7 @@ public partial class Test : Node2D
             ImGui.InputInt("按坐标Y", ref getByY);
             if (ImGui.Button("获取单位(按坐标)"))
             {
-                var unit = _currentGameState.GetUnit(new Vector2I(getByX, getByY));
+                var unit = _currentGameState.UnitMapState.GetUnit(new Vector2I(getByX, getByY));
                 if (unit is not null)
                 {
                     GD.Print($"找到单位: ID={unit.Id}, 坐标=({unit.Coords.X}, {unit.Coords.Y})");

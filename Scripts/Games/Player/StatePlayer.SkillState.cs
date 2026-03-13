@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Games.Player;
 
@@ -18,7 +19,7 @@ public partial class StatePlayer
         private bool _validSkillCoordsDirty = true;
         public override void OnEnter()
         {
-            _unitState = GameState?.GetUnit(FocusedUnitId);
+            _unitState = GameState?.UnitMapState.GetUnit(FocusedUnitId);
         }
         public override void OnInput<T>(in T input)
         {

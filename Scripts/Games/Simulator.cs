@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Games;
 /// <summary>
@@ -44,14 +45,14 @@ public static class Simulator
         public void ApplyPlaceUnit(Vector2I coords, UnitState unitState,
             SimulationResult? result)
         {
-            bool isValid = state.GetUnit(coords) == null;
+            bool isValid = state.UnitMapState.GetUnit(coords) == null;
             if (result?.Layer == SimulationLayer.Waiting || !isValid)
             {
                 result?.Steps.Add(new PlaceUnitStep(coords, UnitState.Default, unitState.Id, isValid));
                 return;
             }
             unitState.Coords = coords;
-            state.AddUnit(unitState);
+            state.UnitMapState.AddUnit(unitState);
             result?.Steps.Add(new PlaceUnitStep(coords, unitState, unitState.Id, isValid));
         }
 
@@ -63,7 +64,7 @@ public static class Simulator
                 return;
             }
 
-            var unit = state.GetUnit(coords);
+            var unit = state.UnitMapState.GetUnit(coords);
             float validDamage = 0;
             if (unit == null || unit.IsDead)
             {
@@ -74,7 +75,7 @@ public static class Simulator
             var unitValue = unit;
             validDamage = Math.Min(damage, unitValue.Health);
             //GD.Print($"修改 {unit.Value.Id} 健康值 {unitValue.Health} - {validDamage}");
-            state.ModifyUnit(unit.Id, u => u.Health -= validDamage);
+            state.UnitMapState.ModifyUnit(unit.Id, u => u.Health -= validDamage);
             result?.Steps.Add(new DamageStep(coords, damage, unit.Id, validDamage));
             if (unitValue.Health <= 0)
             {
@@ -91,7 +92,7 @@ public static class Simulator
                 return;
             }
 
-            var unit = state.GetUnit(coords);
+            var unit = state.UnitMapState.GetUnit(coords);
             if (unit == null || unit.IsDead)
             {
                 result?.Steps.Add(new DeathStep(coords, unit?.Id ?? 0, false));
@@ -99,7 +100,7 @@ public static class Simulator
             }
 
             result?.Steps.Add(new DeathStep(coords, unit.Id, true));
-            state.ModifyUnit(unit.Id, u => u.IsDead = true);
+            state.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
         }
 
         public void ApplyDropTile(Vector2I coords, SimulationResult? result)
@@ -121,7 +122,7 @@ public static class Simulator
                 result.Steps.Add(new PlaceTileStep(coords, tile));
                 return;
             }
-            state.TilesState.ModifyTile(coords, t =>
+            state.TileMapState.ModifyTile(coords, t =>
             {
                 t.IsOccupied = tile.IsOccupied;
                 t.Name = tile.Name;
@@ -132,9 +133,9 @@ public static class Simulator
 
         public void ApplyMoveUnit(Vector2I coords, Vector2I to, SimulationResult? result)
         {
-            var unit = state.GetUnit(coords);
-            var targetTile = state.TilesState.GetTile(to);
-            var targetUnit = state.GetUnit(to);
+            var unit = state.UnitMapState.GetUnit(coords);
+            var targetTile = state.TileMapState.GetTile(to);
+            var targetUnit = state.UnitMapState.GetUnit(to);
             bool isValid = targetTile.Tag != TileTag.Empty && targetUnit == null && unit?.IsDead == false;
             if (result?.Layer == SimulationLayer.Waiting)
             {
@@ -144,7 +145,7 @@ public static class Simulator
 
             if (isValid)
             {
-                state.ModifyUnit(unit!.Id, u => u.Coords = to);
+                state.UnitMapState.ModifyUnit(unit!.Id, u => u.Coords = to);
                 //TODO:引入坐标改变带来的其他影响
             }
 

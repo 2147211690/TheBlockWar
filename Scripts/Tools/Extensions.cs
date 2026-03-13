@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text;
 using Godot;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Tools;
 
@@ -11,8 +12,8 @@ public static class Extensions
     {
         public string ToInfoString()
         {
-            var units = gameState.GetAllUnits().ToList();
-            var mapSize = gameState.TilesState.Size;
+            var units = gameState.UnitMapState.GetAllUnits().ToList();
+            var mapSize = gameState.TileMapState.Size;
             
             var sb = new StringBuilder();
             sb.AppendLine($"GameState - Map Size: {mapSize.X}x{mapSize.Y}");

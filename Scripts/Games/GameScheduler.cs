@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using NLog;
+using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -65,7 +66,7 @@ public class GameScheduler
 
     public uint FocusCoords(Vector2I coords)
     {
-        var unit = _gameState?.GetUnit(coords);
+        var unit = _gameState?.UnitMapState.GetUnit(coords);
         var id = unit?.Id ?? 0;
         FocusUnit(id);
         return id;

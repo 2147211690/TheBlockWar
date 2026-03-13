@@ -1,16 +1,15 @@
-using System;
 using System.Collections.Generic;
 using Godot;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.GameStates;
 
-public interface IReadOnlyGameState
+public interface IReadOnlyUnitMapState
 {
-    IReadOnlyTilesState TilesState { get; }
     IEnumerable<IReadOnlyUnitState> GetAllUnits();
     bool HasUnit(uint id);
+    bool HasUnit(Vector2I coords);
     IReadOnlyUnitState? GetUnit(uint id);
     IReadOnlyUnitState? GetUnit(Vector2I coords);
     
-    IGameState GetSnapshot();
+    IUnitMapState GetSnapshot();
 }

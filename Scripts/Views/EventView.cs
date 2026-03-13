@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 

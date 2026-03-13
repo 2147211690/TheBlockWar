@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Godot;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.GameStates;
 
-public class GameState : IGameState
+public class UnitMapState : IUnitMapState
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public ITilesState TilesState { get; }
-    IReadOnlyTilesState IReadOnlyGameState.TilesState => TilesState;
     private Dictionary<uint, UnitState> _units = new();
     private Dictionary<Vector2I, uint> _unitAt = new();
+    
     public IEnumerable<IReadOnlyUnitState> GetAllUnits() => _units.Values;
 
     public bool HasUnit(uint id)
@@ -19,10 +17,30 @@ public class GameState : IGameState
         return _units.ContainsKey(id);
     }
 
+    public bool HasUnit(Vector2I coords)
+    {
+        return _unitAt.ContainsKey(coords);
+    }
+
     public IReadOnlyUnitState? GetUnit(uint id) => _units.GetValueOrDefault(id);
 
     public IReadOnlyUnitState? GetUnit(Vector2I coords) => 
         _unitAt.TryGetValue(coords, out var id) ? _units.GetValueOrDefault(id) : null;
+
+    public IUnitMapState GetSnapshot()
+    {
+        return new UnitMapStateSnapshot(this);
+    }
+
+    public void AddUnit(UnitState unit)
+    {
+        if (_units.ContainsKey(unit.Id))
+        {
+            Logger.Warn("单位Id{id}已经存在于数据上", unit.Id);
+        }
+        _units[unit.Id] = unit;
+        _unitAt[unit.Coords] = unit.Id;
+    }
 
     public void RemoveUnit(uint id)
     {
@@ -48,32 +66,15 @@ public class GameState : IGameState
             _unitAt[unitState.Coords] = id;
         }
     }
-
-    public void AddUnit(UnitState unit)
-    {
-        if (_units.ContainsKey(unit.Id))
-        {
-            Logger.Warn("单位Id{id}已经存在于数据上", unit.Id);
-        }
-        _units[unit.Id] = unit;
-        _unitAt[unit.Coords] = unit.Id;
-    }
-
-    public IGameState GetSnapshot() => new GameStateSnapshot(this);
-
-    public GameState(Vector2I mapSize)
-    {
-        TilesState = new TilesState(mapSize);
-    }
-
+    
     /// <summary>
-    /// 增量游戏状态快照 - 写时复制（COW）实现
+    /// 单位地图状态快照 - 写时复制（COW）实现
     /// 内存优化：仅存储变更，未变更数据保持对原状态的引用
     /// </summary>
-    public sealed class GameStateSnapshot : IGameState
+    public sealed class UnitMapStateSnapshot : IUnitMapState
     {
         // 父状态引用 - 未修改数据的回退源
-        private readonly GameState _owner;
+        private readonly IReadOnlyUnitMapState _owner;
         
         // 增量存储：仅包含相对于owner的变更
         private Dictionary<uint, UnitState>? _modifiedUnits;      // 修改/新增的单位
@@ -83,16 +84,10 @@ public class GameState : IGameState
         // 脏标记：用于延迟初始化
         private bool _isModified;
 
-        public ITilesState TilesState { get; }
-        IReadOnlyTilesState IReadOnlyGameState.TilesState => TilesState;
-        public GameStateSnapshot(IGameState owner)
+        public UnitMapStateSnapshot(IReadOnlyUnitMapState owner)
         {
-            // 只能是GameState或其快照
-            _owner = owner as GameState 
-                ?? (owner as GameStateSnapshot)?._owner 
-                ?? throw new ArgumentException("Invalid owner type");
-            
-            TilesState = owner.TilesState.GetSnapshot();
+            // 只能是UnitMapState或其快照
+            _owner = owner;
         }
         
         private Dictionary<uint, UnitState> GetModifiedUnits() => 
@@ -111,6 +106,23 @@ public class GameState : IGameState
             if (_modifiedUnits?.ContainsKey(id) == true)
                 return true;
             return _owner.HasUnit(id);
+        }
+
+        public bool HasUnit(Vector2I coords)
+        {
+            // 检查坐标是否被本地修改（包括删除导致的空位）
+            if (_modifiedUnitAt?.TryGetValue(coords, out var localId) == true)
+            {
+                // 如果是0表示该坐标被清空
+                return localId != 0;
+            }
+
+            // 检查该坐标的单位是否被删除
+            var ownerId = _owner.GetUnit(coords)?.Id ?? 0u;
+            if (ownerId != 0 && _removedUnitIds?.Contains(ownerId) == true)
+                return false;
+
+            return _owner.HasUnit(coords);
         }
 
         public IReadOnlyUnitState? GetUnit(uint id)
@@ -179,8 +191,6 @@ public class GameState : IGameState
                 }
             }
         }
-
-
 
         public void AddUnit(UnitState unit)
         {
@@ -291,14 +301,14 @@ public class GameState : IGameState
             _isModified = true;
         }
 
-        public IGameState GetSnapshot()
+        public IUnitMapState GetSnapshot()
         {
             // 优化：如果当前快照未被修改，直接返回自身或父状态
             if (!_isModified)
                 return this;
 
             // 创建新的快照层级
-            return new GameStateSnapshot(this);
+            return new UnitMapStateSnapshot(this);
         }
     }
 }

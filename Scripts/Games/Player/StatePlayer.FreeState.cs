@@ -15,7 +15,7 @@ public partial class StatePlayer
             switch (input)
             {
                 case PlayerInputClick click:
-                    if (GameState?.HasUnit(FocusedUnitId) == false) break;
+                    if (GameState?.UnitMapState.HasUnit(FocusedUnitId) == false) break;
                     var skill = GameScheduler?.GetUnitSkillEvent(FocusedUnitId);
                     if (skill == null)
                     {
