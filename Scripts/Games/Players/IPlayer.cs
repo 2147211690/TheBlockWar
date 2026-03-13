@@ -1,4 +1,4 @@
-namespace TheBlockWar.Scripts.Games.Player;
+namespace TheBlockWar.Scripts.Games.Players;
 
 public interface IPlayer
 {

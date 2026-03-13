@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using Godot;
 using ImGuiNET;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
-using TheBlockWar.Scripts.Games.Player;
+using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
 
@@ -33,7 +34,12 @@ public partial class Test : Node2D
     private StatePlayer _player;
     public override void _Ready()
     {
-        _currentGameState = new GameState(new Vector2I(10, 10));
+        _currentGameState = new GameState(new Vector2I(10, 10),
+            new Dictionary<string, ISkill[]>() 
+            {
+                {"defalut", [Skills.Skill1]},
+            });
+        
         _gameState = _currentGameState;
         _gameScheduler.SetGameState(_currentGameState);
         _snapshot = null;
@@ -56,7 +62,11 @@ public partial class Test : Node2D
             ImGui.Text("游戏状态未初始化");
             if (ImGui.Button("初始化游戏状态"))
             {
-                _currentGameState = new GameState(new Vector2I(10, 10));
+                _currentGameState = new GameState(new Vector2I(10, 10),
+                new Dictionary<string, ISkill[]>() 
+                {
+                    {"defalut", []},
+                });
                 _gameState = _currentGameState;
                 _gameScheduler.SetGameState(_currentGameState);
                 _snapshot = null;

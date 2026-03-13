@@ -1,7 +1,7 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games.Player;
+namespace TheBlockWar.Scripts.Games.Players;
 public partial class StatePlayer
 {
     private abstract class State(StatePlayer player) : IState

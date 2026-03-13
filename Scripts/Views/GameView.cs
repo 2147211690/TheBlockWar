@@ -4,7 +4,7 @@ using System.Linq;
 using Godot;
 using GodotTask;
 using TheBlockWar.Scripts.Games;
-using TheBlockWar.Scripts.Games.Player;
+using TheBlockWar.Scripts.Games.Players;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]

@@ -22,24 +22,18 @@ public class GodotNlogTarget : TargetWithLayout
             coloredMessage = $"[color=green]{logMessage}[/color]";
         else if (logEvent.Level == LogLevel.Info)
             coloredMessage = $"[color=white]{logMessage}[/color]";
-        else if (logEvent.Level == LogLevel.Warn)
-            coloredMessage = $"[color=yellow]{logMessage}[/color]";
-        else if (logEvent.Level == LogLevel.Error)
-            coloredMessage = $"[color=red]{logMessage}[/color]";
-        else if (logEvent.Level == LogLevel.Fatal)
-            coloredMessage = $"[color=red][b]{logMessage}[/b][/color]";
         else
             coloredMessage = logMessage;
 
         // 根据级别使用不同的 Godot 输出方法
         if (logEvent.Level == LogLevel.Trace || logEvent.Level == LogLevel.Debug || logEvent.Level == LogLevel.Info)
-            GD.Print(logMessage);
+            GD.PrintRich(coloredMessage);
         else if (logEvent.Level == LogLevel.Warn)
-            GD.PushWarning(logMessage);
+            GD.PushWarning(coloredMessage);
         else if (logEvent.Level == LogLevel.Error || logEvent.Level == LogLevel.Fatal)
-            GD.PushError(logMessage);
+            GD.PushError(coloredMessage);
         else
-            GD.Print(logMessage);
+            GD.Print(coloredMessage);
     }
 
     protected override void Write(AsyncLogEventInfo logEvent)

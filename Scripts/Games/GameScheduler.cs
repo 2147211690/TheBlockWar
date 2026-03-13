@@ -35,6 +35,7 @@ public class GameScheduler
             (a, b) => ReferenceEquals(a, b) ? 0 : a.Priority.CompareTo(b.Priority));
     private Dictionary<uint, (Vector2I[] Coords, int type)> _coordsRegions = new();
     private uint _coordsRegionsId;
+    private IGameState? _snapshotChache;
     
     public event EventHandler? SimulationUpdated;
     public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
@@ -79,6 +80,7 @@ public class GameScheduler
     public SchedulerEvnet AddEvent(SchedulerEvnet ev, bool run = false)
     {
         if (run) (ev as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
+        
         //调整对应技能层
         if (ev is SkillEvent skillEvent)
         {
@@ -96,14 +98,16 @@ public class GameScheduler
 
     public void RemoveEvent(SchedulerEvnet ev)
     {
+        if (!RemoveEventList(ev)) return;
+        ev.Update -= OnEventUpdate;
+        
         //调整对应技能层
         if (ev is SkillEvent skillEvent)
         {
             _skillEvents.Remove(skillEvent);
             (skillEvent as ISchedulerEvnet)?.Layer = SimulationLayer.Waiting;
         }
-        RemoveEventList(ev);
-        ev.Update -= OnEventUpdate;
+        
         UpdateSimulation();
     }
 
@@ -144,11 +148,12 @@ public class GameScheduler
         UpdateSimulation();
     }
 
-    private void RemoveEventList(SchedulerEvnet ev)
+    private bool RemoveEventList(SchedulerEvnet ev)
     {
-        if (TryRemoveFromList(_runningSimulations, ev)) return;
-        if (TryRemoveFromList(_focusedSimulations, ev)) return;
-        if (TryRemoveFromList(_waitingSimulations, ev)) return;
+        if (TryRemoveFromList(_runningSimulations, ev)) return true;
+        if (TryRemoveFromList(_focusedSimulations, ev)) return true;
+        if (TryRemoveFromList(_waitingSimulations, ev)) return true;
+        return false;
         //if (_runningSimulations.Remove(ev) || _focusedSimulations.Remove(ev) || _waitingSimulations.Remove(ev)) ;
     }
 
@@ -183,7 +188,9 @@ public class GameScheduler
         Logger.Info("触发更新");
         _simulationResults.Clear();
         if (_gameState is null) return;
-        var snapshot = _gameState.GetSnapshot();
+        _snapshotChache?.ClearIfSnapshot();
+        var snapshot = _snapshotChache =
+            (_snapshotChache == null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
         foreach (var layer in _simulationLayers)
         foreach (var ev in layer)
         {
@@ -216,12 +223,12 @@ public class GameScheduler
         Logger.Trace("更新阻塞{count}", _blockingUpdate);
     }
 
-    private void UnblockUpdate()
+    private void UnblockUpdate(bool endUpdate = true)
     {
         _blockingUpdate -= 1;
         Logger.Trace("更新解除阻塞{count}", _blockingUpdate);
         if (_blockingUpdate > 0 || !_needUpdate) return;
-        UpdateSimulation();
+        if (endUpdate) UpdateSimulation();
         _needUpdate = false;
     }
 

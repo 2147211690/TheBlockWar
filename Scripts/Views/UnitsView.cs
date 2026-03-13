@@ -91,7 +91,7 @@ public partial class UnitsView : Node2D
     
     public async GDTask CurrentMoveUnit(Vector2I to)
     {
-        await GDTask.Delay(1000);
+        //await GDTask.Delay(1000);
         _unitMaps.Remove(_currentUnitView!.RealCoords);
         _currentUnitView.RealCoords = to;
         SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);

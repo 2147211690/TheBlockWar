@@ -9,7 +9,8 @@ public class UnitMapState : IUnitMapState
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     private Dictionary<uint, UnitState> _units = new();
     private Dictionary<Vector2I, uint> _unitAt = new();
-    
+
+    public IReadOnlyUnitMapState? Owner => null;
     public IEnumerable<IReadOnlyUnitState> GetAllUnits() => _units.Values;
 
     public bool HasUnit(uint id)
@@ -66,15 +67,18 @@ public class UnitMapState : IUnitMapState
             _unitAt[unitState.Coords] = id;
         }
     }
-    
+
+    public void ClearIfSnapshot(){}
+
     /// <summary>
     /// 单位地图状态快照 - 写时复制（COW）实现
     /// 内存优化：仅存储变更，未变更数据保持对原状态的引用
     /// </summary>
     public sealed class UnitMapStateSnapshot : IUnitMapState
     {
+        
         // 父状态引用 - 未修改数据的回退源
-        private readonly IReadOnlyUnitMapState _owner;
+        public IReadOnlyUnitMapState? Owner { get; }
         
         // 增量存储：仅包含相对于owner的变更
         private Dictionary<uint, UnitState>? _modifiedUnits;      // 修改/新增的单位
@@ -87,7 +91,7 @@ public class UnitMapState : IUnitMapState
         public UnitMapStateSnapshot(IReadOnlyUnitMapState owner)
         {
             // 只能是UnitMapState或其快照
-            _owner = owner;
+            Owner = owner;
         }
         
         private Dictionary<uint, UnitState> GetModifiedUnits() => 
@@ -105,7 +109,7 @@ public class UnitMapState : IUnitMapState
                 return false;
             if (_modifiedUnits?.ContainsKey(id) == true)
                 return true;
-            return _owner.HasUnit(id);
+            return Owner.HasUnit(id);
         }
 
         public bool HasUnit(Vector2I coords)
@@ -118,11 +122,11 @@ public class UnitMapState : IUnitMapState
             }
 
             // 检查该坐标的单位是否被删除
-            var ownerId = _owner.GetUnit(coords)?.Id ?? 0u;
+            var ownerId = Owner.GetUnit(coords)?.Id ?? 0u;
             if (ownerId != 0 && _removedUnitIds?.Contains(ownerId) == true)
                 return false;
 
-            return _owner.HasUnit(coords);
+            return Owner.HasUnit(coords);
         }
 
         public IReadOnlyUnitState? GetUnit(uint id)
@@ -136,7 +140,7 @@ public class UnitMapState : IUnitMapState
                 return modified;
 
             // 3. 回退到父状态
-            return _owner.GetUnit(id);
+            return Owner.GetUnit(id);
         }
 
         public IReadOnlyUnitState? GetUnit(Vector2I coords)
@@ -147,11 +151,11 @@ public class UnitMapState : IUnitMapState
                 // 如果是0表示该坐标被清空
                 if (localId == 0) return null;
                 return _modifiedUnits?.GetValueOrDefault(localId) 
-                    ?? _owner.GetUnit(localId);
+                    ?? Owner.GetUnit(localId);
             }
 
             // 2. 检查该坐标的单位是否被删除
-            var ownerUnit = _owner.GetUnit(coords);
+            var ownerUnit = Owner.GetUnit(coords);
             if (ownerUnit != null && _removedUnitIds?.Contains(ownerUnit.Id) == true)
                 return null;
 
@@ -164,7 +168,7 @@ public class UnitMapState : IUnitMapState
             var processedIds = new HashSet<uint>();
             
             // 1. 先遍历父状态（排除被删除的）
-            foreach (var unit in _owner.GetAllUnits())
+            foreach (var unit in Owner.GetAllUnits())
             {
                 if (_removedUnitIds?.Contains(unit.Id) == true) continue;
                 
@@ -209,7 +213,7 @@ public class UnitMapState : IUnitMapState
             var coordsMap = GetModifiedCoords();
             
             // 如果该坐标在父状态中有其他单位，需要处理冲突
-            var ownerUnitAtCoord = _owner.GetUnit(unit.Coords);
+            var ownerUnitAtCoord = Owner.GetUnit(unit.Coords);
             if (ownerUnitAtCoord != null && ownerUnitAtCoord.Id != id)
             {
                 // 标记原位置单位被移除（如果未被修改）
@@ -266,7 +270,7 @@ public class UnitMapState : IUnitMapState
             else
             {
                 //本地未找到，从父状态克隆
-                var ownerUnit = _owner.GetUnit(id);
+                var ownerUnit = Owner.GetUnit(id);
                 if (ownerUnit == null) return;
                 var clone = ownerUnit.Clone();
                 oldCoords = clone.Coords;
@@ -299,6 +303,14 @@ public class UnitMapState : IUnitMapState
             //GetModifiedUnits()[id] = newUnit;
             _removedUnitIds?.Remove(id); // 确保不在删除集合中
             _isModified = true;
+        }
+
+        public void ClearIfSnapshot()
+        {
+            _modifiedUnitAt?.Clear();
+            _modifiedUnits?.Clear();
+            _removedUnitIds?.Clear();
+            _isModified = false;
         }
 
         public IUnitMapState GetSnapshot()

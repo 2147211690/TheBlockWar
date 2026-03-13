@@ -1,7 +1,7 @@
 using Godot;
 using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games.Player;
+namespace TheBlockWar.Scripts.Games.Players;
 [GlobalClass]
 public partial class StatePlayer : Node, IPlayer
 {

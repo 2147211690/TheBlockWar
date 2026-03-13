@@ -6,6 +6,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public class TileMapState : ITileMapState
 {
+    public IReadOnlyTileMapState? Owner => null;
     public Vector2I Size { get; }
     private readonly TileState[,] _tiles;
     public TileMapState(Vector2I size)
@@ -31,6 +32,8 @@ public class TileMapState : ITileMapState
         modifier(_tiles[coords.X, coords.Y]);
     }
 
+    public void ClearIfSnapshot() {}
+
     public ITileMapState GetSnapshot()
     {
         return new TileMapStateSnapshot(this);
@@ -39,18 +42,18 @@ public class TileMapState : ITileMapState
     
     public class TileMapStateSnapshot : ITileMapState
     {
-        private IReadOnlyTileMapState _owner;
+        public IReadOnlyTileMapState Owner { get; }
         public TileMapStateSnapshot(IReadOnlyTileMapState owner)
         {
-            _owner = owner;
+            Owner = owner;
         }
-        public Vector2I Size => _owner.Size;
+        public Vector2I Size => Owner.Size;
         private Dictionary<Vector2I, TileState>? _tiles = new();
         private Dictionary<Vector2I, TileState> GetTiles() => _tiles ??= new();
         public IReadOnlyTileState GetTile(Vector2I coords)
         {
             if (_tiles?.TryGetValue(coords, out var tile) == true) return tile; 
-            return _owner.GetTile(coords);
+            return Owner.GetTile(coords);
         }
         
         public void ModifyTile(Vector2I coords, Action<TileState> modifier)
@@ -61,10 +64,15 @@ public class TileMapState : ITileMapState
             }
             else
             {
-                tile = _owner.GetTile(coords).Clone();
+                tile = Owner.GetTile(coords).Clone();
                 modifier(tile);
                 GetTiles()[coords] = tile;
             }
+        }
+
+        public void ClearIfSnapshot()
+        {
+            _tiles?.Clear();
         }
 
         public ITileMapState GetSnapshot()

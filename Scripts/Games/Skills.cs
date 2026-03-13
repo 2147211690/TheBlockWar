@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -14,13 +15,13 @@ public static class Skills
         IReadOnlyUnitState unit,
         Vector2I[] args)
     {
-        gameState.ApplyDamage(unit.Coords + Vector2I.Up, 10, result);
-        gameState.ApplyDamage(unit.Coords + Vector2I.Left, 10, result);
-        gameState.ApplyDamage(unit.Coords + Vector2I.Right, 10, result);
-        gameState.ApplyDamage(unit.Coords + Vector2I.Down, 10, result);
+        if (args.TryGetArgs(0, out var v1))
+        {
+            gameState.ApplyMoveUnit(unit.Coords, unit.Coords + v1, result);
+        }
     }
     public static ISkill Skill1 { get; }
-    = new ActionSkill(0, EmptyArgsFunc, Skill1Core);
+    = new ActionSkill(1,(i, i1, arg3) => CoordsRegion.GetCircleRegion(Vector2I.Zero, 5) , Skill1Core);
 
 
 

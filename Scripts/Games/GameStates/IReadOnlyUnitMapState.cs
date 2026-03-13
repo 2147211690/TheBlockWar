@@ -5,6 +5,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IReadOnlyUnitMapState
 {
+    public IReadOnlyUnitMapState? Owner { get; }
     IEnumerable<IReadOnlyUnitState> GetAllUnits();
     bool HasUnit(uint id);
     bool HasUnit(Vector2I coords);

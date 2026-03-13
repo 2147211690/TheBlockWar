@@ -1,6 +1,6 @@
 using Godot;
 
-namespace TheBlockWar.Scripts.Games.Player;
+namespace TheBlockWar.Scripts.Games.Players;
 
 public partial class StatePlayer
 {
@@ -8,13 +8,14 @@ public partial class StatePlayer
     {
         public override void OnEnter()
         {
+            GameScheduler?.FocusUnit(0);
         }
         public override void OnInput<T>(in T input)
         {
             base.OnInput(in input);
             switch (input)
             {
-                case PlayerInputClick click:
+                case PlayerInputClick {Button: MouseButtonMask.Left} click:
                     if (GameState?.UnitMapState.HasUnit(FocusedUnitId) == false) break;
                     var skill = GameScheduler?.GetUnitSkillEvent(FocusedUnitId);
                     if (skill == null)
