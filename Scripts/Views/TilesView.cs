@@ -95,8 +95,8 @@ public partial class TilesView : TileMapLayer
             {
                 if (coord.X < 0 || coord.X >= mapSize.X || coord.Y < 0 || coord.Y >= mapSize.Y) continue;
                 var s = _regionSpritePool.Pop();
-                s.Position = GetRenderPosition(coord, Layer.Underground, -1);
-                s.Offset = GetRenderOffset(coord, Layer.Underground, -1);
+                s.Position = GetRenderPosition(coord, Layer.Underground, -2);
+                s.Offset = GetRenderOffset(coord, Layer.Underground, -2);
                 s.Modulate = new(0, 1, 0, 0.2f);
             }
         }

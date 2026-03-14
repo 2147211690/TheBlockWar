@@ -3,23 +3,17 @@
 [ext_resource type="Script" uid="uid://clo7kpedsd4h6" path="res://Test.cs" id="1_myinc"]
 [ext_resource type="Script" uid="uid://bt85u8jnkingf" path="res://Scripts/Views/GameView.cs" id="2_njov2"]
 [ext_resource type="Script" uid="uid://b4sgjkp7yfofn" path="res://Scripts/Views/TilesView.cs" id="3_8tn2x"]
+[ext_resource type="Resource" uid="uid://cu0gh2aruhrjc" path="res://Resources/GameViewStyle_0.tres" id="3_c4vo5"]
 [ext_resource type="PackedScene" uid="uid://cas0m3vshvj1g" path="res://View/TileView.tscn" id="4_8tn2x"]
 [ext_resource type="Script" uid="uid://bbsl8xk5ntlvd" path="res://Scripts/Views/UnitsView.cs" id="5_aq4fw"]
 [ext_resource type="Texture2D" uid="uid://b4gfqejk75oob" path="res://Art/Img/region_block.png" id="5_vwb7u"]
 [ext_resource type="PackedScene" uid="uid://bccdls2vsjite" path="res://View/UnitView.tscn" id="6_ivycn"]
 [ext_resource type="Script" uid="uid://dk12ehg31xf4o" path="res://Scripts/Views/EventsView.cs" id="7_q1uvj"]
-[ext_resource type="Texture2D" uid="uid://bantwlkdgcecq" path="res://Art/Img/combat/artillery_arrow_down.png" id="8_c4vo5"]
-[ext_resource type="Script" uid="uid://ckoduph8m7puw" path="res://Scripts/Resources/EventsStyle.cs" id="9_vwb7u"]
 
 [sub_resource type="TileSet" id="TileSet_8tn2x"]
 tile_shape = 1
 tile_layout = 5
 tile_size = Vector2i(56, 42)
-
-[sub_resource type="Resource" id="Resource_cqdos"]
-script = ExtResource("9_vwb7u")
-PlaceUnitDown = ExtResource("8_c4vo5")
-metadata/_custom_type_script = "uid://ckoduph8m7puw"
 
 [node name="Node2D" type="Node2D" unique_id=1155941121 node_paths=PackedStringArray("_view")]
 script = ExtResource("1_myinc")
@@ -27,6 +21,7 @@ _view = NodePath("GameView")
 
 [node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("TilesView", "UnitsView", "EventsView")]
 script = ExtResource("2_njov2")
+Style = ExtResource("3_c4vo5")
 TilesView = NodePath("TilesView")
 UnitsView = NodePath("UnitsView")
 EventsView = NodePath("EventsView")
@@ -50,7 +45,6 @@ metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
 script = ExtResource("7_q1uvj")
 GameView = NodePath("..")
 _drawContainer = NodePath("../DrawContainer")
-_style = SubResource("Resource_cqdos")
 
 [node name="DrawContainer" type="Node2D" parent="GameView" unique_id=1071978760]
 y_sort_enabled = true

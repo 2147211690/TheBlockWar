@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games;
 /// <summary>
@@ -33,6 +35,9 @@ public static class Simulator
                         break;
                     case MoveUnitStep moveStep:
                         ApplyMoveUnit(state, moveStep.Coords, moveStep.To, null);
+                        break;
+                    case MoveUnitPathStep movePathStep:
+                        ApplyMoveUnitPath(state, movePathStep.Coords, movePathStep.Path, null);
                         break;
                     case null:
                         break;
@@ -150,6 +155,36 @@ public static class Simulator
             }
 
             result?.Steps.Add(new MoveUnitStep(coords, to, unit?.Id ?? 0, isValid));
+        }
+        
+        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I> path, SimulationResult? result)
+        {
+            if (path.Count == 0) return;
+            var unit = state.UnitMapState.GetUnit(coords + path[0]);
+            if (unit is null)
+            {
+                result?.Steps.Add(new MoveUnitPathStep(coords, path, 0, 0, false));
+                return;
+            }
+            var targetIndex = 1;
+            
+            for (; targetIndex < path.Count - 1; targetIndex++)
+                if (!unit.IsCanPass(state, coords + path[targetIndex])) break;
+            
+            for (; targetIndex >= 0; targetIndex--)
+                if (unit.IsCanBeDestination(state, coords + path[targetIndex])) break;
+            
+            
+            if (result?.Layer == SimulationLayer.Waiting)
+            {
+                result.Steps.Add(new MoveUnitPathStep(coords, path, unit.Id, targetIndex, true));
+                return;
+            }
+
+            state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], null);
+
+            result?.Steps.Add(new MoveUnitPathStep(coords, path, unit.Id, targetIndex, true));
+
         }
     }
 }

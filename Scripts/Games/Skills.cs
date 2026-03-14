@@ -19,11 +19,14 @@ public static class Skills
     {
         if (args.TryGetArgs(0, out var v1))
         {
-            //gameState.ApplyDamage(unit.Coords, 20, result);
-            gameState.ApplyMoveUnit(unit.Coords, unit.Coords + v1, result);
-            if (result.PeekStep is MoveUnitStep {ResultIsValid:true})
+            var path = GameNavigator.FindShortestPath(gameState, unit, unit.Coords, v1 + unit.Coords);
+            gameState.ApplyMoveUnitPath(Vector2I.Zero, path, result);
+        }
+        if (args.TryGetArgs(1, out var v2))
+        {
+            if (result.PeekStep is MoveUnitPathStep { ResultIsValid: true } m)
             {
-                gameState.ApplyDamage(unit.Coords + v1, 20, result);
+                gameState.ApplyMoveUnit(m.Path[m.ResultTargetIndex] + m.Coords, v2 + unit.Coords, result);
             }
         }
     }
@@ -34,11 +37,20 @@ public static class Skills
         int argsIndex,
         Vector2I?[] args)
     {
-        return GameNavigator
-            .FindValidDestinationsWithinCost(state, caster, caster.Coords, 4)
-            .Select(a => a - caster.Coords);
+        if (argsIndex == 0)
+        {
+            return GameNavigator
+                .FindValidDestinationsWithinCost(state, caster, caster.Coords, 4)
+                .Select(a => a - caster.Coords);
+        }
+        else if(argsIndex == 1)
+        {
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 3);
+        }
+
+        return [];
     }
-    public static ISkill Skill1 { get; } = new ActionSkill(1, Skill1Args, Skill1Core);
+    public static ISkill Skill1 { get; } = new ActionSkill(2, Skill1Args, Skill1Core);
 
 
 

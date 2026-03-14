@@ -109,8 +109,13 @@ public partial class StatePlayer
         {
             if (_currentArgIndex > 0)
             {
+                _currentSkillArgs![_currentArgIndex] = null;
                 _currentArgIndex--;
                 UpdateValidSkillCoords();
+                _currentSkillArgs![_currentArgIndex] = 
+                    IsArgValid(_player.CurrentMouseCoords) ?
+                        _player.CurrentMouseCoords - _unitState!.Coords : null;
+                _currentSkillEvent?.Args = _currentSkillArgs;
             }
         }
         private void UpdateValidSkillCoords()

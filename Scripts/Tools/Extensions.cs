@@ -78,4 +78,23 @@ public static class Extensions
             return true;
         }
     }
+
+    extension(in Vector2I coords)
+    {
+        public DirMask ToVecDirMask()
+        {
+            var c = coords with { X = Mathf.Sign(coords.X), Y = Mathf.Sign(coords.Y) };
+            return c.X switch
+            {
+                0 => DirMask.None,
+                1 => DirMask.Right,
+                -1 => DirMask.Left,
+            } | c.Y switch
+            {
+                0 => DirMask.None,
+                1 => DirMask.Down,
+                -1 => DirMask.Up,
+            };
+        }
+    }
 }

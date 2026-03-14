@@ -10,6 +10,7 @@ public partial class StatePlayer : Node, IPlayer
     private FreeState _freeState;
     private SkillState _skillState;
     public GameScheduler? GameScheduler { get; set; }
+    public Vector2I CurrentMouseCoords { get; private set; }
     public StatePlayer()
     {
         _freeState = new(this);
@@ -20,6 +21,10 @@ public partial class StatePlayer : Node, IPlayer
     public void OnInput<T>(in T input)
     {
         Logger.Trace("玩家{player}获取到输入{input}", GetHashCode(), input);
+        if (input is PlayerInputMousceCoords coords)
+        {
+            CurrentMouseCoords = coords.Coords;
+        }
         _stateMachine.CurrentState.OnInput(input);
     }
 

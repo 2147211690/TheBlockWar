@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="GameViewStyle" format=3 uid="uid://cu0gh2aruhrjc"]
+
+[ext_resource type="Script" uid="uid://bphesnyky175h" path="res://Scripts/Resources/GameViewStyle.cs" id="1_ccsqr"]
+[ext_resource type="Texture2D" uid="uid://b6ydvx64xrlwr" path="res://Art/Img/path/up_start.png" id="1_lsp26"]
+[ext_resource type="Texture2D" uid="uid://eblwdcpjwals" path="res://Art/Img/path/down_start.png" id="2_0vsqr"]
+[ext_resource type="Texture2D" uid="uid://bshk5826iyjdd" path="res://Art/Img/path/up_down.png" id="3_dlqdj"]
+[ext_resource type="Texture2D" uid="uid://b537rn4owh4sh" path="res://Art/Img/path/left_start.png" id="4_efcai"]
+[ext_resource type="Texture2D" uid="uid://rd1onv1yl1du" path="res://Art/Img/path/up_left.png" id="5_wjxha"]
+[ext_resource type="Texture2D" uid="uid://c50iby1rbe10m" path="res://Art/Img/path/down_left.png" id="6_ukqsd"]
+[ext_resource type="Texture2D" uid="uid://d2x0702nep3lp" path="res://Art/Img/path/right_end.png" id="7_pgxfe"]
+[ext_resource type="Texture2D" uid="uid://dep6dkaswpa7g" path="res://Art/Img/path/right_start.png" id="8_0j2ph"]
+[ext_resource type="Texture2D" uid="uid://cf3tfdmq71e01" path="res://Art/Img/path/up_right.png" id="9_4ygc1"]
+[ext_resource type="Texture2D" uid="uid://gekf66wgnh5p" path="res://Art/Img/path/down_right.png" id="10_k627b"]
+[ext_resource type="Texture2D" uid="uid://81y1he437e6n" path="res://Art/Img/path/left_end.png" id="11_4k6dv"]
+[ext_resource type="Texture2D" uid="uid://cp4e8nvyqo0el" path="res://Art/Img/path/left_right.png" id="12_yawfy"]
+[ext_resource type="Texture2D" uid="uid://c5hnnwini7vqo" path="res://Art/Img/path/down_end.png" id="13_mjyf2"]
+[ext_resource type="Texture2D" uid="uid://4kyqvnq7okeh" path="res://Art/Img/path/up_end.png" id="14_ablfk"]
+[ext_resource type="Texture2D" uid="uid://bantwlkdgcecq" path="res://Art/Img/combat/artillery_arrow_down.png" id="15_0vsqr"]
+
+[resource]
+script = ExtResource("1_ccsqr")
+PlaceDownTexture = ExtResource("15_0vsqr")
+PathTextures = Array[Texture2D]([null, ExtResource("1_lsp26"), ExtResource("2_0vsqr"), ExtResource("3_dlqdj"), ExtResource("4_efcai"), ExtResource("5_wjxha"), ExtResource("6_ukqsd"), ExtResource("7_pgxfe"), ExtResource("8_0j2ph"), ExtResource("9_4ygc1"), ExtResource("10_k627b"), ExtResource("11_4k6dv"), ExtResource("12_yawfy"), ExtResource("13_mjyf2"), ExtResource("14_ablfk")])
+metadata/_custom_type_script = "uid://bphesnyky175h"

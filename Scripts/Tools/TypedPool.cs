@@ -54,6 +54,7 @@ public class TypedPool<T> : IDisposable
 
     public virtual void Push(T item)
     {
+        if (item is null) return;
         _pool.Push(item);
         AfterPush?.Invoke(item);
     }

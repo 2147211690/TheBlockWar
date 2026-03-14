@@ -5,11 +5,13 @@ using Godot;
 using GodotTask;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class GameView : Node2D
 {
+    [Export] public GameViewStyle Style { get; set; }
     [Export] public TilesView TilesView { get; set; }
     [Export] public UnitsView UnitsView { get; set; }
     [Export] public EventsView EventsView { get; set; }
@@ -134,6 +136,10 @@ public partial class GameView : Node2D
                         UnitsView.CurrentUnitId = damageStep.ResultUnitId;
                         UnitsView.CurrentUnitHealth -= damageStep.ResultValidDamage;
                         break;
+                    case MoveUnitPathStep movePathStep:
+                        UnitsView.CurrentUnitId = movePathStep.ResultUnitId;
+                        if (movePathStep.ResultIsValid) await UnitsView.CurrentMovePathUnit(movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
+                        break;
                 }
             }
         }
@@ -161,6 +167,9 @@ public partial class GameView : Node2D
                         break;
                     case DamageStep damageStep:
                         view.ChangeUnitHealth(isFocused, damageStep.ResultUnitId, -damageStep.ResultValidDamage);
+                        break;
+                    case MoveUnitPathStep movePathStep:
+                        view.MoveUnitPath(isFocused, movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
                         break;
                 }
             }

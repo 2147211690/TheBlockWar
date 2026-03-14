@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 using TheBlockWar.Scripts.Games.GameStates;
 
@@ -14,3 +15,4 @@ public record PlaceTileStep(Vector2I Coords, TileState Tile) : SimStep;
 public record DropTileStep(Vector2I Coords) : SimStep;
 public record PlaceUnitStep(Vector2I Coords, UnitState? Unit, uint ResultUnitId, bool ResultIsValid) : SimStep;
 public record MoveUnitStep(Vector2I Coords, Vector2I To, uint ResultUnitId, bool ResultIsValid) : SimStep;
+public record MoveUnitPathStep(Vector2I Coords, List<Vector2I> Path, uint ResultUnitId, int ResultTargetIndex ,bool ResultIsValid) : SimStep;

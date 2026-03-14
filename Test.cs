@@ -265,8 +265,9 @@ public partial class Test : Node2D
 
             _move = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
             {
-                 s.ApplyMoveUnit(new(2,2), new(6,3), r);
-                s.ApplyMoveUnit(new(6,3), new(1,4), r);
+                 s.ApplyMoveUnitPath(new(2,2), 
+                     [new(0,0), new(0,1), new(0,2),new(1,2),new(2,2)],
+                     r);
             }));
         }
 

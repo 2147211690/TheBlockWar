@@ -1,5 +1,5 @@
+using System.Collections.Generic;
 using Godot;
-using Godot.Collections;
 using GodotTask;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
@@ -11,8 +11,8 @@ public partial class UnitsView : Node2D
     [Export] public GameView GameView { get; set; }
     [Export] private Node2D _nodeContainer;
     [Export] private PackedScene _unitScene;
-    private readonly Dictionary<uint, UnitView> _unitViews = new();
-    private readonly Dictionary<Vector2I, uint> _unitMaps = new();
+    private readonly Godot.Collections.Dictionary<uint, UnitView> _unitViews = new();
+    private readonly Godot.Collections.Dictionary<Vector2I, uint> _unitMaps = new();
     private bool _queueUpdateUnitPosition = false;
     private UnitView? _currentUnitView;
     private UnitView? _focusedUnitView;
@@ -93,6 +93,20 @@ public partial class UnitsView : Node2D
         _currentUnitView.RealCoords = to;
         SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
         _unitMaps.Add(to, CurrentUnitId);
+    }
+
+    public async GDTask CurrentMovePathUnit(Vector2I coords, List<Vector2I> path, int targetIndex)
+    {
+        _unitMaps.Remove(_currentUnitView!.RealCoords);
+        SetUnitMapPosition(coords + path[0], _currentUnitView);
+        for (int i = 1; i <= targetIndex; i++)
+        {
+            await GDTask.Delay(100);
+            SetUnitMapPosition(coords + path[i], _currentUnitView);
+        }
+        _currentUnitView.RealCoords = coords + path[targetIndex];
+        _unitMaps.Add(coords + path[targetIndex], CurrentUnitId);
+        SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
     }
     /// <summary>
     /// 对于会影响瓦片高度的操作，需要调用此方法更新单位位置

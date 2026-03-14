@@ -8,14 +8,14 @@ public partial class EventsView : Node2D
 {
     [Export] public GameView GameView { get; set; }
     [Export] private Node2D _drawContainer;
-    [Export] private EventsStyle _style;
     private EventView.EventViewPool _eventViewPool;
     private Dictionary<uint, EventView> _eventViews = new();
     private EventView? _currentView;
 
     public override void _Ready()
     {
-        _eventViewPool = new EventView.EventViewPool(_drawContainer, GameView.TilesView, _style, GameView.UnitsView);
+        _eventViewPool =
+            new EventView.EventViewPool(_drawContainer, this);
         TreeExiting += () =>
         {
             _eventViewPool.Dispose();
