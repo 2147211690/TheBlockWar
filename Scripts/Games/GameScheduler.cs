@@ -33,7 +33,7 @@ public class GameScheduler
     private Comparer<SchedulerEvnet> _removeComparer =
         Comparer<SchedulerEvnet>.Create(
             (a, b) => ReferenceEquals(a, b) ? 0 : a.Priority.CompareTo(b.Priority));
-    private Dictionary<uint, (Vector2I[] Coords, int type)> _coordsRegions = new();
+    private Dictionary<uint, (HashSet<Vector2I> Coords, int type)> _coordsRegions = new();
     private uint _coordsRegionsId;
     private IGameState? _snapshotChache;
     
@@ -114,11 +114,12 @@ public class GameScheduler
     public uint AddCoordsRegion(IEnumerable<Vector2I> coords, int type)
     {
         var id = _coordsRegionsId++;
-        _coordsRegions[id] = (coords.ToArray(), type);
+        _coordsRegions[id] = (coords.ToHashSet(), type);
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
         return id;
     }
-
+    public bool IsInCoordsRegion(uint id,in Vector2I coord) =>
+        _coordsRegions.TryGetValue(id, out var region) && region.Coords.Contains(coord);
     public void RemoveCoordsRegion(uint id)
     {
         _coordsRegions.Remove(id);
@@ -188,9 +189,9 @@ public class GameScheduler
         Logger.Info("触发更新");
         _simulationResults.Clear();
         if (_gameState is null) return;
-        _snapshotChache?.ClearIfSnapshot();
         var snapshot = _snapshotChache =
             (_snapshotChache == null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
+        snapshot.ClearIfSnapshot();
         foreach (var layer in _simulationLayers)
         foreach (var ev in layer)
         {

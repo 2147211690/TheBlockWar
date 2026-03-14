@@ -13,4 +13,5 @@ public interface IReadOnlyUnitState
     float MaxShield { get; }
     bool IsDead { get; }
     UnitState Clone();
+    UnitState CopyTo(UnitState unit);
 }

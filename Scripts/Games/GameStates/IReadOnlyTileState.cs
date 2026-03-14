@@ -6,4 +6,5 @@ public interface IReadOnlyTileState
     string Name { get; }
     bool IsOccupied { get; }
     TileState Clone();
+    TileState CopyTo(TileState tile);
 }

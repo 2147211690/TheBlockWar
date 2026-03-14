@@ -20,7 +20,7 @@ public class TypedPool<T> : IDisposable
     public Action<T>? BeforePop { get; set; }
     public Action<T>? AfterPush { get; set; }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         if (typeof(Node).IsAssignableFrom(typeof(T)))
         {
@@ -36,7 +36,7 @@ public class TypedPool<T> : IDisposable
         _pool.Clear();
     }
 
-    public T Pop()
+    public virtual T Pop()
     {
         T item;
         if (_pool.Count > 0)
@@ -52,7 +52,7 @@ public class TypedPool<T> : IDisposable
         return item;
     }
 
-    public void Push(T item)
+    public virtual void Push(T item)
     {
         _pool.Push(item);
         AfterPush?.Invoke(item);

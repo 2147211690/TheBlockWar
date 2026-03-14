@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 
@@ -78,12 +79,17 @@ public class UnitMapState : IUnitMapState
     {
         
         // 父状态引用 - 未修改数据的回退源
-        public IReadOnlyUnitMapState? Owner { get; }
+        public IReadOnlyUnitMapState Owner { get; }
         
         // 增量存储：仅包含相对于owner的变更
         private Dictionary<uint, UnitState>? _modifiedUnits;      // 修改/新增的单位
         private HashSet<uint>? _removedUnitIds;                    // 删除的单位ID
         private Dictionary<Vector2I, uint>? _modifiedUnitAt;       // 坐标变更（仅包含变更的坐标）
+        private List<UnitState>? _pooledUnits;
+        //池
+        private static readonly TypedPool<UnitState> UnitPool = new(() => new UnitState(), 1)
+        {
+        };
         
         // 脏标记：用于延迟初始化
         private bool _isModified;
@@ -102,6 +108,9 @@ public class UnitMapState : IUnitMapState
         
         private Dictionary<Vector2I, uint> GetModifiedCoords() => 
             _modifiedUnitAt ??= new Dictionary<Vector2I, uint>();
+        
+        private List<UnitState> GetPooledUnits() => 
+            _pooledUnits ??= new List<UnitState>();
 
         public bool HasUnit(uint id)
         {
@@ -272,7 +281,9 @@ public class UnitMapState : IUnitMapState
                 //本地未找到，从父状态克隆
                 var ownerUnit = Owner.GetUnit(id);
                 if (ownerUnit == null) return;
-                var clone = ownerUnit.Clone();
+                var clone = ownerUnit.CopyTo(UnitPool.Pop());
+                GetPooledUnits().Add(clone);
+                //var clone = ownerUnit.Clone();
                 oldCoords = clone.Coords;
                 modifier(clone);
                 clone.Id = id;
@@ -307,6 +318,8 @@ public class UnitMapState : IUnitMapState
 
         public void ClearIfSnapshot()
         {
+            if (_pooledUnits is not null) foreach (var unit in _pooledUnits) UnitPool.Push(unit);
+            _pooledUnits?.Clear();
             _modifiedUnitAt?.Clear();
             _modifiedUnits?.Clear();
             _removedUnitIds?.Clear();

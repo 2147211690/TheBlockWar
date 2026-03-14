@@ -18,17 +18,18 @@ public class UnitState : IReadOnlyUnitState
 
     public UnitState Clone()
     {
-        return new UnitState
-        {
-            Id = Id,
-            Name = Name,
-            Coords = Coords,
-            Health = Health,
-            MaxHealth = MaxHealth,
-            Shield = Shield,
-            MaxShield = MaxShield,
-            IsDead = IsDead,
-        };
+        return CopyTo(new UnitState());
     }
-
+    public UnitState CopyTo(UnitState unit)
+    {
+        unit.Id = Id;
+        unit.Name = Name;
+        unit.Coords = Coords;
+        unit.Health = Health;
+        unit.MaxHealth = MaxHealth;
+        unit.Shield = Shield;
+        unit.MaxShield = MaxShield;
+        unit.IsDead = IsDead;
+        return unit;
+    }
 }

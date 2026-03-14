@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 
@@ -48,8 +49,14 @@ public class TileMapState : ITileMapState
             Owner = owner;
         }
         public Vector2I Size => Owner.Size;
+        private List<TileState>? _popedTiles;
         private Dictionary<Vector2I, TileState>? _tiles = new();
+
+        private static readonly TypedPool<TileState> TilePool = new(() => new TileState(), 10)
+        {
+        };
         private Dictionary<Vector2I, TileState> GetTiles() => _tiles ??= new();
+        private List<TileState> GetPopedTiles() => _popedTiles ??= new();
         public IReadOnlyTileState GetTile(Vector2I coords)
         {
             if (_tiles?.TryGetValue(coords, out var tile) == true) return tile; 
@@ -64,7 +71,8 @@ public class TileMapState : ITileMapState
             }
             else
             {
-                tile = Owner.GetTile(coords).Clone();
+                tile = Owner.GetTile(coords).CopyTo(TilePool.Pop());
+                GetPopedTiles().Add(tile);
                 modifier(tile);
                 GetTiles()[coords] = tile;
             }
@@ -72,6 +80,8 @@ public class TileMapState : ITileMapState
 
         public void ClearIfSnapshot()
         {
+            if (_popedTiles is not null) foreach (var tile in _popedTiles) TilePool.Push(tile);
+            _popedTiles?.Clear();
             _tiles?.Clear();
         }
 

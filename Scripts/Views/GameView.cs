@@ -55,9 +55,14 @@ public partial class GameView : Node2D
     
     private void GameSchedulerOnOtherStateUpdated(object? sender, GameScheduler.OtherStateUpdateTypeEnum e)
     {
-        if (e == GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId)
+        switch (e)
         {
-            _unitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
+            case GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId:
+                _unitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
+                break;
+            case GameScheduler.OtherStateUpdateTypeEnum.CoordsRegion:
+                
+                break;
         }
     }
 

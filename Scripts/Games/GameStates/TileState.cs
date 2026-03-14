@@ -11,12 +11,14 @@ public class TileState : IReadOnlyTileState
 
     public TileState Clone()
     {
-        return new TileState
-        {
-            Tag = Tag,
-            Name = Name,
-            IsOccupied = IsOccupied,
-        };
+        return CopyTo(new TileState());
+    }
+    public TileState CopyTo(TileState tile)
+    {
+        tile.Tag = Tag;
+        tile.Name = Name;
+        tile.IsOccupied = IsOccupied;
+        return tile;
     }
 }
 [Flags]

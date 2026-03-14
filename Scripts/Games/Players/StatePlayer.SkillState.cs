@@ -14,13 +14,26 @@ public partial class StatePlayer
         private int _currentArgIndex = 0;
         private Vector2I[]? _currentSkillArgs;
         private IReadOnlyUnitState? _unitState;
-        private HashSet<Vector2I> _validSkillCoords = new();
+        private uint _validRegionId;
         public override void OnEnter()
         {
             _unitState = GameState?.UnitMapState.GetUnit(FocusedUnitId);
             _validSkills = GameState?.GetUnitValidSkills("defalut") ?? [];
             TryBeginNewSkill(0);
         }
+
+        public override void OnExit()
+        {
+            base.OnExit();
+            GameScheduler?.RemoveCoordsRegion(_validRegionId);
+            _validSkills = [];
+            _currentSkill = null;
+            _currentSkillEvent = null;
+            _unitState = null;
+            _currentSkillArgs = null;
+            _validRegionId = 0;
+        }
+
         public override void OnInput<T>(in T input)
         {
             base.OnInput(in input);
@@ -101,16 +114,15 @@ public partial class StatePlayer
         private void UpdateValidSkillCoords()
         {
             if (_unitState is null || _currentSkill is null || _currentSkillArgs is null) return;
-            _validSkillCoords.Clear();
-            var validArgs = _currentSkill.GetSkillArgs(_unitState.Coords, _currentArgIndex, _currentSkillArgs);
-            foreach (var coord in validArgs)
-            {
-                _validSkillCoords.Add(coord);
-            }
+            GameScheduler?.RemoveCoordsRegion(_validRegionId);
+            var validArgs =
+                _currentSkill.GetSkillArgs(_unitState.Coords, _currentArgIndex, _currentSkillArgs);
+            _validRegionId = GameScheduler?.AddCoordsRegion(validArgs, 0) ?? 0;
         }
         private bool IsCurrentValidArg()
         {
-            return _currentSkillArgs is not null && _validSkillCoords.Contains(_currentSkillArgs[_currentArgIndex]);
+            return _currentSkillArgs is not null &&
+                   GameScheduler?.IsInCoordsRegion(_validRegionId, _currentSkillArgs[_currentArgIndex]) == true;
         }
         private bool IsEndArg()
         {
