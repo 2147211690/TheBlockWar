@@ -16,6 +16,7 @@ public partial class UnitView : Node2D
     [Export] public float ImpactSquashY { get; set; } = 1.3f;
     [Export] public float ImpactStretchX { get; set; } = 0.25f;
     [Export] public float RecoveryDuration { get; set; } = 0.04f;
+    public Vector2 Offset { get => Center.Position; set => Center.Position = value; }
     public IReadOnlyList<(Vector2I coords, Sprite2D sprite)> Fakes => _fakes ?? [];
     public Vector2I? AimCoords { get; set; }
     public Vector2I RealCoords { get; set; }
@@ -62,16 +63,16 @@ public partial class UnitView : Node2D
         }
     }
 
-    public Sprite2D AddFack(Vector2I coords)
+    public Sprite2D AddFack(Vector2I coords, TilesView tilesView)
     {
         _fakes ??= new();
         var fake = new Sprite2D
         {
             Texture = MainSprite.SpriteFrames.GetFrameTexture(MainSprite.Animation, MainSprite.Frame),
-            Offset = MainSprite.Offset,
-            ZIndex = 1,
+            Offset = tilesView.GetRenderOffset(coords, Layer.Underground, 0) + Offsets.GetValueOrDefault(UnitName),
             Modulate = new Color(1, 1, 1, 0.3f),
         };
+        fake.Position = tilesView.GetRenderPosition(coords, Layer.Underground, 0);
         _fakes.Add((coords, fake));
         return fake;
     }
@@ -85,11 +86,7 @@ public partial class UnitView : Node2D
         _fakes.RemoveAt(index);
         fake.sprite.QueueFree();
     }
-    public void SetGroundHeight(float height)
-    {
-        Center.Position = new Vector2(0, -height);
-    }
-
+    
     public GDTask PlayPlaceDownAnim()
     {
         var tween = CreateTween();

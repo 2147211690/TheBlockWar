@@ -27,7 +27,12 @@ public class TileMapState : ITileMapState
         if (coords.X < 0 || coords.X >= Size.X || coords.Y < 0 || coords.Y >= Size.Y) return TileState.Empty;
         return _tiles[coords.X, coords.Y];
     }
-    
+
+    public bool IsEmpty(Vector2I coords)
+    {
+        return (GetTile(coords).Tag & TileTag.Empty) != 0;
+    }
+
     public void ModifyTile(Vector2I coords, Action<TileState> modifier)
     {
         modifier(_tiles[coords.X, coords.Y]);
@@ -62,7 +67,9 @@ public class TileMapState : ITileMapState
             if (_tiles?.TryGetValue(coords, out var tile) == true) return tile; 
             return Owner.GetTile(coords);
         }
-        
+
+        public bool IsEmpty(Vector2I coords) => (GetTile(coords).Tag & TileTag.Empty) != 0;
+
         public void ModifyTile(Vector2I coords, Action<TileState> modifier)
         {
             if (_tiles?.TryGetValue(coords, out var tile) == true)

@@ -65,4 +65,17 @@ public static class Extensions
             return true;
         }
     }
+    extension(Vector2I?[] args)
+    {
+        public bool TryGetArgs(int index, out Vector2I result)
+        {
+            if (index < 0 || index >= args.Length || args[index] == null)
+            {
+                result = default;
+                return false;
+            }
+            result = args[index]!.Value;
+            return true;
+        }
+    }
 }

@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://b4sgjkp7yfofn" path="res://Scripts/Views/TilesView.cs" id="3_8tn2x"]
 [ext_resource type="PackedScene" uid="uid://cas0m3vshvj1g" path="res://View/TileView.tscn" id="4_8tn2x"]
 [ext_resource type="Script" uid="uid://bbsl8xk5ntlvd" path="res://Scripts/Views/UnitsView.cs" id="5_aq4fw"]
+[ext_resource type="Texture2D" uid="uid://b4gfqejk75oob" path="res://Art/Img/region_block.png" id="5_vwb7u"]
 [ext_resource type="PackedScene" uid="uid://bccdls2vsjite" path="res://View/UnitView.tscn" id="6_ivycn"]
 [ext_resource type="Script" uid="uid://dk12ehg31xf4o" path="res://Scripts/Views/EventsView.cs" id="7_q1uvj"]
 [ext_resource type="Texture2D" uid="uid://bantwlkdgcecq" path="res://Art/Img/combat/artillery_arrow_down.png" id="8_c4vo5"]
@@ -24,29 +25,30 @@ metadata/_custom_type_script = "uid://ckoduph8m7puw"
 script = ExtResource("1_myinc")
 _view = NodePath("GameView")
 
-[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("_tilesView", "_unitsView", "_eventsView")]
+[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("TilesView", "UnitsView", "EventsView")]
 script = ExtResource("2_njov2")
-_tilesView = NodePath("TilesView")
-_unitsView = NodePath("UnitsView")
-_eventsView = NodePath("EventsView")
+TilesView = NodePath("TilesView")
+UnitsView = NodePath("UnitsView")
+EventsView = NodePath("EventsView")
 
-[node name="TilesView" type="TileMapLayer" parent="GameView" unique_id=1800037625 node_paths=PackedStringArray("_nodeContainer")]
+[node name="TilesView" type="TileMapLayer" parent="GameView" unique_id=1800037625 node_paths=PackedStringArray("GameView", "_nodeContainer")]
 tile_set = SubResource("TileSet_8tn2x")
 script = ExtResource("3_8tn2x")
+GameView = NodePath("..")
 _nodeContainer = NodePath("../DrawContainer")
 _tileScene = ExtResource("4_8tn2x")
+RegionTexture = ExtResource("5_vwb7u")
 
-[node name="UnitsView" type="Node2D" parent="GameView" unique_id=1149891957 node_paths=PackedStringArray("_nodeContainer", "TilesView")]
+[node name="UnitsView" type="Node2D" parent="GameView" unique_id=1149891957 node_paths=PackedStringArray("GameView", "_nodeContainer")]
 script = ExtResource("5_aq4fw")
+GameView = NodePath("..")
 _nodeContainer = NodePath("../DrawContainer")
 _unitScene = ExtResource("6_ivycn")
-TilesView = NodePath("../TilesView")
 metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
 
-[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("TilesView", "UnitsView", "_drawContainer")]
+[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("GameView", "_drawContainer")]
 script = ExtResource("7_q1uvj")
-TilesView = NodePath("../TilesView")
-UnitsView = NodePath("../UnitsView")
+GameView = NodePath("..")
 _drawContainer = NodePath("../DrawContainer")
 _style = SubResource("Resource_cqdos")
 

@@ -4,7 +4,7 @@ namespace TheBlockWar.Scripts.Games;
 
 public class SkillEvent : SchedulerEvnet
 {
-    public new Vector2I[]? Args { get => base.Args as Vector2I[]; set => base.Args = value; }
+    public new Vector2I?[]? Args { get => base.Args as Vector2I?[]; set => base.Args = value; }
     public uint BindUnitId { get => field; set => SetField(ref field, value); }
     public ISkill? Skill 
     { 
@@ -16,7 +16,7 @@ public class SkillEvent : SchedulerEvnet
             {
                 var unit = s.UnitMapState.GetUnit(BindUnitId);
                 if (unit == null) return;
-                Skill?.SkillCore(s, r, unit, a as Vector2I[] ?? []);
+                Skill?.SkillCore(s, r, unit, a as Vector2I?[] ?? []);
             };
         }
     }

@@ -11,9 +11,10 @@ public class SimulationResult
     public uint SourceId { get; }
     public SimulationLayer Layer { get; set; } = SimulationLayer.Waiting;
     public List<SimStep> Steps { get; set; } = new();
+    public SimStep PeekStep => Steps.Count > 0 ? Steps[^1] : SimStep.Default;
     public override string ToString()
     {
-        return $"结果来源于事件:{SourceId} 层:{Layer} 步骤数:{Steps.Count}\n详细步骤\n:{string.Join("\n", Steps)}";
+        return $"结果来源于事件:{SourceId} 层:{Layer} 步骤数:{Steps.Count}\n详细步骤:\n{string.Join("\n", Steps)}";
     }
 }
 

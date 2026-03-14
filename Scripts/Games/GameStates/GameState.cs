@@ -37,7 +37,7 @@ public class GameState : IGameState
     public sealed class GameStateSnapshot : IGameState
     {
         // 父状态引用 - 未修改数据的回退源
-        public IReadOnlyGameState? Owner { get; }
+        public IReadOnlyGameState Owner { get; }
 
         public ITileMapState TileMapState { get; }
         public IUnitMapState UnitMapState { get; }

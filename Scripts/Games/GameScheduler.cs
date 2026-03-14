@@ -19,7 +19,9 @@ public class GameScheduler
     public IReadOnlyList<SimulationResult> SimulationResults => _simulationResults;
     public IReadOnlyGameState? GameState => _gameState;
     public uint FocusedUnitId { get; private set; }
-    
+
+    public IReadOnlyDictionary<uint, (HashSet<Vector2I> Coords, int type)> CoordsRegions => _coordsRegions;
+
     private List<SchedulerEvnet> _waitingSimulations = new();
     private List<SchedulerEvnet> _focusedSimulations = new();
     private List<SchedulerEvnet> _runningSimulations = new();
@@ -119,7 +121,7 @@ public class GameScheduler
         return id;
     }
     public bool IsInCoordsRegion(uint id,in Vector2I coord) =>
-        _coordsRegions.TryGetValue(id, out var region) && region.Coords.Contains(coord);
+        CoordsRegions.TryGetValue(id, out var region) && region.Coords.Contains(coord);
     public void RemoveCoordsRegion(uint id)
     {
         _coordsRegions.Remove(id);
@@ -211,10 +213,10 @@ public class GameScheduler
         foreach (var a in SimulationResults)
         {
             if (a.Layer != SimulationLayer.Running) break;
-            Logger.Info("应用结果 {result}", a);
+            Logger.Debug("应用结果 {result}", a);
             _gameState.ApplyResult(a);
         }
-        Logger.Info("更新结果:\n{results}", string.Join("\n", SimulationResults));
+        Logger.Debug("更新结果:\n{results}", string.Join("\n", SimulationResults));
         SimulationUpdated?.Invoke(this, EventArgs.Empty);
     }
 

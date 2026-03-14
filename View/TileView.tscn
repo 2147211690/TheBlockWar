@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cas0m3vshvj1g"]
 
-[ext_resource type="Texture2D" uid="uid://gkk3qxe73b17" path="res://Art/Img/combat/tiles_grass/ground_0_secret.png" id="1_cborc"]
 [ext_resource type="Script" uid="uid://b1mhflxm0nels" path="res://Scripts/Views/TileView.cs" id="1_v2aou"]
+[ext_resource type="Texture2D" uid="uid://daw3l3cmxlgqd" path="res://Art/Img/combat/tiles_sand/ground_0.png" id="2_v2aou"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_v2aou"]
 animations = [{
@@ -12,7 +12,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_cborc")
+"texture": ExtResource("2_v2aou")
 }],
 "loop": true,
 "name": &"Soil",

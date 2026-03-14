@@ -10,11 +10,12 @@ namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class GameView : Node2D
 {
+    [Export] public TilesView TilesView { get; set; }
+    [Export] public UnitsView UnitsView { get; set; }
+    [Export] public EventsView EventsView { get; set; }
+    
     private List<SimulationResult> _runningSimulations = new();
     private List<SimulationResult> _prepareSimulations = new();
-    [Export] private TilesView _tilesView;
-    [Export] private UnitsView _unitsView;
-    [Export] private EventsView _eventsView;
     private GameScheduler? _gameScheduler;
     private Queue<SimulationResult[]> _simulationCache = new();
     private Vector2I? _previousMousceCoords = null;
@@ -40,7 +41,7 @@ public partial class GameView : Node2D
         switch (@event)
         {
             case InputEventMouseMotion e:
-                _currentCoords = _tilesView.GlobalMouseToTileCoords(GetGlobalMousePosition());
+                _currentCoords = TilesView.GlobalMouseToTileCoords(GetGlobalMousePosition());
                 if (_previousMousceCoords == null || _currentCoords != _previousMousceCoords)
                 {
                     _previousMousceCoords = _currentCoords;
@@ -58,10 +59,11 @@ public partial class GameView : Node2D
         switch (e)
         {
             case GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId:
-                _unitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
+                UnitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
                 break;
             case GameScheduler.OtherStateUpdateTypeEnum.CoordsRegion:
-                
+                TilesView.DrawRegions(_gameScheduler!.CoordsRegions.Values,
+                    _gameScheduler.GameState?.TileMapState.Size ?? Vector2I.Zero);
                 break;
         }
     }
@@ -107,39 +109,39 @@ public partial class GameView : Node2D
         foreach (var simulation in _runningSimulations)
         {
             // 清空当前事件视图
-            _eventsView.ClearEventView(simulation.SourceId);
+            EventsView.ClearEventView(simulation.SourceId);
             foreach (var step in simulation.Steps)
             {
                 switch (step)
                 {
                     case PlaceTileStep placeStep:
-                        await _tilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
-                        _unitsView.UpdateUnitPosition(placeStep.Coords);
+                        await TilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
+                        UnitsView.UpdateUnitPosition(placeStep.Coords);
                         break;
                     case DropTileStep dropStep:
-                        await _tilesView.DropTile(dropStep.Coords);
-                        _unitsView.UpdateUnitPosition(dropStep.Coords);
+                        await TilesView.DropTile(dropStep.Coords);
+                        UnitsView.UpdateUnitPosition(dropStep.Coords);
                         break;
                     case PlaceUnitStep placeStep:
-                        if (placeStep.ResultIsValid) await _unitsView.PlaceUnit(placeStep.Coords, placeStep.Unit);
+                        if (placeStep.ResultIsValid) await UnitsView.PlaceUnit(placeStep.Coords, placeStep.Unit);
                         break;
                     case MoveUnitStep moveStep:
-                        _unitsView.CurrentUnitId = moveStep.ResultUnitId;
-                        if (moveStep.ResultIsValid) await _unitsView.CurrentMoveUnit(moveStep.To);
-                        _unitsView.UpdateUnitPosition(moveStep.To);
+                        UnitsView.CurrentUnitId = moveStep.ResultUnitId;
+                        if (moveStep.ResultIsValid) await UnitsView.CurrentMoveUnit(moveStep.To);
+                        UnitsView.UpdateUnitPosition(moveStep.To);
                         break;
                     case DamageStep damageStep:
-                        _unitsView.CurrentUnitId = damageStep.ResultUnitId;
-                        _unitsView.CurrentUnitHealth -= damageStep.ResultValidDamage;
+                        UnitsView.CurrentUnitId = damageStep.ResultUnitId;
+                        UnitsView.CurrentUnitHealth -= damageStep.ResultValidDamage;
                         break;
                 }
             }
         }
-        _eventsView.ClearAll();
+        EventsView.ClearAll();
         foreach (var simulation in _prepareSimulations)
         {
             var isFocused = simulation.Layer == SimulationLayer.Focused;
-            var view = _eventsView.BeginAddEventView(simulation.SourceId);
+            var view = EventsView.BeginAddEventView(simulation.SourceId);
             if (view == null) continue;
             foreach (var step in simulation.Steps)
             {
@@ -162,7 +164,7 @@ public partial class GameView : Node2D
                         break;
                 }
             }
-            _eventsView.EndAddEventView();
+            EventsView.EndAddEventView();
         }
     }
 }

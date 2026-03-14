@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using TheBlockWar.Scripts.Games.GameStates;
 
@@ -12,7 +13,7 @@ public partial class StatePlayer
         private IReadOnlyList<ISkill> _validSkills = [];
         private ISkill? _currentSkill;
         private int _currentArgIndex = 0;
-        private Vector2I[]? _currentSkillArgs;
+        private Vector2I?[]? _currentSkillArgs;
         private IReadOnlyUnitState? _unitState;
         private uint _validRegionId;
         public override void OnEnter()
@@ -81,7 +82,7 @@ public partial class StatePlayer
              }
             _currentSkillEvent = EventFactory.CreateSkill(FocusedUnitId, _currentSkill);
             _currentArgIndex = 0;
-            _currentSkillArgs = new Vector2I[_currentSkill.ArgCount];
+            _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
 
             GameScheduler?.AddEvent(_currentSkillEvent);
             UpdateValidSkillCoords();
@@ -90,8 +91,9 @@ public partial class StatePlayer
         private void SetCurrentIndexArg(in Vector2I arg)
         {
             if (_currentSkillArgs is null || _currentSkill is null) return;
-            _currentSkillArgs[_currentArgIndex] = arg;
-            _currentSkillEvent?.Args =  _currentSkillArgs;
+            _currentSkillArgs[_currentArgIndex] = 
+                IsArgValid(arg + _unitState?.Coords ?? Vector2I.Zero) ? arg : null;
+            _currentSkillEvent?.Args = _currentSkillArgs;
         }
 
         private void EnterNextArg()
@@ -116,14 +118,18 @@ public partial class StatePlayer
             if (_unitState is null || _currentSkill is null || _currentSkillArgs is null) return;
             GameScheduler?.RemoveCoordsRegion(_validRegionId);
             var validArgs =
-                _currentSkill.GetSkillArgs(_unitState.Coords, _currentArgIndex, _currentSkillArgs);
+                _currentSkill.GetSkillArgs(GameState!, _unitState, _currentArgIndex, _currentSkillArgs).
+                    Select(a => a + _unitState.Coords);
             _validRegionId = GameScheduler?.AddCoordsRegion(validArgs, 0) ?? 0;
         }
         private bool IsCurrentValidArg()
         {
             return _currentSkillArgs is not null &&
-                   GameScheduler?.IsInCoordsRegion(_validRegionId, _currentSkillArgs[_currentArgIndex]) == true;
+                   GameScheduler?.IsInCoordsRegion(_validRegionId, 
+                       _currentSkillArgs[_currentArgIndex] + _unitState?.Coords ?? Vector2I.Zero) == true;
         }
+        private bool IsArgValid(Vector2I coords) =>  _currentSkillArgs is not null &&
+                   GameScheduler?.IsInCoordsRegion(_validRegionId, coords) == true;
         private bool IsEndArg()
         {
             return _currentArgIndex == _currentSkill!.ArgCount - 1;

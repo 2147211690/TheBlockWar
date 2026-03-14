@@ -8,9 +8,9 @@ namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class UnitsView : Node2D
 {
+    [Export] public GameView GameView { get; set; }
     [Export] private Node2D _nodeContainer;
     [Export] private PackedScene _unitScene;
-    [Export] public TilesView TilesView { get; set; }
     private readonly Dictionary<uint, UnitView> _unitViews = new();
     private readonly Dictionary<Vector2I, uint> _unitMaps = new();
     private bool _queueUpdateUnitPosition = false;
@@ -77,11 +77,8 @@ public partial class UnitsView : Node2D
     
     public void CurrentAddUnitFack(Vector2I coords)
     {
-        var s = _currentUnitView!.AddFack(coords);
+        var s = _currentUnitView!.AddFack(coords, GameView.TilesView);
         _nodeContainer.AddChild(s);
-        s.Position = TilesView.MapToLocal(coords, Layer.Underground) +
-                     new Vector2(0, -TilesView.GetTileHeight(coords, Layer.Underground));
-        
     }
 
     public void CurrentRemoveUnitFack(Vector2I coords)
@@ -112,8 +109,8 @@ public partial class UnitsView : Node2D
     }
     private void SetUnitMapPosition(Vector2I coords, UnitView render)
     {
-        render.Position = TilesView.MapToLocal(coords, Layer.Underground);
-        render.SetGroundHeight(TilesView.GetTileHeight(coords, Layer.Underground));
+        render.Position = GameView.TilesView.GetRenderPosition(coords, Layer.Underground, 0);
+        render.Offset = GameView.TilesView.GetRenderOffset(coords, Layer.Underground, 0);
     }
 
     public override void _Process(double delta)

@@ -10,6 +10,7 @@ namespace TheBlockWar.Scripts.Views;
 
 public class EventView
 {
+    
     private EventViewPool _pool;
     private List<DrawNode> _nodes = new();
     private TypedPool<DrawNode> DrawNodePool => _pool.DrawNodePool;
@@ -37,13 +38,13 @@ public class EventView
             if(v)
             {
                 u.DrawTextureOffset(Style.PlaceUnitDown,
-                    new Vector2(0, -TilesView.GetTileHeight(coords, Layer.Sky)),
+                    TilesView.GetRenderOffset(coords, Layer.Sky, 0),
                     0.5f,
                     1f,
                     isValid ? Colors.Green : Colors.Red);
             }
         };
-        node.Position = TilesView.MapToLocal(coords, Layer.Sky);
+        node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
         node.QueueRedraw();
     }
 

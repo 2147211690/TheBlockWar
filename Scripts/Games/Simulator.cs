@@ -48,7 +48,7 @@ public static class Simulator
             bool isValid = state.UnitMapState.GetUnit(coords) == null;
             if (result?.Layer == SimulationLayer.Waiting || !isValid)
             {
-                result?.Steps.Add(new PlaceUnitStep(coords, UnitState.Default, unitState.Id, isValid));
+                result?.Steps.Add(new PlaceUnitStep(coords, null, unitState.Id, isValid));
                 return;
             }
             unitState.Coords = coords;
