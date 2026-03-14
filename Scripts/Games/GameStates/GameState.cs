@@ -10,8 +10,8 @@ public class GameState : IGameState
     public IReadOnlyGameState? Owner => null;
     public ITileMapState TileMapState { get; }
     public IUnitMapState UnitMapState { get; }
-
-
+    public TeamState TeamState { get; }
+    
     IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
     private Dictionary<string, ISkill[]> _unitSkillMap;
@@ -23,11 +23,12 @@ public class GameState : IGameState
 
     public IGameState GetSnapshot() => new GameStateSnapshot(this);
 
-    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap)
+    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations)
     {
         _unitSkillMap = unitSkillMap;
         TileMapState = new TileMapState(mapSize);
         UnitMapState = new UnitMapState();
+        TeamState = new TeamState(teamRelations);
     }
     public void ClearIfSnapshot(){}
     /// <summary>
@@ -41,6 +42,7 @@ public class GameState : IGameState
 
         public ITileMapState TileMapState { get; }
         public IUnitMapState UnitMapState { get; }
+        public TeamState TeamState => Owner.TeamState;
 
         IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
         IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;

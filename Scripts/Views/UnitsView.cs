@@ -44,6 +44,8 @@ public partial class UnitsView : Node2D
     { get => _currentUnitView?.HealthBar.CurrentShield ?? 0; set => _currentUnitView?.HealthBar.CurrentShield = value; }
     public float CurrentUnitHealth
     { get => _currentUnitView?.HealthBar.CurrentHealth ?? 0; set => _currentUnitView?.HealthBar.CurrentHealth = value; }
+    
+    
 
     public void FocusUnit(uint unitId)
     {
@@ -52,11 +54,14 @@ public partial class UnitsView : Node2D
         _focusedUnitView = render;
         _focusedUnitView.OutlineColor = new Color("#3aa200");
     }
-    public GDTask PlaceUnit(Vector2I coords, UnitState unit)
+    public GDTask PlaceUnit(Vector2I coords, UnitState unit, TeamTypeEnum teamType)
     {
         if (!_unitViews.TryGetValue(unit.Id, out var render))
         {
             render = _unitViews[unit.Id] = _unitScene.Instantiate<UnitView>();
+            render.UnitsView = this;
+            render.TeamType = teamType;
+            
             _nodeContainer.AddChild(render);
             _unitMaps.Add(coords, unit.Id);
             if (unit.Id == CurrentUnitId) _currentUnitView = render;

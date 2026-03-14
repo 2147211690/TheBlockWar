@@ -10,6 +10,7 @@ public interface ISchedulerEvnet : IComparable<ISchedulerEvnet>
     /// 原则上不要修改它,除非你知道自己在做什么
     /// </summary>
     SimulationLayer Layer { get; set; }
+    int Team { get; set; }
     int Priority { get; set; }
     object? Args { get; set; }
     EventAction? Action { get; set; }

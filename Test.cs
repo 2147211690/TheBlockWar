@@ -38,10 +38,16 @@ public partial class Test : Node2D
             new Dictionary<string, ISkill[]>() 
             {
                 {"defalut", [Skills.Skill1]},
-            });
-        
+            },
+            new int[,] 
+            {
+                {0,1,3},
+                {1,0,3},
+                {3,3,0},
+            }
+            );
         _gameState = _currentGameState;
-        _gameScheduler.SetGameState(_currentGameState);
+        _gameScheduler.InitScheduler(_currentGameState, 0);
         _snapshot = null;
 
         _player = new StatePlayer();
@@ -60,18 +66,6 @@ public partial class Test : Node2D
         if (_currentGameState == null)
         {
             ImGui.Text("游戏状态未初始化");
-            if (ImGui.Button("初始化游戏状态"))
-            {
-                _currentGameState = new GameState(new Vector2I(10, 10),
-                new Dictionary<string, ISkill[]>() 
-                {
-                    {"defalut", []},
-                });
-                _gameState = _currentGameState;
-                _gameScheduler.SetGameState(_currentGameState);
-                _snapshot = null;
-                _view.Bind(_gameScheduler);
-            }
         }
         else
         {
@@ -97,7 +91,7 @@ public partial class Test : Node2D
             if (ImGui.Button("添加单位"))
             {
                 var coords = new Vector2I(x, y);
-                var unit = UnitFactory.CreateUnit("Unit_0");
+                var unit = UnitFactory.CreateUnit("Unit_0", 0);
                 _currentGameState.UnitMapState.AddUnit(unit);
             }
             
@@ -237,7 +231,7 @@ public partial class Test : Node2D
                         }, r);
                     }
                 }
-                s.ApplyPlaceUnit(new(2, 2), UnitFactory.CreateUnit("Unit_0"), r);
+                s.ApplyPlaceUnit(new(2, 2), UnitFactory.CreateUnit("Unit_0", 0), r);
             }), true);
         }
         if (ImGui.Button("测试放置2"))
@@ -249,7 +243,7 @@ public partial class Test : Node2D
                 {
                     for (int j = 0; j < 3; j++)
                     {
-                        s.ApplyPlaceUnit(new(i,j), UnitFactory.CreateUnit("Unit_0"), r);
+                        s.ApplyPlaceUnit(new(i,j), UnitFactory.CreateUnit("Unit_0", 1), r);
                     }
                 }
             }));

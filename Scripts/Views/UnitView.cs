@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Godot;
 using GodotTask;
+using TheBlockWar.Scripts.Games;
 
 namespace TheBlockWar.Scripts.Views;
 
@@ -20,6 +21,8 @@ public partial class UnitView : Node2D
     public IReadOnlyList<(Vector2I coords, Sprite2D sprite)> Fakes => _fakes ?? [];
     public Vector2I? AimCoords { get; set; }
     public Vector2I RealCoords { get; set; }
+    public TeamTypeEnum TeamType { get; set; }
+    public UnitsView UnitsView { get; set; }
     public Vector2I WishCoords => AimCoords ?? RealCoords;
     private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
     private ShaderMaterial _shaderMaterial = null!;
@@ -42,6 +45,8 @@ public partial class UnitView : Node2D
     public override void _Ready()
     {
         _shaderMaterial = MainSprite.Material as ShaderMaterial;
+        HealthBar.Style = UnitsView.GameView.Style;
+        HealthBar.TeamType = TeamType;
         MainSprite.FrameChanged += MainSpriteOnFrameChanged;
         TreeExiting += () =>
         {

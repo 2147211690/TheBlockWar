@@ -2,15 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bxcvnfn0ji655" path="res://Scripts/Views/UnitView.cs" id="1_hq4fu"]
 [ext_resource type="Script" uid="uid://bcfsqru8ni8v0" path="res://Scripts/Views/HealthBar.cs" id="3_0gwqe"]
-[ext_resource type="Script" uid="uid://mat8tjuus2su" path="res://Scripts/Resources/UnitsStyle.cs" id="3_vsdra"]
 [ext_resource type="Shader" uid="uid://bp0nooa7oij51" path="res://Shaders/unit.gdshader" id="4_r4ymd"]
 [ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="4_vsdra"]
-
-[sub_resource type="Resource" id="Resource_r4ymd"]
-script = ExtResource("3_vsdra")
-HealthBarColor = Color(0.06637928, 0.104854204, 0.14329588, 1)
-SplitColor = Color(0.06666667, 0.105882354, 0.14509805, 1)
-metadata/_custom_type_script = "uid://mat8tjuus2su"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xcu2x"]
 resource_local_to_scene = true
@@ -70,7 +63,6 @@ HealthBar = NodePath("Center/HealthBar")
 
 [node name="HealthBar" type="Node2D" parent="Center" unique_id=1368084466]
 script = ExtResource("3_0gwqe")
-Style = SubResource("Resource_r4ymd")
 BlockWidth = 4.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Center" unique_id=341608040]

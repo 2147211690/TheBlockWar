@@ -97,4 +97,16 @@ public static class Extensions
             };
         }
     }
+
+    extension(IReadOnlyUnitState unit)
+    {
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(IReadOnlyGameState gameState, int playerTeam)
+        {
+            return gameState.TeamState.GetTeamTypeRelativeToPlayer(playerTeam, unit.Team);
+        }
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(GameScheduler gameScheduler)
+        {
+            return gameScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(gameScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Neutral;
+        }
+    }
 }

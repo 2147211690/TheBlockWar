@@ -3,9 +3,12 @@ using Godot;
 namespace TheBlockWar.Scripts.Resources;
 
 [GlobalClass]
-public partial class UnitsStyle : Resource
+public partial class GameViewTeamStyle : Resource
 {
-    [ExportGroup("HealthBar")]
+    [ExportGroup("Events")]
+    [Export] public Texture2D PlaceDownTexture { get; set; } = null!;
+    [Export] public Texture2D[] PathTextures { get; set; } = null!;
+    [ExportGroup("Units")]
     [Export] public Color HealthCurrentColor { get; set; } = new Color("#e74c3c");      // 鲜红 - 当前生命
     [Export] public Color ShieldCurrentColor { get; set; } = new Color("#3498db");     // 亮蓝 - 当前护盾
     [Export] public Color HealthBarColor { get; set; } = new Color("#2c3e50");         // 深蓝灰 - 生命条背景

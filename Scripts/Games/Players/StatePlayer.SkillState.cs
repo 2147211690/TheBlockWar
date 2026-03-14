@@ -81,6 +81,7 @@ public partial class StatePlayer
                  return;
              }
             _currentSkillEvent = EventFactory.CreateSkill(FocusedUnitId, _currentSkill);
+            _currentSkillEvent.Team = _unitState!.Team;
             _currentArgIndex = 0;
             _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
 

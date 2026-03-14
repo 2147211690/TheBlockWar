@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
@@ -28,42 +29,43 @@ public class EventView
     /// <param name="unit">要放置的单位状态</param>
     /// <param name="isValid">当前位置是否可以有效放置单位</param>
     /// <param name="isFocus">是否为关注操作</param>
-    public void PlaceUnit(bool isFocus, Vector2I coords, UnitState unit, bool isValid)
+    public void PlaceUnit(bool isFocus, TeamTypeEnum teamType ,Vector2I coords, UnitState unit, bool isValid)
     {
         //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
         node.DrawAction += (u, v) =>
         {
-            PlaceUnitDraw(u, v, isFocus, coords, unit, isValid);
+            PlaceUnitDraw(u, v, isFocus, teamType, coords, unit, isValid);
         };
         node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
         node.QueueRedraw();
     }
 
-    private void PlaceUnitDraw(DrawNode drawNode, bool visible, bool isFocus, Vector2I coords, UnitState unit, bool isValid)
+    private void PlaceUnitDraw(DrawNode drawNode, bool visible, bool isFocus, TeamTypeEnum teamType,
+        Vector2I coords, UnitState unit, bool isValid)
     {
         if(visible)
         {
-            drawNode.DrawTextureOffset(Style.PlaceDownTexture,
+            drawNode.DrawTextureOffset(Style[teamType].PlaceDownTexture,
                 TilesView.GetRenderOffset(coords, Layer.Sky, 0),
                 0.5f,
                 1f,
                 isValid ? Colors.Green : Colors.Red);
         }
     }
-    public void ChangeUnitHealth(bool isFocus, uint unitId, float healthChange)
+    public void ChangeUnitHealth(bool isFocus, TeamTypeEnum teamType, uint unitId, float healthChange)
     {
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
         node.DrawAction += (u, v) =>
         {
-            ChangeUnitHealthDraw(u, v, isFocus, unitId, healthChange);
+            ChangeUnitHealthDraw(u, v, isFocus, teamType, unitId, healthChange);
         };
         node.QueueRedraw();
     }
 
-    private void ChangeUnitHealthDraw(DrawNode drawNode, bool visible, bool isFocus, uint unitId, float healthChange)
+    private void ChangeUnitHealthDraw(DrawNode drawNode, bool visible, bool isFocus, TeamTypeEnum teamType, uint unitId, float healthChange)
     {
         var last = UnitsView.CurrentUnitId;
         UnitsView.CurrentUnitId = unitId;
@@ -85,7 +87,7 @@ public class EventView
     }
     
     
-    public void MoveUnit(bool isFocus, uint unitId, Vector2I from, Vector2I to, bool isValid)
+    public void MoveUnit(bool isFocus, TeamTypeEnum teamType, uint unitId, Vector2I from, Vector2I to, bool isValid)
     {
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
@@ -93,13 +95,13 @@ public class EventView
         var lastAim = UnitsView.CurrentUnitAimCoords;
         node.DrawAction += (u, v) =>
         {
-            MoveUnitDraw(u, v, isFocus, unitId, from, to, isValid, lastAim);
+            MoveUnitDraw(u, v, isFocus, teamType, unitId, from, to, isValid, lastAim);
         };
         node.QueueRedraw();
     }
 
     private void MoveUnitDraw(DrawNode drawNode, bool visible,
-        bool isFocus, uint unitId, Vector2I from, Vector2I to, bool isValid, Vector2I? lastAim)
+        bool isFocus, TeamTypeEnum teamType, uint unitId, Vector2I from, Vector2I to, bool isValid, Vector2I? lastAim)
     {
         if (unitId == 0) return;
         var last = UnitsView.CurrentUnitId;
@@ -131,7 +133,7 @@ public class EventView
         UnitsView.CurrentUnitId = last;
     }
 
-    public void MoveUnitPath(bool isFocus, uint unitId, Vector2I coords, List<Vector2I> path, int targetIndex)
+    public void MoveUnitPath(bool isFocus, TeamTypeEnum teamType, uint unitId, Vector2I coords, List<Vector2I> path, int targetIndex)
     {
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
@@ -139,31 +141,31 @@ public class EventView
         var sprites = new Sprite2D[path.Count];
         node.DrawAction += (u, v) =>
         {
-            MoveUnitPathDraw(u, v, isFocus, unitId, coords, path, targetIndex, lastAim, sprites);
+            MoveUnitPathDraw(u, v, isFocus, teamType, unitId, coords, path, targetIndex, lastAim, sprites);
         };
         node.QueueRedraw();
     }
 
-    private void MoveUnitPathDraw(DrawNode drawNode, bool visible, bool isFocus, uint unitId,
+    private void MoveUnitPathDraw(DrawNode drawNode, bool visible, bool isFocus, TeamTypeEnum teamType, uint unitId,
         Vector2I coords, List<Vector2I> path, int targetIndex, Vector2I? lastAim, Sprite2D[] usedSprites)
     {
         if (unitId == 0) return;
         var last = UnitsView.CurrentUnitId;
         UnitsView.CurrentUnitId = unitId;
         if (targetIndex > 0)
-            MoveUnitDraw(drawNode, visible, isFocus, unitId, coords + path[0],
+            MoveUnitDraw(drawNode, visible, isFocus, teamType, unitId, coords + path[0],
                 coords + path[targetIndex], true, lastAim);
         if (visible)
         {
             if (path.Count < 2) return;
-            var tex = Style.PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
+            var tex = Style[teamType].PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
             SetSprite(coords + path[0], tex, 0);
             for (int i = 1; i < path.Count - 1; i++)
             {
-                tex = Style.PathTextures[(int)(path[i - 1] - path[i]).ToVecDirMask() | (int)(path[i + 1] - path[i]).ToVecDirMask()];
+                tex = Style[teamType].PathTextures[(int)(path[i - 1] - path[i]).ToVecDirMask() | (int)(path[i + 1] - path[i]).ToVecDirMask()];
                 SetSprite(coords + path[i], tex, i);
             }
-            tex = Style.PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
+            tex = Style[teamType].PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
             SetSprite(coords + path[^1], tex, path.Count - 1);
 
             void SetSprite(in Vector2I coords, Texture2D tex, int index)

@@ -33,12 +33,14 @@ public static class GameNavigator
         var coordsUnit = state.UnitMapState.GetUnit(coords);
         if (unit!.IsFlying)
         {
-            return coordsUnit is null || !coordsUnit.IsFlying || coordsUnit.Team == unit.Team;
+            return coordsUnit is null || !coordsUnit.IsFlying ||
+                   state.TeamState.IsPlayerOrFriend(coordsUnit.Team, unit.Team);
         }
         else
         {
             var hasGround = !state.TileMapState.IsEmpty(coords);
-            return hasGround && (coordsUnit is null || coordsUnit.IsFlying || coordsUnit.Team == unit.Team);
+            return hasGround && 
+                   (coordsUnit is null || coordsUnit.IsFlying || state.TeamState.IsPlayerOrFriend(coordsUnit.Team, unit.Team));
         }
     }
     

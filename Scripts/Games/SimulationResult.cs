@@ -9,6 +9,7 @@ public class SimulationResult
         SourceId = sourceId;
     }
     public uint SourceId { get; }
+    public TeamTypeEnum TeamType { get; set; } = TeamTypeEnum.Player;
     public SimulationLayer Layer { get; set; } = SimulationLayer.Waiting;
     public List<SimStep> Steps { get; set; } = new();
     public SimStep PeekStep => Steps.Count > 0 ? Steps[^1] : SimStep.Default;

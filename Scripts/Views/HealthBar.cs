@@ -1,12 +1,14 @@
 using System;
 using Godot;
+using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Views;
 
 public partial class HealthBar : Node2D
 {
-    [Export] public UnitsStyle Style { get; set; } = null!;
+    [Export] public GameViewStyle Style { get; set; } = null!;
+    [Export] public TeamTypeEnum TeamType { get; set; } = TeamTypeEnum.Player;
     [Export] public Vector2 HealthOffset { get; private set; } = new(0, -30);
     [Export] public Vector2 ShieldOffset { get; private set; } = new(0, -40);
     [Export] public float BlockWidth { get; private set; } = 8f; // 每格宽度
@@ -49,7 +51,7 @@ public partial class HealthBar : Node2D
         float flashValue = (Mathf.Sin(FlashTimer * FlashFrequency) * 0.5f + 0.5f) * FlashAmplitude + (1 - FlashAmplitude);
 
         // === 绘制血条 ===
-        DrawBarRect(HealthOffset, Height + 4, totalWidth + 4, 1, style.HealthBarColor);
+        DrawBarRect(HealthOffset, Height + 4, totalWidth + 4, 1, style[TeamType].HealthBarColor);
 
         float targetHealth = Mathf.Clamp(CurrentHealth + HealthChange, 0, MaxHealth);
         DrawHealthBar(HealthOffset, Height, totalWidth, CurrentHealth, targetHealth, MaxHealth, flashValue, style);
@@ -59,7 +61,7 @@ public partial class HealthBar : Node2D
         // === 绘制护盾条 ===
         if (CurrentShield > 0 || ShieldChange != 0)
         {
-            DrawBarRect(ShieldOffset, ShieldHeight + 2, totalWidth + 4, 1, style.ShieldBarColor);
+            DrawBarRect(ShieldOffset, ShieldHeight + 2, totalWidth + 4, 1, style[TeamType].ShieldBarColor);
 
             float targetShield = Mathf.Max(0, CurrentShield + ShieldChange);
             DrawShieldBar(ShieldOffset, ShieldHeight, totalWidth, CurrentShield, targetShield, MaxHealth, flashValue, style);
@@ -72,7 +74,7 @@ public partial class HealthBar : Node2D
     {
         return color with { V = Mathf.Clamp(color.V * (1 + change), 0, 1) };
     }
-    private void DrawHealthBar(Vector2 center, float height, float width, float cur, float target, float max, float flash, UnitsStyle style)
+    private void DrawHealthBar(Vector2 center, float height, float width, float cur, float target, float max, float flash, GameViewStyle style)
     {
         var curV = Mathf.Clamp(cur / max, 0, 1);
         var targetV = Mathf.Clamp(target / max, 0, 1);
@@ -80,39 +82,39 @@ public partial class HealthBar : Node2D
         if (cur > target)
         {
             // 受伤部分闪烁
-            DrawBarRect(center, height, width, curV, style.HealthCurrentColor);
-            DrawFlashingRect(center, height, width, targetV, curV, GetLighterColor(style.HealthCurrentColor, -ColorLightChange), flash);
+            DrawBarRect(center, height, width, curV, style[TeamType].HealthCurrentColor);
+            DrawFlashingRect(center, height, width, targetV, curV, GetLighterColor(style[TeamType].HealthCurrentColor, -ColorLightChange), flash);
         }
         else if (cur < target)
         {
             // 治疗部分闪烁
-            DrawBarRect(center, height, width, curV, style.HealthCurrentColor);
-            DrawFlashingRect(center, height, width, curV, targetV, GetLighterColor(style.HealthCurrentColor, ColorLightChange), flash);
+            DrawBarRect(center, height, width, curV, style[TeamType].HealthCurrentColor);
+            DrawFlashingRect(center, height, width, curV, targetV, GetLighterColor(style[TeamType].HealthCurrentColor, ColorLightChange), flash);
         }
         else
         {
-            DrawBarRect(center, height, width, curV, style.HealthCurrentColor);
+            DrawBarRect(center, height, width, curV, style[TeamType].HealthCurrentColor);
         }
     }
 
-    private void DrawShieldBar(Vector2 center, float height, float width, float cur, float target, float max, float flash, UnitsStyle style)
+    private void DrawShieldBar(Vector2 center, float height, float width, float cur, float target, float max, float flash, GameViewStyle style)
     {
         var curV = Mathf.Clamp(cur / max, 0, 1);
         var targetV = Mathf.Clamp(target / max, 0, 1);
 
         if (cur > target)
         {
-            DrawBarRect(center, height, width, curV, style.ShieldCurrentColor);
-            DrawFlashingRect(center, height, width, targetV, curV, GetLighterColor(style.ShieldCurrentColor, -ColorLightChange), flash);
+            DrawBarRect(center, height, width, curV, style[TeamType].ShieldCurrentColor);
+            DrawFlashingRect(center, height, width, targetV, curV, GetLighterColor(style[TeamType].ShieldCurrentColor, -ColorLightChange), flash);
         }
         else if (cur < target)
         {
-            DrawBarRect(center, height, width, curV, style.ShieldCurrentColor);
-            DrawFlashingRect(center, height, width, curV, targetV, GetLighterColor(style.ShieldCurrentColor, ColorLightChange), flash);
+            DrawBarRect(center, height, width, curV, style[TeamType].ShieldCurrentColor);
+            DrawFlashingRect(center, height, width, curV, targetV, GetLighterColor(style[TeamType].ShieldCurrentColor, ColorLightChange), flash);
         }
         else
         {
-            DrawBarRect(center, height, width, curV, style.ShieldCurrentColor);
+            DrawBarRect(center, height, width, curV, style[TeamType].ShieldCurrentColor);
         }
     }
 
@@ -134,7 +136,7 @@ public partial class HealthBar : Node2D
         DrawRect(new Rect2(center.X - width / 2, center.Y - height / 2, vwidth, height), color);
     }
 
-    private void DrawSplitLine(Vector2 center, float height, float totalWidth, int blockCount, UnitsStyle style)
+    private void DrawSplitLine(Vector2 center, float height, float totalWidth, int blockCount, GameViewStyle style)
     {
         for (int i = 1; i < blockCount; i++)
         {
@@ -142,7 +144,7 @@ public partial class HealthBar : Node2D
             DrawLine(
                 new Vector2(x, center.Y - height / 2),
                 new Vector2(x, center.Y + height / 2),
-                style.SplitColor,
+                style[TeamType].SplitColor,
                 1
             );
         }

@@ -13,12 +13,19 @@ namespace TheBlockWar.Scripts.Games;
 public class GameScheduler
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private static Stack<GameScheduler> _runningSchedulers = new();
+    /// <summary>
+    /// 当前正在运行的调度器,如果没有正在运行的调度器,则为null
+    /// 注意不要在模拟时更新调度器内容,仅用来查询当前游戏状态
+    /// </summary>
+    public static GameScheduler? CurrentScheduler => _runningSchedulers.Peek();
     public IReadOnlyList<SchedulerEvnet> WaitingSimulations => _waitingSimulations;
     public IReadOnlyList<SchedulerEvnet> FocusedSimulations => _focusedSimulations;
     public IReadOnlyList<SchedulerEvnet> RunningSimulations => _runningSimulations;
     public IReadOnlyList<SimulationResult> SimulationResults => _simulationResults;
     public IReadOnlyGameState? GameState => _gameState;
     public uint FocusedUnitId { get; private set; }
+    public int PlayerTeam { get; private set; }
 
     public IReadOnlyDictionary<uint, (HashSet<Vector2I> Coords, int type)> CoordsRegions => _coordsRegions;
 
@@ -48,7 +55,11 @@ public class GameScheduler
         _simulationLayers = [_runningSimulations, _focusedSimulations, _waitingSimulations];
     }
 
-    public void SetGameState(IGameState? gameState) => this._gameState = gameState;
+    public void InitScheduler(IGameState gameState, int playerTeam)
+    { 
+        _gameState = gameState;
+        PlayerTeam = playerTeam;
+    }
     public void FocusUnit(uint id)
     {
         if (FocusedUnitId == id) return;
@@ -187,17 +198,20 @@ public class GameScheduler
             _needUpdate = true;
             return;
         }
-
-        Logger.Info("触发更新");
+        
         _simulationResults.Clear();
         if (_gameState is null) return;
+        Logger.Info("触发更新");
+        
+        _runningSchedulers.Push(this);
         var snapshot = _snapshotChache =
             (_snapshotChache == null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
         snapshot.ClearIfSnapshot();
         foreach (var layer in _simulationLayers)
         foreach (var ev in layer)
         {
-            var result = new SimulationResult(ev.Id) { Layer = ev.Layer };
+            var result = new SimulationResult(ev.Id) { Layer = ev.Layer , 
+                TeamType = GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team)};
             ev.Action?.Invoke(snapshot, ev.Args, result);
             _simulationResults.Add(result);
         }
@@ -218,6 +232,8 @@ public class GameScheduler
         }
         Logger.Debug("更新结果:\n{results}", string.Join("\n", SimulationResults));
         SimulationUpdated?.Invoke(this, EventArgs.Empty);
+        
+        _runningSchedulers.Pop();
     }
 
     private void BlockUpdate()

@@ -24,6 +24,8 @@ public class SchedulerEvnet : ISchedulerEvnet
         get => field;
         set => SetField(ref field, value);
     } = SimulationLayer.Waiting;
+
+    public int Team { get => field; set => SetField(ref field, value); }
     public SimulationLayer Layer => ((ISchedulerEvnet)this).Layer;
     public int Priority { get => field; set => SetField(ref field, value); }
     public object? Args { get => field; set => SetField(ref field, value, false); }

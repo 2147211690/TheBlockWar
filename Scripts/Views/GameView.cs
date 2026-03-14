@@ -6,6 +6,7 @@ using GodotTask;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Resources;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
@@ -125,7 +126,9 @@ public partial class GameView : Node2D
                         UnitsView.UpdateUnitPosition(dropStep.Coords);
                         break;
                     case PlaceUnitStep placeStep:
-                        if (placeStep.ResultIsValid) await UnitsView.PlaceUnit(placeStep.Coords, placeStep.Unit);
+                        if (placeStep.ResultIsValid)
+                            await UnitsView.PlaceUnit(placeStep.Coords, placeStep.Unit, 
+                                placeStep.Unit.GetTeamTypeRelativeToPlayer(_gameScheduler!));
                         break;
                     case MoveUnitStep moveStep:
                         UnitsView.CurrentUnitId = moveStep.ResultUnitId;
@@ -160,16 +163,16 @@ public partial class GameView : Node2D
                         //await _tilesView.DropTile(dropStep.Coords);
                         break;
                     case PlaceUnitStep placeStep:
-                        view.PlaceUnit(isFocused, placeStep.Coords, placeStep.Unit, placeStep.ResultIsValid);
+                        view.PlaceUnit(isFocused, simulation.TeamType ,placeStep.Coords, placeStep.Unit, placeStep.ResultIsValid);
                         break;
                     case MoveUnitStep moveStep:
-                        view.MoveUnit(isFocused, moveStep.ResultUnitId, moveStep.Coords ,moveStep.To, moveStep.ResultIsValid);
+                        view.MoveUnit(isFocused, simulation.TeamType, moveStep.ResultUnitId, moveStep.Coords ,moveStep.To, moveStep.ResultIsValid);
                         break;
                     case DamageStep damageStep:
-                        view.ChangeUnitHealth(isFocused, damageStep.ResultUnitId, -damageStep.ResultValidDamage);
+                        view.ChangeUnitHealth(isFocused, simulation.TeamType, damageStep.ResultUnitId, -damageStep.ResultValidDamage);
                         break;
                     case MoveUnitPathStep movePathStep:
-                        view.MoveUnitPath(isFocused, movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
+                        view.MoveUnitPath(isFocused, simulation.TeamType, movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
                         break;
                 }
             }

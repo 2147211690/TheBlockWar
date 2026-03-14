@@ -12,7 +12,7 @@ public static class UnitFactory
         return _nextUnitId++;
     }
 
-    public static UnitState CreateUnit(string name, Vector2I coords = default)
+    public static UnitState CreateUnit(string name, int team ,Vector2I coords = default)
     {
         return new UnitState()
         {
@@ -23,6 +23,7 @@ public static class UnitFactory
             Health = 100,
             MaxShield = 100,
             Shield = 0,
+            Team = team,
         };
     }
 }
