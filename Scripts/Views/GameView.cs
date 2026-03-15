@@ -12,6 +12,7 @@ namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class GameView : Node2D
 {
+    private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     [Export] public GameViewStyle Style { get; set; }
     [Export] public TilesView TilesView { get; set; }
     [Export] public UnitsView UnitsView { get; set; }
@@ -138,7 +139,7 @@ public partial class GameView : Node2D
                         break;
                     case MoveUnitStep moveStep:
                         UnitsView.CurrentUnitId = moveStep.ResultUnitId;
-                        if (moveStep.ResultIsValid) await UnitsView.CurrentMoveUnit(moveStep.To);
+                        if (moveStep.ResultIsValid) UnitsView.CurrentMoveUnit(moveStep.To);
                         UnitsView.UpdateUnitPosition(moveStep.To);
                         break;
                     case DamageStep damageStep:
@@ -148,6 +149,14 @@ public partial class GameView : Node2D
                     case MoveUnitPathStep movePathStep:
                         UnitsView.CurrentUnitId = movePathStep.ResultUnitId;
                         if (movePathStep.ResultIsValid) await UnitsView.CurrentMovePathUnit(movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
+                        break;
+                    case DropUnitStep dropStep:
+                        UnitsView.CurrentUnitId = dropStep.ResultUnitId;
+                        await UnitsView.CurrentDropUnit();
+                        break;
+                    case PushUnitStep pushStep:
+                        UnitsView.CurrentUnitId = pushStep.ResultUnitId;
+                        await UnitsView.CurrentPushUnit(pushStep.PushDir, pushStep.ResultPush);
                         break;
                 }
             }
@@ -179,6 +188,12 @@ public partial class GameView : Node2D
                         break;
                     case MoveUnitPathStep movePathStep:
                         view.MoveUnitPath(isFocused, simulation.TeamType, movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
+                        break;
+                    case DropUnitStep dropStep:
+                        view.DropUnit(isFocused, dropStep.Coords, dropStep.ResultIsValid);
+                        break;
+                    case PushUnitStep pushStep:
+                        view.PushUnit(isFocused, pushStep.Coords, pushStep.ResultPush);
                         break;
                 }
             }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Godot;
@@ -30,6 +31,11 @@ public static class Extensions
             }
             
             return sb.ToString();
+        }
+        public bool IsInMap(in Vector2I coords)
+        {
+            var size = gameState.TileMapState.Size;
+            return coords.X >= 0 && coords.X < size.X && coords.Y >= 0 && coords.Y < size.Y;
         }
     }
     
@@ -107,6 +113,41 @@ public static class Extensions
         public TeamTypeEnum GetTeamTypeRelativeToPlayer(GameScheduler gameScheduler)
         {
             return gameScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(gameScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Neutral;
+        }
+        public bool TryFindBuff(BuffTypeEnum buffType, out int index)
+        {
+            for (var i = 0; i < unit.Buffs.Count; i++)
+                if (unit.Buffs[i].BuffType == buffType)
+                {
+                    index = i;
+                    return true;
+                }
+            index = -1;
+            return false;
+        }
+    }
+
+    extension<T>(IReadOnlyList<T> list)
+    {
+        public List<T> CloneToList()
+        {
+            var l = new List<T>(list.Count);
+            for(var i = 0; i < list.Count; i++) l[i] = list[i];
+            return l;
+        }
+    }
+    extension(DirMask dirMask)
+    {
+        public Vector2I ToVec2I()
+        {
+            return dirMask switch
+            {
+                DirMask.Up => new Vector2I(0, -1),
+                DirMask.Down => new Vector2I(0, 1),
+                DirMask.Left => new Vector2I(-1, 0),
+                DirMask.Right => new Vector2I(1, 0),
+                _ => Vector2I.Zero,
+            };
         }
     }
 }

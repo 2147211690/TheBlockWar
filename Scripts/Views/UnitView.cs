@@ -23,6 +23,7 @@ public partial class UnitView : Node2D
     public Vector2I RealCoords { get; set; }
     public TeamTypeEnum TeamType { get; set; }
     public UnitsView UnitsView { get; set; }
+    public uint Id { get; set; }
     public Vector2I WishCoords => AimCoords ?? RealCoords;
     private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
     private ShaderMaterial _shaderMaterial = null!;

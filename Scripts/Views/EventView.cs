@@ -149,12 +149,12 @@ public class EventView
     private void MoveUnitPathDraw(DrawNode drawNode, bool visible, bool isFocus, TeamTypeEnum teamType, uint unitId,
         Vector2I coords, List<Vector2I> path, int targetIndex, Vector2I? lastAim, Sprite2D[] usedSprites)
     {
-        if (unitId == 0) return;
+        //if (unitId == 0) return;
         var last = UnitsView.CurrentUnitId;
         UnitsView.CurrentUnitId = unitId;
-        if (targetIndex > 0)
+        /*if (targetIndex > 0)
             MoveUnitDraw(drawNode, visible, isFocus, teamType, unitId, coords + path[0],
-                coords + path[targetIndex], true, lastAim);
+                coords + path[targetIndex], true, lastAim);*/
         if (visible)
         {
             if (path.Count < 2) return;
@@ -184,7 +184,37 @@ public class EventView
         
     }
     
+    public void DropUnit(bool isFocus, Vector2I coords, bool isValid)
+    {
+        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
+        var node = DrawNodePool.Pop();
+        _nodes.Add(node);
+        node.DrawAction += (u, v) =>
+        {
+            if (v)
+            {
+                u.DrawCircle(Vector2.Zero, 10, isValid ? Colors.Green : Colors.Red);
+            }
+        };
+        node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
+        node.QueueRedraw();
+    }
     
+    public void PushUnit(bool isFocus, Vector2I coords, bool isValid)
+    {
+        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
+        var node = DrawNodePool.Pop();
+        _nodes.Add(node);
+        node.DrawAction += (u, v) =>
+        {
+            if (v)
+            {
+                u.DrawCircle(TilesView.GetRenderOffset(coords, Layer.Sky, 0), 10, isValid ? Colors.Green : Colors.Red);
+            }
+        };
+        node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
+        node.QueueRedraw();
+    }
     
     private void Clear()
     {

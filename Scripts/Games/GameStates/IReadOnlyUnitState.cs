@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -13,7 +14,8 @@ public interface IReadOnlyUnitState
     float Shield { get; }
     float MaxShield { get; }
     bool IsDead { get; }
-    bool IsFlying { get; set; }
+    bool IsFlying { get; }
+    IReadOnlyList<BuffState> Buffs { get; }
     UnitState Clone();
     UnitState CopyTo(UnitState unit);
 }

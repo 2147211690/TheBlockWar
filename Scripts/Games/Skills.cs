@@ -24,9 +24,10 @@ public static class Skills
         }
         if (args.TryGetArgs(1, out var v2))
         {
-            if (result.PeekStep is MoveUnitPathStep { ResultIsValid: true } m)
+            for(int i = 0; i < 4; i++)
             {
-                gameState.ApplyMoveUnit(m.Path[m.ResultTargetIndex] + m.Coords, v2 + unit.Coords, result);
+                var dir = (DirMask)(1 << i);
+                gameState.ApplyPushUnit(v2 + unit.Coords + dir.ToVec2I(), dir, result);
             }
         }
     }
@@ -45,8 +46,8 @@ public static class Skills
         }
         else if(argsIndex == 1)
         {
-            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 3)
-                .Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 3);
+            //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
 
         return [];

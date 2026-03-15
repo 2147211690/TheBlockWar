@@ -43,7 +43,14 @@ public static class GameNavigator
                    (coordsUnit is null || coordsUnit.IsFlying || state.TeamState.IsPlayerOrFriend(coordsUnit.Team, unit.Team));
         }
     }
-    
+
+    public static bool IsWillDrop(this IReadOnlyUnitState unit, IReadOnlyGameState state, in Vector2I coords)
+    {
+        if (coords.X < 0 || coords.X >= state!.TileMapState.Size.X || coords.Y < 0 || coords.Y >= state.TileMapState.Size.Y)
+            return true;
+        var hasGround = !state.TileMapState.IsEmpty(coords);
+        return !hasGround && !unit.IsFlying;
+    }
     private static bool CanBeDestination(Vector2I arg) => _unit!.IsCanBeDestination(_gameState!, arg);
 
     private static int GetMoveCost(Vector2I arg) => 1;

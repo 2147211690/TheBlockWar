@@ -225,9 +225,10 @@ public partial class Test : Node2D
                 {
                     for (int j = 0; j < 10; j++)
                     {
+                        var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
                         s.ApplyPlaceTile(new(i, j), new TileState()
                         {
-                            Tag = TileTag.Ground
+                            Tag = empty ? TileTag.Empty : TileTag.Ground
                         }, r);
                     }
                 }
