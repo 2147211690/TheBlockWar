@@ -23,6 +23,7 @@ public partial class GameView : Node2D
     private Queue<SimulationResult[]> _simulationCache = new();
     private Vector2I? _previousMousceCoords = null;
     private Vector2I _currentCoords;
+    private bool _refocus = false;
     public GDTask RunSimulationTask { get; private set; } = GDTask.CompletedTask;
     public IPlayer? Player { get; set; }
     public void Bind(GameScheduler gameScheduler)
@@ -105,10 +106,15 @@ public partial class GameView : Node2D
         {
             SetSimulations(simulations);
         }
+        else if (_refocus) //如果完全完成了且运行过模拟,则重置下关注的坐标
+        {
+            Player?.OnInput(new PlayerInputMousceCoords(_currentCoords));
+            _refocus = false;
+        }
     }
     private async GDTask RunSimulation()
     {
-
+        if (_runningSimulations.Count > 0) _refocus = true;
         foreach (var simulation in _runningSimulations)
         {
             // 清空当前事件视图

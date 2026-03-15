@@ -11,8 +11,8 @@ public partial class StatePlayer
     {
         private SkillEvent? _currentSkillEvent;
         private IReadOnlyList<ISkill> _validSkills = [];
-        private ISkill? _currentSkill;
-        private int _currentArgIndex = 0;
+        private ISkill _currentSkill;
+        private int _currentArgIndex = -1;
         private Vector2I?[]? _currentSkillArgs;
         private IReadOnlyUnitState? _unitState;
         private uint _validRegionId;
@@ -26,13 +26,14 @@ public partial class StatePlayer
         public override void OnExit()
         {
             base.OnExit();
-            GameScheduler?.RemoveCoordsRegion(_validRegionId);
+            //GameScheduler!.RemoveCoordsRegion(_validRegionId);
             _validSkills = [];
             _currentSkill = null;
             _currentSkillEvent = null;
             _unitState = null;
             _currentSkillArgs = null;
             _validRegionId = 0;
+            _currentArgIndex = -1;
         }
 
         public override void OnInput<T>(in T input)
@@ -41,32 +42,13 @@ public partial class StatePlayer
             switch (input)
             {
                 case PlayerInputClick {Button: MouseButtonMask.Left} click: //选定
-                    if (IsCurrentValidArg())
-                    {
-                        if (IsEndArg())
-                        {
-                            _currentSkillEvent?.Run();
-                            StateMachine.ChangeState(player._freeState);
-                        }
-                        else
-                        {
-                            EnterNextArg();
-                        }
-                    }
+                    TryEnterToNextArg();
                     break;
                 case PlayerInputClick {Button: MouseButtonMask.Right} click: //取消
-                    if (IsFirstArg())
-                    {
-                        GameScheduler?.RemoveEvent(_currentSkillEvent!);
-                        StateMachine.ChangeState(player._freeState);
-                    }
-                    else
-                    {
-                        BackToPreviousArg();
-                    }
+                    TryBackToPreviousArg();
                     break;
                 case PlayerInputMousceCoords coords:
-                    SetCurrentIndexArg(coords.Coords - _unitState?.Coords ?? Vector2I.Zero);
+                    SetCurrentIndexArgGlobal(coords.Coords);
                     break;
             }
         }
@@ -80,69 +62,82 @@ public partial class StatePlayer
                  StateMachine.ChangeState(player._freeState);
                  return;
              }
-            _currentSkillEvent = EventFactory.CreateSkill(FocusedUnitId, _currentSkill);
-            _currentSkillEvent.Team = _unitState!.Team;
-            _currentArgIndex = 0;
-            _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
-
-            GameScheduler?.AddEvent(_currentSkillEvent);
-            UpdateValidSkillCoords();
+             TryEnterToNextArg();
         }
-
-        private void SetCurrentIndexArg(in Vector2I arg)
+        
+        private void TryEnterToNextArg()
         {
-            if (_currentSkillArgs is null || _currentSkill is null) return;
-            _currentSkillArgs[_currentArgIndex] = 
-                IsArgValid(arg + _unitState?.Coords ?? Vector2I.Zero) ? arg : null;
-            _currentSkillEvent?.Args = _currentSkillArgs;
-        }
-
-        private void EnterNextArg()
-        {
-            if (_currentSkill is null) return;
-            if (_currentArgIndex < _currentSkill.ArgCount - 1)
+            if (_currentArgIndex == -1) //进入第一个参数
             {
+                _currentSkillEvent = EventFactory.CreateSkill(FocusedUnitId, _currentSkill);
+                _currentSkillEvent.Team = _unitState!.Team;
+                _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
+                _currentSkillEvent.Args = _currentSkillArgs;
+                
                 _currentArgIndex++;
-                UpdateValidSkillCoords();
+                
+                UpdateCurrentValidSkillCoords();
+                SetCurrentIndexArgGlobal(_player.CurrentMouseCoords);
+                GameScheduler?.AddEvent(_currentSkillEvent);
+            }
+            else if (_currentArgIndex == _currentSkill.ArgCount - 1) //最后一个参数
+            {
+                if (!IsCurrentValidArg()) return;
+                //所有参数完成
+                GameScheduler!.RemoveCoordsRegion(_validRegionId);
+                _currentSkillEvent!.Run();
+                StateMachine.ChangeState(player._freeState);
+            }
+            else //进入下一个参数
+            {
+                if (!IsCurrentValidArg()) return;
+                _currentArgIndex++;
+                UpdateCurrentValidSkillCoords();
+                SetCurrentIndexArgGlobal(_player.CurrentMouseCoords);
             }
         }
-        private void BackToPreviousArg()
+        private void TryBackToPreviousArg()
         {
-            if (_currentArgIndex > 0)
+            if (_currentArgIndex == 0) //如果已经在第一个参数，取消技能
+            {
+                GameScheduler!.RemoveCoordsRegion(_validRegionId);
+                GameScheduler.RemoveEvent(_currentSkillEvent!);
+                _currentArgIndex--;
+                StateMachine.ChangeState(player._freeState);
+            }
+            else if (_currentArgIndex < 0) //未初始状态
+            {
+                return;
+            }
+            else //返回上一个参数
             {
                 _currentSkillArgs![_currentArgIndex] = null;
                 _currentArgIndex--;
-                UpdateValidSkillCoords();
-                _currentSkillArgs![_currentArgIndex] = 
-                    IsArgValid(_player.CurrentMouseCoords) ?
-                        _player.CurrentMouseCoords - _unitState!.Coords : null;
-                _currentSkillEvent?.Args = _currentSkillArgs;
+                UpdateCurrentValidSkillCoords();
+                SetCurrentIndexArgGlobal(_player.CurrentMouseCoords);
             }
         }
-        private void UpdateValidSkillCoords()
+        
+        private void SetCurrentIndexArgGlobal(in Vector2I arg)
         {
-            if (_unitState is null || _currentSkill is null || _currentSkillArgs is null) return;
+            _currentSkillArgs![_currentArgIndex] = IsArgGlobalValid(arg) ? arg - _unitState!.Coords: null;
+            _currentSkillEvent?.Args = _currentSkillArgs;
+        }
+        private void UpdateCurrentValidSkillCoords()
+        {
             GameScheduler?.RemoveCoordsRegion(_validRegionId);
             var validArgs =
-                _currentSkill.GetSkillArgs(GameState!, _unitState, _currentArgIndex, _currentSkillArgs).
-                    Select(a => a + _unitState.Coords);
+                _currentSkill.GetSkillArgs(GameState!, _unitState!, _currentArgIndex, _currentSkillArgs!).
+                    Select(a => a + _unitState!.Coords);
             _validRegionId = GameScheduler?.AddCoordsRegion(validArgs, 0) ?? 0;
         }
         private bool IsCurrentValidArg()
         {
-            return _currentSkillArgs is not null &&
-                   GameScheduler?.IsInCoordsRegion(_validRegionId, 
-                       _currentSkillArgs[_currentArgIndex] + _unitState?.Coords ?? Vector2I.Zero) == true;
+            return _currentSkillArgs![_currentArgIndex] is not null &&
+                GameScheduler!.IsInCoordsRegion(_validRegionId, 
+                       _currentSkillArgs![_currentArgIndex]!.Value + _unitState!.Coords);
         }
-        private bool IsArgValid(Vector2I coords) =>  _currentSkillArgs is not null &&
-                   GameScheduler?.IsInCoordsRegion(_validRegionId, coords) == true;
-        private bool IsEndArg()
-        {
-            return _currentArgIndex == _currentSkill!.ArgCount - 1;
-        }
-        private bool IsFirstArg()
-        {
-            return _currentArgIndex == 0;
-        }
+        private bool IsArgGlobalValid(Vector2I? coords) =>  coords is not null && 
+                                                            GameScheduler?.IsInCoordsRegion(_validRegionId, coords.Value) == true;
     }
 }

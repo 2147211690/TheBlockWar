@@ -45,7 +45,8 @@ public static class Skills
         }
         else if(argsIndex == 1)
         {
-            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 3);
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 3)
+                .Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
 
         return [];
