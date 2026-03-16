@@ -24,8 +24,7 @@ public class TileMapState : ITileMapState
     }
     public IReadOnlyTileState GetTile(Vector2I coords)
     {
-        if (coords.X < 0 || coords.X >= Size.X || coords.Y < 0 || coords.Y >= Size.Y) return TileState.Empty;
-        return _tiles[coords.X, coords.Y];
+        return !coords.IsInSize(Size) ? TileState.Empty : _tiles[coords.X, coords.Y];
     }
 
     public bool IsEmpty(Vector2I coords)
@@ -35,6 +34,7 @@ public class TileMapState : ITileMapState
 
     public void ModifyTile(Vector2I coords, Action<TileState> modifier)
     {
+        if (!coords.IsInSize(Size)) return;
         modifier(_tiles[coords.X, coords.Y]);
     }
 

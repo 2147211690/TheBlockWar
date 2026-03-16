@@ -47,7 +47,8 @@ TestResults/
 Thumbs.db       # Windows
 desktop.ini     # Windows
 *.directory     # Linux
-
+# TRAE
+.trae/
 # ========================== 游戏素材/构建忽略 ==========================
 # 导出的游戏包（建议通过CI/CD自动导出，不提交到Git）
 exports/

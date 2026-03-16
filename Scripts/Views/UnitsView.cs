@@ -55,14 +55,27 @@ public partial class UnitsView : Node2D
         //护盾条
         render.HealthBar.CurrentShield = unit.Shield;
     }
-    public GDTask DropUnit(uint unitId)
+    public async GDTask DropUnit(uint unitId)
     {
-        if (!_unitViews.TryGetValue(unitId, out var view)) return GDTask.CompletedTask;
+        if (!_unitViews.TryGetValue(unitId, out var view)) return;
+        var dropHelght = 50f;
+        var targetOffset =
+            GameView.TilesView.GetRenderOffset(view.RealCoords, Layer.Underground, 0,
+                GameView.TilesView.GetTileHeight(view.RealCoords) - dropHelght);
+        //动画
+        // 创建动画
+        var tween = view.CreateTween();
+        // 使用Quad加速过渡，模拟重力加速效果
+        tween.TweenProperty(view, "Offset", targetOffset, 0.12f)
+            .SetTrans(Tween.TransitionType.Quad)
+            .SetEase(Tween.EaseType.In);
+        
+        await tween.WaitForTween();
+        //动画完成后
         _unitMaps.Remove(view.RealCoords);
         _nodeContainer.RemoveChild(view);
         _unitViews.Remove(view.Id);
         view.QueueFree();
-        return GDTask.CompletedTask;
     }
     
     public void AddUnitFack(uint unitId, Vector2I coords)
@@ -101,19 +114,60 @@ public partial class UnitsView : Node2D
         view.RealCoords = coords + path[targetIndex];
         _unitMaps.Add(coords + path[targetIndex], unitId);
         SetUnitMapPosition(view.WishCoords, view);
+        await GDTask.Delay(100);
     }
 
     public async GDTask PushUnit(uint unitId, DirMask dir, bool push)
     {
         if (!_unitViews.TryGetValue(unitId, out var view)) return;
-        var coord = view.RealCoords;
+        var coords = view.RealCoords;
+        var tween = view.CreateTween();
+        var positionTarget = 
+            GameView.TilesView.GetRenderPosition(coords + dir.ToVec2I(), Layer.Underground, 0);
+        var renderOffset = 
+            GameView.TilesView.GetRenderOffset(coords + dir.ToVec2I(), Layer.Underground, 0);
         if (push)
         {
-            MoveUnit(unitId, coord + dir.ToVec2I());
+            tween.TweenProperty(view, "position", positionTarget, 0.08f);
+            tween.TweenProperty(view, "Offset", renderOffset, 0.08f);
+            await tween.WaitForTween();
+            MoveUnit(unitId, coords + dir.ToVec2I());
         }
         else
         {
-            
+            // 撞击弹回动画
+            var pushRatio = 0.5f; // 前冲比例
+            var pushTime = 0.05f; // 前冲时间
+            var bounceTime = 0.10f; // 弹回时间
+    
+            // 第一阶段：快速前冲到30%位置
+            var initialPos = view.Position;
+            var initialOffset = view.Offset;
+    
+            // 计算中间位置（当前到目标的30%）
+            var intermediatePos = initialPos + (positionTarget - initialPos) * pushRatio;
+            var intermediateOffset = initialOffset + (renderOffset - initialOffset) * pushRatio;
+    
+            tween.TweenProperty(view, "position", intermediatePos, pushTime)
+                .SetTrans(Tween.TransitionType.Quad)
+                .SetEase(Tween.EaseType.Out);
+    
+            tween.TweenProperty(view, "Offset", intermediateOffset, pushTime)
+                .SetTrans(Tween.TransitionType.Quad)
+                .SetEase(Tween.EaseType.Out);
+    
+            // 第二阶段：有力弹回原位
+            tween.Chain()
+                .TweenProperty(view, "position", initialPos, bounceTime)
+                .SetTrans(Tween.TransitionType.Bounce)
+                .SetEase(Tween.EaseType.Out);
+    
+            tween.TweenProperty(view, "Offset", initialOffset, bounceTime)
+                .SetTrans(Tween.TransitionType.Bounce)
+                .SetEase(Tween.EaseType.Out);
+    
+            await tween.WaitForTween();
+            // 不调用MoveUnit，单位停留在原位置
         }
     }
     

@@ -83,7 +83,7 @@ public partial class GameView : Node2D
     {
         if (!RunSimulationTask.Status.IsCompleted())
         {
-            GD.Print("缓存操作结果");
+            Logger.Info("缓存操作结果");
             _simulationCache.Enqueue(simulations.ToArray());
             return;
         }
@@ -176,7 +176,7 @@ public partial class GameView : Node2D
                         view.PlaceUnit(isFocused, simulation.TeamType ,placeStep.Coords, placeStep.Unit, placeStep.ResultIsValid);
                         break;
                     case MoveUnitStep moveStep:
-                        view.MoveUnit(isFocused, simulation.TeamType, moveStep.ResultUnitId, moveStep.Coords ,moveStep.To, moveStep.ResultIsValid);
+                        view.MoveUnit(isFocused, moveStep.ResultUnitId, moveStep.Coords ,moveStep.To, moveStep.ResultIsValid);
                         break;
                     case DamageStep damageStep:
                         view.ChangeUnitHealth(isFocused, simulation.TeamType, damageStep.ResultUnitId, -damageStep.ResultValidDamage);

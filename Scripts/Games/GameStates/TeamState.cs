@@ -16,11 +16,11 @@ public class TeamState
     }
     public bool IsEnemy(int team1, int team2)
     {
-        return TryGetRelation(team1, team2) == 1;
+        return TryGetRelation(team1, team2) == (int)TeamTypeEnum.Enemy;
     }
     public bool IsFriend(int team1, int team2)
     {
-        return TryGetRelation(team1, team2) == 3;
+        return TryGetRelation(team1, team2) == (int)TeamTypeEnum.Friend;
     }
     public bool IsPlayer(int team1, int team2)
     {
@@ -32,7 +32,7 @@ public class TeamState
     }
     public bool IsNeutral(int team1, int team2)
     {
-        return TryGetRelation(team1, team2) == 2;
+        return TryGetRelation(team1, team2) == (int)TeamTypeEnum.Neutral;
     }
     public TeamTypeEnum GetTeamTypeRelativeToPlayer(int playerTeam, int team)
     {
@@ -43,7 +43,7 @@ public class TeamState
     private int TryGetRelation(int team1, int team2)
     {
         if (team1 < 0 || team1 >= _teamRelations.GetLength(0) ||
-            team2 < 0 || team2 >= _teamRelations.GetLength(1)) return 1;
+            team2 < 0 || team2 >= _teamRelations.GetLength(1)) return (int)TeamTypeEnum.Enemy;
         return _teamRelations[team1, team2];
     }
 }

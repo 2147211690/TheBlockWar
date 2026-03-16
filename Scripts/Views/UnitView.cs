@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Godot;
 using GodotTask;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Views;
 
@@ -120,7 +121,7 @@ public partial class UnitView : Node2D
         tween.Chain().TweenProperty(MainSprite, "scale", Vector2.One, RecoveryDuration)
             .SetTrans(Tween.TransitionType.Elastic)
             .SetEase(Tween.EaseType.Out);
-        
-        return ToSignal(tween, Tween.SignalName.Finished).AsGDTask();
+
+        return tween.WaitForTween();
     }
 }

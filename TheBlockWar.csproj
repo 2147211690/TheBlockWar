@@ -24,4 +24,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="开发规范\添加新模拟操作步骤的规范流程.md" />
+  </ItemGroup>
 </Project>

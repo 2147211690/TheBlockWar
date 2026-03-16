@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Godot;
+using GodotTask;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
 
@@ -35,7 +36,7 @@ public static class Extensions
         public bool IsInMap(in Vector2I coords)
         {
             var size = gameState.TileMapState.Size;
-            return coords.X >= 0 && coords.X < size.X && coords.Y >= 0 && coords.Y < size.Y;
+            return coords.IsInSize(size);
         }
     }
     
@@ -102,6 +103,10 @@ public static class Extensions
                 -1 => DirMask.Up,
             };
         }
+        public bool IsInSize(in Vector2I size, Vector2I offset = default)
+        {
+            return coords.X >= 0 + offset.X && coords.X < size.X + offset.X && coords.Y >= 0 + offset.Y && coords.Y < size.Y + offset.Y;
+        }
     }
 
     extension(IReadOnlyUnitState unit)
@@ -148,6 +153,33 @@ public static class Extensions
                 DirMask.Right => new Vector2I(1, 0),
                 _ => Vector2I.Zero,
             };
+        }
+    }
+
+    extension(Tween tween)
+    {
+        public GDTask WaitForTween()
+        {
+            return tween.ToSignal(tween, Tween.SignalName.Finished).AsGDTask();
+        }
+    }
+    extension(BuffOperation operation)
+    {
+        public uint WithDuration(int duration)
+        {
+            return (uint)operation | (uint)duration;
+        }
+    }
+
+    extension(uint num)
+    {
+        public BuffOperation GetOperation()
+        {
+            return (BuffOperation)(num & (0b_111 << 29));
+        }
+        public int GetDuration()
+        {
+            return (int)(num & ~(0b_011 << 29));
         }
     }
 }

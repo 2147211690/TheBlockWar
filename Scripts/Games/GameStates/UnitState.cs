@@ -23,33 +23,25 @@ public class UnitState : IReadOnlyUnitState
     private List<BuffState>? _buffs;
 
     /// <summary>
-    /// 添加一个buff,如果buff已存在,则修改其持续时间为最大持续时间
+    /// 添加一个buff,不做检查
     /// </summary>
-    /// <param name="buff"></param>
     public void AddBuff(BuffTypeEnum buffType, int duration)
     {
-        if (this.TryFindBuff(buffType, out var index))
+        GetBuffList().Add(new BuffState
         {
-            var oldBuffDuration = GetBuffList()[index].Duration;
-            GetBuffList()[index] = new BuffState
-            {
-                BuffType = buffType,
-                Duration = Mathf.Max(oldBuffDuration, duration)
-            };
-        }
-        else
-        {
-            GetBuffList().Add(new BuffState
-            {
-                BuffType = buffType,
-                Duration = duration
-            });
-        }
+            BuffType = buffType,
+            Duration = duration
+        });
     }
 
     public void RemoveBuff(BuffTypeEnum buffType)
     {
         if (!this.TryFindBuff(buffType, out var index)) return;
+        GetBuffList().RemoveAt(index);
+    }
+    public void RemoveBuff(int index)
+    {
+        if (index < 0 || index >= Buffs.Count) return;
         GetBuffList().RemoveAt(index);
     }
 
@@ -59,6 +51,15 @@ public class UnitState : IReadOnlyUnitState
         GetBuffList()[index] = new BuffState
         {
             BuffType = buffType,
+            Duration =  modifyDuration
+        };
+    }
+    public void ModifyBuff(int index, int modifyDuration)
+    {
+        if (index < 0 || index >= Buffs.Count) return;
+        GetBuffList()[index] = new BuffState
+        {
+            BuffType = Buffs[index].BuffType,
             Duration =  modifyDuration
         };
     }

@@ -23,9 +23,10 @@ animations = [{
 script = ExtResource("1_v2aou")
 MainSprite = NodePath("AnimatedSprite2D")
 _tilesHeights = Dictionary[String, float]({
+"Empty": 0.0,
 "Soil": 32.0
 })
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1473144361]
 sprite_frames = SubResource("SpriteFrames_v2aou")
-animation = &"Soil"
+animation = &"Empty"

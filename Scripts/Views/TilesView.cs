@@ -61,6 +61,7 @@ public partial class TilesView : TileMapLayer
             _nodeContainer.AddChild(render);
         }
         render.Position = MapToLocal(coords);
+        render.Visible = true;
         if ((tile.Tag & TileTag.Empty) != 0)
         {
             render.TileName = "Empty";
@@ -75,15 +76,21 @@ public partial class TilesView : TileMapLayer
     public GDTask DropTile(Vector2I coords)
     {
         GD.Print("DropTile");
-        TileView render;
-        if (!_tileViews.TryGetValue(coords, out render))
+        if (!_tileViews.TryGetValue(coords, out var render))
         {
             return GDTask.CompletedTask;
         }
         var tween = CreateTween();
         tween.SetTrans(Tween.TransitionType.Bounce); // 使用Bounce效果模拟弹性落地
         tween.SetEase(Tween.EaseType.Out);
-        tween.TweenProperty(render, "position", MapToLocal(coords) + new Vector2(0, -30), 0.08f);
+        var targetOffset = render.MainSprite.Offset + new Vector2(0, 30);
+        tween.TweenProperty(render.MainSprite, "offset", targetOffset, 0.08f);
+        tween.TweenProperty(render, "visible", false, 0.08f);
+        tween.Finished += () =>
+        {
+            render.Visible = false;
+            render.TileName = "Empty";
+        };
         return tween.ToSignal(tween, "finished").AsGDTask();
     }
     public void DrawRegions(IEnumerable<(HashSet<Vector2I> Coords, int type)> regions, in Vector2I mapSize)
@@ -93,7 +100,7 @@ public partial class TilesView : TileMapLayer
         {
             foreach (var coord in coords)
             {
-                if (coord.X < 0 || coord.X >= mapSize.X || coord.Y < 0 || coord.Y >= mapSize.Y) continue;
+                if (!coord.IsInSize(mapSize)) continue;
                 var s = _regionSpritePool.Pop();
                 s.Position = GetRenderPosition(coord, Layer.Underground, -2);
                 s.Offset = GetRenderOffset(coord, Layer.Underground, -2);
@@ -103,19 +110,26 @@ public partial class TilesView : TileMapLayer
     }
 
     private float GetLayerOffset(Layer layer) => LocalRightDown.Y / (int)layer;
-    public Vector2 GetRenderPosition(in Vector2I coords, Layer layer, int offset)
+    public Vector2 GetRenderPosition(in Vector2I coords, Layer layer, int renderOffset)
     {
         var maxOffset = GetLayerOffset(layer);
         var pos = MapToLocal(coords);
-        pos.Y += maxOffset + offset / 100f * maxOffset;
+        pos.Y += maxOffset + renderOffset / 100f * maxOffset;
         return pos;
     }
 
-    public Vector2 GetRenderOffset(in Vector2I coords, Layer layer, int offset)
+    public Vector2 GetRenderOffset(in Vector2I coords, Layer layer, int renderOffset, float? defineHeight = null)
     {
         var maxOffset = GetLayerOffset(layer);
-        var pos = new Vector2(0, -maxOffset - offset / 100f * maxOffset);
-        if ((layer & Layer.Underground) != 0 || (layer & Layer.Sky) != 0) pos.Y -= GetTileHeight(coords);
+        var pos = new Vector2(0, -maxOffset - renderOffset / 100f * maxOffset);
+        if (defineHeight is null)
+        {
+            if ((layer & Layer.Underground) != 0 || (layer & Layer.Sky) != 0) pos.Y -= GetTileHeight(coords);
+        }
+        else
+        {
+            pos.Y -= defineHeight.Value;
+        }
         return pos;
     }
 }

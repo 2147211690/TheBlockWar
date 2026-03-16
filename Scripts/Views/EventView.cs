@@ -84,20 +84,20 @@ public class EventView
     }
     
     
-    public void MoveUnit(bool isFocus, TeamTypeEnum teamType, uint unitId, Vector2I from, Vector2I to, bool isValid)
+    public void MoveUnit(bool isFocus, uint unitId, Vector2I from, Vector2I to, bool isValid)
     {
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
         var lastAim = UnitsView.GetUnitAimCoords(unitId);
         node.DrawAction += (u, v) =>
         {
-            MoveUnitDraw(u, v, isFocus, teamType, unitId, from, to, isValid, lastAim);
+            MoveUnitDraw(u, v, isFocus, unitId, from, to, isValid, lastAim);
         };
         node.QueueRedraw();
     }
 
     private void MoveUnitDraw(DrawNode drawNode, bool visible,
-        bool isFocus, TeamTypeEnum teamType, uint unitId, Vector2I from, Vector2I to, bool isValid, Vector2I? lastAim)
+        bool isFocus,uint unitId, Vector2I from, Vector2I to, bool isValid, Vector2I? lastAim)
     {
         if (unitId == 0) return;
         if (visible)
