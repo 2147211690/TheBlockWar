@@ -15,7 +15,7 @@ public class SkillEvent : SchedulerEvnet
             Action = (s, a, r) =>
             {
                 var unit = s.UnitMapState.GetUnit(BindUnitId);
-                if (unit == null) return;
+                if (unit is null) return;
                 Skill?.SkillCore(s, r, unit, a as Vector2I?[] ?? []);
             };
         }

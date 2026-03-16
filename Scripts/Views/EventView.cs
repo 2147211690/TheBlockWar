@@ -67,23 +67,20 @@ public class EventView
 
     private void ChangeUnitHealthDraw(DrawNode drawNode, bool visible, bool isFocus, TeamTypeEnum teamType, uint unitId, float healthChange)
     {
-        var last = UnitsView.CurrentUnitId;
-        UnitsView.CurrentUnitId = unitId;
         if (visible)
         {
             if (isFocus)
             {
-                UnitsView.CurrentUnitHealthChange += healthChange;
+                UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange += healthChange;
             }
         }
         else
         {
             if (isFocus)
             {
-                UnitsView.CurrentUnitHealthChange -= healthChange;
+                UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange -= healthChange;
             }
         }
-        UnitsView.CurrentUnitId = last;
     }
     
     
@@ -91,8 +88,7 @@ public class EventView
     {
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
-        UnitsView.CurrentUnitId = unitId;
-        var lastAim = UnitsView.CurrentUnitAimCoords;
+        var lastAim = UnitsView.GetUnitAimCoords(unitId);
         node.DrawAction += (u, v) =>
         {
             MoveUnitDraw(u, v, isFocus, teamType, unitId, from, to, isValid, lastAim);
@@ -104,40 +100,37 @@ public class EventView
         bool isFocus, TeamTypeEnum teamType, uint unitId, Vector2I from, Vector2I to, bool isValid, Vector2I? lastAim)
     {
         if (unitId == 0) return;
-        var last = UnitsView.CurrentUnitId;
-        UnitsView.CurrentUnitId = unitId;
         if (visible)
         {
             if (isFocus)
             {
-                UnitsView.CurrentAddUnitFack(from);
-                UnitsView.CurrentUnitAimCoords = to;
+                UnitsView.AddUnitFack(unitId, from);
+                UnitsView.SetUnitAimCoords(unitId, to);
             }
             else
             {
-                UnitsView.CurrentAddUnitFack(to);
+                UnitsView.AddUnitFack(unitId, to);
             }
         }
         else
         {
             if (isFocus)
             {
-                UnitsView.CurrentRemoveUnitFack(from);
-                UnitsView.CurrentUnitAimCoords = lastAim;
+                UnitsView.RemoveUnitFack(unitId, from);
+                UnitsView.SetUnitAimCoords(unitId, lastAim);
             }
             else
             {
-                UnitsView.CurrentRemoveUnitFack(to);
+                UnitsView.RemoveUnitFack(unitId, to);
             }
         }
-        UnitsView.CurrentUnitId = last;
     }
 
     public void MoveUnitPath(bool isFocus, TeamTypeEnum teamType, uint unitId, Vector2I coords, List<Vector2I> path, int targetIndex)
     {
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
-        var lastAim = UnitsView.CurrentUnitAimCoords;
+        var lastAim = UnitsView.GetUnitAimCoords(unitId);
         var sprites = new Sprite2D[path.Count];
         node.DrawAction += (u, v) =>
         {
@@ -150,8 +143,6 @@ public class EventView
         Vector2I coords, List<Vector2I> path, int targetIndex, Vector2I? lastAim, Sprite2D[] usedSprites)
     {
         //if (unitId == 0) return;
-        var last = UnitsView.CurrentUnitId;
-        UnitsView.CurrentUnitId = unitId;
         /*if (targetIndex > 0)
             MoveUnitDraw(drawNode, visible, isFocus, teamType, unitId, coords + path[0],
                 coords + path[targetIndex], true, lastAim);*/
@@ -180,7 +171,6 @@ public class EventView
         {
             for (int i = usedSprites.Length - 1; i >= 0; i--) SpritePool.Push(usedSprites[i]);
         }
-        UnitsView.CurrentUnitId = last;
         
     }
     

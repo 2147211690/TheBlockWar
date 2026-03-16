@@ -248,7 +248,7 @@ public class UnitMapState : IUnitMapState
         public void RemoveUnit(uint id)
         {
             var unit = GetUnit(id);
-            if (unit == null) return;
+            if (unit is null) return;
 
             // 标记为删除
             GetRemovedIds().Add(id);
@@ -280,7 +280,7 @@ public class UnitMapState : IUnitMapState
             {
                 //本地未找到，从父状态克隆
                 var ownerUnit = Owner.GetUnit(id);
-                if (ownerUnit == null) return;
+                if (ownerUnit is null) return;
                 var clone = ownerUnit.CopyTo(UnitPool.Pop());
                 GetPooledUnits().Add(clone);
                 //var clone = ownerUnit.Clone();

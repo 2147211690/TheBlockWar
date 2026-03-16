@@ -15,40 +15,16 @@ public partial class UnitsView : Node2D
     private readonly Godot.Collections.Dictionary<uint, UnitView> _unitViews = new();
     private readonly Godot.Collections.Dictionary<Vector2I, uint> _unitMaps = new();
     private bool _queueUpdateUnitPosition = false;
-    private UnitView? _currentUnitView;
     private UnitView? _focusedUnitView;
-    public uint CurrentUnitId
-    {
-        get;
-        set
-        {
-            field = value;
-            _unitViews.TryGetValue(value, out _currentUnitView);
-        }
-    }
-
-    public Vector2I? CurrentUnitAimCoords
-    {
-        get => _currentUnitView?.AimCoords;
-        set
-        {
-            if (_currentUnitView is null) return;
-            _currentUnitView.AimCoords = value; 
-            SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
-        }
-    }
-
-    public float CurrentUnitHealthChange
-    { get => _currentUnitView?.HealthBar.HealthChange ?? 0; set => _currentUnitView?.HealthBar.HealthChange = value; }
-    public float CurrentUnitShieldChange
-    { get => _currentUnitView?.HealthBar.ShieldChange ?? 0; set => _currentUnitView?.HealthBar.ShieldChange = value; }
-    public float CurrentUnitShield
-    { get => _currentUnitView?.HealthBar.CurrentShield ?? 0; set => _currentUnitView?.HealthBar.CurrentShield = value; }
-    public float CurrentUnitHealth
-    { get => _currentUnitView?.HealthBar.CurrentHealth ?? 0; set => _currentUnitView?.HealthBar.CurrentHealth = value; }
     
-    
-
+    public Vector2I? GetUnitAimCoords(uint unitId) => _unitViews.GetValueOrDefault(unitId)?.AimCoords;
+    public void SetUnitAimCoords(uint unitId, Vector2I? aimCoords)
+    {
+        if (!_unitViews.TryGetValue(unitId, out var view)) return;
+        view.AimCoords = aimCoords;
+        SetUnitMapPosition(view.WishCoords, view);
+    }
+    public UnitView? GetUnitView(uint unitId) => _unitViews.GetValueOrDefault(unitId);
     public void FocusUnit(uint unitId)
     {
         _focusedUnitView?.OutlineColor = new Color("#3aa2003c");
@@ -56,7 +32,7 @@ public partial class UnitsView : Node2D
         _focusedUnitView = render;
         _focusedUnitView.OutlineColor = new Color("#3aa200");
     }
-    public GDTask PlaceUnit(Vector2I coords, UnitState unit, TeamTypeEnum teamType)
+    public async GDTask PlaceUnit(Vector2I coords, UnitState unit, TeamTypeEnum teamType)
     {
         if (!_unitViews.TryGetValue(unit.Id, out var render))
         {
@@ -67,76 +43,73 @@ public partial class UnitsView : Node2D
             
             _nodeContainer.AddChild(render);
             _unitMaps.Add(coords, unit.Id);
-            if (unit.Id == CurrentUnitId) _currentUnitView = render;
         }
         //设置单位位置和动画
         render!.RealCoords = coords;
         SetUnitMapPosition(render.WishCoords, render);
         render.UnitName = unit.Name;
-        render.PlayPlaceDownAnim();
+        await render.PlayPlaceDownAnim();
         //血条
         render.HealthBar.MaxHealth = unit.MaxHealth;
         render.HealthBar.CurrentHealth = unit.Health;
         //护盾条
         render.HealthBar.CurrentShield = unit.Shield;
-        
-        return GDTask.CompletedTask;
     }
-    public GDTask CurrentDropUnit()
+    public GDTask DropUnit(uint unitId)
     {
-        if (_currentUnitView == null) return GDTask.CompletedTask;
-        _unitMaps.Remove(_currentUnitView.RealCoords);
-        _nodeContainer.RemoveChild(_currentUnitView);
-        _unitViews.Remove(_currentUnitView.Id);
-        _currentUnitView.QueueFree();
-        _currentUnitView = null;
+        if (!_unitViews.TryGetValue(unitId, out var view)) return GDTask.CompletedTask;
+        _unitMaps.Remove(view.RealCoords);
+        _nodeContainer.RemoveChild(view);
+        _unitViews.Remove(view.Id);
+        view.QueueFree();
         return GDTask.CompletedTask;
     }
     
-    public void CurrentAddUnitFack(Vector2I coords)
+    public void AddUnitFack(uint unitId, Vector2I coords)
     {
-        if (_currentUnitView is null) return;
-        var s = _currentUnitView!.AddFack(coords, GameView.TilesView);
+        if (!_unitViews.TryGetValue(unitId, out var view)) return;
+        var s = view.AddFack(coords, GameView.TilesView);
         _nodeContainer.AddChild(s);
     }
 
-    public void CurrentRemoveUnitFack(Vector2I coords)
+    public void RemoveUnitFack(uint unitId, Vector2I coords)
     {
-        _currentUnitView?.RemoveFack(coords);
+        if (!_unitViews.TryGetValue(unitId, out var view)) return;
+        view.RemoveFack(coords);
     }
     
-    public void CurrentMoveUnit(Vector2I to)
+    public void MoveUnit(uint unitId, Vector2I to)
     {
-        if (_currentUnitView is null) return;
+        if (!_unitViews.TryGetValue(unitId, out var view)) return;
         //await GDTask.Delay(1000);
-        _unitMaps.Remove(_currentUnitView!.RealCoords);
-        _currentUnitView.RealCoords = to;
-        SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
-        _unitMaps.Add(to, CurrentUnitId);
+        _unitMaps.Remove(view.RealCoords);
+        view.RealCoords = to;
+        SetUnitMapPosition(view.WishCoords, view);
+        _unitMaps.Add(to, unitId);
     }
 
-    public async GDTask CurrentMovePathUnit(Vector2I coords, List<Vector2I> path, int targetIndex)
+    public async GDTask MovePathUnit(uint unitId, Vector2I coords, List<Vector2I> path, int targetIndex)
     {
-        if (_currentUnitView is null) return;
-        _unitMaps.Remove(_currentUnitView!.RealCoords);
-        SetUnitMapPosition(coords + path[0], _currentUnitView);
+        if (!_unitViews.TryGetValue(unitId, out var view)) return;
+        _unitMaps.Remove(view.RealCoords);
+        SetUnitMapPosition(coords + path[0], view);
         for (int i = 1; i <= targetIndex; i++)
         {
             await GDTask.Delay(100);
-            SetUnitMapPosition(coords + path[i], _currentUnitView);
+            SetUnitMapPosition(coords + path[i], view);
         }
-        _currentUnitView.RealCoords = coords + path[targetIndex];
-        _unitMaps.Add(coords + path[targetIndex], CurrentUnitId);
-        SetUnitMapPosition(_currentUnitView.WishCoords, _currentUnitView);
+        view.RealCoords = coords + path[targetIndex];
+        _unitMaps.Add(coords + path[targetIndex], unitId);
+        SetUnitMapPosition(view.WishCoords, view);
     }
 
-    public async GDTask CurrentPushUnit(DirMask dir, bool push)
+    public async GDTask PushUnit(uint unitId, DirMask dir, bool push)
     {
-        if (_currentUnitView is null) return;
-        var coord = _currentUnitView!.RealCoords;
+        if (!_unitViews.TryGetValue(unitId, out var view)) return;
+        var coord = view.RealCoords;
         if (push)
         {
-            CurrentMoveUnit(coord + dir.ToVec2I());
+            MoveUnit(unitId, coord + dir.ToVec2I());
         }
         else
         {

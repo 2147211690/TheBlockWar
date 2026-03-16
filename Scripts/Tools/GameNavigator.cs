@@ -46,8 +46,7 @@ public static class GameNavigator
 
     public static bool IsWillDrop(this IReadOnlyUnitState unit, IReadOnlyGameState state, in Vector2I coords)
     {
-        if (coords.X < 0 || coords.X >= state!.TileMapState.Size.X || coords.Y < 0 || coords.Y >= state.TileMapState.Size.Y)
-            return true;
+        if (!state.IsInMap(coords)) return true;
         var hasGround = !state.TileMapState.IsEmpty(coords);
         return !hasGround && !unit.IsFlying;
     }

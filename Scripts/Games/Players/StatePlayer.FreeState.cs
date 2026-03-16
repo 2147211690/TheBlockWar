@@ -18,7 +18,7 @@ public partial class StatePlayer
                 case PlayerInputClick {Button: MouseButtonMask.Left} click:
                     if (GameState?.UnitMapState.HasUnit(FocusedUnitId) == false) break;
                     var skill = GameScheduler?.GetUnitSkillEvent(FocusedUnitId);
-                    if (skill == null)
+                    if (skill is null)
                     {
                         //单位没有等待中的技能
                         StateMachine.ChangeState(_player._skillState);

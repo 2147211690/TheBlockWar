@@ -205,7 +205,7 @@ public class GameScheduler
         
         _runningSchedulers.Push(this);
         var snapshot = _snapshotChache =
-            (_snapshotChache == null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
+            (_snapshotChache is null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
         snapshot.ClearIfSnapshot();
         foreach (var layer in _simulationLayers)
         foreach (var ev in layer)

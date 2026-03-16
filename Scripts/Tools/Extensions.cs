@@ -9,7 +9,7 @@ namespace TheBlockWar.Scripts.Tools;
 
 public static class Extensions
 {
-    extension(IGameState gameState)
+    extension(IReadOnlyGameState gameState)
     {
         public string ToInfoString()
         {
@@ -75,7 +75,7 @@ public static class Extensions
     {
         public bool TryGetArgs(int index, out Vector2I result)
         {
-            if (index < 0 || index >= args.Length || args[index] == null)
+            if (index < 0 || index >= args.Length || args[index] is null)
             {
                 result = default;
                 return false;

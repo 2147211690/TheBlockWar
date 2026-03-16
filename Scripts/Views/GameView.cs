@@ -47,7 +47,7 @@ public partial class GameView : Node2D
         {
             case InputEventMouseMotion e:
                 _currentCoords = TilesView.GlobalMouseToTileCoords(GetGlobalMousePosition());
-                if (_previousMousceCoords == null || _currentCoords != _previousMousceCoords)
+                if (_previousMousceCoords is null || _currentCoords != _previousMousceCoords)
                 {
                     _previousMousceCoords = _currentCoords;
                     Player?.OnInput(new PlayerInputMousceCoords(_currentCoords));
@@ -98,7 +98,6 @@ public partial class GameView : Node2D
         }
         RunSimulationTask = RunSimulation();
         RunSimulationTask.GetAwaiter().OnCompleted(RunCompleted);
-        
 
     }
     private void RunCompleted()
@@ -138,25 +137,21 @@ public partial class GameView : Node2D
                                 placeStep.Unit.GetTeamTypeRelativeToPlayer(_gameScheduler!));
                         break;
                     case MoveUnitStep moveStep:
-                        UnitsView.CurrentUnitId = moveStep.ResultUnitId;
-                        if (moveStep.ResultIsValid) UnitsView.CurrentMoveUnit(moveStep.To);
+                        if (moveStep.ResultIsValid) UnitsView.MoveUnit(moveStep.ResultUnitId, moveStep.To);
                         UnitsView.UpdateUnitPosition(moveStep.To);
                         break;
                     case DamageStep damageStep:
-                        UnitsView.CurrentUnitId = damageStep.ResultUnitId;
-                        UnitsView.CurrentUnitHealth -= damageStep.ResultValidDamage;
+                        UnitsView.GetUnitView(damageStep.ResultUnitId)?.HealthBar.CurrentHealth -= damageStep.ResultValidDamage;
                         break;
                     case MoveUnitPathStep movePathStep:
-                        UnitsView.CurrentUnitId = movePathStep.ResultUnitId;
-                        if (movePathStep.ResultIsValid) await UnitsView.CurrentMovePathUnit(movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
+                        if (movePathStep.ResultIsValid) 
+                            await UnitsView.MovePathUnit(movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
                         break;
                     case DropUnitStep dropStep:
-                        UnitsView.CurrentUnitId = dropStep.ResultUnitId;
-                        await UnitsView.CurrentDropUnit();
+                        await UnitsView.DropUnit(dropStep.ResultUnitId);
                         break;
                     case PushUnitStep pushStep:
-                        UnitsView.CurrentUnitId = pushStep.ResultUnitId;
-                        await UnitsView.CurrentPushUnit(pushStep.PushDir, pushStep.ResultPush);
+                        await UnitsView.PushUnit(pushStep.ResultUnitId, pushStep.PushDir, pushStep.ResultPush);
                         break;
                 }
             }
@@ -166,7 +161,7 @@ public partial class GameView : Node2D
         {
             var isFocused = simulation.Layer == SimulationLayer.Focused;
             var view = EventsView.BeginAddEventView(simulation.SourceId);
-            if (view == null) continue;
+            if (view is null) continue;
             foreach (var step in simulation.Steps)
             {
                 switch (step)

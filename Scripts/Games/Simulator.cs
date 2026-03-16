@@ -16,9 +16,8 @@ public static class Simulator
     {
         public void ApplyResult(SimulationResult result)
         {
-            foreach (var step in result.Steps)
+            foreach (var step in result.MasterSteps)
             {
-                if (step.IsChildStep) continue;
                 switch (step)
                 {
                     case DamageStep damageStep:
@@ -57,63 +56,65 @@ public static class Simulator
         /// 触发单位进入到新坐标的事件
         /// </summary>
         /// <param name="unit"></param>
-        private void ApplyUnitSetInCoords(IReadOnlyUnitState unit, SimulationResult? result)
+        private void ApplyUnitSetInCoords(uint unitId, SimulationResult? result)
         {
+            var unit = state.UnitMapState.GetUnit(unitId); //防止获取到镜像中未改变的单位
+            if (unit is null) return;
             var coords = unit.Coords;
             if (unit.IsWillDrop(state, coords)) // 单位会掉落
             {
                 state.ApplyDropUnit(coords, result, true);
             }
         }
-        private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, in Vector2I coords, SimulationResult? result)
+        private void ApplyUnitRemoveFromCoords(uint unitId, in Vector2I coords, SimulationResult? result)
         {
             
         }
         public void ApplyPlaceUnit(Vector2I coords, UnitState unitState,
             SimulationResult? result, bool isChildEvent = false)
         {
-            bool isValid = state.UnitMapState.GetUnit(coords) == null;
+            bool isValid = state.UnitMapState.GetUnit(coords) is null;
             if (result?.Layer == SimulationLayer.Waiting || !isValid)
             {
-                result?.Steps.Add(new PlaceUnitStep(isChildEvent, coords, null, unitState.Id, isValid));
+                result?.AddStep(new PlaceUnitStep(isChildEvent, coords, null, unitState.Id, isValid));
                 return;
             }
             unitState.Coords = coords;
             state.UnitMapState.AddUnit(unitState);
-            result?.Steps.Add(new PlaceUnitStep(isChildEvent, coords, unitState, unitState.Id, isValid));
-            state.ApplyUnitSetInCoords(unitState, result);
+            result?.AddStep(new PlaceUnitStep(isChildEvent, coords, unitState, unitState.Id, isValid));
+            state.ApplyUnitSetInCoords(unitState.Id, result);
         }
         public void ApplyDropUnit(Vector2I coords, SimulationResult? result, bool isChildEvent = false)
         {
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new DropUnitStep(isChildEvent, coords, 0, false));
+                result.AddStep(new DropUnitStep(isChildEvent, coords, 0, false));
                 return;
             }
             var unit = state.UnitMapState.GetUnit(coords);
-            if (unit == null)
+            if (unit is null)
             {
-                result?.Steps.Add(new DropUnitStep(isChildEvent, coords, 0, false));
+                result?.AddStep(new DropUnitStep(isChildEvent, coords, 0, false));
                 return;
             }
             state.UnitMapState.RemoveUnit(unit.Id);
-            state.ApplyUnitRemoveFromCoords(unit, coords, result);
-            result?.Steps.Add(new DropUnitStep(isChildEvent, coords, unit.Id, true));
+            state.ApplyUnitRemoveFromCoords(unit.Id, coords, result);
+            result?.AddStep(new DropUnitStep(isChildEvent, coords, unit.Id, true));
         }
         
         public void ApplyDamage(Vector2I coords, float damage, SimulationResult? result, bool isChildEvent = false)
         {
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new DamageStep(isChildEvent, coords, damage, 0, 0));
+                result.AddStep(new DamageStep(isChildEvent, coords, damage, 0, 0));
                 return;
             }
 
             var unit = state.UnitMapState.GetUnit(coords);
             float validDamage = 0;
-            if (unit == null || unit.IsDead)
+            if (unit is null || unit.IsDead)
             {
-                result?.Steps.Add(new DamageStep(isChildEvent, coords, damage, unit?.Id ?? 0, validDamage));
+                result?.AddStep(new DamageStep(isChildEvent, coords, damage, unit?.Id ?? 0, validDamage));
                 return;
             }
 
@@ -121,7 +122,7 @@ public static class Simulator
             validDamage = Math.Min(damage, unitValue.Health);
             //GD.Print($"修改 {unit.Value.Id} 健康值 {unitValue.Health} - {validDamage}");
             state.UnitMapState.ModifyUnit(unit.Id, u => u.Health -= validDamage);
-            result?.Steps.Add(new DamageStep(isChildEvent, coords, damage, unit.Id, validDamage));
+            result?.AddStep(new DamageStep(isChildEvent, coords, damage, unit.Id, validDamage));
             if (unitValue.Health <= 0)
             {
                 ApplyDeath(state, coords, result);
@@ -132,19 +133,19 @@ public static class Simulator
         {
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new DeathStep(isChildEvent, coords, 0, false));
+                result.AddStep(new DeathStep(isChildEvent, coords, 0, false));
                 
                 return;
             }
 
             var unit = state.UnitMapState.GetUnit(coords);
-            if (unit == null || unit.IsDead)
+            if (unit is null || unit.IsDead)
             {
-                result?.Steps.Add(new DeathStep(isChildEvent, coords, unit?.Id ?? 0, false));
+                result?.AddStep(new DeathStep(isChildEvent, coords, unit?.Id ?? 0, false));
                 return;
             }
 
-            result?.Steps.Add(new DeathStep(isChildEvent, coords, unit.Id, true));
+            result?.AddStep(new DeathStep(isChildEvent, coords, unit.Id, true));
             state.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
         }
 
@@ -152,19 +153,19 @@ public static class Simulator
         {
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new DropTileStep(isChildEvent, coords));
+                result.AddStep(new DropTileStep(isChildEvent, coords));
                 return;
             }
-
-            //TODO:测试上方单位等处理
-            result?.Steps.Add(new DropTileStep(isChildEvent, coords));
+            var unit = state.UnitMapState.GetUnit(coords);
+            result?.AddStep(new DropTileStep(isChildEvent, coords));
+            if (unit != null) state.ApplyDropUnit(coords, result, true);
         }
 
         public void ApplyPlaceTile(Vector2I coords, TileState tile, SimulationResult? result, bool isChildEvent = false)
         {
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new PlaceTileStep(isChildEvent, coords, tile));
+                result.AddStep(new PlaceTileStep(isChildEvent, coords, tile));
                 return;
             }
             state.TileMapState.ModifyTile(coords, t =>
@@ -173,9 +174,9 @@ public static class Simulator
                 t.Name = tile.Name;
                 t.Tag = tile.Tag;
             });
-            result?.Steps.Add(new PlaceTileStep(isChildEvent, coords, tile));
+            result?.AddStep(new PlaceTileStep(isChildEvent, coords, tile));
             var unit = state.UnitMapState.GetUnit(coords);
-            if (unit != null) state.ApplyUnitSetInCoords(unit, result);
+            if (unit != null) state.ApplyUnitSetInCoords(unit.Id, result);
         }
 
         public void ApplyMoveUnit(Vector2I coords, Vector2I to, SimulationResult? result, bool isChildEvent = false)
@@ -184,17 +185,17 @@ public static class Simulator
             bool isValid = true;
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new MoveUnitStep(isChildEvent, coords, to, unit?.Id ?? 0, isValid));
+                result.AddStep(new MoveUnitStep(isChildEvent, coords, to, unit?.Id ?? 0, isValid));
                 return;
             }
 
             if (unit is not null)
             {
-                state.ApplyUnitRemoveFromCoords(unit, coords, result);
+                state.ApplyUnitRemoveFromCoords(unit.Id, coords, result);
                 state.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
             }
-            result?.Steps.Add(new MoveUnitStep(isChildEvent, coords, to, unit?.Id ?? 0, isValid));
-            if (unit is not null) state.ApplyUnitSetInCoords(unit, result);
+            result?.AddStep(new MoveUnitStep(isChildEvent, coords, to, unit?.Id ?? 0, isValid));
+            if (unit is not null) state.ApplyUnitSetInCoords(unit.Id, result);
         }
         
         public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I> path, SimulationResult? result, bool isChildStep = false)
@@ -203,7 +204,7 @@ public static class Simulator
             var unit = state.UnitMapState.GetUnit(coords + path[0]);
             if (unit is null)
             {
-                result?.Steps.Add(new MoveUnitPathStep(isChildStep, coords, path, 0, 0, false));
+                result?.AddStep(new MoveUnitPathStep(isChildStep, coords, path, 0, 0, false));
                 return;
             }
             var targetIndex = 1;
@@ -213,17 +214,17 @@ public static class Simulator
             
             for (; targetIndex >= 0; targetIndex--)
                 if (unit.IsCanBeDestination(state, coords + path[targetIndex])) break;
-            
+
             
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new MoveUnitPathStep(isChildStep, coords, path, unit.Id, targetIndex, true));
-                state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], result, true);
+                result.AddStep(new MoveUnitPathStep(isChildStep, coords, path, unit.Id, targetIndex, true));
+                if (targetIndex > 0) state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], result, true);
                 return;
             }
             
-            result?.Steps.Add(new MoveUnitPathStep(isChildStep, coords, path, unit.Id, targetIndex, true));
-            state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], result, true);
+            result?.AddStep(new MoveUnitPathStep(isChildStep, coords, path, unit.Id, targetIndex, true));
+            if (targetIndex > 0) state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], result, true);
 
         }
 
@@ -231,14 +232,14 @@ public static class Simulator
         {
             if (result?.Layer == SimulationLayer.Waiting)
             {
-                result.Steps.Add(new PushUnitStep(isChildEvent, coords, dir, 0, true));
+                result.AddStep(new PushUnitStep(isChildEvent, coords, dir, 0, true));
                 return;
             }
             var unit = state.UnitMapState.GetUnit(coords);
             var target = coords + dir.ToVec2I();
             var targetUnit = state.UnitMapState.GetUnit(target);
             var validPush = targetUnit is null && state.IsInMap(target);
-            result?.Steps.Add(new PushUnitStep(isChildEvent, coords, dir, unit?.Id ?? 0, validPush));
+            result?.AddStep(new PushUnitStep(isChildEvent, coords, dir, unit?.Id ?? 0, validPush));
             if (validPush)
             {
                 state.ApplyMoveUnit(coords, target, result, true);

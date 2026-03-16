@@ -63,7 +63,7 @@ public partial class Test : Node2D
     {
         ImGui.Begin("游戏状态");
         
-        if (_currentGameState == null)
+        if (_currentGameState is null)
         {
             ImGui.Text("游戏状态未初始化");
         }

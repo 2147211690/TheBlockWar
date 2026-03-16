@@ -24,6 +24,7 @@ public static class Skills
         }
         if (args.TryGetArgs(1, out var v2))
         {
+            gameState.ApplyDropTile(v2 + unit.Coords, result);
             for(int i = 0; i < 4; i++)
             {
                 var dir = (DirMask)(1 << i);
