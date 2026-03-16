@@ -210,8 +210,10 @@ public class GameScheduler
         foreach (var layer in _simulationLayers)
         foreach (var ev in layer)
         {
-            var result = new SimulationResult(ev.Id) { Layer = ev.Layer , 
-                TeamType = GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team)};
+            var result = new SimulationResult(
+                ev.Id,
+                GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
+                ev.Layer);
             ev.Action?.Invoke(snapshot, ev.Args, result);
             _simulationResults.Add(result);
         }

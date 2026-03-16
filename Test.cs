@@ -302,6 +302,7 @@ public partial class Test : Node2D
         {
             (_follow as ISchedulerEvnet)?.Layer = _follow.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
+        
         ImGui.End();
         
     }
