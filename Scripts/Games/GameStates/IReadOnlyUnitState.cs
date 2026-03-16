@@ -5,6 +5,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IReadOnlyUnitState
 {
+    public static readonly IReadOnlyUnitState Null = new UnitState();
     uint Id { get; }
     int Team { get; }
     string Name { get; }

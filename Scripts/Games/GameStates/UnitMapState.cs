@@ -34,7 +34,7 @@ public class UnitMapState : IUnitMapState
         return new UnitMapStateSnapshot(this);
     }
 
-    public void AddUnit(UnitState unit)
+    public void AddUnit(UnitState unit, out IReadOnlyUnitState? renewedUnit)
     {
         if (_units.ContainsKey(unit.Id))
         {
@@ -42,19 +42,26 @@ public class UnitMapState : IUnitMapState
         }
         _units[unit.Id] = unit;
         _unitAt[unit.Coords] = unit.Id;
+        renewedUnit = unit;
     }
 
-    public void RemoveUnit(uint id)
+    public void RemoveUnit(uint id, out IReadOnlyUnitState? renewedUnit)
     {
-        if (!_units.Remove(id, out var unit)) return;
+        if (!_units.Remove(id, out var unit))
+        {
+            renewedUnit = null;
+            return;
+        }
         _unitAt.Remove(unit.Coords);
+        renewedUnit = null;
     }
 
-    public void ModifyUnit(uint id, Action<UnitState> modifier)
+    public void ModifyUnit(uint id, Action<UnitState> modifier, out IReadOnlyUnitState? renewedUnit)
     {
         if (!_units.TryGetValue(id, out var unitState))
         {
             Logger.Warn("单位Id{id}不存在于数据上", id);
+            renewedUnit = null;
             return;
         }
         var oldCoords = unitState.Coords;
@@ -67,6 +74,7 @@ public class UnitMapState : IUnitMapState
             _unitAt.Remove(oldCoords);
             _unitAt[unitState.Coords] = id;
         }
+        renewedUnit = unitState;
     }
 
     public void ClearIfSnapshot(){}
@@ -205,7 +213,7 @@ public class UnitMapState : IUnitMapState
             }
         }
 
-        public void AddUnit(UnitState unit)
+        public void AddUnit(UnitState unit, out IReadOnlyUnitState? renewedUnit)
         {
             var id = unit.Id;
             
@@ -243,12 +251,17 @@ public class UnitMapState : IUnitMapState
             }
             
             coordsMap[unit.Coords] = id;
+                renewedUnit = unit;
         }
 
-        public void RemoveUnit(uint id)
+        public void RemoveUnit(uint id, out IReadOnlyUnitState? renewedUnit)
         {
             var unit = GetUnit(id);
-            if (unit is null) return;
+            if (unit is null)
+            {
+                renewedUnit = null;
+                return;
+            }
 
             // 标记为删除
             GetRemovedIds().Add(id);
@@ -259,12 +272,17 @@ public class UnitMapState : IUnitMapState
             // 标记坐标为空
             GetModifiedCoords()[unit.Coords] = 0;
             _isModified = true;
+            renewedUnit = null;
         }
 
-        public void ModifyUnit(uint id, Action<UnitState> modifier)
+        public void ModifyUnit(uint id, Action<UnitState> modifier, out IReadOnlyUnitState? renewedUnit)
         {
             // 1. 检查是否被删除
-            if (_removedUnitIds?.Contains(id) == true) return;
+            if (_removedUnitIds?.Contains(id) == true)
+            {
+                renewedUnit = null;
+                return;
+            }
             Vector2I oldCoords;
             IReadOnlyUnitState newUnit;
             // 2. 检查本地修改
@@ -280,7 +298,11 @@ public class UnitMapState : IUnitMapState
             {
                 //本地未找到，从父状态克隆
                 var ownerUnit = Owner.GetUnit(id);
-                if (ownerUnit is null) return;
+                if (ownerUnit is null)
+                {
+                    renewedUnit = null;
+                    return;
+                }
                 var clone = ownerUnit.CopyTo(UnitPool.Pop());
                 GetPooledUnits().Add(clone);
                 //var clone = ownerUnit.Clone();
@@ -314,6 +336,7 @@ public class UnitMapState : IUnitMapState
             //GetModifiedUnits()[id] = newUnit;
             _removedUnitIds?.Remove(id); // 确保不在删除集合中
             _isModified = true;
+            renewedUnit = newUnit;
         }
 
         public void ClearIfSnapshot()

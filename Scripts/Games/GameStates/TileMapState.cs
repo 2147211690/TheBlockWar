@@ -32,10 +32,15 @@ public class TileMapState : ITileMapState
         return (GetTile(coords).Tag & TileTag.Empty) != 0;
     }
 
-    public void ModifyTile(Vector2I coords, Action<TileState> modifier)
+    public void ModifyTile(Vector2I coords, Action<TileState> modifier, out IReadOnlyTileState? renewedUnit)
     {
-        if (!coords.IsInSize(Size)) return;
+        if (!coords.IsInSize(Size))
+        {
+            renewedUnit = null;
+            return;
+        }
         modifier(_tiles[coords.X, coords.Y]);
+        renewedUnit = _tiles[coords.X, coords.Y];
     }
 
     public void ClearIfSnapshot() {}
@@ -70,11 +75,12 @@ public class TileMapState : ITileMapState
 
         public bool IsEmpty(Vector2I coords) => (GetTile(coords).Tag & TileTag.Empty) != 0;
 
-        public void ModifyTile(Vector2I coords, Action<TileState> modifier)
+        public void ModifyTile(Vector2I coords, Action<TileState> modifier, out IReadOnlyTileState? renewedUnit)
         {
             if (_tiles?.TryGetValue(coords, out var tile) == true)
             {
                 modifier(tile);
+                renewedUnit = tile;
             }
             else
             {
@@ -82,6 +88,7 @@ public class TileMapState : ITileMapState
                 GetPopedTiles().Add(tile);
                 modifier(tile);
                 GetTiles()[coords] = tile;
+                renewedUnit = tile;
             }
         }
 

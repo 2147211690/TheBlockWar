@@ -112,6 +112,7 @@ public partial class BuffView : Node2D
         s.SpriteFrames = null;
         s.Offset = Vector2.Zero;
         GameView.AnimatedSpritePool.Push(s);
+        _visibleBuffs.Remove(type);
     }
     public override void _Draw()
     {
