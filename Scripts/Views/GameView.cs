@@ -13,6 +13,7 @@ namespace TheBlockWar.Scripts.Views;
 public partial class GameView : Node2D
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    [Export] public Node2D DrawContainer { get; private set; } = null!;
     [Export] public GameViewStyle Style { get; set; }
     [Export] public TilesView TilesView { get; set; }
     [Export] public UnitsView UnitsView { get; set; }
@@ -27,16 +28,33 @@ public partial class GameView : Node2D
     private bool _refocus = false;
     public GDTask RunSimulationTask { get; private set; } = GDTask.CompletedTask;
     public IPlayer? Player { get; set; }
+    public TypedPool<AnimatedSprite2D> AnimatedSpritePool { get; private set; }
     public void Bind(GameScheduler gameScheduler)
     {
         _gameScheduler = gameScheduler;
         _gameScheduler.SimulationUpdated += GameSchedulerOnSimulationUpdated;
         _gameScheduler.OtherStateUpdated += GameSchedulerOnOtherStateUpdated;
-        
+        AnimatedSpritePool = new TypedPool<AnimatedSprite2D>(() =>
+        {
+            var node = new AnimatedSprite2D();
+            DrawContainer.AddChild(node);
+            return node;
+        }, 0)
+        {
+            AfterPush = u =>
+            {
+                u.Visible = false;
+            },
+            BeforePop = u =>
+            {
+                u.Visible = true;
+            }
+        };
         TreeExiting += () =>
         {
             _gameScheduler.SimulationUpdated -= GameSchedulerOnSimulationUpdated;
             _gameScheduler.OtherStateUpdated -= GameSchedulerOnOtherStateUpdated;
+            AnimatedSpritePool.Dispose();
         };
     }
 
@@ -153,6 +171,17 @@ public partial class GameView : Node2D
                     case PushUnitStep pushStep:
                         await UnitsView.PushUnit(pushStep.ResultUnitId, pushStep.PushDir, pushStep.ResultPush);
                         break;
+                    case ModifyUnitBuffStep modifyUnitBuffStep:
+                        //TODO: 处理单位buff变更
+                        if (modifyUnitBuffStep.Operation == BuffOperation.AddBuff)
+                        {
+                            UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView.AddVisibleBuff(modifyUnitBuffStep.BuffType);
+                        }
+                        else if (modifyUnitBuffStep.Operation == BuffOperation.RemoveBuff)
+                        {
+                            UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView.RemoveVisibleBuff(modifyUnitBuffStep.BuffType);
+                        }
+                        break;
                 }
             }
         }
@@ -189,6 +218,11 @@ public partial class GameView : Node2D
                         break;
                     case PushUnitStep pushStep:
                         view.PushUnit(isFocused, pushStep.Coords, pushStep.ResultPush);
+                        break;
+                    case ModifyUnitBuffStep modifyUnitBuffStep:
+                        view.ModifyUnitBuff(isFocused, modifyUnitBuffStep.Coords,
+                            modifyUnitBuffStep.ResultUnitId, modifyUnitBuffStep.BuffType,
+                            modifyUnitBuffStep.ResultOperation, modifyUnitBuffStep.ResultDuration);
                         break;
                 }
             }

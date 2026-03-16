@@ -5,6 +5,7 @@ namespace TheBlockWar.Scripts.Resources;
 [GlobalClass]
 public partial class GameViewTeamStyle : Resource
 {
+    [Export] public Font Font { get; set; } = null!;
     [ExportGroup("Events")]
     [Export] public Texture2D PlaceDownTexture { get; set; } = null!;
     [Export] public Texture2D[] PathTextures { get; set; } = null!;

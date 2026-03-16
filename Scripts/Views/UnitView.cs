@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Godot;
 using GodotTask;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Views;
@@ -12,6 +13,7 @@ public partial class UnitView : Node2D
     [Export] public AnimatedSprite2D MainSprite { get; set; }
     [Export] public Node2D Center { get; set; }
     [Export] public HealthBar HealthBar { get; set; }
+    [Export] public BuffView BuffView { get; set; }
     [ExportGroup("PlaceDown")]
     [Export] public float DropHeight { get; set; } = 50f;
     [Export] public float DropDuration { get; set; } = 0.1f;
@@ -26,6 +28,7 @@ public partial class UnitView : Node2D
     public UnitsView UnitsView { get; set; }
     public uint Id { get; set; }
     public Vector2I WishCoords => AimCoords ?? RealCoords;
+    public GameView GameView { get; set; }
     private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
     private ShaderMaterial _shaderMaterial = null!;
     public Color OutlineColor
@@ -44,11 +47,17 @@ public partial class UnitView : Node2D
         }
     }
 
+    public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType, UnitsView unitsView)
+    {
+        GameView = gameView;
+        UnitsView = unitsView;
+        TeamType = teamType;
+        HealthBar.Init(gameView, style, teamType);
+        BuffView.Init(gameView, style, teamType);
+    }
     public override void _Ready()
     {
         _shaderMaterial = MainSprite.Material as ShaderMaterial;
-        HealthBar.Style = UnitsView.GameView.Style;
-        HealthBar.TeamType = TeamType;
         MainSprite.FrameChanged += MainSpriteOnFrameChanged;
         TreeExiting += () =>
         {

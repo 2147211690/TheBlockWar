@@ -137,7 +137,7 @@ public static class Extensions
         public List<T> CloneToList()
         {
             var l = new List<T>(list.Count);
-            for(var i = 0; i < list.Count; i++) l[i] = list[i];
+            for (var i = 0; i < list.Count; i++) l.Add(list[i]);
             return l;
         }
     }

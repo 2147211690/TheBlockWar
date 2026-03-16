@@ -10,7 +10,7 @@ namespace TheBlockWar.Scripts.Views;
 public partial class UnitsView : Node2D
 {
     [Export] public GameView GameView { get; set; }
-    [Export] private Node2D _nodeContainer;
+    [Export] public Node2D DrawContainer { get; private set; } = null!;
     [Export] private PackedScene _unitScene;
     private readonly Godot.Collections.Dictionary<uint, UnitView> _unitViews = new();
     private readonly Godot.Collections.Dictionary<Vector2I, uint> _unitMaps = new();
@@ -37,11 +37,8 @@ public partial class UnitsView : Node2D
         if (!_unitViews.TryGetValue(unit.Id, out var render))
         {
             render = _unitViews[unit.Id] = _unitScene.Instantiate<UnitView>();
-            render.UnitsView = this;
-            render.TeamType = teamType;
-            render.Id = unit.Id;
-            
-            _nodeContainer.AddChild(render);
+            render.Init(GameView, GameView.Style, teamType, this);
+            DrawContainer.AddChild(render);
             _unitMaps.Add(coords, unit.Id);
         }
         //设置单位位置和动画
@@ -73,7 +70,7 @@ public partial class UnitsView : Node2D
         await tween.WaitForTween();
         //动画完成后
         _unitMaps.Remove(view.RealCoords);
-        _nodeContainer.RemoveChild(view);
+        DrawContainer.RemoveChild(view);
         _unitViews.Remove(view.Id);
         view.QueueFree();
     }
@@ -82,7 +79,7 @@ public partial class UnitsView : Node2D
     {
         if (!_unitViews.TryGetValue(unitId, out var view)) return;
         var s = view.AddFack(coords, GameView.TilesView);
-        _nodeContainer.AddChild(s);
+        DrawContainer.AddChild(s);
     }
 
     public void RemoveUnitFack(uint unitId, Vector2I coords)

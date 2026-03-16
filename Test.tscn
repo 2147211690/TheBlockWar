@@ -19,8 +19,9 @@ tile_size = Vector2i(56, 42)
 script = ExtResource("1_myinc")
 _view = NodePath("GameView")
 
-[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("TilesView", "UnitsView", "EventsView")]
+[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView")]
 script = ExtResource("2_njov2")
+DrawContainer = NodePath("DrawContainer")
 Style = ExtResource("3_c4vo5")
 TilesView = NodePath("TilesView")
 UnitsView = NodePath("UnitsView")
@@ -34,10 +35,10 @@ _nodeContainer = NodePath("../DrawContainer")
 _tileScene = ExtResource("4_8tn2x")
 RegionTexture = ExtResource("5_vwb7u")
 
-[node name="UnitsView" type="Node2D" parent="GameView" unique_id=1149891957 node_paths=PackedStringArray("GameView", "_nodeContainer")]
+[node name="UnitsView" type="Node2D" parent="GameView" unique_id=1149891957 node_paths=PackedStringArray("GameView", "DrawContainer")]
 script = ExtResource("5_aq4fw")
 GameView = NodePath("..")
-_nodeContainer = NodePath("../DrawContainer")
+DrawContainer = NodePath("../DrawContainer")
 _unitScene = ExtResource("6_ivycn")
 metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
 

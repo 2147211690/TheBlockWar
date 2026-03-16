@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bcim17u866j4p"]
+
+[ext_resource type="Script" uid="uid://dmemr0krwh881" path="res://Scripts/Views/BuffView.cs" id="1_35o47"]
+[ext_resource type="Script" uid="uid://fw1j844n5kht" path="res://Tests/TestMain.cs" id="1_yoo7l"]
+[ext_resource type="Resource" uid="uid://cu0gh2aruhrjc" path="res://Resources/GameViewStyle_0.tres" id="2_oh1sm"]
+[ext_resource type="Resource" uid="uid://dmdokg15gk43n" path="res://Resources/Infos/MainInfos.tres" id="3_yoo7l"]
+[ext_resource type="Texture2D" uid="uid://dm7188puqyhc8" path="res://Art/Img/ui/strategy/plus.png" id="5_rcr67"]
+[ext_resource type="Texture2D" uid="uid://bll45ntridu3t" path="res://Art/Img/ui/x.png" id="6_rcr67"]
+
+[node name="TestMain" type="Node2D" unique_id=606139785]
+script = ExtResource("1_yoo7l")
+
+[node name="BuffView" type="Node2D" parent="." unique_id=896210065]
+script = ExtResource("1_35o47")
+Style = ExtResource("2_oh1sm")
+Infos = ExtResource("3_yoo7l")
+PlusTexture = ExtResource("5_rcr67")
+MinusTexture = ExtResource("6_rcr67")
+GainTint = Color(1, 1, 1, 1)
+LoseTint = Color(1, 0.8189716, 0.77014244, 1)
+metadata/_custom_type_script = "uid://dmemr0krwh881"
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1296258764]
+zoom = Vector2(1.74, 1.74)

@@ -5,6 +5,7 @@ using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Views;
 
+[GlobalClass]
 public partial class HealthBar : Node2D
 {
     [Export] public GameViewStyle Style { get; set; } = null!;
@@ -18,7 +19,7 @@ public partial class HealthBar : Node2D
     [Export] public float FlashFrequency { get; private set; } = 6f; // 闪烁频率
     [Export] public float FlashAmplitude { get; private set; } = 0.5f; // 闪烁强度
     [Export] public float ColorLightChange { get; private set; } = 0.4f; // 颜色变化强度
-
+    
     public float FlashTimer => Time.GetTicksMsec() / 1000f;
 
     public float MaxHealth { get; set => SetFloatViewValue(ref field, value); }
@@ -26,13 +27,20 @@ public partial class HealthBar : Node2D
     public float HealthChange { get; set => SetFloatViewValue(ref field, value); }
     public float CurrentShield { get; set => SetFloatViewValue(ref field, value); }
     public float ShieldChange { get; set => SetFloatViewValue(ref field, value); }
-
+    public GameView GameView { get; set; } = null!;
     private void SetFloatViewValue(ref float field, float value)
     {
         if (Math.Abs(value - field) < float.Epsilon) return;
         field = value;
     }
 
+    public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType)
+    {
+        GameView = gameView;
+        Style = style;
+        TeamType = teamType;
+    }
+    
     public override void _Process(double delta)
     {
         QueueRedraw();

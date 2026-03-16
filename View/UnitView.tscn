@@ -4,6 +4,96 @@
 [ext_resource type="Script" uid="uid://bcfsqru8ni8v0" path="res://Scripts/Views/HealthBar.cs" id="3_0gwqe"]
 [ext_resource type="Shader" uid="uid://bp0nooa7oij51" path="res://Shaders/unit.gdshader" id="4_r4ymd"]
 [ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="4_vsdra"]
+[ext_resource type="Texture2D" uid="uid://dm7188puqyhc8" path="res://Art/Img/ui/strategy/plus.png" id="5_5mqhy"]
+[ext_resource type="Resource" uid="uid://dmdokg15gk43n" path="res://Resources/Infos/MainInfos.tres" id="5_87f3l"]
+[ext_resource type="Texture2D" uid="uid://bfap1gxptpmrn" path="res://Art/Img/combat/iceblock_emerge.png" id="5_b2pj8"]
+[ext_resource type="Script" uid="uid://dmemr0krwh881" path="res://Scripts/Views/BuffView.cs" id="5_r4ymd"]
+[ext_resource type="Texture2D" uid="uid://bll45ntridu3t" path="res://Art/Img/ui/x.png" id="6_b2pj8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xm5jm"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(0, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v5jkn"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(69, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q4aql"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(138, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ql751"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(207, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_02ohy"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(276, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qnmca"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(345, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yaa23"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(414, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ulugv"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(483, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nspp3"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(552, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0g5wc"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(621, 0, 69, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ye42v"]
+atlas = ExtResource("5_b2pj8")
+region = Rect2(690, 0, 69, 56)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_5mqhy"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xm5jm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v5jkn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q4aql")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ql751")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_02ohy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qnmca")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yaa23")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ulugv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nspp3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0g5wc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ye42v")
+}],
+"loop": false,
+"name": &"Test_Add",
+"speed": 44.0
+}]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xcu2x"]
 resource_local_to_scene = true
@@ -50,7 +140,7 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="UnitView" type="Node2D" unique_id=1880059611 node_paths=PackedStringArray("MainSprite", "Center", "HealthBar")]
+[node name="UnitView" type="Node2D" unique_id=1880059611 node_paths=PackedStringArray("MainSprite", "Center", "HealthBar", "BuffView")]
 script = ExtResource("1_hq4fu")
 Offsets = Dictionary[String, Vector2]({
 "Unit_0": Vector2(7, -5)
@@ -58,12 +148,35 @@ Offsets = Dictionary[String, Vector2]({
 MainSprite = NodePath("Center/AnimatedSprite2D")
 Center = NodePath("Center")
 HealthBar = NodePath("Center/HealthBar")
+BuffView = NodePath("Center/BuffView")
 
 [node name="Center" type="Node2D" parent="." unique_id=1069590474]
 
 [node name="HealthBar" type="Node2D" parent="Center" unique_id=1368084466]
+z_index = 1
+position = Vector2(0, -29)
 script = ExtResource("3_0gwqe")
+HealthOffset = Vector2(0, 0)
+ShieldOffset = Vector2(0, -10)
 BlockWidth = 4.0
+
+[node name="BuffView" type="Node2D" parent="Center" unique_id=1808677010 node_paths=PackedStringArray("UnitView")]
+z_index = 1
+position = Vector2(0, -18)
+script = ExtResource("5_r4ymd")
+Infos = ExtResource("5_87f3l")
+BuffEffectSpriteFrames = SubResource("SpriteFrames_5mqhy")
+BuffEffectOffsets = Dictionary[String, Vector2]({
+"Test": Vector2(8, -8)
+})
+UnitView = NodePath("../..")
+SymbolBoxSize = Vector2(8, 8)
+IconBoxSize = Vector2(12, 12)
+PlusTexture = ExtResource("5_5mqhy")
+MinusTexture = ExtResource("6_b2pj8")
+GainTint = Color(1, 1, 1, 1)
+LoseTint = Color(1, 0.8189716, 0.77014244, 1)
+metadata/_custom_type_script = "uid://dmemr0krwh881"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Center" unique_id=341608040]
 material = SubResource("ShaderMaterial_xcu2x")

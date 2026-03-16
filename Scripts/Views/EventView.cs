@@ -205,7 +205,38 @@ public class EventView
         node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
         node.QueueRedraw();
     }
-    
+    public void ModifyUnitBuff(bool isFocus, Vector2I coords, uint unitId, BuffTypeEnum buffType, BuffOperation operation, int change)
+    {
+        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
+        var node = DrawNodePool.Pop();
+        _nodes.Add(node);
+        var c = operation switch
+        {
+            BuffOperation.AddBuff => 1,
+            BuffOperation.RemoveBuff => -1,
+            BuffOperation.ChangeDuration => change >= 0 ? 1 : -1,
+            _ => 0,
+        };
+        node.DrawAction += (u, v) =>
+        {
+            if (v)
+            {
+                if (isFocus)
+                {
+                    UnitsView.GetUnitView(unitId)?.BuffView.ChangeBuffChange(buffType, c);
+                }
+            }
+            else
+            {
+                if (isFocus)
+                {
+                    UnitsView.GetUnitView(unitId)?.BuffView.ChangeBuffChange(buffType, -c);
+                }
+            }
+        };
+        node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
+        node.QueueRedraw();
+    }
     private void Clear()
     {
         for (int i = _nodes.Count - 1; i >= 0; i--) DrawNodePool.Push(_nodes[i]);

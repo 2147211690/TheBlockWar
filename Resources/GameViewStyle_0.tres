@@ -18,8 +18,11 @@
 [ext_resource type="Texture2D" uid="uid://bantwlkdgcecq" path="res://Art/Img/combat/artillery_arrow_down.png" id="15_0vsqr"]
 [ext_resource type="Script" uid="uid://slsetkd0kji2" path="res://Scripts/Resources/GameViewTeamStyle.cs" id="16_dlqdj"]
 
+[sub_resource type="SystemFont" id="SystemFont_dlqdj"]
+
 [sub_resource type="Resource" id="Resource_efcai"]
 script = ExtResource("16_dlqdj")
+Font = SubResource("SystemFont_dlqdj")
 PlaceDownTexture = ExtResource("15_0vsqr")
 PathTextures = Array[Texture2D]([null, ExtResource("1_lsp26"), ExtResource("2_0vsqr"), ExtResource("3_dlqdj"), ExtResource("4_efcai"), ExtResource("5_wjxha"), ExtResource("6_ukqsd"), ExtResource("7_pgxfe"), ExtResource("8_0j2ph"), ExtResource("9_4ygc1"), ExtResource("10_k627b"), ExtResource("11_4k6dv"), ExtResource("12_yawfy"), ExtResource("13_mjyf2"), ExtResource("14_ablfk")])
 HealthCurrentColor = Color(0.2027216, 0.6880478, 0.4521318, 1)
@@ -29,6 +32,7 @@ SplitColor = Color(0.06401862, 0.10175585, 0.13946006, 1)
 
 [sub_resource type="Resource" id="Resource_dlqdj"]
 script = ExtResource("16_dlqdj")
+Font = SubResource("SystemFont_dlqdj")
 PlaceDownTexture = ExtResource("15_0vsqr")
 PathTextures = Array[Texture2D]([null, ExtResource("1_lsp26"), ExtResource("2_0vsqr"), ExtResource("3_dlqdj"), ExtResource("4_efcai"), ExtResource("5_wjxha"), ExtResource("6_ukqsd"), ExtResource("7_pgxfe"), ExtResource("8_0j2ph"), ExtResource("9_4ygc1"), ExtResource("10_k627b"), ExtResource("11_4k6dv"), ExtResource("12_yawfy"), ExtResource("13_mjyf2"), ExtResource("14_ablfk")])
 ShieldCurrentColor = Color(0.81648004, 0.0870079, 0.4975397, 1)
