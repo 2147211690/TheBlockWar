@@ -4,6 +4,7 @@ using ImGuiNET;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
 

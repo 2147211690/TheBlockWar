@@ -4,7 +4,7 @@ using Godot;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.Simulations;
 
 public record SimStep(bool IsChildStep)
 {

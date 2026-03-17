@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.Simulations;
 
 public class SimulationResult
 {
