@@ -281,7 +281,7 @@ public static class Simulator
                 }
 
                 var unit = state.UnitMapState.GetUnit(coords);
-                state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t), out _);
+                state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
                 result.Steps?.AddStep(new DropTileStep(IsCurrentChildSimulation, coords));
                 if (!unit.IsNull()) state.ApplyDropUnit(coords, result);
             }
@@ -306,7 +306,7 @@ public static class Simulator
                     t.IsOccupied = tile.IsOccupied;
                     t.Name = tile.Name;
                     t.Tag = tile.Tag;
-                }, out _);
+                });
                 result.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
                 var unit = state.UnitMapState.GetUnit(coords);
                 if (!unit.IsNull()) state.ApplyUnitSetInCoords(unit, result);
