@@ -8,40 +8,19 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyModifyUnitBuff(Vector2I coords, BuffTypeEnum buffType, BuffOperation operation, int duration,
-            SimulationResult result)
+        public void ApplyModifyUnitBuff(Vector2I coords, BuffTypeEnum buffType, BuffOperation operation, 
+            int duration, SimulationResult result)
         {
             EnterSimulation();
             Main();
             ExitSimulation();
-
-
-            void ChangeUnitValidBuff(IReadOnlyUnitState unit, int changeIndex, int oldDuration, int newDuration,
-                out BuffOperation resultOperation, out int resultDuration)
-            {
-                if (newDuration == 0)
-                {
-                    //如果新持续时间为0，则移除buff
-                    state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(changeIndex));
-                    resultOperation = BuffOperation.RemoveBuff;
-                    resultDuration = 0;
-                }
-                else
-                {
-                    state.UnitMapState.ModifyUnit(unit.Id, u => u.ModifyBuff(changeIndex, newDuration));
-                    var change = newDuration - oldDuration;
-                    resultOperation = BuffOperation.ChangeDuration;
-                    resultDuration = change;
-                }
-            }
-
+            
             void Main()
             {
                 if (result.Layer == SimulationLayer.Waiting)
                 {
                     result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
-                        duration,
-                        0, operation, duration));
+                        duration, 0, operation, duration));
                     return;
                 }
 
@@ -49,82 +28,22 @@ partial class Simulator
                 var resultOperation = BuffOperation.None;
                 var resultDuration = duration;
                 var resultOldDuration = 0;
+
                 if (!unit.IsNull())
                 {
-                    switch (operation)
+                    (resultOperation, resultDuration, resultOldDuration) = operation switch
                     {
-                        case BuffOperation.AddBuff: //添加buff
-                            if (unit.TryFindBuff(buffType, out var addIndex))
-                            {
-                                //如果buff已存在，则使用最大持续时间
-                                var oldDuration = unit.Buffs[addIndex].Duration;
-                                var newDuration = Mathf.Max(duration, oldDuration);
-                                ChangeUnitValidBuff(unit, addIndex, oldDuration, newDuration,
-                                    out resultOperation, out resultDuration);
-                                resultOldDuration = oldDuration;
-                            }
-                            else
-                            {
-                                //如果buff不存在，则直接添加
-                                state.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffType, duration));
-                                resultOperation = BuffOperation.AddBuff;
-                                resultDuration = duration;
-                            }
-
-                            break;
-                        case BuffOperation.RemoveBuff: //移除buff
-                            if (unit.TryFindBuff(buffType, out var removeIndex))
-                            {
-                                //如果buff已存在
-                                state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(removeIndex));
-                                resultOperation = BuffOperation.RemoveBuff;
-                                resultDuration = 0;
-                            }
-
-                            break;
-                        case BuffOperation.ChangeDuration: //改变buff持续时间
-                            if (unit.TryFindBuff(buffType, out var changeIndex))
-                            {
-                                var oldDuration = unit.Buffs[changeIndex].Duration;
-                                var newDuration = Mathf.Max(duration + duration, 0);
-                                //如果buff已存在
-                                ChangeUnitValidBuff(unit, changeIndex, oldDuration, newDuration,
-                                    out resultOperation, out resultDuration);
-                                resultOldDuration = oldDuration;
-                            }
-                            else
-                            {
-                                //如果buff不存在，则直接添加
-                                state.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffType, duration));
-                                resultOperation = BuffOperation.AddBuff;
-                                resultDuration = duration;
-                            }
-
-                            break;
-                        case BuffOperation.SetDuration: //设置buff持续时间
-                            if (unit.TryFindBuff(buffType, out var setIndex))
-                            {
-                                //如果buff已存在
-                                var oldDuration = unit.Buffs[setIndex].Duration;
-                                var newDuration = Mathf.Max(duration, 0);
-                                ChangeUnitValidBuff(unit, setIndex, oldDuration, newDuration,
-                                    out resultOperation, out resultDuration);
-                            }
-                            else
-                            {
-                                //如果buff不存在，则直接添加
-                                state.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffType, duration));
-                                resultOperation = BuffOperation.AddBuff;
-                                resultDuration = duration;
-                            }
-
-                            break;
-                    }
+                        BuffOperation.AddBuff => state.HandleAddOrChangeBuff(unit, buffType, duration, true),
+                        BuffOperation.RemoveBuff => state.HandleRemoveBuff(unit, buffType),
+                        BuffOperation.ChangeDuration =>
+                            state.HandleAddOrChangeBuff(unit, buffType, duration * 2, false),
+                        BuffOperation.SetDuration => state.HandleSetDurationBuff(unit, buffType, duration),
+                        _ => (BuffOperation.None, duration, 0)
+                    };
                 }
 
                 result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
-                    duration,
-                    unit.Id, resultOperation, resultDuration));
+                    duration, unit.Id, resultOperation, resultDuration));
 
                 if (ComplexSimulationRegion(result, 1))
                 {
@@ -140,11 +59,64 @@ partial class Simulator
                             state.NotifyUnitBuff(unit, buffType, b => b.OnDurationChanged(state, unit,
                                 resultOldDuration, resultOldDuration + resultDuration, result));
                             break;
-                        default:
-                            break;
                     }
                 }
             }
+        }
+
+        private (BuffOperation operation, int duration, int oldDuration) HandleAddOrChangeBuff(IReadOnlyUnitState unit, 
+            BuffTypeEnum buffType, int newDuration, bool isAdd)
+        {
+            if (unit.TryFindBuff(buffType, out var index))
+            {
+                var oldDuration = unit.Buffs[index].Duration;
+                var finalDuration = isAdd ? Mathf.Max(newDuration, oldDuration) : Mathf.Max(newDuration, 0);
+                
+                if (finalDuration == 0)
+                {
+                    state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
+                    return (BuffOperation.RemoveBuff, 0, oldDuration);
+                }
+                
+                state.UnitMapState.ModifyUnit(unit.Id, u => u.ModifyBuff(index, finalDuration));
+                return (BuffOperation.ChangeDuration, finalDuration - oldDuration, oldDuration);
+            }
+            
+            state.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffType, newDuration));
+            return (BuffOperation.AddBuff, newDuration, 0);
+        }
+
+        private (BuffOperation operation, int duration, int oldDuration) HandleRemoveBuff(IReadOnlyUnitState unit, 
+            BuffTypeEnum buffType)
+        {
+            if (unit.TryFindBuff(buffType, out var index))
+            {
+                state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
+                return (BuffOperation.RemoveBuff, 0, 0);
+            }
+            return (BuffOperation.None, 0, 0);
+        }
+
+        private (BuffOperation operation, int duration, int oldDuration) HandleSetDurationBuff(IReadOnlyUnitState unit, 
+            BuffTypeEnum buffType, int newDuration)
+        {
+            if (unit.TryFindBuff(buffType, out var index))
+            {
+                var oldDuration = unit.Buffs[index].Duration;
+                var finalDuration = Mathf.Max(newDuration, 0);
+                
+                if (finalDuration == 0)
+                {
+                    state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
+                    return (BuffOperation.RemoveBuff, 0, oldDuration);
+                }
+                
+                state.UnitMapState.ModifyUnit(unit.Id, u => u.ModifyBuff(index, finalDuration));
+                return (BuffOperation.ChangeDuration, finalDuration - oldDuration, oldDuration);
+            }
+            
+            state.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffType, newDuration));
+            return (BuffOperation.AddBuff, newDuration, 0);
         }
     }
 }
