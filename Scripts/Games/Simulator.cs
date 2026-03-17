@@ -74,6 +74,10 @@ public static class Simulator
                         ApplyModifyUnitBuff(state, modifyUnitBuffStep.Coords, modifyUnitBuffStep.BuffType,
                             modifyUnitBuffStep.Operation, modifyUnitBuffStep.Duration, runningResult);
                         break;
+                    case ModifyTileRegionStep modifyTileRegionStep:
+                        ApplyModifyTileRegion(state, modifyTileRegionStep.Coords, modifyTileRegionStep.RegionType,
+                            modifyTileRegionStep.Operation, modifyTileRegionStep.Duration, runningResult);
+                        break;
                     case null:
                         break;
                 }
@@ -94,11 +98,23 @@ public static class Simulator
             {
                 state.ApplyDropUnit(coords, result);
             }
+            else
+            {
+                var toTile = state.TileMapState.GetTile(unit.Coords);
+                if (!toTile.IsNull())
+                {
+                    state.NotifyTileRegions(toTile, r => r.OnUnitEnter(state, unit, coords, false, result));
+                }
+            }
         }
 
-        private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, in Vector2I coords, SimulationResult result)
+        private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, Vector2I coords, SimulationResult result)
         {
-
+            var fromTile = state.TileMapState.GetTile(coords);
+            if (!fromTile.IsNull())
+            {
+                state.NotifyTileRegions(fromTile, r => r.OnUnitLeave(state, unit, coords, false, result));
+            }
         }
 
         private void NotifyUnitBuffs(IReadOnlyUnitState unit, Action<IBuff> action)
@@ -115,6 +131,22 @@ public static class Simulator
             if (unit.IsNull()) return;
             if (!unit.TryFindBuff(buffType, out var index)) return;
             action(unit.Buffs[index].BuffType.GetInstance());
+        }
+
+        private void NotifyTileRegions(IReadOnlyTileState tile, Action<IRegion> action)
+        {
+            if (tile.Regions.Count == 0) return;
+            foreach (var regionType in tile.Regions.ToArray())
+            {
+                action(regionType.RegionType.GetInstance());
+            }
+        }
+
+        private void NotifyTileRegion(IReadOnlyTileState tile, RegionTypeEnum regionType, Action<IRegion> action)
+        {
+            if (tile == TileState.Empty) return;
+            if (!tile.TryFindRegion(regionType, out var index)) return;
+            action(tile.Regions[index].RegionType.GetInstance());
         }
 
         public void ApplyPlaceUnit(Vector2I coords, UnitState unitState,
@@ -284,6 +316,12 @@ public static class Simulator
                 state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
                 result.Steps?.AddStep(new DropTileStep(IsCurrentChildSimulation, coords));
                 if (!unit.IsNull()) state.ApplyDropUnit(coords, result);
+                var tile = state.TileMapState.GetTile(coords);
+                /*for (var i = tile.Regions.Count - 1; tile.Regions.Count > 0; i = tile.Regions.Count - 1)
+                {
+                    state.ApplyModifyTileRegion(coords, tile.Regions[i].RegionType, RegionOperation.RemoveRegion, 0, result);
+                }*/
+                
             }
         }
 
@@ -341,7 +379,7 @@ public static class Simulator
             }
         }
 
-        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I> path, SimulationResult result)
+        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path, SimulationResult result)
         {
             EnterSimulation();
             Main();
@@ -349,7 +387,7 @@ public static class Simulator
 
             void Main()
             {
-                if (path.Count == 0) return;
+                if (path is not {Count: > 0}) return;
                 var unit = state.UnitMapState.GetUnit(coords + path[0]);
                 if (unit.IsNull())
                 {
@@ -553,13 +591,154 @@ public static class Simulator
             }
         }
 
-        public void ParallelStart(SimulationResult result)
+        public void ApplyModifyTileRegion(Vector2I coords, RegionTypeEnum regionType, RegionOperation operation,
+            int duration,
+            SimulationResult result)
+        {
+            EnterSimulation();
+            Main();
+            ExitSimulation();
+
+            void ChangeTileValidRegion(IReadOnlyTileState tile, int changeIndex, int oldDuration, int newDuration,
+                out RegionOperation resultOperation, out int resultDuration)
+            {
+                if (newDuration == 0)
+                {
+                    state.TileMapState.ModifyTile(coords, t => t.RemoveRegion(changeIndex));
+                    resultOperation = RegionOperation.RemoveRegion;
+                    resultDuration = 0;
+                }
+                else
+                {
+                    state.TileMapState.ModifyTile(coords, t => t.ModifyRegion(changeIndex, newDuration));
+                    var change = newDuration - oldDuration;
+                    resultOperation = RegionOperation.ChangeDuration;
+                    resultDuration = change;
+                }
+            }
+
+            void Main()
+            {
+                if (result.Layer == SimulationLayer.Waiting)
+                {
+                    result.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType,
+                        operation,
+                        duration,
+                        operation, duration));
+                    return;
+                }
+
+                var tile = state.TileMapState.GetTile(coords);
+                var resultOperation = RegionOperation.None;
+                var resultDuration = duration;
+                var resultOldDuration = 0;
+                if (tile != TileState.Empty)
+                {
+                    switch (operation)
+                    {
+                        case RegionOperation.AddRegion:
+                            if (tile.TryFindRegion(regionType, out var addIndex))
+                            {
+                                var oldDuration = tile.Regions[addIndex].Duration;
+                                var newDuration = Mathf.Max(duration, oldDuration);
+                                ChangeTileValidRegion(tile, addIndex, oldDuration, newDuration,
+                                    out resultOperation, out resultDuration);
+                                resultOldDuration = oldDuration;
+                            }
+                            else
+                            {
+                                state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionType, duration));
+                                resultOperation = RegionOperation.AddRegion;
+                                resultDuration = duration;
+                            }
+
+                            break;
+                        case RegionOperation.RemoveRegion:
+                            if (tile.TryFindRegion(regionType, out var removeIndex))
+                            {
+                                state.TileMapState.ModifyTile(coords, t => t.RemoveRegion(removeIndex));
+                                resultOperation = RegionOperation.RemoveRegion;
+                                resultDuration = 0;
+                            }
+
+                            break;
+                        case RegionOperation.ChangeDuration:
+                            if (tile.TryFindRegion(regionType, out var changeIndex))
+                            {
+                                var oldDuration = tile.Regions[changeIndex].Duration;
+                                var newDuration = Mathf.Max(duration + duration, 0);
+                                ChangeTileValidRegion(tile, changeIndex, oldDuration, newDuration,
+                                    out resultOperation, out resultDuration);
+                                resultOldDuration = oldDuration;
+                            }
+                            else
+                            {
+                                state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionType, duration));
+                                resultOperation = RegionOperation.AddRegion;
+                                resultDuration = duration;
+                            }
+
+                            break;
+                        case RegionOperation.SetDuration:
+                            if (tile.TryFindRegion(regionType, out var setIndex))
+                            {
+                                var oldDuration = tile.Regions[setIndex].Duration;
+                                var newDuration = Mathf.Max(duration, 0);
+                                ChangeTileValidRegion(tile, setIndex, oldDuration, newDuration,
+                                    out resultOperation, out resultDuration);
+                            }
+                            else
+                            {
+                                state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionType, duration));
+                                resultOperation = RegionOperation.AddRegion;
+                                resultDuration = duration;
+                            }
+                            break;
+                    }
+                }
+                result.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType, operation,
+                    duration,
+                    resultOperation, resultDuration));
+
+                if (ComplexSimulationRegion(result, 1))
+                {
+                    switch (resultOperation)
+                    {
+                        case RegionOperation.AddRegion:
+
+                            var unit = state.UnitMapState.GetUnit(coords);
+                            if (!unit.IsNull())
+                            {
+                                state.NotifyTileRegion(tile, regionType,
+                                    r => r.OnUnitEnter(state, unit, coords, true, result));
+                            }
+
+                            break;
+                        case RegionOperation.RemoveRegion:
+                            var removeUnit = state.UnitMapState.GetUnit(coords);
+                            if (!removeUnit.IsNull())
+                            {
+                                state.NotifyTileRegion(tile, regionType,
+                                    r => r.OnUnitLeave(state, removeUnit, coords, true, result));
+                            }
+
+                            break;
+                        case RegionOperation.ChangeDuration:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        public static void ParallelStart(SimulationResult result)
         {
             if (result.Layer != SimulationLayer.Running) return;
             result.Steps?.AddStep(new ParallelStep(IsCurrentChildSimulation, true));
         }
 
-        public void ParallelEnd(SimulationResult result)
+        public static void ParallelEnd(SimulationResult result)
         {
             if (result.Layer != SimulationLayer.Running) return;
             result.Steps?.AddStep(new ParallelStep(IsCurrentChildSimulation, false));

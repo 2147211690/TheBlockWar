@@ -24,12 +24,23 @@ public record PushUnitStep(bool IsChildStep, Vector2I Coords, DirMask PushDir ,u
 /// <param name="ResultOperation">只有AddBuff,RemoveBuff,ChangeDuration结果</param>
 public record ModifyUnitBuffStep(bool IsChildStep, Vector2I Coords, BuffTypeEnum BuffType, BuffOperation Operation, int Duration,
     uint ResultUnitId, BuffOperation ResultOperation, int ResultDuration) : SimStep(IsChildStep);
+public record ModifyTileRegionStep(bool IsChildStep, Vector2I Coords, RegionTypeEnum RegionType, RegionOperation Operation, int Duration,
+    RegionOperation ResultOperation, int ResultDuration) : SimStep(IsChildStep);
 [Flags]
 public enum BuffOperation
 {
     None,
     AddBuff,
     RemoveBuff,
+    ChangeDuration,
+    SetDuration
+}
+[Flags]
+public enum RegionOperation
+{
+    None,
+    AddRegion,
+    RemoveRegion,
     ChangeDuration,
     SetDuration
 }

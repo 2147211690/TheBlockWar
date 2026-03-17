@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -132,6 +133,22 @@ public static class Extensions
         }
         public bool IsNull() => unit.Id == 0;
     }
+
+    extension(IReadOnlyTileState tile)
+    {
+        public bool TryFindRegion(RegionTypeEnum regionType, out int index)
+        {
+            for (var i = 0; i < tile.Regions.Count; i++)
+                if (tile.Regions[i].RegionType == regionType)
+                {
+                    index = i;
+                    return true;
+                }
+            index = -1;
+            return false;
+        }
+        public bool IsNull() => (tile.Tag & TileTag.Empty) != 0;
+    }
     
 
     extension<T>(IReadOnlyList<T> list)
@@ -193,6 +210,15 @@ public static class Extensions
         public int GetDuration()
         {
             return (int)(num & ~(0b_011 << 29));
+        }
+    }
+
+    extension(AnimatedSprite2D animatedSprite2D)
+    {
+        public void ContinueFinishedOneShot(Action action)
+        {
+            animatedSprite2D.Connect(AnimatedSprite2D.SignalName.AnimationFinished,
+                Callable.From(action), (uint)GodotObject.ConnectFlags.OneShot);
         }
     }
 }

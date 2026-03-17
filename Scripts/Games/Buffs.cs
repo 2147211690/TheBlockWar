@@ -72,7 +72,7 @@ public static class Buffs
 
         public override void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result)
         {
-            //state.ApplyDropTile(unit.Coords, result);
+            //state.UnitMapState.ModifyUnit(unit.Id, u => u);
         }
     }
 }

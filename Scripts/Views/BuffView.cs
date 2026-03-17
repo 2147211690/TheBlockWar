@@ -99,20 +99,38 @@ public partial class BuffView : Node2D
         
         s.SpriteFrames = BuffEffectSpriteFrames;
         var name = $"{Enum.GetName(type)}_Add";
-        if (BuffEffectSpriteFrames.HasAnimation(name)) s.Play(name);
+        var idleName = $"{Enum.GetName(type)}_Idle";
+        if (BuffEffectSpriteFrames.HasAnimation(name))
+        {
+            s.Play(name);
+            if (BuffEffectSpriteFrames.HasAnimation(idleName))
+            {
+                s.ContinueFinishedOneShot(() => s.Play(idleName));
+            }
+        }
+        else if (BuffEffectSpriteFrames.HasAnimation(idleName)) s.Play(idleName);
+        
     }
     public void RemoveVisibleBuff(BuffTypeEnum type)
     {
-        if (!_visibleBuffs.TryGetValue(type, out var s)) return;
+        if (!_visibleBuffs.Remove(type, out var s)) return;
+
         var name = $"{Enum.GetName(type)}_Remove";
-        if (BuffEffectSpriteFrames.HasAnimation(name)) s.Play(name);
-        //TODO: 动画完成后才移除
-        s.GetParent().RemoveChild(s);
-        GameView.DrawContainer.AddChild(s);
-        s.SpriteFrames = null;
-        s.Offset = Vector2.Zero;
-        GameView.AnimatedSpritePool.Push(s);
-        _visibleBuffs.Remove(type);
+        if (BuffEffectSpriteFrames.HasAnimation(name))
+        {
+            s.Play(name);
+            s.ContinueFinishedOneShot(() => AfterAnim(s));
+        }
+        else AfterAnim(s);
+
+        void AfterAnim(AnimatedSprite2D animatedSprite2D)
+        {
+            animatedSprite2D.GetParent().RemoveChild(animatedSprite2D);
+            GameView.DrawContainer.AddChild(animatedSprite2D);
+            animatedSprite2D.SpriteFrames = null;
+            animatedSprite2D.Offset = Vector2.Zero;
+            GameView.AnimatedSpritePool.Push(animatedSprite2D);
+        }
     }
     public override void _Draw()
     {

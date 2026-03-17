@@ -20,19 +20,20 @@ public static class Skills
     {
         if (args.TryGetArgs(0, out var v1))
         {
+            
             var path = GameNavigator.FindShortestPath(gameState, unit, useCoords, v1 + unit.Coords);
             gameState.ApplyMoveUnitPath(Vector2I.Zero, path, result);
+            gameState.ApplyModifyTileRegion(useCoords, RegionTypeEnum.Test1, RegionOperation.AddRegion, 1, result);
         }
         if (args.TryGetArgs(1, out var v2))
         {
+            
             gameState.ApplyModifyUnitBuff(useCoords + v2, BuffTypeEnum.Test, BuffOperation.AddBuff, 1, result);
-            gameState.ParallelStart(result);
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 var dir = (DirMask)(1 << i);
                 gameState.ApplyPushUnit(v2 + useCoords + dir.ToVec2I(), dir, result);
             }
-            gameState.ParallelEnd(result);
         }
     }
 
