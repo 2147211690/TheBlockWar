@@ -98,18 +98,23 @@ public static class Simulator
             renewedUnit = state.UnitMapState.GetUnit(unit.Id);
         }
 
-        private void NotifyUnitBuffs(IReadOnlyUnitState unit, Action<IBuff> action, out IReadOnlyUnitState? renewedUnit)
+        private void NotifyUnitBuffs(IReadOnlyUnitState? unit, Action<IBuff> action)
         {
-            if (unit.Buffs.Count == 0)
+            if ((unit?.Buffs.Count ?? 0) == 0)
             {
-                renewedUnit = unit;
                 return;
             }
             foreach (var buffType in unit.Buffs.ToArray())
             {
+                if (unit is null) break;
                 action(buffType.BuffType.GetInstance());
             }
-            renewedUnit = state.UnitMapState.GetUnit(unit.Id);
+        }
+        private void NotifyUnitBuff(IReadOnlyUnitState? unit, BuffTypeEnum buffType, Action<IBuff> action)
+        {
+            if (unit is null) return;
+            if (!unit.TryFindBuff(buffType, out var index)) return;
+            action(unit.Buffs[index].BuffType.GetInstance());
         }
         public void ApplyPlaceUnit(Vector2I coords, UnitState unitState,
             SimulationResult result)
@@ -182,7 +187,7 @@ public static class Simulator
                 }
                 var rawDamage = damage;
                 
-                state.NotifyUnitBuffs(unit, b => b.OnUnitBeforeDamage(state, id, rawDamage, ref rawDamage, result), out unit);
+                state.NotifyUnitBuffs(unit, b => b.OnUnitBeforeDamage(state, unit, rawDamage, ref rawDamage, result, out unit));
 
                 if (unit is null)
                 {
@@ -206,7 +211,7 @@ public static class Simulator
                 if (validDamage > 0 && result.Layer == SimulationLayer.Running)
                 {
                     // 触发受伤后事件
-                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterDamage(state, id, validDamage, result), out unit);
+                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterDamage(state, unit, validDamage, result, out unit));
                 }
                 
                 if (unit?.Health <= 0)
@@ -423,6 +428,7 @@ public static class Simulator
                 var id = unit?.Id ?? 0;
                 var resultOperation = BuffOperation.None;
                 var resultDuration = duration;
+                var resultOldDuration = 0;
                 if (unit is not null)
                 {
                     switch (operation)
@@ -435,6 +441,7 @@ public static class Simulator
                                 var newDuration = Mathf.Max(duration, oldDuration);
                                 ChangeUnitValidBuff(unit, addIndex, oldDuration, newDuration, 
                                     out resultOperation, out resultDuration, out unit);
+                                resultOldDuration = oldDuration;
                             }
                             else
                             {
@@ -461,8 +468,15 @@ public static class Simulator
                                 //如果buff已存在
                                 ChangeUnitValidBuff(unit, changeIndex, oldDuration, newDuration, 
                                     out resultOperation, out resultDuration, out unit);
+                                resultOldDuration = oldDuration;
                             }
-
+                            else
+                            {
+                                //如果buff不存在，则直接添加
+                                state.UnitMapState.ModifyUnit(id, u => u.AddBuff(buffType, duration), out unit);
+                                resultOperation = BuffOperation.AddBuff;
+                                resultDuration = duration;
+                            }
                             break;
                         case BuffOperation.SetDuration: //设置buff持续时间
                             if (unit.TryFindBuff(buffType, out var setIndex))
@@ -482,11 +496,26 @@ public static class Simulator
                             }
                             break;
                     }
-                    //TODO:处理buff改变后的额外效果
                 }
 
                 result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation, duration,
                     id, resultOperation, resultDuration));
+                
+                switch (resultOperation)
+                {
+                    case BuffOperation.AddBuff:
+                        state.NotifyUnitBuffs(unit, b => b.OnAddToUnit(state, unit, result, out unit));
+                        break;
+                    case BuffOperation.RemoveBuff:
+                        state.NotifyUnitBuff(unit, buffType, b => b.OnRemoveFromUnit(state, unit, result, out unit));
+                        break;
+                    case BuffOperation.ChangeDuration:
+                        state.NotifyUnitBuff(unit, buffType, b => b.OnDurationChanged(state, unit,
+                            resultOldDuration, resultOldDuration + resultDuration, result, out unit));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
