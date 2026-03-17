@@ -45,6 +45,17 @@ public partial class TilesView : TileMapLayer
         };
     }
 
+    public Vector2 GetLocalVec(DirMask dirMask)
+    {
+        return dirMask switch
+        {
+            DirMask.Up => LocalUp,
+            DirMask.Down => -LocalUp,
+            DirMask.Left => LocalLeft,
+            DirMask.Right => -LocalLeft,
+            _ => Vector2.Zero,
+        };
+    }
     public float GetTileHeight(in Vector2I coords) => _tileViews.GetValueOrDefault(coords, null)?.Height ?? 0;
     public Vector2I GlobalMouseToTileCoords(Vector2 globalMousePos)
     {
@@ -52,7 +63,7 @@ public partial class TilesView : TileMapLayer
         local.Y += NormalGroundHeight;
         return LocalToMap(local);
     }
-    public GDTask PlaceTile(Vector2I coords, TileState tile)
+    public async GDTask PlaceTile(Vector2I coords, TileState tile)
     {
         //GD.Print("PlaceTile");
         if (!_tileViews.TryGetValue(coords, out var render))
@@ -69,16 +80,16 @@ public partial class TilesView : TileMapLayer
         else
         {
             render.TileName = "Soil";
-            return render.PlayPlaceDownAnim();
+            await render.PlayPlaceDownAnim();
         }
-        return GDTask.CompletedTask;
+        GameView.UnitsView.UpdateUnitPosition(coords);
     }
-    public GDTask DropTile(Vector2I coords)
+    public async GDTask DropTile(Vector2I coords)
     {
         GD.Print("DropTile");
         if (!_tileViews.TryGetValue(coords, out var render))
         {
-            return GDTask.CompletedTask;
+            return;
         }
         var tween = CreateTween();
         tween.SetTrans(Tween.TransitionType.Bounce); // 使用Bounce效果模拟弹性落地
@@ -91,7 +102,8 @@ public partial class TilesView : TileMapLayer
             render.Visible = false;
             render.TileName = "Empty";
         };
-        return tween.ToSignal(tween, "finished").AsGDTask();
+        await tween.WaitForTween();
+        GameView.UnitsView.UpdateUnitPosition(coords);
     }
     public void DrawRegions(IEnumerable<(HashSet<Vector2I> Coords, int type)> regions, in Vector2I mapSize)
     {
@@ -109,7 +121,12 @@ public partial class TilesView : TileMapLayer
         }
     }
 
-    private float GetLayerOffset(Layer layer) => LocalRightDown.Y / (int)layer;
+    private float GetLayerOffset(Layer layer) => layer switch
+    {
+        Layer.Ground => 0,
+        Layer.Underground => LocalRightDown.Y / 4,
+        Layer.Sky => LocalRightDown.Y * 2,
+    };
     public Vector2 GetRenderPosition(in Vector2I coords, Layer layer, int renderOffset)
     {
         var maxOffset = GetLayerOffset(layer);

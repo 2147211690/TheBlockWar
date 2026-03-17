@@ -13,11 +13,25 @@ namespace TheBlockWar.Scripts.Games;
 /// </summary>
 public static class Simulator
 {
+    /// <summary>
+    /// 是否进行复杂模拟
+    /// </summary>
+    public static int ComplexSimulationMaxLevel { get; set; } = int.MaxValue;
     private static int _simulationStack;
     private static bool IsCurrentChildSimulation => _simulationStack > 1;
-    private static void EnterSimulation() => _simulationStack++;
+    private static void EnterSimulation()
+    {
+        if (_simulationStack == 0)
+        {
+            CurrentComplexSimulationMaxLevel = ComplexSimulationMaxLevel;
+        }
+        _simulationStack++;
+    }
     private static void ExitSimulation() => _simulationStack--;
-
+    private static int CurrentComplexSimulationMaxLevel { get; set; }
+    private static bool ComplexSimulationRegion(SimulationResult result, int level) 
+        => CurrentComplexSimulationMaxLevel >= level || result.Layer == SimulationLayer.Running;
+    
     extension(IGameState state)
     {
         public void ApplyResult(SimulationResult result)
@@ -57,7 +71,7 @@ public static class Simulator
                         ApplyDropTile(state, dropTileStep.Coords, runningResult);
                         break;
                     case ModifyUnitBuffStep modifyUnitBuffStep:
-                        ApplyModifyUnitBuff(state, modifyUnitBuffStep.Coords, modifyUnitBuffStep.BuffType, 
+                        ApplyModifyUnitBuff(state, modifyUnitBuffStep.Coords, modifyUnitBuffStep.BuffType,
                             modifyUnitBuffStep.Operation, modifyUnitBuffStep.Duration, runningResult);
                         break;
                     case null:
@@ -74,16 +88,17 @@ public static class Simulator
             {
                 return;
             }
-            
+
             var coords = unit.Coords;
             if (unit.IsWillDrop(state, coords)) // 单位会掉落
             {
                 state.ApplyDropUnit(coords, result);
             }
         }
+
         private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, in Vector2I coords, SimulationResult result)
         {
-            
+
         }
 
         private void NotifyUnitBuffs(IReadOnlyUnitState unit, Action<IBuff> action)
@@ -94,12 +109,14 @@ public static class Simulator
                 action(buffType.BuffType.GetInstance());
             }
         }
+
         private void NotifyUnitBuff(IReadOnlyUnitState unit, BuffTypeEnum buffType, Action<IBuff> action)
         {
             if (unit.IsNull()) return;
             if (!unit.TryFindBuff(buffType, out var index)) return;
             action(unit.Buffs[index].BuffType.GetInstance());
         }
+
         public void ApplyPlaceUnit(Vector2I coords, UnitState unitState,
             SimulationResult result)
         {
@@ -115,19 +132,24 @@ public static class Simulator
                     result.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, null, 0, isValid));
                     return;
                 }
+
                 //如果在等待层,或者此处有单位,则放置失败
                 if (!isValid)
                 {
-                    result.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, null, unitState.Id, false));
+                    result.Steps?.AddStep(
+                        new PlaceUnitStep(IsCurrentChildSimulation, coords, null, unitState.Id, false));
                     return;
                 }
+
                 unitState.Coords = coords;
                 state.UnitMapState.AddUnit(unitState);
-                result.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitState, unitState.Id, isValid));
+                result.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitState, unitState.Id,
+                    isValid));
                 //应用单位放置到坐标的额外操作
                 state.ApplyUnitSetInCoords(state.UnitMapState.GetUnit(unitState.Id), result);
             }
         }
+
         public void ApplyDropUnit(Vector2I coords, SimulationResult result)
         {
             EnterSimulation();
@@ -136,18 +158,19 @@ public static class Simulator
 
             void Main()
             {
-                
+
                 if (result.Layer == SimulationLayer.Waiting)
                 {
                     result.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, 0, false));
                     return;
                 }
+
                 var unit = state.UnitMapState.GetUnit(coords);
                 state.UnitMapState.RemoveUnit(unit.Id);
-                result.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, unit.Id,true));
+                result.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, unit.Id, true));
             }
         }
-        
+
         public void ApplyDamage(Vector2I coords, float damage, SimulationResult result)
         {
             EnterSimulation();
@@ -161,46 +184,54 @@ public static class Simulator
                     result.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, 0, 0));
                     return;
                 }
+
                 var unit = state.UnitMapState.GetUnit(coords);
                 float validDamage = 0;
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    result.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                    result.Steps?.AddStep(
+                        new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
                     return;
                 }
+
                 var rawDamage = damage;
-                
+
                 //应用单位伤害前事件
-                state.NotifyUnitBuffs(unit, b => b.OnUnitBeforeDamage(state, unit, rawDamage, ref rawDamage, result));
-                unit = state.UnitMapState.GetUnit(unit.Id);
-                
+                if (ComplexSimulationRegion(result, 0))
+                {
+                    state.NotifyUnitBuffs(unit,
+                        b => b.OnUnitBeforeDamage(state, unit, rawDamage, ref rawDamage, result));
+                    unit = state.UnitMapState.GetUnit(unit.Id);
+                }
+
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                    result.Steps?.AddStep(
+                        new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
                     return;
                 }
-                
+
                 validDamage = Math.Min(rawDamage, unit.Health);
                 state.UnitMapState.ModifyUnit(unit.Id, u => u.Health -= validDamage);
                 unit = state.UnitMapState.GetUnit(unit.Id);
-                
+
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                    result.Steps?.AddStep(
+                        new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
                     return;
                 }
-                
+
                 result.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
 
                 // 触发受伤后事件, 仅在运行层触发
-                //TODO:待考虑是否需要在关注层触发
-                if (validDamage > 0 && result.Layer == SimulationLayer.Running)
+                if (validDamage > 0 && ComplexSimulationRegion(result, 0))
                 {
                     // 触发受伤后事件
                     state.NotifyUnitBuffs(unit, b => b.OnUnitAfterDamage(state, unit, validDamage, result));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
-                
+
                 if (!unit.IsNull() && unit.Health <= 0)
                 {
                     ApplyDeath(state, coords, result);
@@ -221,15 +252,15 @@ public static class Simulator
                     result.Steps?.AddStep(new DeathStep(IsCurrentChildSimulation, coords, 0, false));
                     return;
                 }
-                
+
                 var unit = state.UnitMapState.GetUnit(coords);
-                
+
                 if (unit.IsNull() || unit.IsDead)
                 {
                     result.Steps?.AddStep(new DeathStep(IsCurrentChildSimulation, coords, unit.Id, false));
                     return;
                 }
-                
+
                 result.Steps?.AddStep(new DeathStep(IsCurrentChildSimulation, coords, unit.Id, true));
                 state.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
             }
@@ -248,6 +279,7 @@ public static class Simulator
                     result.Steps?.AddStep(new DropTileStep(IsCurrentChildSimulation, coords));
                     return;
                 }
+
                 var unit = state.UnitMapState.GetUnit(coords);
                 state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t), out _);
                 result.Steps?.AddStep(new DropTileStep(IsCurrentChildSimulation, coords));
@@ -268,6 +300,7 @@ public static class Simulator
                     result.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
                     return;
                 }
+
                 state.TileMapState.ModifyTile(coords, t =>
                 {
                     t.IsOccupied = tile.IsOccupied;
@@ -288,13 +321,14 @@ public static class Simulator
 
             void Main()
             {
-                
+
                 bool isValid = true;
                 if (result.Layer == SimulationLayer.Waiting)
                 {
                     result.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, 0, isValid));
                     return;
                 }
+
                 var unit = state.UnitMapState.GetUnit(coords);
                 if (!unit.IsNull())
                 {
@@ -306,7 +340,7 @@ public static class Simulator
                 else result.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, unit.Id, isValid));
             }
         }
-        
+
         public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I> path, SimulationResult result)
         {
             EnterSimulation();
@@ -319,25 +353,31 @@ public static class Simulator
                 var unit = state.UnitMapState.GetUnit(coords + path[0]);
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, 0, false));
+                    result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, 0,
+                        false));
                     return;
                 }
-                var targetIndex = 1;
-            
-                for (; targetIndex < path.Count - 1; targetIndex++)
-                    if (!unit.IsCanPass(state, coords + path[targetIndex])) break;
-            
-                for (; targetIndex >= 0; targetIndex--)
-                    if (unit.IsCanBeDestination(state, coords + path[targetIndex])) break;
 
-            
+                var targetIndex = 1;
+
+                for (; targetIndex < path.Count - 1; targetIndex++)
+                    if (!unit.IsCanPass(state, coords + path[targetIndex]))
+                        break;
+
+                for (; targetIndex >= 0; targetIndex--)
+                    if (unit.IsCanBeDestination(state, coords + path[targetIndex]))
+                        break;
+
+
                 if (result.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, targetIndex, true));
+                    result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id,
+                        targetIndex, true));
                     return;
                 }
-                
-                result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, targetIndex, true));
+
+                result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, targetIndex,
+                    true));
                 if (targetIndex > 0) state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], result);
             }
         }
@@ -355,6 +395,7 @@ public static class Simulator
                     result.Steps?.AddStep(new PushUnitStep(IsCurrentChildSimulation, coords, dir, 0, true));
                     return;
                 }
+
                 var unit = state.UnitMapState.GetUnit(coords);
                 var target = coords + dir.ToVec2I();
                 var targetUnit = state.UnitMapState.GetUnit(target);
@@ -372,7 +413,7 @@ public static class Simulator
                 }
             }
         }
-        
+
         public void ApplyModifyUnitBuff(Vector2I coords, BuffTypeEnum buffType, BuffOperation operation, int duration,
             SimulationResult result)
         {
@@ -381,7 +422,7 @@ public static class Simulator
             ExitSimulation();
 
 
-            void ChangeUnitValidBuff(IReadOnlyUnitState unit, int changeIndex, int oldDuration, int newDuration, 
+            void ChangeUnitValidBuff(IReadOnlyUnitState unit, int changeIndex, int oldDuration, int newDuration,
                 out BuffOperation resultOperation, out int resultDuration)
             {
                 if (newDuration == 0)
@@ -404,10 +445,12 @@ public static class Simulator
             {
                 if (result.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation, duration,
+                    result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
+                        duration,
                         0, operation, duration));
                     return;
                 }
+
                 var unit = state.UnitMapState.GetUnit(coords);
                 var resultOperation = BuffOperation.None;
                 var resultDuration = duration;
@@ -422,7 +465,7 @@ public static class Simulator
                                 //如果buff已存在，则使用最大持续时间
                                 var oldDuration = unit.Buffs[addIndex].Duration;
                                 var newDuration = Mathf.Max(duration, oldDuration);
-                                ChangeUnitValidBuff(unit, addIndex, oldDuration, newDuration, 
+                                ChangeUnitValidBuff(unit, addIndex, oldDuration, newDuration,
                                     out resultOperation, out resultDuration);
                                 resultOldDuration = oldDuration;
                             }
@@ -433,6 +476,7 @@ public static class Simulator
                                 resultOperation = BuffOperation.AddBuff;
                                 resultDuration = duration;
                             }
+
                             break;
                         case BuffOperation.RemoveBuff: //移除buff
                             if (unit.TryFindBuff(buffType, out var removeIndex))
@@ -442,6 +486,7 @@ public static class Simulator
                                 resultOperation = BuffOperation.RemoveBuff;
                                 resultDuration = 0;
                             }
+
                             break;
                         case BuffOperation.ChangeDuration: //改变buff持续时间
                             if (unit.TryFindBuff(buffType, out var changeIndex))
@@ -449,7 +494,7 @@ public static class Simulator
                                 var oldDuration = unit.Buffs[changeIndex].Duration;
                                 var newDuration = Mathf.Max(duration + duration, 0);
                                 //如果buff已存在
-                                ChangeUnitValidBuff(unit, changeIndex, oldDuration, newDuration, 
+                                ChangeUnitValidBuff(unit, changeIndex, oldDuration, newDuration,
                                     out resultOperation, out resultDuration);
                                 resultOldDuration = oldDuration;
                             }
@@ -460,6 +505,7 @@ public static class Simulator
                                 resultOperation = BuffOperation.AddBuff;
                                 resultDuration = duration;
                             }
+
                             break;
                         case BuffOperation.SetDuration: //设置buff持续时间
                             if (unit.TryFindBuff(buffType, out var setIndex))
@@ -467,7 +513,7 @@ public static class Simulator
                                 //如果buff已存在
                                 var oldDuration = unit.Buffs[setIndex].Duration;
                                 var newDuration = Mathf.Max(duration, 0);
-                                ChangeUnitValidBuff(unit, setIndex, oldDuration, newDuration, 
+                                ChangeUnitValidBuff(unit, setIndex, oldDuration, newDuration,
                                     out resultOperation, out resultDuration);
                             }
                             else
@@ -477,29 +523,46 @@ public static class Simulator
                                 resultOperation = BuffOperation.AddBuff;
                                 resultDuration = duration;
                             }
+
                             break;
                     }
                 }
 
-                result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation, duration,
+                result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
+                    duration,
                     unit.Id, resultOperation, resultDuration));
-                
-                switch (resultOperation)
+
+                if (ComplexSimulationRegion(result, 1))
                 {
-                    case BuffOperation.AddBuff:
-                        state.NotifyUnitBuffs(unit, b => b.OnAddToUnit(state, unit, result));
-                        break;
-                    case BuffOperation.RemoveBuff:
-                        state.NotifyUnitBuff(unit, buffType, b => b.OnRemoveFromUnit(state, unit, result));
-                        break;
-                    case BuffOperation.ChangeDuration:
-                        state.NotifyUnitBuff(unit, buffType, b => b.OnDurationChanged(state, unit,
-                            resultOldDuration, resultOldDuration + resultDuration, result));
-                        break;
-                    default:
-                        break;
+                    switch (resultOperation)
+                    {
+                        case BuffOperation.AddBuff:
+                            state.NotifyUnitBuffs(unit, b => b.OnAddToUnit(state, unit, result));
+                            break;
+                        case BuffOperation.RemoveBuff:
+                            state.NotifyUnitBuff(unit, buffType, b => b.OnRemoveFromUnit(state, unit, result));
+                            break;
+                        case BuffOperation.ChangeDuration:
+                            state.NotifyUnitBuff(unit, buffType, b => b.OnDurationChanged(state, unit,
+                                resultOldDuration, resultOldDuration + resultDuration, result));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
+        }
+
+        public void ParallelStart(SimulationResult result)
+        {
+            if (result.Layer != SimulationLayer.Running) return;
+            result.Steps?.AddStep(new ParallelStep(IsCurrentChildSimulation, true));
+        }
+
+        public void ParallelEnd(SimulationResult result)
+        {
+            if (result.Layer != SimulationLayer.Running) return;
+            result.Steps?.AddStep(new ParallelStep(IsCurrentChildSimulation, false));
         }
     }
 }

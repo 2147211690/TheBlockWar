@@ -217,7 +217,7 @@ public partial class GameView : Node2D
                         view.DropUnit(isFocused, dropStep.Coords, dropStep.ResultIsValid);
                         break;
                     case PushUnitStep pushStep:
-                        view.PushUnit(isFocused, pushStep.Coords, pushStep.ResultPush);
+                        view.PushUnit(isFocused, simulation.TeamType, pushStep.PushDir, pushStep.Coords, pushStep.ResultPush);
                         break;
                     case ModifyUnitBuffStep modifyUnitBuffStep:
                         view.ModifyUnitBuff(isFocused, modifyUnitBuffStep.Coords,

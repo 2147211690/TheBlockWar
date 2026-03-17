@@ -26,12 +26,13 @@ public static class Skills
         if (args.TryGetArgs(1, out var v2))
         {
             gameState.ApplyModifyUnitBuff(useCoords + v2, BuffTypeEnum.Test, BuffOperation.AddBuff, 1, result);
-            gameState.ApplyModifyUnitBuff(v2 + useCoords + Vector2I.Up, BuffTypeEnum.Test, BuffOperation.RemoveBuff, 1, result);
+            gameState.ParallelStart(result);
             for(int i = 0; i < 4; i++)
             {
                 var dir = (DirMask)(1 << i);
                 gameState.ApplyPushUnit(v2 + useCoords + dir.ToVec2I(), dir, result);
             }
+            gameState.ParallelEnd(result);
         }
     }
 

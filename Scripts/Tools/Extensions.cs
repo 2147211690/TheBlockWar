@@ -156,6 +156,17 @@ public static class Extensions
                 _ => Vector2I.Zero,
             };
         }
+        public int ToIndex()
+        {
+            return dirMask switch
+            {
+                DirMask.Up => 0,
+                DirMask.Down => 1,
+                DirMask.Left => 2,
+                DirMask.Right => 3,
+                _ => -1,
+            };
+        }
     }
 
     extension(Tween tween)

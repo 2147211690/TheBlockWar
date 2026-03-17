@@ -96,6 +96,7 @@ public partial class UnitsView : Node2D
         view.RealCoords = to;
         SetUnitMapPosition(view.WishCoords, view);
         _unitMaps.Add(to, unitId);
+        GameView.UnitsView.UpdateUnitPosition(to);
     }
 
     public async GDTask MovePathUnit(uint unitId, Vector2I coords, List<Vector2I> path, int targetIndex)

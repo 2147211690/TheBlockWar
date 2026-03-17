@@ -17,6 +17,10 @@
 [ext_resource type="Texture2D" uid="uid://4kyqvnq7okeh" path="res://Art/Img/path/up_end.png" id="14_ablfk"]
 [ext_resource type="Texture2D" uid="uid://bantwlkdgcecq" path="res://Art/Img/combat/artillery_arrow_down.png" id="15_0vsqr"]
 [ext_resource type="Script" uid="uid://slsetkd0kji2" path="res://Scripts/Resources/GameViewTeamStyle.cs" id="16_dlqdj"]
+[ext_resource type="Texture2D" uid="uid://b1lm0tuxmtii2" path="res://Art/Img/combat/arrow_up.png" id="16_pgxfe"]
+[ext_resource type="Texture2D" uid="uid://boiiurj7aaxi8" path="res://Art/Img/combat/arrow_down.png" id="17_0j2ph"]
+[ext_resource type="Texture2D" uid="uid://bi50bo3kev630" path="res://Art/Img/combat/arrow_left.png" id="18_4ygc1"]
+[ext_resource type="Texture2D" uid="uid://bm0hdspgfujef" path="res://Art/Img/combat/arrow_right.png" id="19_k627b"]
 
 [sub_resource type="SystemFont" id="SystemFont_dlqdj"]
 
@@ -25,6 +29,7 @@ script = ExtResource("16_dlqdj")
 Font = SubResource("SystemFont_dlqdj")
 PlaceDownTexture = ExtResource("15_0vsqr")
 PathTextures = Array[Texture2D]([null, ExtResource("1_lsp26"), ExtResource("2_0vsqr"), ExtResource("3_dlqdj"), ExtResource("4_efcai"), ExtResource("5_wjxha"), ExtResource("6_ukqsd"), ExtResource("7_pgxfe"), ExtResource("8_0j2ph"), ExtResource("9_4ygc1"), ExtResource("10_k627b"), ExtResource("11_4k6dv"), ExtResource("12_yawfy"), ExtResource("13_mjyf2"), ExtResource("14_ablfk")])
+PushTextures = Array[Texture2D]([ExtResource("16_pgxfe"), ExtResource("17_0j2ph"), ExtResource("18_4ygc1"), ExtResource("19_k627b")])
 HealthCurrentColor = Color(0.2027216, 0.6880478, 0.4521318, 1)
 ShieldCurrentColor = Color(0.7857211, 0.5788141, 0.45463789, 1)
 HealthBarColor = Color(0.06401862, 0.10175585, 0.13946006, 1)
@@ -35,6 +40,7 @@ script = ExtResource("16_dlqdj")
 Font = SubResource("SystemFont_dlqdj")
 PlaceDownTexture = ExtResource("15_0vsqr")
 PathTextures = Array[Texture2D]([null, ExtResource("1_lsp26"), ExtResource("2_0vsqr"), ExtResource("3_dlqdj"), ExtResource("4_efcai"), ExtResource("5_wjxha"), ExtResource("6_ukqsd"), ExtResource("7_pgxfe"), ExtResource("8_0j2ph"), ExtResource("9_4ygc1"), ExtResource("10_k627b"), ExtResource("11_4k6dv"), ExtResource("12_yawfy"), ExtResource("13_mjyf2"), ExtResource("14_ablfk")])
+PushTextures = Array[Texture2D]([ExtResource("16_pgxfe"), ExtResource("17_0j2ph"), ExtResource("18_4ygc1"), ExtResource("19_k627b")])
 ShieldCurrentColor = Color(0.81648004, 0.0870079, 0.4975397, 1)
 HealthBarColor = Color(0.06401862, 0.10175585, 0.13946006, 1)
 SplitColor = Color(0.06401862, 0.10175585, 0.13946006, 1)

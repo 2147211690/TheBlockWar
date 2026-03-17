@@ -10,6 +10,8 @@ public record SimStep(bool IsChildStep)
 {
     public static readonly SimStep Default = new(false);
 }
+
+public record ParallelStep(bool IsChildStep, bool IsStart) : SimStep(IsChildStep);
 public record DamageStep(bool IsChildStep, Vector2I Coords,float Damage, uint ResultUnitId, float ResultValidDamage) : SimStep(IsChildStep);
 public record DeathStep(bool IsChildStep, Vector2I Coords, uint ResultUnitId, bool ResultIsValid) : SimStep(IsChildStep);
 public record PlaceTileStep(bool IsChildStep, Vector2I Coords, TileState Tile) : SimStep(IsChildStep);

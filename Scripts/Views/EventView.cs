@@ -42,6 +42,7 @@ public class EventView
         node.QueueRedraw();
     }
 
+
     private void PlaceUnitDraw(DrawNode drawNode, bool visible, bool isFocus, TeamTypeEnum teamType,
         Vector2I coords, UnitState unit, bool isValid)
     {
@@ -190,7 +191,7 @@ public class EventView
         node.QueueRedraw();
     }
     
-    public void PushUnit(bool isFocus, Vector2I coords, bool isValid)
+    public void PushUnit(bool isFocus, TeamTypeEnum teamType, DirMask pushDir, Vector2I coords, bool isValid)
     {
         //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
         var node = DrawNodePool.Pop();
@@ -199,10 +200,13 @@ public class EventView
         {
             if (v)
             {
-                u.DrawCircle(TilesView.GetRenderOffset(coords, Layer.Sky, 0), 10, isValid ? Colors.Green : Colors.Red);
+                u.DrawTextureCentered(Style[teamType].PushTextures[pushDir.ToIndex()], 
+                    TilesView.GetRenderOffset(coords, Layer.Sky, 0),
+                    new Color(1,1,1,isFocus ? 1 : 0.3f));
             }
         };
-        node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
+        node.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0) +
+                        TilesView.GetLocalVec(pushDir) * (isValid ? 0.5f : 0.2f);
         node.QueueRedraw();
     }
     public void ModifyUnitBuff(bool isFocus, Vector2I coords, uint unitId, BuffTypeEnum buffType, BuffOperation operation, int change)
