@@ -32,8 +32,9 @@ public partial class UnitsView : Node2D
         _focusedUnitView = render;
         _focusedUnitView.OutlineColor = new Color("#3aa200");
     }
-    public async GDTask PlaceUnit(Vector2I coords, UnitState unit, TeamTypeEnum teamType)
+    public async GDTask PlaceUnit(Vector2I coords, IReadOnlyUnitState unit, TeamTypeEnum teamType)
     {
+        if (unit.IsNull()) return;
         if (!_unitViews.TryGetValue(unit.Id, out var render))
         {
             render = _unitViews[unit.Id] = _unitScene.Instantiate<UnitView>();

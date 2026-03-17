@@ -2,7 +2,7 @@ using Godot;
 using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Games;
-
+//TODO:可能使用其他方式创建单位
 public static class UnitFactory
 {
     private static uint _nextUnitId = 1;

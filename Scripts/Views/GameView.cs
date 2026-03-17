@@ -152,8 +152,14 @@ public partial class GameView : Node2D
                         break;
                     case PlaceUnitStep placeStep:
                         if (placeStep.ResultIsValid)
-                            await UnitsView.PlaceUnit(placeStep.Coords, placeStep.Unit, 
-                                placeStep.Unit.GetTeamTypeRelativeToPlayer(_gameScheduler!));
+                        {
+                            var u = UnitFactory.CreateUnit(placeStep.UnitName, placeStep.Team, placeStep.Coords);
+                            u.Id = placeStep.ResultUnit.Id;
+                            await UnitsView.PlaceUnit(
+                                placeStep.Coords,
+                                u,
+                                placeStep.Team.GetTeamTypeRelativeToPlayer(_gameScheduler!));
+                        }
                         break;
                     case MoveUnitStep moveStep:
                         if (moveStep.ResultIsValid) UnitsView.MoveUnit(moveStep.ResultUnitId, moveStep.To);
@@ -203,7 +209,7 @@ public partial class GameView : Node2D
                         //await _tilesView.DropTile(dropStep.Coords);
                         break;
                     case PlaceUnitStep placeStep:
-                        view.PlaceUnit(isFocused, simulation.TeamType ,placeStep.Coords, placeStep.Unit, placeStep.ResultIsValid);
+                        view.PlaceUnit(isFocused, simulation.TeamType ,placeStep.Coords, placeStep.ResultUnit, placeStep.ResultIsValid);
                         break;
                     case MoveUnitStep moveStep:
                         view.MoveUnit(isFocused, moveStep.ResultUnitId, moveStep.Coords ,moveStep.To, moveStep.ResultIsValid);

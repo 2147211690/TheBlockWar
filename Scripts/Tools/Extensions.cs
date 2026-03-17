@@ -222,4 +222,16 @@ public static class Extensions
                 Callable.From(action), (uint)GodotObject.ConnectFlags.OneShot);
         }
     }
+
+    extension(int team)
+    {
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(IReadOnlyGameState gameState, int playerTeam)
+        {
+            return gameState.TeamState.GetTeamTypeRelativeToPlayer(playerTeam, team);
+        }
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(GameScheduler gameScheduler)
+        {
+            return gameScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(gameScheduler.PlayerTeam, team) ?? TeamTypeEnum.Neutral;
+        }
+    }
 }

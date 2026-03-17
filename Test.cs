@@ -225,7 +225,7 @@ public partial class Test : Node2D
                 {
                     for (int j = 0; j < 10; j++)
                     {
-                        s.ApplyPlaceUnit(new(i,j), UnitFactory.CreateUnit("Unit_0", 1), r);
+                        s.ApplyPlaceUnit(new(i,j), "Unit_0", 1, null, r);
                     }
                 }
             }), true);
@@ -246,7 +246,7 @@ public partial class Test : Node2D
                         }, r);
                     }
                 }
-                s.ApplyPlaceUnit(new(2, 2), UnitFactory.CreateUnit("Unit_0", 0), r);
+                s.ApplyPlaceUnit(new(2, 2), "Unit_0", 0, null, r);
             }), true);
         }
         if (ImGui.Button("测试放置2"))
@@ -258,7 +258,7 @@ public partial class Test : Node2D
                 {
                     for (int j = 0; j < 3; j++)
                     {
-                        s.ApplyPlaceUnit(new(i,j), UnitFactory.CreateUnit("Unit_0", 1), r);
+                        s.ApplyPlaceUnit(new(i,j), "Unit_0", 1, null, r);
                     }
                 }
             }));

@@ -8,7 +8,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public class UnitState : IReadOnlyUnitState
 {
-    public static readonly IReadOnlyUnitState Default = new UnitState();
+    public static readonly UnitState Null = IReadOnlyUnitState.Null.Clone();
     public uint Id { get; set; }
     public int Team { get; set; } = 0;
     public string Name { get; set; } =  string.Empty;

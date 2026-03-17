@@ -30,9 +30,9 @@ public class EventView
     /// <param name="unit">要放置的单位状态</param>
     /// <param name="isValid">当前位置是否可以有效放置单位</param>
     /// <param name="isFocus">是否为关注操作</param>
-    public void PlaceUnit(bool isFocus, TeamTypeEnum teamType ,Vector2I coords, UnitState unit, bool isValid)
+    public void PlaceUnit(bool isFocus, TeamTypeEnum teamType ,Vector2I coords, IReadOnlyUnitState unit, bool isValid)
     {
-        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
+        //GD.Print($"PlaceUnit: {coords} {unitName} {isValid} {isFocus}");
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
         node.DrawAction += (u, v) =>
@@ -45,7 +45,7 @@ public class EventView
 
 
     private void PlaceUnitDraw(DrawNode drawNode, bool visible, bool isFocus, TeamTypeEnum teamType,
-        Vector2I coords, UnitState unit, bool isValid)
+        Vector2I coords, IReadOnlyUnitState unit, bool isValid)
     {
         if(visible)
         {

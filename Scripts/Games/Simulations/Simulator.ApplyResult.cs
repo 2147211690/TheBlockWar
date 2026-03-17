@@ -27,7 +27,7 @@ partial class Simulator
                         ApplyPlaceTile(state, placeTileStep.Coords, placeTileStep.Tile, runningResult);
                         break;
                     case PlaceUnitStep placeUnitStep:
-                        ApplyPlaceUnit(state, placeUnitStep.Coords, placeUnitStep.Unit, runningResult);
+                        ApplyPlaceUnit(state, placeUnitStep.Coords, placeUnitStep.UnitName, placeUnitStep.Team, placeUnitStep.ResultUnit, runningResult);
                         break;
                     case MoveUnitStep moveStep:
                         ApplyMoveUnit(state, moveStep.Coords, moveStep.To, runningResult);
