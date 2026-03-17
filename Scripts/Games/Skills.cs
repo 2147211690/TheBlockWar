@@ -9,27 +9,28 @@ namespace TheBlockWar.Scripts.Games;
 
 public static class Skills
 {
-    private static readonly ActionSkill.GetSkillArgsFunc EmptyArgsFunc = (_, _, _, _) => [];
-    private static readonly ActionSkill.GetSkillArgsFunc SelfArgsFunc = (_, _, _, _) => [Vector2I.Zero];
+    private static readonly ActionSkill.GetSkillArgsFunc EmptyArgsFunc = (_, _, _, _, _) => [];
+    private static readonly ActionSkill.GetSkillArgsFunc SelfArgsFunc = (_, _, _, _, _) => [Vector2I.Zero];
     private static void Skill1Core(
         IGameState gameState,
         SimulationResult result,
         IReadOnlyUnitState unit,
+        Vector2I useCoords,
         Vector2I?[] args)
     {
         if (args.TryGetArgs(0, out var v1))
         {
-            var path = GameNavigator.FindShortestPath(gameState, unit, unit.Coords, v1 + unit.Coords);
+            var path = GameNavigator.FindShortestPath(gameState, unit, useCoords, v1 + unit.Coords);
             gameState.ApplyMoveUnitPath(Vector2I.Zero, path, result);
         }
         if (args.TryGetArgs(1, out var v2))
         {
-            gameState.ApplyModifyUnitBuff(v2 + unit.Coords, BuffTypeEnum.Test, BuffOperation.AddBuff, 1, result);
-            gameState.ApplyModifyUnitBuff(v2 + unit.Coords + Vector2I.Up, BuffTypeEnum.Test, BuffOperation.RemoveBuff, 1, result);
+            gameState.ApplyModifyUnitBuff(useCoords + v2, BuffTypeEnum.Test, BuffOperation.AddBuff, 1, result);
+            gameState.ApplyModifyUnitBuff(v2 + useCoords + Vector2I.Up, BuffTypeEnum.Test, BuffOperation.RemoveBuff, 1, result);
             for(int i = 0; i < 4; i++)
             {
                 var dir = (DirMask)(1 << i);
-                gameState.ApplyPushUnit(v2 + unit.Coords + dir.ToVec2I(), dir, result);
+                gameState.ApplyPushUnit(v2 + useCoords + dir.ToVec2I(), dir, result);
             }
         }
     }
@@ -37,6 +38,7 @@ public static class Skills
     private static IEnumerable<Vector2I> Skill1Args(
         IReadOnlyGameState state,
         IReadOnlyUnitState caster,
+        Vector2I useCoords,
         int argsIndex,
         Vector2I?[] args)
     {
@@ -63,12 +65,14 @@ public static class Skills
         public delegate IEnumerable<Vector2I> GetSkillArgsFunc(
             IReadOnlyGameState state,
             IReadOnlyUnitState caster,
+            Vector2I useCoords,
             int argsIndex,
             Vector2I?[] args);
         public delegate void SkillCoreFunc(
             IGameState gameState,
             SimulationResult result,
             IReadOnlyUnitState unit,
+            Vector2I useCoords,
             Vector2I?[] args);
         
         private GetSkillArgsFunc _getSkillArgs;
@@ -86,15 +90,16 @@ public static class Skills
         public IEnumerable<Vector2I> GetSkillArgs(
             IReadOnlyGameState state,
             IReadOnlyUnitState caster,
+            Vector2I useCoords,
             int argsIndex,
             Vector2I?[] args)
         {
-            return _getSkillArgs(state, caster, argsIndex, args);
+            return _getSkillArgs(state, caster, useCoords, argsIndex, args);
         }
 
-        public void SkillCore(IGameState gameState, SimulationResult result, IReadOnlyUnitState unit, Vector2I?[] args)
+        public void SkillCore(IGameState gameState, SimulationResult result, IReadOnlyUnitState unit, Vector2I useCoords, Vector2I?[] args)
         {
-            _skillCore(gameState, result, unit, args);
+            _skillCore(gameState, result, unit, useCoords, args);
         }
     }
 }

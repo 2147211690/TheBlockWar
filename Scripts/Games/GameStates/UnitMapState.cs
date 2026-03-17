@@ -11,7 +11,13 @@ public class UnitMapState : IUnitMapState
     private Dictionary<uint, UnitState> _units = new();
     private Dictionary<Vector2I, uint> _unitAt = new();
 
+    public UnitMapState(Vector2I size)
+    {
+        Size = size;
+    }
+
     public IReadOnlyUnitMapState? Owner => null;
+    public Vector2I Size { get; }
     public IEnumerable<IReadOnlyUnitState> GetAllUnits() => _units.Values;
 
     public bool HasUnit(uint id)
@@ -24,81 +30,87 @@ public class UnitMapState : IUnitMapState
         return _unitAt.ContainsKey(coords);
     }
 
-    public IReadOnlyUnitState? GetUnit(uint id) => _units.GetValueOrDefault(id);
+    public IReadOnlyUnitState GetUnit(uint id) => _units.GetValueOrDefault(id) ?? IReadOnlyUnitState.Null;
 
-    public IReadOnlyUnitState? GetUnit(Vector2I coords) => 
-        _unitAt.TryGetValue(coords, out var id) ? _units.GetValueOrDefault(id) : null;
+    public IReadOnlyUnitState GetUnit(Vector2I coords) =>
+        _unitAt.TryGetValue(coords, out var id)
+            ? (_units.GetValueOrDefault(id) ?? IReadOnlyUnitState.Null)
+            : IReadOnlyUnitState.Null;
 
     public IUnitMapState GetSnapshot()
     {
         return new UnitMapStateSnapshot(this);
     }
 
-    public void AddUnit(UnitState unit, out IReadOnlyUnitState? renewedUnit)
+    public void AddUnit(UnitState unit)
     {
-        if (_units.ContainsKey(unit.Id))
+        if (_units.TryGetValue(unit.Id, out var old))
         {
-            Logger.Warn("单位Id{id}已经存在于数据上", unit.Id);
-        }
-        _units[unit.Id] = unit;
-        _unitAt[unit.Coords] = unit.Id;
-        renewedUnit = unit;
-    }
-
-    public void RemoveUnit(uint id, out IReadOnlyUnitState? renewedUnit)
-    {
-        if (!_units.Remove(id, out var unit))
-        {
-            renewedUnit = null;
+            Logger.Warn("单位Id{id}已经存在于数据上,无法添加", unit.Id);
             return;
         }
-        _unitAt.Remove(unit.Coords);
-        renewedUnit = null;
+
+        if (!unit.Coords.IsInSize(Size))
+        {
+            Logger.Warn("单位{id}坐标{coords}超出地图范围", unit.Id, unit.Coords);
+            return;
+        }
+
+        _units[unit.Id] = unit;
+        _unitAt[unit.Coords] = unit.Id;
     }
 
-    public void ModifyUnit(uint id, Action<UnitState> modifier, out IReadOnlyUnitState? renewedUnit)
+    public void RemoveUnit(uint id)
+    {
+        if (!_units.Remove(id, out var unit)) return;
+        _unitAt.Remove(unit.Coords);
+    }
+
+    public void ModifyUnit(uint id, Action<UnitState> modifier)
     {
         if (!_units.TryGetValue(id, out var unitState))
         {
             Logger.Warn("单位Id{id}不存在于数据上", id);
-            renewedUnit = null;
             return;
         }
+
         var oldCoords = unitState.Coords;
-        
+
         modifier(unitState);
-        unitState.Id = id;//确保ID一致
-        
+        unitState.Id = id; //确保ID一致
+
         if (oldCoords != unitState.Coords)
         {
             _unitAt.Remove(oldCoords);
             _unitAt[unitState.Coords] = id;
         }
-        renewedUnit = unitState;
     }
 
-    public void ClearIfSnapshot(){}
+    public void ClearIfSnapshot()
+    {
+    }
 
     /// <summary>
     /// 单位地图状态快照 - 写时复制（COW）实现
     /// 内存优化：仅存储变更，未变更数据保持对原状态的引用
+    /// 读取保证：首次读取自动克隆到本地修改表，永久返回克隆体，绝不返回Owner原始引用
     /// </summary>
     public sealed class UnitMapStateSnapshot : IUnitMapState
     {
-        
         // 父状态引用 - 未修改数据的回退源
         public IReadOnlyUnitMapState Owner { get; }
-        
+        public Vector2I Size => Owner.Size;
+
         // 增量存储：仅包含相对于owner的变更
-        private Dictionary<uint, UnitState>? _modifiedUnits;      // 修改/新增的单位
-        private HashSet<uint>? _removedUnitIds;                    // 删除的单位ID
-        private Dictionary<Vector2I, uint>? _modifiedUnitAt;       // 坐标变更（仅包含变更的坐标）
+        private Dictionary<uint, UnitState>? _modifiedUnits; // 修改/新增的单位 + 读时克隆的单位
+        private HashSet<uint>? _removedUnitIds; // 删除的单位ID
+        private Dictionary<Vector2I, uint>? _modifiedUnitAt; // 坐标变更（仅包含变更的坐标）
+
         private List<UnitState>? _pooledUnits;
+
         //池
-        private static readonly TypedPool<UnitState> UnitPool = new(() => new UnitState(), 1)
-        {
-        };
-        
+        private static readonly TypedPool<UnitState> UnitPool = new(() => new UnitState(), 10);
+
         // 脏标记：用于延迟初始化
         private bool _isModified;
 
@@ -107,17 +119,17 @@ public class UnitMapState : IUnitMapState
             // 只能是UnitMapState或其快照
             Owner = owner;
         }
-        
-        private Dictionary<uint, UnitState> GetModifiedUnits() => 
+
+        private Dictionary<uint, UnitState> GetModifiedUnits() =>
             _modifiedUnits ??= new Dictionary<uint, UnitState>();
-        
-        private HashSet<uint> GetRemovedIds() => 
+
+        private HashSet<uint> GetRemovedIds() =>
             _removedUnitIds ??= new HashSet<uint>();
-        
-        private Dictionary<Vector2I, uint> GetModifiedCoords() => 
+
+        private Dictionary<Vector2I, uint> GetModifiedCoords() =>
             _modifiedUnitAt ??= new Dictionary<Vector2I, uint>();
-        
-        private List<UnitState> GetPooledUnits() => 
+
+        private List<UnitState> GetPooledUnits() =>
             _pooledUnits ??= new List<UnitState>();
 
         public bool HasUnit(uint id)
@@ -139,223 +151,194 @@ public class UnitMapState : IUnitMapState
             }
 
             // 检查该坐标的单位是否被删除
-            var ownerId = Owner.GetUnit(coords)?.Id ?? 0u;
+            var ownerId = Owner.GetUnit(coords).Id;
             if (ownerId != 0 && _removedUnitIds?.Contains(ownerId) == true)
                 return false;
 
             return Owner.HasUnit(coords);
         }
 
-        public IReadOnlyUnitState? GetUnit(uint id)
+        /// <summary>
+        /// 核心：首次读取自动克隆到本地修改表，永久返回克隆体
+        /// </summary>
+        public IReadOnlyUnitState GetUnit(uint id)
         {
-            // 1. 检查是否被删除
+            // 1. 已删除 → 返回空
             if (_removedUnitIds?.Contains(id) == true)
-                return null;
+                return IReadOnlyUnitState.Null;
 
-            // 2. 检查本地修改
-            if (_modifiedUnits?.TryGetValue(id, out var modified) == true)
-                return modified;
+            var modifiedUnits = GetModifiedUnits();
 
-            // 3. 回退到父状态
-            return Owner.GetUnit(id);
+            // 2. 本地已有 → 直接返回（永久缓存）
+            if (modifiedUnits.TryGetValue(id, out var unit))
+                return unit;
+
+            // 3. 首次读取：从Owner克隆 → 存入本地 → 永久使用
+            var ownerUnit = Owner.GetUnit(id);
+            if (ownerUnit.IsNull())
+                return IReadOnlyUnitState.Null;
+
+            // 克隆并加入本地修改表（读时COW）
+            var clone = ownerUnit.CopyTo(UnitPool.Pop());
+            GetPooledUnits().Add(clone);
+            modifiedUnits[id] = clone;
+            _isModified = true; // 读取也算作状态变更（因为产生了本地副本）
+
+            return clone;
         }
 
-        public IReadOnlyUnitState? GetUnit(Vector2I coords)
+        /// <summary>
+        /// 坐标获取：同样保证返回本地克隆体
+        /// </summary>
+        public IReadOnlyUnitState GetUnit(Vector2I coords)
         {
-            // 1. 检查坐标是否被本地修改（包括删除导致的空位）
+            // 1. 本地坐标修改
             if (_modifiedUnitAt?.TryGetValue(coords, out var localId) == true)
             {
-                // 如果是0表示该坐标被清空
-                if (localId == 0) return null;
-                return _modifiedUnits?.GetValueOrDefault(localId) 
-                    ?? Owner.GetUnit(localId);
+                if (localId == 0) return IReadOnlyUnitState.Null;
+                return GetUnit(localId); // 走ID获取，自动保证克隆
             }
 
-            // 2. 检查该坐标的单位是否被删除
+            // 2. 父状态坐标 → 先拿ID，再走ID获取（自动克隆）
             var ownerUnit = Owner.GetUnit(coords);
-            if (ownerUnit != null && _removedUnitIds?.Contains(ownerUnit.Id) == true)
-                return null;
+            if (ownerUnit.IsNull())
+                return IReadOnlyUnitState.Null;
 
-            return ownerUnit;
+            if (_removedUnitIds?.Contains(ownerUnit.Id) == true)
+                return IReadOnlyUnitState.Null;
+
+            return GetUnit(ownerUnit.Id); // 关键：全部走ID获取，确保本地克隆
         }
 
+        /// <summary>
+        /// 遍历：全部返回本地克隆体
+        /// </summary>
         public IEnumerable<IReadOnlyUnitState> GetAllUnits()
         {
-            // 合并父状态和本地修改的迭代器
-            var processedIds = new HashSet<uint>();
-            
-            // 1. 先遍历父状态（排除被删除的）
-            foreach (var unit in Owner.GetAllUnits())
-            {
-                if (_removedUnitIds?.Contains(unit.Id) == true) continue;
-                
-                // 如果被修改，使用修改后的版本
-                if (_modifiedUnits?.TryGetValue(unit.Id, out var modified) == true)
-                {
-                    yield return modified;
-                    processedIds.Add(unit.Id);
-                }
-                else
-                {
-                    yield return unit;
-                    processedIds.Add(unit.Id);
-                }
-            }
+            var processed = new HashSet<uint>();
 
-            // 2. 补充新增的单位（父状态中不存在的）
+            // 1. 遍历本地已修改/已克隆的单位
             if (_modifiedUnits != null)
             {
                 foreach (var (id, unit) in _modifiedUnits)
                 {
-                    if (!processedIds.Contains(id))
-                        yield return unit;
+                    if (_removedUnitIds?.Contains(id) == true) continue;
+                    yield return unit;
+                    processed.Add(id);
                 }
+            }
+
+            // 2. 遍历父状态未处理单位 → 自动触发读时克隆
+            foreach (var ownerUnit in Owner.GetAllUnits())
+            {
+                var id = ownerUnit.Id;
+                if (processed.Contains(id)) continue;
+                if (_removedUnitIds?.Contains(id) == true) continue;
+
+                // 这里会自动克隆到本地
+                yield return GetUnit(id);
             }
         }
 
-        public void AddUnit(UnitState unit, out IReadOnlyUnitState? renewedUnit)
+        public void AddUnit(UnitState unit)
         {
             var id = unit.Id;
-            
-            // 从删除集合中移除（如果存在）
+            if (!unit.Coords.IsInSize(Size))
+            {
+                Logger.Warn("单位{id}坐标{coords}超出地图大小{size}", id, unit.Coords, Size);
+                return;
+            }
+
             _removedUnitIds?.Remove(id);
-            
-            // 检查是否已存在（可能是修改）
+
             var existing = GetUnit(id);
-            
+            if (!existing.IsNull())
+            {
+                Logger.Warn("单位Id{id}已存在于数据上", id);
+                return;
+            }
+
             GetModifiedUnits()[id] = unit;
             _isModified = true;
-            
-            // 更新坐标映射
+
             var coordsMap = GetModifiedCoords();
-            
-            // 如果该坐标在父状态中有其他单位，需要处理冲突
             var ownerUnitAtCoord = Owner.GetUnit(unit.Coords);
-            if (ownerUnitAtCoord != null && ownerUnitAtCoord.Id != id)
+            if (!ownerUnitAtCoord.IsNull() && ownerUnitAtCoord.Id != id)
             {
-                // 标记原位置单位被移除（如果未被修改）
                 if (_modifiedUnits?.ContainsKey(ownerUnitAtCoord.Id) != true)
-                {
                     GetRemovedIds().Add(ownerUnitAtCoord.Id);
-                }
             }
-            
-            // 清除该坐标上的旧映射（如果有）
+
             foreach (var (coord, uid) in coordsMap)
             {
-                if (uid == id) 
+                if (uid == id)
                 {
-                    coordsMap[coord] = 0; // 标记为空
+                    coordsMap[coord] = 0;
                     break;
                 }
             }
-            
+
             coordsMap[unit.Coords] = id;
-                renewedUnit = unit;
         }
 
-        public void RemoveUnit(uint id, out IReadOnlyUnitState? renewedUnit)
+        public void RemoveUnit(uint id)
         {
             var unit = GetUnit(id);
-            if (unit is null)
-            {
-                renewedUnit = null;
-                return;
-            }
+            if (unit.IsNull()) return;
 
-            // 标记为删除
             GetRemovedIds().Add(id);
-            
-            // 从修改集合中移除（如果存在）
             _modifiedUnits?.Remove(id);
-            
-            // 标记坐标为空
             GetModifiedCoords()[unit.Coords] = 0;
             _isModified = true;
-            renewedUnit = null;
         }
 
-        public void ModifyUnit(uint id, Action<UnitState> modifier, out IReadOnlyUnitState? renewedUnit)
+        public void ModifyUnit(uint id, Action<UnitState> modifier)
         {
-            // 1. 检查是否被删除
-            if (_removedUnitIds?.Contains(id) == true)
-            {
-                renewedUnit = null;
-                return;
-            }
-            Vector2I oldCoords;
-            IReadOnlyUnitState newUnit;
-            // 2. 检查本地修改
-            if (_modifiedUnits?.TryGetValue(id, out var modified) == true)
-            {
-                //本地找到直接原地修改
-                oldCoords = modified.Coords;
-                modifier(modified);
-                modified.Id = id;
-                newUnit = modified;
-            }
-            else
-            {
-                //本地未找到，从父状态克隆
-                var ownerUnit = Owner.GetUnit(id);
-                if (ownerUnit is null)
-                {
-                    renewedUnit = null;
-                    return;
-                }
-                var clone = ownerUnit.CopyTo(UnitPool.Pop());
-                GetPooledUnits().Add(clone);
-                //var clone = ownerUnit.Clone();
-                oldCoords = clone.Coords;
-                modifier(clone);
-                clone.Id = id;
-                GetModifiedUnits()[id] = clone;
-                newUnit = clone;
-            }
-            
-            // 如果坐标改变，需要更新坐标映射
-            if (newUnit.Coords != oldCoords)
+            if (_removedUnitIds?.Contains(id) == true) return;
+
+            // GetUnit 已经保证返回本地克隆，直接修改即可
+            var unit = (UnitState)GetUnit(id);
+            if (unit.IsNull()) return;
+
+            var oldCoords = unit.Coords;
+            modifier(unit);
+
+            if (unit.Coords != oldCoords)
             {
                 var coordsMap = GetModifiedCoords();
-                
-                // 旧坐标清空
                 coordsMap[oldCoords] = 0;
-                
-                // 检查新坐标是否被占用
-                var occupant = GetUnit(newUnit.Coords);
-                if (occupant != null && occupant.Id != id)
+
+                var occupant = GetUnit(unit.Coords);
+                if (!occupant.IsNull() && occupant.Id != id)
                 {
-                    // 移除占用者
                     GetRemovedIds().Add(occupant.Id);
                     _modifiedUnits?.Remove(occupant.Id);
                 }
-                
-                coordsMap[newUnit.Coords] = id;
+
+                coordsMap[unit.Coords] = id;
             }
 
-            //GetModifiedUnits()[id] = newUnit;
-            _removedUnitIds?.Remove(id); // 确保不在删除集合中
+            _removedUnitIds?.Remove(id);
             _isModified = true;
-            renewedUnit = newUnit;
         }
 
         public void ClearIfSnapshot()
         {
-            if (_pooledUnits is not null) foreach (var unit in _pooledUnits) UnitPool.Push(unit);
-            _pooledUnits?.Clear();
-            _modifiedUnitAt?.Clear();
+            if (_pooledUnits != null)
+            {
+                foreach (var u in _pooledUnits) UnitPool.Push(u);
+                _pooledUnits.Clear();
+            }
+
             _modifiedUnits?.Clear();
             _removedUnitIds?.Clear();
+            _modifiedUnitAt?.Clear();
             _isModified = false;
         }
 
         public IUnitMapState GetSnapshot()
         {
-            // 优化：如果当前快照未被修改，直接返回自身或父状态
-            if (!_isModified)
-                return this;
-
-            // 创建新的快照层级
+            if (!_isModified) return this;
             return new UnitMapStateSnapshot(this);
         }
     }

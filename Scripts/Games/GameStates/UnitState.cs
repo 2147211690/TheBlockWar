@@ -81,7 +81,7 @@ public class UnitState : IReadOnlyUnitState
         unit.MaxShield = MaxShield;
         unit.IsDead = IsDead;
         unit.IsFlying = IsFlying;
-        unit._buffs = _buffs?.CloneToList();
+        unit._buffs = _buffs?.Count > 0 ? _buffs.CloneToList() : null;
         return unit;
     }
 }

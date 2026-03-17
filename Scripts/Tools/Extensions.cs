@@ -130,6 +130,7 @@ public static class Extensions
             index = -1;
             return false;
         }
+        public bool IsNull() => unit.Id == 0;
     }
     
 

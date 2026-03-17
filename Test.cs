@@ -92,7 +92,7 @@ public partial class Test : Node2D
             {
                 var coords = new Vector2I(x, y);
                 var unit = UnitFactory.CreateUnit("Unit_0", 0);
-                _currentGameState.UnitMapState.AddUnit(unit, out _);
+                _currentGameState.UnitMapState.AddUnit(unit);
             }
             
             // 测试修改单位
@@ -109,7 +109,7 @@ public partial class Test : Node2D
                 if (unit is not null)
                 {
                     var newCoords = new Vector2I(newX, newY);
-                    _currentGameState.UnitMapState.ModifyUnit((uint)unitId, u => u.Coords = newCoords, out unit);
+                    _currentGameState.UnitMapState.ModifyUnit((uint)unitId, u => u.Coords = newCoords);
                 }
             }
             
@@ -121,7 +121,7 @@ public partial class Test : Node2D
             
             if (ImGui.Button("删除单位"))
             {
-                _currentGameState.UnitMapState.RemoveUnit((uint)deleteId, out _);
+                _currentGameState.UnitMapState.RemoveUnit((uint)deleteId);
             }
             
             // 测试获取单位
@@ -215,7 +215,20 @@ public partial class Test : Node2D
         {
             (_event0 as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
         }
+        if (ImGui.Button("测试放置压力"))
+        {
 
+            _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    for (int j = 0; j < 10; j++)
+                    {
+                        s.ApplyPlaceUnit(new(i,j), UnitFactory.CreateUnit("Unit_0", 1), r);
+                    }
+                }
+            }), true);
+        }
         if (ImGui.Button("测试放置"))
         {
 

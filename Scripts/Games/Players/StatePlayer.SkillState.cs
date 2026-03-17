@@ -127,7 +127,7 @@ public partial class StatePlayer
         {
             GameScheduler?.RemoveCoordsRegion(_validRegionId);
             var validArgs =
-                _currentSkill.GetSkillArgs(GameState!, _unitState!, _currentArgIndex, _currentSkillArgs!).
+                _currentSkill.GetSkillArgs(GameState!, _unitState!, _unitState!.Coords, _currentArgIndex, _currentSkillArgs!).
                     Select(a => a + _unitState!.Coords);
             _validRegionId = GameScheduler?.AddCoordsRegion(validArgs, 0) ?? 0;
         }

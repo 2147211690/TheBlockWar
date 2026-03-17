@@ -12,35 +12,35 @@ public static class GameNavigator
 
     public static bool IsCanBeDestination(this IReadOnlyUnitState unit, IReadOnlyGameState state, in Vector2I coords)
     {
-        if (coords.X < 0 || coords.X >= state!.TileMapState.Size.X || coords.Y < 0 || coords.Y >= state.TileMapState.Size.Y)
+        if (coords.X < 0 || coords.X >= state.TileMapState.Size.X || coords.Y < 0 || coords.Y >= state.TileMapState.Size.Y)
             return false;
         var coordsUnit = state.UnitMapState.GetUnit(coords);
-        if (unit!.IsFlying)
+        if (unit.IsFlying)
         {
-            return coordsUnit is null;
+            return coordsUnit.IsNull();
         }
         else
         {
             var hasGround = !state.TileMapState.IsEmpty(coords);
-            return hasGround && coordsUnit is null;
+            return hasGround && coordsUnit.IsNull();
         }
     }
 
     public static bool IsCanPass(this IReadOnlyUnitState unit, IReadOnlyGameState state, in Vector2I coords)
     {
-        if (coords.X < 0 || coords.X >= state!.TileMapState.Size.X || coords.Y < 0 || coords.Y >= state.TileMapState.Size.Y)
+        if (coords.X < 0 || coords.X >= state.TileMapState.Size.X || coords.Y < 0 || coords.Y >= state.TileMapState.Size.Y)
             return false;
         var coordsUnit = state.UnitMapState.GetUnit(coords);
-        if (unit!.IsFlying)
+        if (unit.IsFlying)
         {
-            return coordsUnit is null || !coordsUnit.IsFlying ||
+            return coordsUnit.IsNull() || !coordsUnit.IsFlying ||
                    state.TeamState.IsPlayerOrFriend(coordsUnit.Team, unit.Team);
         }
         else
         {
             var hasGround = !state.TileMapState.IsEmpty(coords);
             return hasGround && 
-                   (coordsUnit is null || coordsUnit.IsFlying || state.TeamState.IsPlayerOrFriend(coordsUnit.Team, unit.Team));
+                   (coordsUnit.IsNull() || coordsUnit.IsFlying || state.TeamState.IsPlayerOrFriend(coordsUnit.Team, unit.Team));
         }
     }
 

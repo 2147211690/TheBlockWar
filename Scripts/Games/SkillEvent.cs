@@ -1,4 +1,5 @@
 using Godot;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -15,8 +16,9 @@ public class SkillEvent : SchedulerEvnet
             Action = (s, a, r) =>
             {
                 var unit = s.UnitMapState.GetUnit(BindUnitId);
-                if (unit is null) return;
-                Skill?.SkillCore(s, r, unit, a as Vector2I?[] ?? []);
+                var useCoords = unit.Coords;
+                if (unit.IsNull()) return;
+                Skill?.SkillCore(s, r, unit, useCoords, a as Vector2I?[] ?? []);
             };
         }
     }

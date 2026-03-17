@@ -5,17 +5,17 @@ namespace TheBlockWar.Scripts.Games;
 public interface IBuff
 {
     BuffTypeEnum BuffType { get; }
-    void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result, out IReadOnlyUnitState? renewedUnit);
+    void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result);
     void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
-        ref float resultDamage, SimulationResult result, out IReadOnlyUnitState? renewedUnit);
+        ref float resultDamage, SimulationResult result);
     void OnUnitAfterDamage(IGameState state, IReadOnlyUnitState unit, float getDamage, 
-        SimulationResult result, out IReadOnlyUnitState? renewedUnit);
+        SimulationResult result);
     void OnUnitBeforeCure(IGameState state, IReadOnlyUnitState unit, float rawCure,
-        ref float resultCure, SimulationResult result, out IReadOnlyUnitState? renewedUnit);
+        ref float resultCure, SimulationResult result);
     void OnUnitAfterCure(IGameState state, IReadOnlyUnitState unit, float getCure,
-        SimulationResult result, out IReadOnlyUnitState? renewedUnit);
+        SimulationResult result);
     void OnRemoveFromUnit(IGameState state, IReadOnlyUnitState unit,
-        SimulationResult result, out IReadOnlyUnitState? renewedUnit);
+        SimulationResult result);
     void OnDurationChanged(IGameState state, IReadOnlyUnitState unit,
-        int oldDuration, int newDuration, SimulationResult result, out IReadOnlyUnitState? renewedUnit);
+        int oldDuration, int newDuration, SimulationResult result);
 }

@@ -27,7 +27,7 @@ public class GameState : IGameState
     {
         _unitSkillMap = unitSkillMap;
         TileMapState = new TileMapState(mapSize);
-        UnitMapState = new UnitMapState();
+        UnitMapState = new UnitMapState(mapSize);
         TeamState = new TeamState(teamRelations);
     }
     public void ClearIfSnapshot(){}

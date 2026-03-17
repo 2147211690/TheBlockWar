@@ -5,15 +5,15 @@
 [ext_resource type="Texture2D" uid="uid://cr8m1aj4in057" path="res://Art/Img/ui/star.png" id="2_w7jet"]
 [ext_resource type="Texture2D" uid="uid://ccm878y8pucns" path="res://Art/Img/ui/core.png" id="3_w7jet"]
 
+[sub_resource type="Resource" id="Resource_qfrb8"]
+script = ExtResource("1_26ht0")
+Icon = ExtResource("3_w7jet")
+metadata/_custom_type_script = "uid://qrkhfr53ls33"
+
 [sub_resource type="Resource" id="Resource_26ht0"]
 script = ExtResource("1_26ht0")
 BuffType = 1
 Icon = ExtResource("2_w7jet")
-metadata/_custom_type_script = "uid://qrkhfr53ls33"
-
-[sub_resource type="Resource" id="Resource_qfrb8"]
-script = ExtResource("1_26ht0")
-Icon = ExtResource("3_w7jet")
 metadata/_custom_type_script = "uid://qrkhfr53ls33"
 
 [resource]
