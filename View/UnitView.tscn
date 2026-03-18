@@ -3,13 +3,70 @@
 [ext_resource type="Script" uid="uid://bxcvnfn0ji655" path="res://Scripts/Views/UnitView.cs" id="1_hq4fu"]
 [ext_resource type="Script" uid="uid://bcfsqru8ni8v0" path="res://Scripts/Views/HealthBar.cs" id="3_0gwqe"]
 [ext_resource type="Shader" uid="uid://bp0nooa7oij51" path="res://Shaders/unit.gdshader" id="4_r4ymd"]
+[ext_resource type="Texture2D" uid="uid://bn5jhcnku063u" path="res://Art/Img/combat/shield_front_turnon.png" id="4_v5jkn"]
 [ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="4_vsdra"]
 [ext_resource type="Texture2D" uid="uid://dm7188puqyhc8" path="res://Art/Img/ui/strategy/plus.png" id="5_5mqhy"]
-[ext_resource type="Resource" uid="uid://dmdokg15gk43n" path="res://Resources/Infos/MainInfos.tres" id="5_87f3l"]
 [ext_resource type="Texture2D" uid="uid://bfap1gxptpmrn" path="res://Art/Img/combat/iceblock_emerge.png" id="5_b2pj8"]
+[ext_resource type="Texture2D" uid="uid://pr1ao0cgd2sb" path="res://Art/Img/combat/shield_front_turnoff.png" id="5_q4aql"]
 [ext_resource type="Script" uid="uid://dmemr0krwh881" path="res://Scripts/Views/BuffView.cs" id="5_r4ymd"]
 [ext_resource type="Texture2D" uid="uid://bll45ntridu3t" path="res://Art/Img/ui/x.png" id="6_b2pj8"]
 [ext_resource type="Texture2D" uid="uid://ba381ltwbtrj0" path="res://Art/Img/combat/iceblock_death.png" id="6_xm5jm"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o7vh6"]
+atlas = ExtResource("4_v5jkn")
+region = Rect2(0, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5lbt3"]
+atlas = ExtResource("4_v5jkn")
+region = Rect2(46, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_753c2"]
+atlas = ExtResource("4_v5jkn")
+region = Rect2(92, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j1o83"]
+atlas = ExtResource("4_v5jkn")
+region = Rect2(138, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ddpse"]
+atlas = ExtResource("4_v5jkn")
+region = Rect2(184, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_evjsq"]
+atlas = ExtResource("4_v5jkn")
+region = Rect2(230, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_78hij"]
+atlas = ExtResource("4_v5jkn")
+region = Rect2(276, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qou61"]
+atlas = ExtResource("5_q4aql")
+region = Rect2(0, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_engai"]
+atlas = ExtResource("5_q4aql")
+region = Rect2(46, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxbxi"]
+atlas = ExtResource("5_q4aql")
+region = Rect2(92, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qqm4t"]
+atlas = ExtResource("5_q4aql")
+region = Rect2(138, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1pfl7"]
+atlas = ExtResource("5_q4aql")
+region = Rect2(184, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5bvky"]
+atlas = ExtResource("5_q4aql")
+region = Rect2(230, 0, 46, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p3c0p"]
+atlas = ExtResource("5_q4aql")
+region = Rect2(276, 0, 46, 41)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xm5jm"]
 atlas = ExtResource("5_b2pj8")
@@ -109,6 +166,58 @@ region = Rect2(1032, 0, 86, 60)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_5mqhy"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o7vh6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5lbt3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_753c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j1o83")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ddpse")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_evjsq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_78hij")
+}],
+"loop": false,
+"name": &"Test2_Add",
+"speed": 40.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qou61")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_engai")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxbxi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qqm4t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1pfl7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5bvky")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p3c0p")
+}],
+"loop": false,
+"name": &"Test2_Remove",
+"speed": 40.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_xm5jm")
@@ -261,10 +370,10 @@ BlockWidth = 4.0
 z_index = 1
 position = Vector2(0, -18)
 script = ExtResource("5_r4ymd")
-Infos = ExtResource("5_87f3l")
 BuffEffectSpriteFrames = SubResource("SpriteFrames_5mqhy")
 BuffEffectOffsets = Dictionary[String, Vector2]({
-"Test": Vector2(8, -8)
+"Test": Vector2(8, -8),
+"Test2": Vector2(0, -8)
 })
 UnitView = NodePath("../..")
 SymbolBoxSize = Vector2(8, 8)

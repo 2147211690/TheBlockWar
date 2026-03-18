@@ -8,6 +8,7 @@ using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.EventViews;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
@@ -29,33 +30,25 @@ public partial class GameView : Node2D
     private bool _refocus = false;
     public GDTask RunSimulationTask { get; private set; } = GDTask.CompletedTask;
     public IPlayer? Player { get; set; }
-    public TypedPool<AnimatedSprite2D> AnimatedSpritePool { get; private set; }
+    public ViewPools ViewPools { get; private set; } = null!;
+
+    public override void _Ready()
+    {
+        base._Ready();
+        ViewPools = new ViewPools(DrawContainer);
+    }
+
     public void Bind(GameScheduler gameScheduler)
     {
         _gameScheduler = gameScheduler;
         _gameScheduler.SimulationUpdated += GameSchedulerOnSimulationUpdated;
         _gameScheduler.OtherStateUpdated += GameSchedulerOnOtherStateUpdated;
-        AnimatedSpritePool = new TypedPool<AnimatedSprite2D>(() =>
-        {
-            var node = new AnimatedSprite2D();
-            DrawContainer.AddChild(node);
-            return node;
-        }, 0)
-        {
-            AfterPush = u =>
-            {
-                u.Visible = false;
-            },
-            BeforePop = u =>
-            {
-                u.Visible = true;
-            }
-        };
+        
+        
         TreeExiting += () =>
         {
             _gameScheduler.SimulationUpdated -= GameSchedulerOnSimulationUpdated;
             _gameScheduler.OtherStateUpdated -= GameSchedulerOnOtherStateUpdated;
-            AnimatedSpritePool.Dispose();
         };
     }
 
@@ -215,7 +208,7 @@ public partial class GameView : Node2D
                         view.MoveUnit(isFocused, moveStep.ResultUnitId, moveStep.Coords ,moveStep.To, moveStep.ResultIsValid);
                         break;
                     case DamageStep damageStep:
-                        view.ChangeUnitHealth(isFocused, simulation.TeamType, damageStep.ResultUnitId, -damageStep.ResultValidDamage);
+                        view.ChangeUnitHealth(isFocused, simulation.TeamType, damageStep.Coords, damageStep.ResultUnitId, -damageStep.ResultValidDamage);
                         break;
                     case MoveUnitPathStep movePathStep:
                         view.MoveUnitPath(isFocused, simulation.TeamType, movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);

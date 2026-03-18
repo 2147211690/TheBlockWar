@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
@@ -12,7 +13,6 @@ public partial class BuffView : Node2D
 {
     [Export] public GameViewStyle Style { get; set; } = null!;
     [Export] public TeamTypeEnum TeamType { get; set; }
-    [Export] public Infos Infos { get; set; } = null!;
     [Export] public SpriteFrames BuffEffectSpriteFrames { get; set; } = null!;
     [Export] public Godot.Collections.Dictionary<string, Vector2> BuffEffectOffsets { get; set; } = null!;
     [Export] public UnitView UnitView { get; set; } = null!;
@@ -90,12 +90,12 @@ public partial class BuffView : Node2D
     public void AddVisibleBuff(BuffTypeEnum type)
     {
         if (_visibleBuffs.ContainsKey(type)) return;
-        var s = GameView.AnimatedSpritePool.Pop();
+        var s = GameView.ViewPools.AnimatedSprite2DPool.Pop();
         s.GetParent().RemoveChild(s);
         UnitView.Center.AddChild(s);
         s.Position = Vector2.Zero;
         _visibleBuffs.Add(type, s);
-        if (BuffEffectOffsets.TryGetValue(Enum.GetName(type), out var offset)) s.Offset = offset;
+        if (BuffEffectOffsets.TryGetValue(Enum.GetName(type)!, out var offset)) s.Offset = offset;
         
         s.SpriteFrames = BuffEffectSpriteFrames;
         var name = $"{Enum.GetName(type)}_Add";
@@ -129,7 +129,7 @@ public partial class BuffView : Node2D
             GameView.DrawContainer.AddChild(animatedSprite2D);
             animatedSprite2D.SpriteFrames = null;
             animatedSprite2D.Offset = Vector2.Zero;
-            GameView.AnimatedSpritePool.Push(animatedSprite2D);
+            GameView.ViewPools.AnimatedSprite2DPool.Push(animatedSprite2D);
         }
     }
     public override void _Draw()
@@ -199,7 +199,7 @@ public partial class BuffView : Node2D
         // 绘制图标
         foreach (var type in buffs)
         {
-            var icon = Infos.BuffInfos.GetValueOrDefault(type)?.Icon;
+            var icon = type.GetInstance().Info.Icon;
             if (icon != null)
             {
                 DrawTextureInBox(

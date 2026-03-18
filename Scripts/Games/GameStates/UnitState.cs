@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -21,13 +22,24 @@ public class UnitState : IReadOnlyUnitState
     public bool IsFlying { get; set; } = false;
     public IReadOnlyList<BuffState> Buffs => _buffs ?? [];
     private List<BuffState>? _buffs;
-    
+
     /// <summary>
     /// 添加一个buff,不做检查
     /// </summary>
     public void AddBuff(BuffTypeEnum buffType, int duration)
     {
-        GetBuffList().Add(new BuffState
+        var list = GetBuffList();
+        for (var i = 0; i < list.Count; i++)
+        {
+            if (list[i].BuffType.GetInstance().Info.Priority < buffType.GetInstance().Info.Priority) continue;
+            list.Insert(i, new BuffState
+            {
+                BuffType = buffType,
+                Duration = duration
+            });
+            return;
+        }
+        list.Add(new BuffState
         {
             BuffType = buffType,
             Duration = duration

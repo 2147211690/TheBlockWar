@@ -59,15 +59,6 @@ public partial class UnitView : Node2D
     {
         _shaderMaterial = MainSprite.Material as ShaderMaterial;
         MainSprite.FrameChanged += MainSpriteOnFrameChanged;
-        TreeExiting += () =>
-        {
-            MainSprite.FrameChanged -= MainSpriteOnFrameChanged;
-            if (_fakes is null) return;
-            foreach (var f in _fakes)
-            {
-                f.sprite.QueueFree();
-            }
-        };
     }
 
     private void MainSpriteOnFrameChanged()
@@ -82,13 +73,13 @@ public partial class UnitView : Node2D
     public Sprite2D AddFack(Vector2I coords, TilesView tilesView)
     {
         _fakes ??= new();
-        var fake = new Sprite2D
-        {
-            Texture = MainSprite.SpriteFrames.GetFrameTexture(MainSprite.Animation, MainSprite.Frame),
-            Offset = tilesView.GetRenderOffset(coords, Layer.Underground, 0) + Offsets.GetValueOrDefault(UnitName),
-            Modulate = new Color(1, 1, 1, 0.3f),
-        };
+        
+        var fake = GameView.ViewPools.Sprite2DPool.Pop();
+        fake.Texture = MainSprite.SpriteFrames.GetFrameTexture(MainSprite.Animation, MainSprite.Frame);
+        fake.Offset = tilesView.GetRenderOffset(coords, Layer.Underground, 0) + Offsets.GetValueOrDefault(UnitName);
+        fake.Modulate = new Color(1, 1, 1, 0.3f);
         fake.Position = tilesView.GetRenderPosition(coords, Layer.Underground, 0);
+        
         _fakes.Add((coords, fake));
         return fake;
     }
@@ -100,7 +91,12 @@ public partial class UnitView : Node2D
         if (index == -1) return;
         var fake = _fakes[index];
         _fakes.RemoveAt(index);
-        fake.sprite.QueueFree();
+        
+        var sprite = fake.sprite;
+        sprite.Texture = null;
+        sprite.Offset = Vector2.Zero;
+        sprite.Modulate = Colors.White;
+        GameView.ViewPools.Sprite2DPool.Push(sprite);
     }
     
     public GDTask PlayPlaceDownAnim()

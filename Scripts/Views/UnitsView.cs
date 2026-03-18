@@ -80,7 +80,6 @@ public partial class UnitsView : Node2D
     {
         if (!_unitViews.TryGetValue(unitId, out var view)) return;
         var s = view.AddFack(coords, GameView.TilesView);
-        DrawContainer.AddChild(s);
     }
 
     public void RemoveUnitFack(uint unitId, Vector2I coords)

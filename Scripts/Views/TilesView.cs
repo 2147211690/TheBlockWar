@@ -139,7 +139,7 @@ public partial class TilesView : TileMapLayer
     {
         var maxOffset = GetLayerOffset(layer);
         var pos = new Vector2(0, -maxOffset - renderOffset / 100f * maxOffset);
-        if (defineHeight is null)
+        if (defineHeight == null)
         {
             if ((layer & Layer.Underground) != 0 || (layer & Layer.Sky) != 0) pos.Y -= GetTileHeight(coords);
         }

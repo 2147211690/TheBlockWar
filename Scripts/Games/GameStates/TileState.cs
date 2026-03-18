@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -70,7 +71,14 @@ public class TileState : IReadOnlyTileState
         tile.Tag = Tag;
         tile.Name = Name;
         tile.IsOccupied = IsOccupied;
-        tile._regions = _regions?.Count > 0 ? _regions.CloneToList() : null;
+        if (tile._regions is {Count: > 0} && _regions is {Count: > 0} && _regions.Count == tile._regions.Count)
+        {
+            for (int i = 0; i < _regions.Count; i++)
+            {
+                tile._regions[i] = _regions[i];
+            }
+        }
+        else tile._regions = _regions?.Count > 0 ? _regions.CloneToList() : null;
         return tile;
     }
 }

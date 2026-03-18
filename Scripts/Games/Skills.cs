@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
@@ -29,12 +31,17 @@ public static class Skills
         if (args.TryGetArgs(1, out var v2))
         {
             
-            gameState.ApplyModifyUnitBuff(useCoords + v2, BuffTypeEnum.Test, BuffOperation.AddBuff, 1, result);
+            gameState.ApplyModifyUnitBuff(useCoords + v2, BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
             for (int i = 0; i < 4; i++)
             {
                 var dir = (DirMask)(1 << i);
                 gameState.ApplyPushUnit(v2 + useCoords + dir.ToVec2I(), dir, result);
             }
+            gameState.ApplyDamage(useCoords + v2, 20, result);
+        }
+        if (args.TryGetArgs(2, out var v3))
+        {
+            gameState.ApplyDamage(useCoords + v3, 10, result);
         }
     }
 
@@ -53,13 +60,17 @@ public static class Skills
         }
         else if(argsIndex == 1)
         {
-            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 3);
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 4);
             //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
-
+        else if(argsIndex == 2)
+        {
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6);
+            //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
+        }
         return [];
     }
-    public static ISkill Skill1 { get; } = new ActionSkill(2, Skill1Args, Skill1Core);
+    public static ISkill Skill1 { get; } = new ActionSkill(3, Skill1Args, Skill1Core);
 
 
 

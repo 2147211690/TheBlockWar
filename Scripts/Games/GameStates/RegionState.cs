@@ -1,3 +1,5 @@
+using TheBlockWar.Scripts.Games.Regions;
+
 namespace TheBlockWar.Scripts.Games.GameStates;
 
 public struct RegionState

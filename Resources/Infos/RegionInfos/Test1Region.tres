@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://bioi125qkur8j"]
+
+[ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_ey71y"]
+[ext_resource type="Texture2D" uid="uid://bwk0oksaelssj" path="res://Art/Img/combat/mine.png" id="1_ib5xc"]
+
+[resource]
+script = ExtResource("1_ey71y")
+RegionType = 1
+Icon = ExtResource("1_ib5xc")
+DefaultDuration = 1
+metadata/_custom_type_script = "uid://6ogmwabfqvx"

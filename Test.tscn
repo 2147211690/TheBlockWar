@@ -8,7 +8,8 @@
 [ext_resource type="Script" uid="uid://bbsl8xk5ntlvd" path="res://Scripts/Views/UnitsView.cs" id="5_aq4fw"]
 [ext_resource type="Texture2D" uid="uid://b4gfqejk75oob" path="res://Art/Img/region_block.png" id="5_vwb7u"]
 [ext_resource type="PackedScene" uid="uid://bccdls2vsjite" path="res://View/UnitView.tscn" id="6_ivycn"]
-[ext_resource type="Script" uid="uid://dk12ehg31xf4o" path="res://Scripts/Views/EventsView.cs" id="7_q1uvj"]
+[ext_resource type="Script" uid="uid://dk12ehg31xf4o" path="res://Scripts/Views/EventViews/EventsView.cs" id="7_q1uvj"]
+[ext_resource type="Script" uid="uid://boli430ctw28m" path="res://Scripts/Views/EventViews/BlockNumberView.cs" id="9_vwb7u"]
 
 [sub_resource type="TileSet" id="TileSet_8tn2x"]
 tile_shape = 1
@@ -42,10 +43,16 @@ DrawContainer = NodePath("../DrawContainer")
 _unitScene = ExtResource("6_ivycn")
 metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
 
-[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("GameView", "_drawContainer")]
+[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("GameView", "_drawContainer", "BlockNumberView")]
 script = ExtResource("7_q1uvj")
 GameView = NodePath("..")
 _drawContainer = NodePath("../DrawContainer")
+BlockNumberView = NodePath("BlockNumberView")
+
+[node name="BlockNumberView" type="Node2D" parent="GameView/EventsView" unique_id=101820365 node_paths=PackedStringArray("EventsView")]
+script = ExtResource("9_vwb7u")
+EventsView = NodePath("..")
+metadata/_custom_type_script = "uid://boli430ctw28m"
 
 [node name="DrawContainer" type="Node2D" parent="GameView" unique_id=1071978760]
 y_sort_enabled = true
