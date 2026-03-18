@@ -20,6 +20,9 @@ partial class Simulator
                         //GD.Print($"伤害 {damageStep.Coords} {damageStep.Damage} {damageStep.ResultValidDamage}");
                         ApplyDamage(state, damageStep.Coords, damageStep.Damage, runningResult);
                         break;
+                    case CureStep cureStep:
+                        ApplyCure(state, cureStep.Coords, cureStep.Cure, runningResult);
+                        break;
                     case DeathStep deathStep:
                         ApplyDeath(state, deathStep.Coords, runningResult);
                         break;
@@ -51,6 +54,9 @@ partial class Simulator
                     case ModifyTileRegionStep modifyTileRegionStep:
                         ApplyModifyTileRegion(state, modifyTileRegionStep.Coords, modifyTileRegionStep.RegionType,
                             modifyTileRegionStep.Operation, modifyTileRegionStep.Duration, runningResult);
+                        break;
+                    case AnimationStep animationStep:
+                        //播放动画,不改变游戏状态
                         break;
                     case null:
                         break;

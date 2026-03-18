@@ -15,6 +15,7 @@ public record SimStep(bool IsChildStep)
 
 public record ParallelStep(bool IsChildStep, bool IsStart) : SimStep(IsChildStep);
 public record DamageStep(bool IsChildStep, Vector2I Coords,float Damage, uint ResultUnitId, float ResultValidDamage) : SimStep(IsChildStep);
+public record CureStep(bool IsChildStep, Vector2I Coords,float Cure, uint ResultUnitId, float ResultValidCure) : SimStep(IsChildStep);
 public record DeathStep(bool IsChildStep, Vector2I Coords, uint ResultUnitId, bool ResultIsValid) : SimStep(IsChildStep);
 public record PlaceTileStep(bool IsChildStep, Vector2I Coords, TileState Tile) : SimStep(IsChildStep);
 public record DropTileStep(bool IsChildStep, Vector2I Coords) : SimStep(IsChildStep);
@@ -28,6 +29,14 @@ public record ModifyUnitBuffStep(bool IsChildStep, Vector2I Coords, BuffTypeEnum
     uint ResultUnitId, BuffOperation ResultOperation, int ResultDuration) : SimStep(IsChildStep);
 public record ModifyTileRegionStep(bool IsChildStep, Vector2I Coords, RegionTypeEnum RegionType, RegionOperation Operation, int Duration,
     RegionOperation ResultOperation, int ResultDuration) : SimStep(IsChildStep);
+public record AnimationStep(bool IsChildStep, AnimationType Animation) : SimStep(IsChildStep);
+
+//Animations
+public record AnimationType();
+public record ShotSomethingAnim(Vector2I Coords, Vector2I To, string ThingName, float Time) : AnimationType;
+public record ThrowSomethingAnim(Vector2I Coords, Vector2I To, string ThingName, float ThrowHeight, float Time) : AnimationType;
+public record UnitJumpToAnim(uint UnitId, Vector2I Coords, float Time) : AnimationType;
+public record SummonEffectAnim(Vector2I Coords, string EffectName) : AnimationType;
 [Flags]
 public enum BuffOperation
 {

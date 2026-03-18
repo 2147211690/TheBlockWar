@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://fw1j844n5kht" path="res://Tests/TestMain.cs" id="1_yoo7l"]
 [ext_resource type="Resource" uid="uid://cu0gh2aruhrjc" path="res://Resources/GameViewStyle_0.tres" id="2_oh1sm"]
 [ext_resource type="Texture2D" uid="uid://dm7188puqyhc8" path="res://Art/Img/ui/strategy/plus.png" id="5_rcr67"]
+[ext_resource type="Texture2D" uid="uid://c5ayhd5fgh63i" path="res://icon.svg" id="6_74xl5"]
 [ext_resource type="Texture2D" uid="uid://bll45ntridu3t" path="res://Art/Img/ui/x.png" id="6_rcr67"]
 
 [node name="TestMain" type="Node2D" unique_id=606139785]
@@ -20,3 +21,8 @@ metadata/_custom_type_script = "uid://dmemr0krwh881"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1296258764]
 zoom = Vector2(1.74, 1.74)
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=445406234]
+scale = Vector2(1.09, 1.09)
+texture = ExtResource("6_74xl5")
+offset = Vector2(0.97, -100)

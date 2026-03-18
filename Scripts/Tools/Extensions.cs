@@ -216,12 +216,31 @@ public static class Extensions
         }
     }
 
-    extension(AnimatedSprite2D animatedSprite2D)
+    extension(AnimatedSprite2D s)
     {
         public void ContinueFinishedOneShot(Action action)
         {
-            animatedSprite2D.Connect(AnimatedSprite2D.SignalName.AnimationFinished,
+            s.Connect(AnimatedSprite2D.SignalName.AnimationFinished,
                 Callable.From(action), (uint)GodotObject.ConnectFlags.OneShot);
+        }
+        /// <summary>
+        /// 在以当前偏移量为中心的基础上，设置缩放比例, 并更新偏移量。
+        /// </summary>
+        public void SetScaleCentered(in Vector2 offset, in Vector2 scale)
+        {
+            s.Offset = s.Scale * offset / scale;
+            s.Scale = scale;
+        }
+    }
+    extension(Sprite2D s)
+    {
+        /// <summary>
+        /// 在以当前偏移量为中心的基础上，设置缩放比例, 并更新偏移量。
+        /// </summary>
+        public void SetScaleCentered(in Vector2 offset, in Vector2 scale)
+        {
+            s.Offset = offset / scale;
+            s.Scale = scale;
         }
     }
 

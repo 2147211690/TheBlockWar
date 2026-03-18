@@ -161,6 +161,9 @@ public partial class GameView : Node2D
                     case DamageStep damageStep:
                         UnitsView.GetUnitView(damageStep.ResultUnitId)?.HealthBar.CurrentHealth -= damageStep.ResultValidDamage;
                         break;
+                    case CureStep cureStep:
+                        UnitsView.GetUnitView(cureStep.ResultUnitId)?.HealthBar.CurrentHealth += cureStep.ResultValidCure;
+                        break;
                     case MoveUnitPathStep movePathStep:
                         if (movePathStep.ResultIsValid) 
                             await UnitsView.MovePathUnit(movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
@@ -172,7 +175,6 @@ public partial class GameView : Node2D
                         await UnitsView.PushUnit(pushStep.ResultUnitId, pushStep.PushDir, pushStep.ResultPush);
                         break;
                     case ModifyUnitBuffStep modifyUnitBuffStep:
-                        //TODO: 处理单位buff变更
                         if (modifyUnitBuffStep.Operation == BuffOperation.AddBuff)
                         {
                             UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView.AddVisibleBuff(modifyUnitBuffStep.BuffType);
@@ -182,6 +184,11 @@ public partial class GameView : Node2D
                             UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView.RemoveVisibleBuff(modifyUnitBuffStep.BuffType);
                         }
                         break;
+                    case AnimationStep animationStep:
+                        //TODO:动画实现
+                        break;
+                    case null:
+                        break;
                 }
             }
         }
@@ -189,7 +196,8 @@ public partial class GameView : Node2D
         foreach (var simulation in _prepareSimulations)
         {
             var isFocused = simulation.Layer == SimulationLayer.Focused;
-            var view = EventsView.BeginAddEventView(simulation.SourceId);
+            var teamType = simulation.TeamType;
+            var view = EventsView.BeginAddEventView(simulation.SourceId, isFocused, teamType);
             if (view is null) continue;
             foreach (var step in simulation.Steps)
             {
@@ -202,27 +210,33 @@ public partial class GameView : Node2D
                         //await _tilesView.DropTile(dropStep.Coords);
                         break;
                     case PlaceUnitStep placeStep:
-                        view.PlaceUnit(isFocused, simulation.TeamType ,placeStep.Coords, placeStep.ResultUnit, placeStep.ResultIsValid);
+                        view.PlaceUnit(placeStep);
                         break;
                     case MoveUnitStep moveStep:
-                        view.MoveUnit(isFocused, moveStep.ResultUnitId, moveStep.Coords ,moveStep.To, moveStep.ResultIsValid);
+                        view.MoveUnit(moveStep);
                         break;
                     case DamageStep damageStep:
-                        view.ChangeUnitHealth(isFocused, simulation.TeamType, damageStep.Coords, damageStep.ResultUnitId, -damageStep.ResultValidDamage);
+                        view.Damage(damageStep);
+                        break;
+                    case CureStep cureStep:
+                        view.Cure(cureStep);
                         break;
                     case MoveUnitPathStep movePathStep:
-                        view.MoveUnitPath(isFocused, simulation.TeamType, movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
+                        view.MoveUnitPath(movePathStep);
                         break;
                     case DropUnitStep dropStep:
-                        view.DropUnit(isFocused, dropStep.Coords, dropStep.ResultIsValid);
+                        view.DropUnit(dropStep);
                         break;
                     case PushUnitStep pushStep:
-                        view.PushUnit(isFocused, simulation.TeamType, pushStep.PushDir, pushStep.Coords, pushStep.ResultPush);
+                        view.PushUnit(pushStep);
                         break;
                     case ModifyUnitBuffStep modifyUnitBuffStep:
-                        view.ModifyUnitBuff(isFocused, modifyUnitBuffStep.Coords,
-                            modifyUnitBuffStep.ResultUnitId, modifyUnitBuffStep.BuffType,
-                            modifyUnitBuffStep.ResultOperation, modifyUnitBuffStep.ResultDuration);
+                        view.ModifyUnitBuff(modifyUnitBuffStep);
+                        break;
+                    case AnimationStep animationStep:
+                        view.Animation(animationStep);
+                        break;
+                    case null:
                         break;
                 }
             }

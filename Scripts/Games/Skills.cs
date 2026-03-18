@@ -31,7 +31,7 @@ public static class Skills
         if (args.TryGetArgs(1, out var v2))
         {
             
-            gameState.ApplyModifyUnitBuff(useCoords + v2, BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
+            
             for (int i = 0; i < 4; i++)
             {
                 var dir = (DirMask)(1 << i);
@@ -41,7 +41,19 @@ public static class Skills
         }
         if (args.TryGetArgs(2, out var v3))
         {
-            gameState.ApplyDamage(useCoords + v3, 10, result);
+            var c = v3 + useCoords;
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    if (i == j && i == 0)
+                    {
+                        gameState.ApplyModifyUnitBuff(c + new Vector2I(i, j), BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
+                    }
+                    else gameState.ApplyCure(c + new Vector2I(i, j), 10, result);
+                }
+            }
+            
         }
     }
 

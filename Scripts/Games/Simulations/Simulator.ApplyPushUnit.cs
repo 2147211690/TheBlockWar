@@ -35,7 +35,7 @@ partial class Simulator
                 else
                 {
                     state.ApplyDamage(coords, 10, result);
-                    state.ApplyDamage(target, 10, result);
+                    if (!targetUnit.IsNull()) state.ApplyDamage(target, 10, result);
                 }
             }
         }

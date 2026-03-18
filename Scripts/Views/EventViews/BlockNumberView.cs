@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Views.EventViews;
 [GlobalClass]
@@ -13,15 +14,16 @@ public partial class BlockNumberView : Node2D
     
     public void UseBlock(Vector2I coords)
     {
-        if (_blockNumberSprites.TryGetValue(coords, out var block)) block.IsFocused++;
+        if (_blockNumberSprites.TryGetValue(coords, out var block)) block.UseCount++;
         else
         {
             block = new Block
             {
                 Sprite = ViewPools.Sprite2DPool.Pop(),
-                FocusedNumber = 0,
+                ValidNumber = 0,
                 HasAim = 0,
-                IsFocused = 1,
+                UseCount = 1,
+                IsFocused = 0,
             };
             _blockNumberSprites[coords] = block;
         }
@@ -30,34 +32,39 @@ public partial class BlockNumberView : Node2D
     public void CancelBlock(Vector2I coords)
     {
         if (!_blockNumberSprites.TryGetValue(coords, out var block)) return;
-        block.IsFocused--;
-        if (block.IsFocused <= 0)
+        block.UseCount--;
+        if (block.UseCount <= 0)
         {
             RemoveBlock(coords);
         }
     }
 
-    public void AddNumber(Vector2I coords, float value, bool hasAim, bool isFocused)
+    public void AddNumber(Vector2I coords, float rawValue, float validValue, bool hasAim, bool isFocused)
     {
         if (!_blockNumberSprites.TryGetValue(coords, out var block)) return;
-        block.FocusedNumber += isFocused ? value : 0;
-        block.Number += !isFocused ? value : 0;
+        //被分配出的有效数值
+        block.ValidNumber += hasAim ? validValue : 0;
+        //未被分配出的数值
+        block.RawNumber += rawValue;
         block.HasAim += hasAim ? 1 : 0;
+        block.IsFocused += isFocused ? 1 : 0;
         
         UpdateBlock(block, coords);
     }
     private void UpdateBlock(Block block, in Vector2I coords)
     {
-        var num = block.IsFocused > 0 ? block.FocusedNumber : block.Number;
+        var num = 0f;
+        num = block.HasAim == 0 ? block.RawNumber : block.ValidNumber;
         var texture = EventsView.GameView.Style[0].GetBlockNumberTexture(Mathf.Abs((int)(num / 10)));
         block.Sprite.Texture = texture;
-        block.Sprite.Scale = block.HasAim > 0 ? new Vector2(1.2f, 1.2f) : Vector2.One;
-        block.Sprite.Modulate = block.HasAim > 0
-            ? (block.FocusedNumber > 0 ? Colors.GreenYellow : Colors.OrangeRed)
-            : Colors.White;
+        block.Sprite.Modulate = num != 0
+            ? (num > 0 ? Colors.GreenYellow : Colors.OrangeRed) :
+            Colors.White;
         block.Sprite.Modulate = block.Sprite.Modulate with { A = block.IsFocused > 0 ? 1 : 0.6f };
-        block.Sprite.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 0);
-        block.Sprite.Offset = TilesView.GetRenderOffset(coords, Layer.Sky, 0, 20);
+        block.Sprite.Position = TilesView.GetRenderPosition(coords, Layer.Sky, 1);
+        block.Sprite.SetScaleCentered(
+            TilesView.GetRenderOffset(coords, Layer.Sky, 1),
+            block.HasAim > 0 ? new Vector2(1.2f, 1.2f) : Vector2.One);
     }
 
     private void RemoveBlock(Vector2I coords)
@@ -77,9 +84,10 @@ public partial class BlockNumberView : Node2D
     private class Block
     {
         public required Sprite2D Sprite { get; init; }
-        public float FocusedNumber { get; set; }
-        public float Number { get; set; }
+        public float ValidNumber { get; set; }
+        public float RawNumber { get; set; }
         public int HasAim { get; set; }
+        public int UseCount { get; set; }
         public int IsFocused { get; set; }
     }
 }

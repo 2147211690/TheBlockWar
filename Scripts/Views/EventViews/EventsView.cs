@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using Godot;
+using TheBlockWar.Scripts.Games;
 
 namespace TheBlockWar.Scripts.Views.EventViews;
 [GlobalClass]
 public partial class EventsView : Node2D
 {
+    private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     [Export] public GameView GameView { get; set; }
     [Export] private Node2D _drawContainer;
     [Export] public BlockNumberView BlockNumberView { get; set; }
@@ -31,19 +33,21 @@ public partial class EventsView : Node2D
         _eventViews.Clear();
     }
 
-    public EventView? BeginAddEventView(uint id)
+    public EventView? BeginAddEventView(uint id, bool isFocused, TeamTypeEnum teamType)
     {
         if (_eventViews.ContainsKey(id))
         {
-            GD.PrintErr($"EventView with id {id} already exists");
+            Logger.Warn($"EventView with id {id} already exists");
             return null;
         }
         if (_currentView != null)
         {
-            GD.PrintErr($"CurrentView is not null");
+            Logger.Warn($"CurrentView is not null");
             return null;
         }
         _currentView = _eventViewPool.Pop();
+        _currentView.IsFocused = isFocused;
+        _currentView.TeamType = teamType;
         _eventViews.Add(id, _currentView);
         return _currentView;
     }
