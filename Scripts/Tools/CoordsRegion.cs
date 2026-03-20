@@ -62,6 +62,15 @@ public static class CoordsRegion
         }
     }
 
+    public static IEnumerable<Vector2I> GetCrossRegion(Vector2I center, int up, int down, int left, int right)
+    {
+        for (var y = -up; y <= down; y++)
+            yield return new Vector2I(center.X, center.Y + y);
+        for (var x = -left; x <= right; x++)
+            if (x != 0)
+                yield return new Vector2I(center.X + x, center.Y);
+    }
+
     /// <summary>
     ///     获取从start到end的连续路径(上下左右)区域，包含start和end
     /// </summary>

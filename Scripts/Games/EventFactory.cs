@@ -5,7 +5,7 @@ namespace TheBlockWar.Scripts.Games;
 
 public static class EventFactory
 {
-    private static uint _eventId = 0;
+    private static uint _eventId = 1;
     public static uint CreateEventId()
     {
         return _eventId++;

@@ -376,8 +376,10 @@ BuffEffectOffsets = Dictionary[String, Vector2]({
 "Test2": Vector2(0, -8)
 })
 UnitView = NodePath("../..")
-SymbolBoxSize = Vector2(8, 8)
+SymbolBoxSize = Vector2(6, 6)
 IconBoxSize = Vector2(12, 12)
+ElementSpacing = 0.0
+RowSpacing = 0.0
 PlusTexture = ExtResource("5_5mqhy")
 MinusTexture = ExtResource("6_b2pj8")
 GainTint = Color(1, 1, 1, 1)

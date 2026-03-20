@@ -14,6 +14,9 @@ public static class Skills
 {
     private static readonly ActionSkill.GetSkillArgsFunc EmptyArgsFunc = (_, _, _, _, _) => [];
     private static readonly ActionSkill.GetSkillArgsFunc SelfArgsFunc = (_, _, _, _, _) => [Vector2I.Zero];
+    /// <summary>
+    /// 会传入快照状态，需要在快照状态下进行操作
+    /// </summary>
     private static void Skill1Core(
         IGameState gameState,
         SimulationResult result,
@@ -26,37 +29,27 @@ public static class Skills
             
             var path = GameNavigator.FindShortestPath(gameState, unit, useCoords, v1 + unit.Coords);
             gameState.ApplyMoveUnitPath(Vector2I.Zero, path, result);
-            gameState.ApplyModifyTileRegion(useCoords, RegionTypeEnum.Test1, RegionOperation.AddRegion, 1, result);
         }
-        if (args.TryGetArgs(1, out var v2))
+        if (args.TryGetArgs(1, out var v2) && result.PeekStep is MoveUnitPathStep moveStep)
         {
-            
-            
-            for (int i = 0; i < 4; i++)
-            {
-                var dir = (DirMask)(1 << i);
-                gameState.ApplyPushUnit(v2 + useCoords + dir.ToVec2I(), dir, result);
-            }
-            gameState.ApplyDamage(useCoords + v2, 20, result);
+            var start = moveStep.Path[moveStep.ResultTargetIndex];
+            var dir = (v2 - v1).ToVecDirMask();
+            gameState.MoveHit(start, dir, 20, 4, !unit.IsFlying ,result);
+            gameState.ApplyAnimation(new ThrowSomethingAnim(start, v2 + useCoords, "Test", 100, 1), result);
+            gameState.ApplyModifyUnitBuff(v2 + useCoords, BuffTypeEnum.Test, BuffOperation.AddBuff, 1, result);
         }
         if (args.TryGetArgs(2, out var v3))
         {
-            var c = v3 + useCoords;
-            for (int i = -1; i < 2; i++)
-            {
-                for (int j = -1; j < 2; j++)
-                {
-                    if (i == j && i == 0)
-                    {
-                        gameState.ApplyModifyUnitBuff(c + new Vector2I(i, j), BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
-                    }
-                    else gameState.ApplyCure(c + new Vector2I(i, j), 10, result);
-                }
-            }
-            
+            gameState.ApplyModifyUnitBuff(v3 + useCoords, BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
+        }
+        if (args.TryGetArgs(3, out var v4))
+        {
+            gameState.ApplyModifyUnitBuff(v4 + useCoords, BuffTypeEnum.Test, BuffOperation.RemoveBuff, 1, result);
         }
     }
-
+    /// <summary>
+    /// 不会传入快照状态，直接操作原始状态
+    /// </summary>
     private static IEnumerable<Vector2I> Skill1Args(
         IReadOnlyGameState state,
         IReadOnlyUnitState caster,
@@ -72,7 +65,7 @@ public static class Skills
         }
         else if(argsIndex == 1)
         {
-            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 4);
+            return CoordsRegion.GetCrossRegion(args[0] ?? Vector2I.Zero, 4, 4, 4, 4);
             //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
         else if(argsIndex == 2)
@@ -80,9 +73,14 @@ public static class Skills
             return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6);
             //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
+        else if(argsIndex == 3)
+        {
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6);
+            //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
+        }
         return [];
     }
-    public static ISkill Skill1 { get; } = new ActionSkill(3, Skill1Args, Skill1Core);
+    public static ISkill Skill1 { get; } = new ActionSkill(4, Skill1Args, Skill1Core);
 
 
 

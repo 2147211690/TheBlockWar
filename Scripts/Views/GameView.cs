@@ -20,8 +20,10 @@ public partial class GameView : Node2D
     [Export] public TilesView TilesView { get; set; }
     [Export] public UnitsView UnitsView { get; set; }
     [Export] public EventsView EventsView { get; set; }
+    [Export] public AnimationView AnimationView { get; set; }
     
-    private List<SimulationResult> _runningSimulations = new();
+    private Dictionary<uint, SimulationResult> _runningSimulations = new();
+    private List<SimulationResult> _lastSimulations = new();
     private List<SimulationResult> _prepareSimulations = new();
     private GameScheduler? _gameScheduler;
     private Queue<SimulationResult[]> _simulationCache = new();
@@ -99,19 +101,23 @@ public partial class GameView : Node2D
             _simulationCache.Enqueue(simulations.ToArray());
             return;
         }
+
+        (_lastSimulations, _prepareSimulations) = (_prepareSimulations, _lastSimulations);
+        
         _prepareSimulations.Clear();
         _runningSimulations.Clear();
         foreach (var simulation in simulations)
         {
             if (simulation.Layer == SimulationLayer.Running)
-                _runningSimulations.Add(simulation);
+                _runningSimulations.Add(simulation.SourceId, simulation);
             else
                 _prepareSimulations.Add(simulation);
         }
-        RunSimulationTask = RunSimulation();
-        RunSimulationTask.GetAwaiter().OnCompleted(RunCompleted);
 
+        RunSimulationTask = StartSimulations();
+        RunSimulationTask.GetAwaiter().OnCompleted(RunCompleted);
     }
+
     private void RunCompleted()
     {
         if (_simulationCache.TryDequeue(out var simulations))
@@ -124,13 +130,22 @@ public partial class GameView : Node2D
             _refocus = false;
         }
     }
-    private async GDTask RunSimulation()
+    private async GDTask StartSimulations()
     {
         if (_runningSimulations.Count > 0) _refocus = true;
-        foreach (var simulation in _runningSimulations)
+        //绘制运行前的事件
+        DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
+        await RunSimulations(_runningSimulations.Values);
+        DrawEvents(_prepareSimulations);
+    }
+
+    private async GDTask RunSimulations(IEnumerable<SimulationResult> simulations)
+    {
+        foreach (var simulation in simulations)
         {
             // 清空当前事件视图
-            EventsView.ClearEventView(simulation.SourceId);
+            //EventsView.ClearEventView(simulation.SourceId);
+            if (simulation.Steps == null) continue;
             foreach (var step in simulation.Steps)
             {
                 switch (step)
@@ -185,15 +200,19 @@ public partial class GameView : Node2D
                         }
                         break;
                     case AnimationStep animationStep:
-                        //TODO:动画实现
+                        await AnimationView.Play(animationStep.Animation);
                         break;
                     case null:
                         break;
                 }
             }
         }
+    }
+
+    private void DrawEvents(IEnumerable<SimulationResult> s)
+    {
         EventsView.ClearAll();
-        foreach (var simulation in _prepareSimulations)
+        foreach (var simulation in s)
         {
             var isFocused = simulation.Layer == SimulationLayer.Focused;
             var teamType = simulation.TeamType;

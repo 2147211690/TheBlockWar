@@ -18,6 +18,8 @@ public class EventView
     private TypedPool<DrawNode> DrawNodePool => _pool.EventsView.GameView.ViewPools.DrawNodePool;
     private TypedPool<Sprite2D> SpritePool => _pool.EventsView.GameView.ViewPools.Sprite2DPool;
     private BlockNumberView BlockNumberView => _pool.EventsView.BlockNumberView;
+    private BlockBuffView BlockBuffView => _pool.EventsView.BlockBuffView;
+    private BlockRegionView BlockRegionView => _pool.EventsView.BlockRegionView;
     private TilesView TilesView => _pool.EventsView.GameView.TilesView;
     private GameViewStyle Style => _pool.EventsView.GameView.Style;
     private UnitsView UnitsView => _pool.EventsView.GameView.UnitsView;
@@ -80,6 +82,7 @@ public class EventView
         else
         {
             BlockNumberView.CancelBlock(coords);
+            BlockNumberView.RemoveNumber(coords, originChange, unitId == 0 ? originChange : healthChange, unitId != 0, IsFocused);
             if (IsFocused)
             {
                 UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange -= healthChange;
@@ -152,6 +155,7 @@ public class EventView
                     usedSprites[index].Texture = tex;
                     usedSprites[index].Position = TilesView.GetRenderPosition(coords , Layer.Underground, -1);
                     usedSprites[index].Offset = TilesView.GetRenderOffset(coords, Layer.Underground, -1);
+                    usedSprites[index].Modulate = Colors.White with {A = IsFocused ? 1 : 0.6f};
                 }
             }
             else
@@ -161,6 +165,7 @@ public class EventView
                     if (usedSprites[i] == null) break;
                     usedSprites[i].Texture = null;
                     usedSprites[i].Offset = Vector2.Zero;
+                    usedSprites[i].Modulate = Colors.White;
                     SpritePool.Push(usedSprites[i]);
                 }
             }
@@ -214,10 +219,30 @@ public class EventView
             BuffOperation.ChangeDuration => step.ResultDuration >= 0 ? 1 : -1,
             _ => 0,
         };
+        var color = step.Operation switch
+        {
+            BuffOperation.AddBuff => Colors.White,
+            BuffOperation.RemoveBuff => Colors.OrangeRed,
+            _ => Colors.White,
+        };
+        var isAdd = step.Operation switch
+        {
+            BuffOperation.AddBuff => true,
+            BuffOperation.RemoveBuff => false,
+            BuffOperation.ChangeDuration => step.Duration >= 0,
+            BuffOperation.SetDuration => true,
+        };
+        color.A = IsFocused ? 1 : 0.6f;
+        
         node.DrawAction += (u, v) =>
         {
             if (v)
             {
+                BlockBuffView.AddBuffChange(step.Coords,
+                    step.BuffType,
+                    isAdd,
+                    IsFocused
+                );
                 if (IsFocused)
                 {
                     UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, c);
@@ -225,6 +250,11 @@ public class EventView
             }
             else
             {
+                BlockBuffView.RemoveBuffChange(step.Coords,
+                    step.BuffType,
+                    isAdd,
+                    IsFocused
+                );
                 if (IsFocused)
                 {
                     UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, -c);
@@ -237,9 +267,76 @@ public class EventView
 
     public void Animation(AnimationStep step)
     {
-        //TODO:绘制动画
-    }
+        var node = DrawNodePool.Pop();
+        _nodes.Add(node);
+        switch (step.Animation)
+        {
+            case ShotSomethingAnim shotSomethingAnim:
+                ShotSomething(node, shotSomethingAnim);
+                break;
+            case ThrowSomethingAnim throwSomethingAnim:
+                ThrowSomething(node, throwSomethingAnim);
+                break;
+            default:
+                break;
+        }
+        node.QueueRedraw();
+
+        void ShotSomething(DrawNode node, ShotSomethingAnim anim)
+        {
+            node.Position = Vector2.Zero;
+            var startPos = TilesView.GetRealPosition(anim.Coords, Layer.Sky);
+            var endPos = TilesView.GetRealPosition(anim.To, Layer.Sky);
+            var distance = startPos.DistanceTo(endPos);
+            var dotSpacing = 20f;
+            var dotRadius = 4f;
+            var dotCount = (int)(distance / dotSpacing);
+            
+            node.DrawAction +=
+                (u, v) => PointLineDraw(u, v, dotCount, dotRadius, (t) => startPos.Lerp(endPos, t));
+        }
+        void ThrowSomething(DrawNode node, ThrowSomethingAnim anim)
+        {
+            node.Position = Vector2.Zero;
+            var throwStart = TilesView.GetRealPosition(anim.Coords, Layer.Underground);
+            var throwEnd = TilesView.GetRealPosition(anim.To, Layer.Underground);
+            var throwCenter = throwEnd.Lerp(throwStart, 0.5f) + new Vector2(0, -anim.ThrowHeight);
     
+            var distance = throwStart.DistanceTo(throwEnd);
+            var dotSpacing = 20f;
+            var dotRadius = 4f;
+            var dotCount = (int)(distance / dotSpacing);
+    
+            node.DrawAction +=
+                (u, v) => PointLineDraw(u, v, dotCount, dotRadius, t =>
+                {
+                    var s1 = throwStart.Lerp(throwCenter, t);
+                    var s2 = throwCenter.Lerp(throwEnd, t);
+                    return s1.Lerp(s2, t);
+                });
+        }
+    }
+
+    private void PointLineDraw(DrawNode u, bool v, int dotCount, float dotRadius, Func<float, Vector2> getPos)
+    {
+        if (v)
+        {
+            u.ZIndex = 1;
+            var color = Colors.White with { A = IsFocused ? 1 : 0.6f };
+
+            for (int i = 0; i <= dotCount; i++)
+            {
+                var t = (float)i / dotCount;
+                var dotPos = getPos(t);
+                u.DrawCircle(dotPos, dotRadius, color);
+            }
+        }
+        else
+        {
+            u.ZIndex = 0;
+        }
+    }
+
     private void Clear()
     {
         for (int i = _nodes.Count - 1; i >= 0; i--) DrawNodePool.Push(_nodes[i]);

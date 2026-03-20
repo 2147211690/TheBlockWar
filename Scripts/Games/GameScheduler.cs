@@ -72,7 +72,7 @@ public class GameScheduler
         FocusedUnitId = id;
         
         //调整对应技能层
-        skillEvent = _skillEvents.Find(e => e.BindUnitId == FocusedUnitId);
+        skillEvent = id == 0 ? null : _skillEvents.Find(e => e.BindUnitId == FocusedUnitId);
         (skillEvent as ISchedulerEvnet)?.Layer = SimulationLayer.Focused;
         UnblockUpdate();
         
@@ -150,9 +150,8 @@ public class GameScheduler
             _ => throw new ArgumentOutOfRangeException(nameof(ev.Layer), ev.Layer, null)
         };
         var index = list.BinarySearch(ev);
-        list.Insert(index < 0 ? ~index : index, ev);
-        /*list.Add(ev);
-        list.Sort();*/
+        index = index < 0 ? ~index : index;
+        list.Insert(index, ev);
     }
 
     private void OnEventUpdate(object? sender, EventArgs e)
@@ -165,31 +164,7 @@ public class GameScheduler
 
     private bool RemoveEventList(SchedulerEvnet ev)
     {
-        if (TryRemoveFromList(_runningSimulations, ev)) return true;
-        if (TryRemoveFromList(_focusedSimulations, ev)) return true;
-        if (TryRemoveFromList(_waitingSimulations, ev)) return true;
-        return false;
-        //if (_runningSimulations.Remove(ev) || _focusedSimulations.Remove(ev) || _waitingSimulations.Remove(ev)) ;
-    }
-
-    private bool TryRemoveFromList(List<SchedulerEvnet> list, SchedulerEvnet ev)
-    {
-        if (list.Count == 0) return false;
-        var index = list.BinarySearch(0, list.Count, ev, _removeComparer);
-        if (index < 0) return false;
-        for (var i = index; i >= 0 && list[i].CompareTo(ev) == 0 ; i--)
-        {
-            if (!ReferenceEquals(list[i], ev)) continue;
-            list.RemoveAt(i);
-            return true;
-        }
-        for (var i = index + 1; i < list.Count && list[i].CompareTo(ev) == 0; i++)
-        {
-            if (!ReferenceEquals(list[i], ev)) continue;
-            list.RemoveAt(i);
-            return true;
-        }
-        return false;
+        return _runningSimulations.Remove(ev) || _focusedSimulations.Remove(ev) || _waitingSimulations.Remove(ev);
     }
 
     private void UpdateSimulation()

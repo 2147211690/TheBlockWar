@@ -42,22 +42,57 @@ public static class Extensions
             var size = gameState.TileMapState.Size;
             return coords.IsInSize(size);
         }
+
+        public (Vector2I coords, bool isHit) CastRayToUnit(in Vector2I start, in Vector2I step, int maxSteps, bool checkGround = false)
+        {
+            var coords = start;
+            for (var i = 0; i < maxSteps; i++)
+            {
+                coords += step;
+                if (gameState.IsInMap(coords) && (!checkGround || !gameState.TileMapState.IsEmpty(coords)))
+                {
+                    if (gameState.UnitMapState.HasUnit(coords)) return (coords, true);
+                }
+                else
+                {
+                    return (coords, false);
+                }
+            }
+            return (coords, false);
+        }
+    }
+
+    extension(IGameState state)
+    {
+        public (Vector2I coords, bool isHit) MoveHit(in Vector2I start, DirMask dir, float damage, int length, bool checkGround,
+            SimulationResult result)
+        {
+            if (!dir.IsOneVec()) return (start, false);
+            var (aim, isHit) = state.CastRayToUnit(start, dir.ToVec2I(), length, checkGround);
+            state.ApplyMoveUnitPath(start, CoordsRegion.GetPathRegion(Vector2I.Zero, aim - dir.ToVec2I() - start).ToList(), result);
+            if (isHit)
+            {
+                state.ApplyDamage(aim, damage, result);
+                state.ApplyDamage(aim - dir.ToVec2I(), damage, result);
+            }
+            return (aim, isHit);
+        }
     }
     
     extension(Node2D node2d)
     {
-        public void DrawTextureCentered(Texture2D texture, Vector2 position, Color? modulate = null)
+        public void DrawTextureCentered(Texture2D? texture, Vector2 position, Color? modulate = null)
         {
-            node2d.DrawTexture(texture, position - texture.GetSize() * node2d.GlobalScale / 2, modulate);
+            node2d.DrawTexture(texture, position - (texture?.GetSize() ?? Vector2.One) * node2d.GlobalScale / 2, modulate);
         }
         /// <summary>
         /// 绘制纹理并根据偏移量调整位置
         /// </summary>
         /// <param name="offsetX">X轴偏移量，0-1之间的浮点数，0表示左边缘，1表示右边缘</param>
         /// <param name="offsetY">Y轴偏移量，0-1之间的浮点数，0表示上边缘，1表示下边缘</param>
-        public void DrawTextureOffset(Texture2D texture, Vector2 position, float offsetX, float offsetY, Color? modulate = null)
+        public void DrawTextureOffset(Texture2D? texture, Vector2 position, float offsetX, float offsetY, Color? modulate = null)
         {
-            var size = texture.GetSize();
+            var size = texture?.GetSize() ?? Vector2.One;
             size = new(Mathf.Lerp(0, size.X, offsetX), Mathf.Lerp(0, size.Y, offsetY));
             node2d.DrawTexture(texture, position - size * node2d.GlobalScale, modulate);
         }
@@ -186,6 +221,11 @@ public static class Extensions
                 DirMask.Right => 3,
                 _ => -1,
             };
+        }
+
+        public bool IsOneVec()
+        {
+            return dirMask != DirMask.None && (dirMask & (dirMask - 1)) == 0;
         }
     }
 

@@ -58,11 +58,11 @@ public class ViewPools
                 a.DrawAction = null;
                 a.ProcessRedraw = false;
                 a.Args = null;
+                a.Reset();
                 a.ProcessMode = Node.ProcessModeEnum.Disabled;
             },
             BeforePop = a =>
             {
-                a.Reset();
                 a.Visible = true;
                 a.ProcessMode = Node.ProcessModeEnum.Inherit;
             }

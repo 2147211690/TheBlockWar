@@ -127,6 +127,21 @@ public partial class TilesView : TileMapLayer
         Layer.Underground => LocalRightDown.Y / 4,
         Layer.Sky => LocalRightDown.Y * 2,
     };
+    
+    public Vector2 GetRealPosition(in Vector2I coords, Layer layer, float? defineHeight = null)
+    {
+        var pos = MapToLocal(coords);
+        if (defineHeight == null)
+        {
+            if ((layer & Layer.Underground) != 0 || (layer & Layer.Sky) != 0) pos.Y -= GetTileHeight(coords);
+        }
+        else
+        {
+            pos.Y -= defineHeight.Value;
+        }
+        return pos;
+    }
+    
     public Vector2 GetRenderPosition(in Vector2I coords, Layer layer, int renderOffset)
     {
         var maxOffset = GetLayerOffset(layer);

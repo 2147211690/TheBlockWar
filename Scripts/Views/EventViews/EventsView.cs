@@ -10,6 +10,8 @@ public partial class EventsView : Node2D
     [Export] public GameView GameView { get; set; }
     [Export] private Node2D _drawContainer;
     [Export] public BlockNumberView BlockNumberView { get; set; }
+    [Export] public BlockBuffView BlockBuffView { get; set; }
+    [Export] public BlockRegionView BlockRegionView { get; set; }
     private EventView.EventViewPool _eventViewPool;
     private Dictionary<uint, EventView> _eventViews = new();
     private EventView? _currentView;

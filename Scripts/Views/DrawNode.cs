@@ -5,7 +5,17 @@ namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class DrawNode : Node2D
 {
-    public Action<DrawNode, bool>? DrawAction { get; set; }
+    public Action<DrawNode, bool>? DrawAction
+    {
+        get => field;
+        set
+        {
+            if (_hadDrawn) DrawAction?.Invoke(this, false);
+            field = value;
+            if (IsVisibleInTree()) QueueRedraw();
+        }
+    }
+
     public bool ProcessRedraw { get; set; }
     public float Time => (float)Godot.Time.GetTicksMsec() / 1000 - ResetTime;
     public float DeltaTime { get; private set; }
@@ -16,6 +26,8 @@ public partial class DrawNode : Node2D
     {
         DeltaTime = 0;
         ResetTime = 0;
+        _hadDrawn = false;
+        Args = null;
     }
 
     public DrawNode()
@@ -25,11 +37,17 @@ public partial class DrawNode : Node2D
 
     private void OnVisibilityChanged()
     {
-        if (!IsVisibleInTree() && _hadDrawn) DrawAction?.Invoke(this, false);
+        if (DrawAction == null) return;
+        if (!IsVisibleInTree() && _hadDrawn)
+        {
+            _hadDrawn = false;
+            DrawAction?.Invoke(this, false);
+        }
     }
 
     public override void _Process(double delta)
     {
+        if (DrawAction == null) return;
         DeltaTime = (float)delta;
         if (ProcessRedraw) QueueRedraw();
     }
@@ -37,8 +55,10 @@ public partial class DrawNode : Node2D
     public override void _Draw()
     {
         base._Draw();
-        DrawAction?.Invoke(this, true);
+        if (DrawAction == null) return;
+        if (_hadDrawn) DrawAction?.Invoke(this, false);
         _hadDrawn = true;
+        DrawAction?.Invoke(this, true);
     }
     
 }

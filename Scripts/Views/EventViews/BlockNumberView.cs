@@ -25,6 +25,7 @@ public partial class BlockNumberView : Node2D
                 UseCount = 1,
                 IsFocused = 0,
             };
+            block.Sprite.ZIndex = 2;
             _blockNumberSprites[coords] = block;
         }
     }
@@ -51,6 +52,19 @@ public partial class BlockNumberView : Node2D
         
         UpdateBlock(block, coords);
     }
+
+    public void RemoveNumber(Vector2I coords, float rawValue, float validValue, bool hasAim, bool isFocused)
+    {
+        if (!_blockNumberSprites.TryGetValue(coords, out var block)) return;
+        //被分配出的有效数值
+        block.ValidNumber = hasAim ? validValue : 0;
+        //未被分配出的数值
+        block.RawNumber -= rawValue;
+        block.HasAim -= hasAim ? 1 : 0;
+        block.IsFocused -= isFocused ? 1 : 0;
+        
+        UpdateBlock(block, coords);
+    }
     private void UpdateBlock(Block block, in Vector2I coords)
     {
         var num = 0f;
@@ -74,6 +88,7 @@ public partial class BlockNumberView : Node2D
             block.Sprite.Texture = null;
             block.Sprite.Scale = Vector2.One;
             block.Sprite.Modulate = Colors.White;
+            block.Sprite.ZIndex = 0;
             ViewPools.Sprite2DPool.Push(block.Sprite);
             _blockNumberSprites.Remove(coords);
         }

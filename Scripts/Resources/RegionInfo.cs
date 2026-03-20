@@ -12,6 +12,7 @@ public partial class RegionInfo : Resource
     };
     [Export] public RegionTypeEnum RegionType { get; set; }
     [Export] public Texture2D? Icon { get; set; }
+    [Export] public bool IsOnece { get; set; }
     [Export] public int DefaultDuration { get; set; }
     [Export] public string Description { get; set; } = string.Empty;
 }

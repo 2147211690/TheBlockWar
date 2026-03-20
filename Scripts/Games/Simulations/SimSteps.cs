@@ -35,7 +35,7 @@ public record AnimationStep(bool IsChildStep, AnimationType Animation) : SimStep
 public record AnimationType();
 public record ShotSomethingAnim(Vector2I Coords, Vector2I To, string ThingName, float Time) : AnimationType;
 public record ThrowSomethingAnim(Vector2I Coords, Vector2I To, string ThingName, float ThrowHeight, float Time) : AnimationType;
-public record UnitJumpToAnim(uint UnitId, Vector2I Coords, float Time) : AnimationType;
+public record UnitJumpToAnim(Vector2I Coords, Vector2I To, float Time) : AnimationType;
 public record SummonEffectAnim(Vector2I Coords, string EffectName) : AnimationType;
 [Flags]
 public enum BuffOperation

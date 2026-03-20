@@ -17,7 +17,7 @@ partial class Simulator
 
             void Main()
             {
-                if (path is not {Count: > 0}) return;
+                if (path is not {Count: > 1}) return;
                 var unit = state.UnitMapState.GetUnit(coords + path[0]);
                 if (unit.IsNull())
                 {

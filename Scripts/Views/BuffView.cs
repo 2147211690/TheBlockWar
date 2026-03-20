@@ -54,6 +54,7 @@ public partial class BuffView : Node2D
     // Buff数据
     private readonly Dictionary<BuffTypeEnum, int> _buffChanges = new();
     private readonly Dictionary<BuffTypeEnum, AnimatedSprite2D> _visibleBuffs = new();
+    private bool _refreshBuffListsDirty = true;
 
     public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType)
     {
@@ -84,7 +85,7 @@ public partial class BuffView : Node2D
         if (_buffChanges[type] == 0)
             _buffChanges.Remove(type);
 
-        RefreshBuffLists();
+        _refreshBuffListsDirty = true;
         QueueRedraw();
     }
     public void AddVisibleBuff(BuffTypeEnum type)
@@ -135,6 +136,11 @@ public partial class BuffView : Node2D
     public override void _Draw()
     {
         base._Draw();
+        if (_refreshBuffListsDirty)
+        {
+            RefreshBuffLists();
+            _refreshBuffListsDirty = false;
+        }
         if (_gainBuffs.Count == 0 && _loseBuffs.Count == 0) return;
 
         int rowCount = (_gainBuffs.Count > 0 ? 1 : 0) + (_loseBuffs.Count > 0 ? 1 : 0);
@@ -162,7 +168,7 @@ public partial class BuffView : Node2D
         foreach (var kvp in _buffChanges)
         {
             if (kvp.Value > 0) _gainBuffs.Add(kvp.Key);
-            else if (kvp.Value < 0) _loseBuffs.Add(kvp.Key);
+            else if (kvp.Value < 0 && _visibleBuffs.ContainsKey(kvp.Key)) _loseBuffs.Add(kvp.Key);
         }
     }
 

@@ -85,7 +85,7 @@ public partial class StatePlayer
                 if (!IsCurrentValidArg()) return;
                 //所有参数完成
                 GameScheduler!.RemoveCoordsRegion(_validRegionId);
-                _currentSkillEvent!.Run();
+                //_currentSkillEvent!.Run();
                 StateMachine.ChangeState(player._freeState);
             }
             else //进入下一个参数

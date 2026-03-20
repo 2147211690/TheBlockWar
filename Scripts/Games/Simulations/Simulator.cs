@@ -54,10 +54,16 @@ public static partial class Simulator
             }
             else
             {
-                var toTile = state.TileMapState.GetTile(unit.Coords);
+                var toTile = state.TileMapState.GetTile(coords);
                 if (!toTile.IsNull())
                 {
                     state.NotifyTileRegions(toTile, r => r.OnUnitEnter(state, unit, coords, false, result));
+                }
+                // 移除所有一次性区域
+                for (var i = toTile.Regions.Count - 1; i >= 0; i--)
+                {
+                    if (!toTile.Regions[i].RegionType.GetInstance().Info.IsOnece) continue;
+                    state.TileMapState.ModifyTile(coords, u => u.RemoveRegion(i));
                 }
             }
         }

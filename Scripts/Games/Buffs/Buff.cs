@@ -11,7 +11,7 @@ public class Buff : IBuff
     public Buff(string infoPath)
     {
         Info = ResourceLoader.Exists(infoPath) ? ResourceLoader.Load<BuffInfo>(infoPath) : BuffInfo.Null;
-        Logger.Warn("BuffInfo-{path}不存在,使用空替代", infoPath);
+        //Logger.Warn("BuffInfo-{path}不存在,使用空替代", infoPath);
     }
 
     public BuffInfo Info { get; }

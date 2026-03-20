@@ -10,6 +10,10 @@
 [ext_resource type="PackedScene" uid="uid://bccdls2vsjite" path="res://View/UnitView.tscn" id="6_ivycn"]
 [ext_resource type="Script" uid="uid://dk12ehg31xf4o" path="res://Scripts/Views/EventViews/EventsView.cs" id="7_q1uvj"]
 [ext_resource type="Script" uid="uid://boli430ctw28m" path="res://Scripts/Views/EventViews/BlockNumberView.cs" id="9_vwb7u"]
+[ext_resource type="Script" uid="uid://c2bb8fdqy4ca4" path="res://Scripts/Views/AnimationView.cs" id="11_cqdos"]
+[ext_resource type="Script" uid="uid://d1jjn6pd0t1w8" path="res://Scripts/Views/EventViews/BlockBuffView.cs" id="11_rc7cs"]
+[ext_resource type="Script" uid="uid://ckyskgma4rbc0" path="res://Scripts/Views/EventViews/BlockRegionView.cs" id="12_d1b21"]
+[ext_resource type="Texture2D" uid="uid://bc0rv0tg0wvqo" path="res://Art/Img/ui/power.png" id="12_r6p7k"]
 
 [sub_resource type="TileSet" id="TileSet_8tn2x"]
 tile_shape = 1
@@ -20,13 +24,14 @@ tile_size = Vector2i(56, 42)
 script = ExtResource("1_myinc")
 _view = NodePath("GameView")
 
-[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView")]
+[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView", "AnimationView")]
 script = ExtResource("2_njov2")
 DrawContainer = NodePath("DrawContainer")
 Style = ExtResource("3_c4vo5")
 TilesView = NodePath("TilesView")
 UnitsView = NodePath("UnitsView")
 EventsView = NodePath("EventsView")
+AnimationView = NodePath("AnimationView")
 
 [node name="TilesView" type="TileMapLayer" parent="GameView" unique_id=1800037625 node_paths=PackedStringArray("GameView", "_nodeContainer")]
 tile_set = SubResource("TileSet_8tn2x")
@@ -43,16 +48,39 @@ DrawContainer = NodePath("../DrawContainer")
 _unitScene = ExtResource("6_ivycn")
 metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
 
-[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("GameView", "_drawContainer", "BlockNumberView")]
+[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("GameView", "_drawContainer", "BlockNumberView", "BlockBuffView", "BlockRegionView")]
 script = ExtResource("7_q1uvj")
 GameView = NodePath("..")
 _drawContainer = NodePath("../DrawContainer")
 BlockNumberView = NodePath("BlockNumberView")
+BlockBuffView = NodePath("BlockBuffView")
+BlockRegionView = NodePath("BlockRegionView")
 
 [node name="BlockNumberView" type="Node2D" parent="GameView/EventsView" unique_id=101820365 node_paths=PackedStringArray("EventsView")]
 script = ExtResource("9_vwb7u")
 EventsView = NodePath("..")
 metadata/_custom_type_script = "uid://boli430ctw28m"
+
+[node name="BlockBuffView" type="Node2D" parent="GameView/EventsView" unique_id=1068886859 node_paths=PackedStringArray("EventsView")]
+z_index = 1
+script = ExtResource("11_rc7cs")
+EventsView = NodePath("..")
+IconSize = Vector2(18, 18)
+SymbolBoxSize = Vector2(0, 0)
+ElementSpacing = 1.0
+RowSpacing = -2.0
+
+[node name="BlockRegionView" type="Node2D" parent="GameView/EventsView" unique_id=296024160 node_paths=PackedStringArray("EventsView")]
+script = ExtResource("12_d1b21")
+EventsView = NodePath("..")
+
+[node name="AnimationView" type="Node2D" parent="GameView" unique_id=2146921144 node_paths=PackedStringArray("GameView")]
+script = ExtResource("11_cqdos")
+GameView = NodePath("..")
+Somethings = Dictionary[String, Texture2D]({
+"Test": ExtResource("12_r6p7k")
+})
+metadata/_custom_type_script = "uid://c2bb8fdqy4ca4"
 
 [node name="DrawContainer" type="Node2D" parent="GameView" unique_id=1071978760]
 y_sort_enabled = true
