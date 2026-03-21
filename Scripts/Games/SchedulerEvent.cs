@@ -8,10 +8,10 @@ namespace TheBlockWar.Scripts.Games;
 /// 事件类,用于游戏调度器
 /// 事件越小,优先级越高
 /// </summary>
-public class SchedulerEvnet : ISchedulerEvnet
+public class SchedulerEvent : ISchedulerEvnet
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public SchedulerEvnet(uint id)
+    public SchedulerEvent(uint id)
     {
         Id = id;
     }
@@ -46,8 +46,8 @@ public class SchedulerEvnet : ISchedulerEvnet
     /// </summary>
     public void Run() =>
         ((ISchedulerEvnet)this).Layer = SimulationLayer.Running;
-    public static bool operator <(SchedulerEvnet a, SchedulerEvnet b) => a.CompareTo(b) < 0;
-    public static bool operator >(SchedulerEvnet a, SchedulerEvnet b) => a.CompareTo(b) > 0;
+    public static bool operator <(SchedulerEvent a, SchedulerEvent b) => a.CompareTo(b) < 0;
+    public static bool operator >(SchedulerEvent a, SchedulerEvent b) => a.CompareTo(b) > 0;
     public int CompareTo(ISchedulerEvnet? other)
     {
         if (ReferenceEquals(this, other)) return 0;

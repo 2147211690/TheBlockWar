@@ -3,7 +3,7 @@ using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games;
 
-public class SkillEvent : SchedulerEvnet
+public class SkillEvent : SchedulerEvent
 {
     public new Vector2I?[]? Args
     {

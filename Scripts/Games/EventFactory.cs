@@ -11,12 +11,12 @@ public static class EventFactory
         return _eventId++;
     }
 
-    public static SchedulerEvnet CreateEvent(
+    public static SchedulerEvent CreateEvent(
         ISchedulerEvnet.EventAction? action = null,
         int priority = 0,
         object? args = null)
     {
-        return new SchedulerEvnet(CreateEventId())
+        return new SchedulerEvent(CreateEventId())
         {
             Priority = priority,
             Args = args,

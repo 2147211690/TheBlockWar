@@ -20,9 +20,9 @@ public class GameScheduler
     /// 注意不要在模拟时更新调度器内容,仅用来查询当前游戏状态
     /// </summary>
     public static GameScheduler? CurrentScheduler => _runningSchedulers.Peek();
-    public IReadOnlyList<SchedulerEvnet> WaitingSimulations => _waitingSimulations;
-    public IReadOnlyList<SchedulerEvnet> FocusedSimulations => _focusedSimulations;
-    public IReadOnlyList<SchedulerEvnet> RunningSimulations => _runningSimulations;
+    public IReadOnlyList<SchedulerEvent> WaitingSimulations => _waitingSimulations;
+    public IReadOnlyList<SchedulerEvent> FocusedSimulations => _focusedSimulations;
+    public IReadOnlyList<SchedulerEvent> RunningSimulations => _runningSimulations;
     public IReadOnlyList<SimulationResult> SimulationResults => _simulationResults;
     public IReadOnlyGameState? GameState => _gameState;
     public uint FocusedUnitId { get; private set; }
@@ -30,18 +30,18 @@ public class GameScheduler
 
     public IReadOnlyDictionary<uint, (HashSet<Vector2I> Coords, int type)> CoordsRegions => _coordsRegions;
 
-    private List<SchedulerEvnet> _waitingSimulations = new();
-    private List<SchedulerEvnet> _focusedSimulations = new();
-    private List<SchedulerEvnet> _runningSimulations = new();
+    private List<SchedulerEvent> _waitingSimulations = new();
+    private List<SchedulerEvent> _focusedSimulations = new();
+    private List<SchedulerEvent> _runningSimulations = new();
     private List<SimulationResult> _simulationResults = new();
-    private List<SchedulerEvnet>[] _simulationLayers;
+    private List<SchedulerEvent>[] _simulationLayers;
     private int _blockingUpdate = 0;
     private List<SkillEvent> _skillEvents = new();
     private bool _needUpdate;
     private IGameState? _gameState;
 
-    private Comparer<SchedulerEvnet> _removeComparer =
-        Comparer<SchedulerEvnet>.Create(
+    private Comparer<SchedulerEvent> _removeComparer =
+        Comparer<SchedulerEvent>.Create(
             (a, b) => ReferenceEquals(a, b) ? 0 : a.Priority.CompareTo(b.Priority));
     private Dictionary<uint, (HashSet<Vector2I> Coords, int type)> _coordsRegions = new();
     private uint _coordsRegionsId;
@@ -91,7 +91,7 @@ public class GameScheduler
     {
         return _skillEvents.Find(e => e.BindUnitId == unitId);
     }
-    public SchedulerEvnet AddEvent(SchedulerEvnet ev, bool run = false)
+    public SchedulerEvent AddEvent(SchedulerEvent ev, bool run = false)
     {
         if (run) (ev as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
         
@@ -110,7 +110,7 @@ public class GameScheduler
         return ev;
     }
 
-    public void RemoveEvent(SchedulerEvnet ev)
+    public void RemoveEvent(SchedulerEvent ev)
     {
         if (!RemoveEventList(ev)) return;
         ev.Update -= OnEventUpdate;
@@ -140,7 +140,7 @@ public class GameScheduler
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
     }
 
-    private void AddEventList(SchedulerEvnet ev)
+    private void AddEventList(SchedulerEvent ev)
     {
         var list = ev.Layer switch
         {
@@ -156,17 +156,16 @@ public class GameScheduler
 
     private void OnEventUpdate(object? sender, EventArgs e)
     {
-        var ev = (sender as SchedulerEvnet)!;
+        var ev = (sender as SchedulerEvent)!;
         RemoveEventList(ev);
         AddEventList(ev);
         UpdateSimulation();
     }
 
-    private bool RemoveEventList(SchedulerEvnet ev)
+    private bool RemoveEventList(SchedulerEvent ev)
     {
         return _runningSimulations.Remove(ev) || _focusedSimulations.Remove(ev) || _waitingSimulations.Remove(ev);
     }
-
     private void UpdateSimulation()
     {
         if (_blockingUpdate > 0)
@@ -174,7 +173,11 @@ public class GameScheduler
             _needUpdate = true;
             return;
         }
-        
+        UpdateCore();
+    }
+    
+    private void UpdateCore()
+    {
         _simulationResults.Clear();
         if (_gameState is null) return;
         Logger.Info("触发更新");

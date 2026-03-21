@@ -26,12 +26,12 @@ public partial class Test : Node2D
     private int damageTarget;
     private int damageValue;
     private GameScheduler _gameScheduler = new();
-    private SchedulerEvnet _event0;
+    private SchedulerEvent _event0;
     [Export] private GameView _view;
-    private SchedulerEvnet _event2;
-    private SchedulerEvnet _move;
-    private SchedulerEvnet _damage;
-    private SchedulerEvnet _follow;
+    private SchedulerEvent _event2;
+    private SchedulerEvent _move;
+    private SchedulerEvent _damage;
+    private SchedulerEvent _follow;
     private StatePlayer _player;
     public override void _Ready()
     {
