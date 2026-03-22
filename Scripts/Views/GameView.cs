@@ -37,7 +37,7 @@ public partial class GameView : Node2D
     public override void _Ready()
     {
         base._Ready();
-        ViewPools = new ViewPools(DrawContainer);
+        ViewPools = new ViewPools(DrawContainer, Style);
     }
 
     public void Bind(GameScheduler gameScheduler)

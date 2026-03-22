@@ -1,11 +1,12 @@
 [gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://drxifhh70bbqf"]
 
-[ext_resource type="Texture2D" uid="uid://d2agilk4g0v3h" path="res://Art/Img/ui/core_strat.png" id="1_fjt8a"]
+[ext_resource type="Texture2D" uid="uid://heqolcr2bbvi" path="res://Art/Img/ui/flask.png" id="1_fjt8a"]
 [ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_w85jb"]
 
 [resource]
 script = ExtResource("1_w85jb")
 BuffType = 1
 Icon = ExtResource("1_fjt8a")
+Priority = -1
 Description = "测试"
 metadata/_custom_type_script = "uid://qrkhfr53ls33"

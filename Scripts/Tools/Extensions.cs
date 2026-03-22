@@ -78,23 +78,120 @@ public static class Extensions
             return (aim, isHit);
         }
     }
-    
+
     extension(Node2D node2d)
     {
         public void DrawTextureCentered(Texture2D? texture, Vector2 position, Color? modulate = null)
         {
-            node2d.DrawTexture(texture, position - (texture?.GetSize() ?? Vector2.One) * node2d.GlobalScale / 2, modulate);
+            if (texture == null) return;
+            node2d.DrawTexture(texture, position - (texture?.GetSize() ?? Vector2.One) * node2d.GlobalScale / 2,
+                modulate);
         }
+
         /// <summary>
         /// 绘制纹理并根据偏移量调整位置
         /// </summary>
         /// <param name="offsetX">X轴偏移量，0-1之间的浮点数，0表示左边缘，1表示右边缘</param>
         /// <param name="offsetY">Y轴偏移量，0-1之间的浮点数，0表示上边缘，1表示下边缘</param>
-        public void DrawTextureOffset(Texture2D? texture, Vector2 position, float offsetX, float offsetY, Color? modulate = null)
+        public void DrawTextureOffset(Texture2D? texture, Vector2 position, float offsetX, float offsetY,
+            Color? modulate = null)
         {
             var size = texture?.GetSize() ?? Vector2.One;
             size = new(Mathf.Lerp(0, size.X, offsetX), Mathf.Lerp(0, size.Y, offsetY));
             node2d.DrawTexture(texture, position - size * node2d.GlobalScale, modulate);
+        }
+
+        public Rect2 DrawItemTab(Vector2 position, IReadOnlyList<Texture2D> textures, ItemTabStyle style)
+        {
+            if (textures.Count == 0)
+            {
+                // 返回一个空矩形 
+                return new Rect2(position, Vector2.Zero);
+            }
+
+            // 计算整体宽度 
+            float totalWidth = 0;
+            float maxHeight = 0;
+
+            for (int i = 0; i < textures.Count; i++)
+            {
+                var texture = textures[i];
+                if (texture != null)
+                {
+                    // 按照原始宽高比缩放纹理
+                    float aspectRatio = texture.GetHeight() / (float)texture.GetWidth();
+                    float texHeight = style.ItemSize.X * aspectRatio;
+                    // 考虑到ItemSize的限制
+                    if (texHeight > style.ItemSize.Y)
+                    {
+                        texHeight = style.ItemSize.Y;
+                        float texWidth = style.ItemSize.Y / aspectRatio;
+                        totalWidth += texWidth;
+                    }
+                    else
+                    {
+                        totalWidth += style.ItemSize.X;
+                    }
+
+                    if (texHeight > maxHeight) maxHeight = texHeight;
+                }
+                else
+                {
+                    totalWidth += style.ItemSize.X;
+                    if (style.ItemSize.Y > maxHeight) maxHeight = style.ItemSize.Y;
+                }
+            }
+
+            // 加上间隔 
+            totalWidth += style.ItemSpacing * (textures.Count - 1);
+
+            Vector2 startPos = position;
+            startPos.Y -= style.ItemSize.Y / 2;
+
+            // 根据对齐方式调整起始位置 
+            if (style.Layout == 1) // 右对齐：以Position为右边，向左绘制 
+            {
+                startPos = new Vector2(startPos.X - totalWidth, startPos.Y);
+            }
+            else if (style.Layout == 0) // 居中对齐：所有元素在Position居中绘制 
+            {
+                startPos = new Vector2(startPos.X - totalWidth / 2, startPos.Y);
+            }
+            // style.Layout == -1 是左对齐，不需要调整，以Position为起点向右绘制 
+
+            // 绘制每个纹理 
+            Vector2 currentPos = startPos;
+            for (int i = 0; i < textures.Count; i++)
+            {
+                var texture = textures[i];
+                if (texture != null)
+                {
+                    // 按照原始宽高比计算实际绘制尺寸
+                    float aspectRatio = texture.GetHeight() / (float)texture.GetWidth();
+                    float drawHeight = style.ItemSize.X * aspectRatio;
+                    float drawWidth = style.ItemSize.X;
+
+                    // 确保不超过ItemSize的限制
+                    if (drawHeight > style.ItemSize.Y)
+                    {
+                        drawHeight = style.ItemSize.Y;
+                        drawWidth = style.ItemSize.Y / aspectRatio;
+                    }
+
+                    Vector2 drawSize = new Vector2(drawWidth, drawHeight);
+                    // 将纹理按等比例缩放到合适大小并绘制 
+                    node2d.DrawTextureRect(texture, new Rect2(currentPos, drawSize), false, style.Modulate);
+                    currentPos = new Vector2(currentPos.X + drawWidth + style.ItemSpacing, currentPos.Y);
+                }
+                else
+                {
+                    // 如果纹理为空，仍然占用空间 
+                    currentPos = new Vector2(currentPos.X + style.ItemSize.X + style.ItemSpacing, currentPos.Y);
+                }
+            }
+
+            // 返回绘制区域的边界矩形 
+            return new Rect2(startPos.X, startPos.Y, totalWidth, maxHeight);
         }
     }
 
@@ -296,4 +393,17 @@ public static class Extensions
         }
     }
     
+}
+
+public class ItemTabStyle
+{
+    public Vector2 ItemSize { get; set; }
+    public float ItemSpacing { get; set; } = 10;
+    /// <summary>
+    /// 0: 水平布局
+    /// -1: 左对齐
+    /// 1: 右对齐
+    /// </summary>
+    public int Layout { get; set; } = 0;
+    public Color Modulate { get; set; } = Colors.White;
 }

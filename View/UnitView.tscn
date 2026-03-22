@@ -377,7 +377,7 @@ BuffEffectOffsets = Dictionary[String, Vector2]({
 })
 UnitView = NodePath("../..")
 SymbolBoxSize = Vector2(6, 6)
-IconBoxSize = Vector2(12, 12)
+IconBoxSize = Vector2(10, 10)
 ElementSpacing = 0.0
 RowSpacing = 0.0
 PlusTexture = ExtResource("5_5mqhy")

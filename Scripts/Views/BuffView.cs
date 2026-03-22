@@ -79,6 +79,7 @@ public partial class BuffView : Node2D
 
     public void ChangeBuffChange(BuffTypeEnum type, int change)
     {
+        if (change == 0) return;
         if (!_buffChanges.TryAdd(type, change))
             _buffChanges[type] += change;
 
@@ -99,11 +100,11 @@ public partial class BuffView : Node2D
         if (BuffEffectOffsets.TryGetValue(Enum.GetName(type)!, out var offset)) s.Offset = offset;
         
         s.SpriteFrames = BuffEffectSpriteFrames;
-        var name = $"{Enum.GetName(type)}_Add";
+        var addName = $"{Enum.GetName(type)}_Add";
         var idleName = $"{Enum.GetName(type)}_Idle";
-        if (BuffEffectSpriteFrames.HasAnimation(name))
+        if (BuffEffectSpriteFrames.HasAnimation(addName))
         {
-            s.Play(name);
+            s.Play(addName);
             if (BuffEffectSpriteFrames.HasAnimation(idleName))
             {
                 s.ContinueFinishedOneShot(() => s.Play(idleName));

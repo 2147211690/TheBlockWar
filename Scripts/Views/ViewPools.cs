@@ -1,4 +1,5 @@
 using Godot;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.EventViews;
 
@@ -6,9 +7,11 @@ namespace TheBlockWar.Scripts.Views;
 
 public class ViewPools
 {
-    public ViewPools(Node2D drawContainer)
+    public GameViewStyle Style { get; set; }
+    public ViewPools(Node2D drawContainer, GameViewStyle styleStyle)
     {
         DrawContainer = drawContainer;
+        Style = styleStyle;
         AnimatedSprite2DPool = new TypedPool<AnimatedSprite2D>(() =>
         {
             var node = new AnimatedSprite2D();
@@ -67,9 +70,30 @@ public class ViewPools
                 a.ProcessMode = Node.ProcessModeEnum.Inherit;
             }
         };
+        BlockEventDrawNodePool = new TypedPool<BlockEventDrawNode>(() =>
+        {
+            var node = new BlockEventDrawNode();
+            node.Style = Style;
+            DrawContainer.AddChild(node);
+            node.Visible = false;
+            return node;
+        }, 10)
+        {
+            AfterPush = a =>
+            {
+                a.Visible = false;
+                a.ProcessMode = Node.ProcessModeEnum.Disabled;
+            },
+            BeforePop = a =>
+            {
+                a.Visible = true;
+                a.ProcessMode = Node.ProcessModeEnum.Inherit;
+            }
+        };
     }
     public Node2D DrawContainer { get; }
     public TypedPool<AnimatedSprite2D> AnimatedSprite2DPool { get; private set; }
     public TypedPool<Sprite2D> Sprite2DPool { get; private set; }
     public TypedPool<DrawNode> DrawNodePool { get; private set; }
+    public TypedPool<BlockEventDrawNode> BlockEventDrawNodePool { get; private set; }
 }

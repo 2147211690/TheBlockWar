@@ -9,6 +9,7 @@ public class Test2Buff() : Buff("res://Resources/Infos/BuffInfos/Test2Buff.tres"
         ref float resultDamage,
         SimulationResult result)
     {
+        if (rawDamage == 0) return;
         resultDamage = 0;
         state.ApplyModifyUnitBuff(unit.Coords, Info.BuffType, BuffOperation.RemoveBuff, 0, result);
     }

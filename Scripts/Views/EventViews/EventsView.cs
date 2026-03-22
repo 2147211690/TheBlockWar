@@ -12,6 +12,7 @@ public partial class EventsView : Node2D
     [Export] public BlockNumberView BlockNumberView { get; set; }
     [Export] public BlockBuffView BlockBuffView { get; set; }
     [Export] public BlockRegionView BlockRegionView { get; set; }
+    public BlockDraw BlockDraw { get; set; }
     private EventView.EventViewPool _eventViewPool;
     private Dictionary<uint, EventView> _eventViews = new();
     private EventView? _currentView;
@@ -20,6 +21,7 @@ public partial class EventsView : Node2D
     {
         _eventViewPool =
             new EventView.EventViewPool(_drawContainer, this);
+        BlockDraw = new BlockDraw(this);
     }
 
     public void ClearEventView(uint id)
@@ -33,6 +35,7 @@ public partial class EventsView : Node2D
     {
         foreach (var eventView in _eventViews.Values) _eventViewPool.Push(eventView);
         _eventViews.Clear();
+        BlockDraw.Clear();
     }
 
     public EventView? BeginAddEventView(uint id, bool isFocused, TeamTypeEnum teamType)

@@ -23,6 +23,7 @@ public class EventView
     private TilesView TilesView => _pool.EventsView.GameView.TilesView;
     private GameViewStyle Style => _pool.EventsView.GameView.Style;
     private UnitsView UnitsView => _pool.EventsView.GameView.UnitsView;
+    private BlockDraw BlockDraw => _pool.EventsView.BlockDraw;
     public bool IsFocused { get; set; }
     public TeamTypeEnum TeamType { get; set; }
     private EventView(EventViewPool pool)
@@ -72,17 +73,18 @@ public class EventView
     {
         if (visible)
         {
-            BlockNumberView.UseBlock(coords);
+            //BlockNumberView.UseBlock(coords);
             if (IsFocused)
             {
                 UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange += healthChange;
             }
-            BlockNumberView.AddNumber(coords, originChange, unitId == 0 ? originChange : healthChange, unitId != 0, IsFocused);
+            //BlockNumberView.AddNumber(coords, originChange, unitId == 0 ? originChange : healthChange, unitId != 0, IsFocused);
+            BlockDraw.AddHealthChange(coords, originChange, healthChange, IsFocused, TeamType);
         }
         else
         {
-            BlockNumberView.CancelBlock(coords);
-            BlockNumberView.RemoveNumber(coords, originChange, unitId == 0 ? originChange : healthChange, unitId != 0, IsFocused);
+            //BlockNumberView.CancelBlock(coords);
+            //.RemoveNumber(coords, originChange, unitId == 0 ? originChange : healthChange, unitId != 0, IsFocused);
             if (IsFocused)
             {
                 UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange -= healthChange;
@@ -209,14 +211,14 @@ public class EventView
     }
     public void ModifyUnitBuff(ModifyUnitBuffStep step)
     {
+        
         //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
         var node = DrawNodePool.Pop();
         _nodes.Add(node);
-        var c = step.Operation switch
+        var c = step.ResultOperation switch
         {
             BuffOperation.AddBuff => 1,
             BuffOperation.RemoveBuff => -1,
-            BuffOperation.ChangeDuration => step.ResultDuration >= 0 ? 1 : -1,
             _ => 0,
         };
         var color = step.Operation switch
@@ -238,11 +240,12 @@ public class EventView
         {
             if (v)
             {
-                BlockBuffView.AddBuffChange(step.Coords,
+                /*BlockBuffView.AddBuffChange(step.Coords,
                     step.BuffType,
                     isAdd,
                     IsFocused
-                );
+                );*/
+                if (!step.IsChildStep) BlockDraw.AddBuffChange(step.Coords, step.BuffType, isAdd, IsFocused, TeamType);
                 if (IsFocused)
                 {
                     UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, c);
@@ -250,11 +253,11 @@ public class EventView
             }
             else
             {
-                BlockBuffView.RemoveBuffChange(step.Coords,
+                /*BlockBuffView.RemoveBuffChange(step.Coords,
                     step.BuffType,
                     isAdd,
                     IsFocused
-                );
+                );*/
                 if (IsFocused)
                 {
                     UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, -c);
@@ -303,8 +306,8 @@ public class EventView
             var throwCenter = throwEnd.Lerp(throwStart, 0.5f) + new Vector2(0, -anim.ThrowHeight);
     
             var distance = throwStart.DistanceTo(throwEnd);
-            var dotSpacing = 20f;
-            var dotRadius = 4f;
+            var dotSpacing = 4f;
+            var dotRadius = 1f;
             var dotCount = (int)(distance / dotSpacing);
     
             node.DrawAction +=
