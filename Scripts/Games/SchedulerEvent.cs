@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games;

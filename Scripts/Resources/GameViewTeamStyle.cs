@@ -1,5 +1,3 @@
-using Godot;
-
 namespace TheBlockWar.Scripts.Resources;
 
 [GlobalClass]

@@ -1,6 +1,3 @@
-using System;
-using Godot;
-
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class DrawNode : Node2D

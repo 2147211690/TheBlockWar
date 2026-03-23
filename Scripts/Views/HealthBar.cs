@@ -1,5 +1,3 @@
-using System;
-using Godot;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Resources;
 

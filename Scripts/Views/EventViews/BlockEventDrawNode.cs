@@ -1,12 +1,9 @@
-using System.Collections.Generic;
 using System.Linq;
-using Godot;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
-using Autoload = TheBlockWar.Scripts.Tools.Autoload;
 
 namespace TheBlockWar.Scripts.Views.EventViews;
 

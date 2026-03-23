@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace TheBlockWar.Scripts.Games.Regions;
 
 public static class Regions

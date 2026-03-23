@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using Godot;
-using GodotTask;
-
 namespace TheBlockWar.Scripts.Views;
 
 public partial class TileView : Node2D

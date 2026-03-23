@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace TheBlockWar.Scripts.Tools;
 
 public class RecordTypedPool<T> : TypedPool<T>

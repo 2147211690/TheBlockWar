@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Godot;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Views.EventViews;

@@ -1,4 +1,3 @@
-using Godot;
 using NLog;
 using NLog.Common;
 using NLog.Targets;

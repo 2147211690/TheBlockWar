@@ -1,6 +1,3 @@
-using Godot;
-using Godot.Collections;
-using GodotTask;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
@@ -9,7 +6,7 @@ namespace TheBlockWar.Scripts.Views;
 public partial class AnimationView : Node2D
 {
     [Export] public GameView GameView { get; set; }
-    [Export] public Dictionary<string, Texture2D> Somethings { get; set; }
+    [Export] public Godot.Collections.Dictionary<string, Texture2D> Somethings { get; set; }
     public GDTask Play(AnimationType step)
     {
         switch (step)

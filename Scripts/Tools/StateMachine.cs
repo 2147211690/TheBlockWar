@@ -1,5 +1,3 @@
-using System;
-
 namespace TheBlockWar.Scripts.Tools;
 
 public class StateMachine<T> where T : IState

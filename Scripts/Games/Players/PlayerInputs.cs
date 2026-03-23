@@ -1,5 +1,3 @@
-using Godot;
-
 namespace TheBlockWar.Scripts.Games.Players;
 
 public record struct PlayerInputClick(Vector2I Coords, MouseButtonMask Button);

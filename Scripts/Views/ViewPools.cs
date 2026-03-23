@@ -1,4 +1,3 @@
-using Godot;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.EventViews;

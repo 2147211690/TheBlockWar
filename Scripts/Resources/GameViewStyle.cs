@@ -1,4 +1,3 @@
-using Godot;
 using TheBlockWar.Scripts.Games;
 
 namespace TheBlockWar.Scripts.Resources;

@@ -1,5 +1,3 @@
-using Godot;
-
 namespace TheBlockWar.Scripts.Games.Players;
 
 public partial class StatePlayer

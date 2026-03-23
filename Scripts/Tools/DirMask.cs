@@ -1,5 +1,3 @@
-using System;
-
 namespace TheBlockWar.Scripts.Tools;
 
 [Flags]

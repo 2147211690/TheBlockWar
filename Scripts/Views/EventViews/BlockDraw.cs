@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Godot;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Regions;
