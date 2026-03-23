@@ -134,7 +134,8 @@ public partial class GameView : Node2D
     {
         if (_runningSimulations.Count > 0) _refocus = true;
         //绘制运行前的事件
-        DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
+        if (_runningSimulations.Count > 0)
+            DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
         await RunSimulations(_runningSimulations.Values);
         DrawEvents(_prepareSimulations);
     }

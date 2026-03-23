@@ -37,6 +37,7 @@ CallHelper="*uid://fa1xktpsl2t3"
 [display]
 
 window/stretch/mode="canvas_items"
+mouse_cursor/custom_image="uid://cx1goiv4roxax"
 
 [dotnet]
 

@@ -110,41 +110,8 @@ public static class Extensions
             }
 
             // 计算整体宽度 
-            float totalWidth = 0;
-            float maxHeight = 0;
-
-            for (int i = 0; i < textures.Count; i++)
-            {
-                var texture = textures[i];
-                if (texture != null)
-                {
-                    // 按照原始宽高比缩放纹理
-                    float aspectRatio = texture.GetHeight() / (float)texture.GetWidth();
-                    float texHeight = style.ItemSize.X * aspectRatio;
-                    // 考虑到ItemSize的限制
-                    if (texHeight > style.ItemSize.Y)
-                    {
-                        texHeight = style.ItemSize.Y;
-                        float texWidth = style.ItemSize.Y / aspectRatio;
-                        totalWidth += texWidth;
-                    }
-                    else
-                    {
-                        totalWidth += style.ItemSize.X;
-                    }
-
-                    if (texHeight > maxHeight) maxHeight = texHeight;
-                }
-                else
-                {
-                    totalWidth += style.ItemSize.X;
-                    if (style.ItemSize.Y > maxHeight) maxHeight = style.ItemSize.Y;
-                }
-            }
-
-            // 加上间隔 
-            totalWidth += style.ItemSpacing * (textures.Count - 1);
-
+            float totalWidth = style.ItemSize.X * textures.Count + style.ItemSpacing * (textures.Count - 1);
+            
             Vector2 startPos = position;
             startPos.Y -= style.ItemSize.Y / 2;
 
@@ -163,35 +130,39 @@ public static class Extensions
             Vector2 currentPos = startPos;
             for (int i = 0; i < textures.Count; i++)
             {
-                var texture = textures[i];
-                if (texture != null)
-                {
-                    // 按照原始宽高比计算实际绘制尺寸
-                    float aspectRatio = texture.GetHeight() / (float)texture.GetWidth();
-                    float drawHeight = style.ItemSize.X * aspectRatio;
-                    float drawWidth = style.ItemSize.X;
-
-                    // 确保不超过ItemSize的限制
-                    if (drawHeight > style.ItemSize.Y)
-                    {
-                        drawHeight = style.ItemSize.Y;
-                        drawWidth = style.ItemSize.Y / aspectRatio;
-                    }
-
-                    Vector2 drawSize = new Vector2(drawWidth, drawHeight);
-                    // 将纹理按等比例缩放到合适大小并绘制 
-                    node2d.DrawTextureRect(texture, new Rect2(currentPos, drawSize), false, style.Modulate);
-                    currentPos = new Vector2(currentPos.X + drawWidth + style.ItemSpacing, currentPos.Y);
-                }
-                else
-                {
-                    // 如果纹理为空，仍然占用空间 
-                    currentPos = new Vector2(currentPos.X + style.ItemSize.X + style.ItemSpacing, currentPos.Y);
-                }
+                var texture = textures[i]; 
+                node2d.DrawTextureRadioRect(texture, new Rect2(currentPos, style.ItemSize), style.Modulate);
+                currentPos.X += style.ItemSize.X + style.ItemSpacing;
             }
-
             // 返回绘制区域的边界矩形 
-            return new Rect2(startPos.X, startPos.Y, totalWidth, maxHeight);
+            return new Rect2(startPos, totalWidth, style.ItemSize.Y);
+        }
+        public void DrawTextureRadioRect(Texture2D texture, in Rect2 rect, Color? modulate = null)
+        {
+            Vector2 textureSize = texture.GetSize();
+            float texWidth = textureSize.X;
+            float texHeight = textureSize.Y;
+
+            float targetWidth = rect.Size.X;
+            float targetHeight = rect.Size.Y;
+
+            // 3. 计算等比缩放比例（取更小的，保证图片完全显示）
+            float scaleX = targetWidth / texWidth;
+            float scaleY = targetHeight / texHeight;
+            float finalScale = Mathf.Min(scaleX, scaleY);
+
+            // 4. 计算最终绘制的宽高（等比）
+            float drawWidth = texWidth * finalScale;
+            float drawHeight = texHeight * finalScale;
+
+            // 5. 居中计算：在 rect 区域内水平、垂直居中
+            float offsetX = rect.Position.X + (targetWidth - drawWidth) / 2f;
+            float offsetY = rect.Position.Y + (targetHeight - drawHeight) / 2f;
+
+            // 6. 最终绘制区域
+            Rect2 drawRect = new Rect2(offsetX, offsetY, drawWidth, drawHeight);
+            // 8. 执行绘制
+            node2d.DrawTextureRect(texture, drawRect, false, modulate);
         }
     }
 

@@ -78,6 +78,13 @@ public partial class HealthBar : Node2D
         }
     }
 
+    public void ClearAllChanges()
+    {
+        HealthChange = 0;
+        ShieldChange = 0;
+        QueueRedraw();
+    }
+
     private Color GetLighterColor(in Color color, float change)
     {
         return color with { V = Mathf.Clamp(color.V * (1 + change), 0, 1) };

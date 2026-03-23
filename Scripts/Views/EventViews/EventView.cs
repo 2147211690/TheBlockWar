@@ -30,24 +30,24 @@ public class EventView
     {
         _pool = pool;
     }
+    private void NeedClearUnit(uint id)
+    {
+        _pool.EventsView.NeedClearUnit(id);
+    }
     public void PlaceUnit(PlaceUnitStep step)
     {
-        //GD.Print($"PlaceUnit: {coords} {unitName} {isValid} {isFocus}");
-        var node = DrawNodePool.Pop();
-        _nodes.Add(node);
-        node.DrawAction += (u, v) =>
-        {
-            if (v)
+        Draw((u, v) =>
             {
-                u.DrawTextureOffset(Style[TeamType].PlaceDownTexture,
-                    TilesView.GetRenderOffset(step.Coords, Layer.Sky, 0),
-                    0.5f,
-                    1f,
-                    step.ResultIsValid ? Colors.Green : Colors.Red);
-            }
-        };
-        node.Position = TilesView.GetRenderPosition(step.Coords, Layer.Sky, 0);
-        node.QueueRedraw();
+                if (v)
+                {
+                    u.DrawTextureOffset(Style[TeamType].PlaceDownTexture,
+                        TilesView.GetRenderOffset(step.Coords, Layer.Sky, 0),
+                        0.5f,
+                        1f,
+                        step.ResultIsValid ? Colors.Green : Colors.Red);
+                }
+            },
+            TilesView.GetRenderPosition(step.Coords, Layer.Sky, 0));
     }
     public void Damage(DamageStep step)
     {
@@ -60,172 +60,110 @@ public class EventView
     
     private void ChangeUnitHealth(Vector2I coords, uint unitId, float originChange, float healthChange)
     {
-        var node = DrawNodePool.Pop();
-        _nodes.Add(node);
-        node.DrawAction += (u, v) =>
+        if (IsFocused)
         {
-            ChangeUnitHealthDraw(u, v, coords, unitId, originChange, healthChange);
-        };
-        node.QueueRedraw();
-    }
-
-    private void ChangeUnitHealthDraw(DrawNode drawNode, bool visible, Vector2I coords, uint unitId, float originChange ,float healthChange)
-    {
-        if (visible)
-        {
-            //BlockNumberView.UseBlock(coords);
-            if (IsFocused)
-            {
-                UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange += healthChange;
-            }
-            //BlockNumberView.AddNumber(coords, originChange, unitId == 0 ? originChange : healthChange, unitId != 0, IsFocused);
-            BlockDraw.AddHealthChange(coords, originChange, healthChange, IsFocused, TeamType);
+            UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange += healthChange;
+            NeedClearUnit(unitId);
         }
-        else
-        {
-            //BlockNumberView.CancelBlock(coords);
-            //.RemoveNumber(coords, originChange, unitId == 0 ? originChange : healthChange, unitId != 0, IsFocused);
-            if (IsFocused)
-            {
-                UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange -= healthChange;
-            }
-        }
+        BlockDraw.AddHealthChange(coords, originChange, healthChange, IsFocused, TeamType);
     }
-    
     
     public void MoveUnit(MoveUnitStep step)
     {
-        var node = DrawNodePool.Pop();
-        _nodes.Add(node);
-        var lastAim = UnitsView.GetUnitAimCoords(step.ResultUnitId);
-        node.DrawAction += (u, v) =>
+        if (step.ResultUnitId == 0) return;
+        if (IsFocused)
         {
-            if (step.ResultUnitId == 0) return;
-            if (v)
-            {
-                if (IsFocused)
-                {
-                    UnitsView.AddUnitFack(step.ResultUnitId, step.Coords);
-                    UnitsView.SetUnitAimCoords(step.ResultUnitId, step.To);
-                }
-                else
-                {
-                    UnitsView.AddUnitFack(step.ResultUnitId, step.To);
-                }
-            }
-            else
-            {
-                if (IsFocused)
-                {
-                    UnitsView.RemoveUnitFack(step.ResultUnitId, step.Coords);
-                    UnitsView.SetUnitAimCoords(step.ResultUnitId, lastAim);
-                }
-                else
-                {
-                    UnitsView.RemoveUnitFack(step.ResultUnitId, step.To);
-                }
-            }
-        };
-        node.QueueRedraw();
+            UnitsView.AddUnitFack(step.ResultUnitId, step.Coords);
+            UnitsView.SetUnitAimCoords(step.ResultUnitId, step.To);
+        }
+        else
+        {
+            UnitsView.AddUnitFack(step.ResultUnitId, step.To);
+        }
+        NeedClearUnit(step.ResultUnitId);
     }
 
     public void MoveUnitPath(MoveUnitPathStep step)
     {
-        var node = DrawNodePool.Pop();
-        _nodes.Add(node);
-        var lastAim = UnitsView.GetUnitAimCoords(step.ResultUnitId);
         var usedSprites = new Sprite2D[step.Path.Count];
-        node.DrawAction += (u, v) =>
-        {
-            var path = step.Path;
-            if (v)
+        Draw((u, v) =>
             {
-                if (path.Count < 2) return;
-                var tex = Style[TeamType].PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
-                SetSprite(step.Coords + path[0], tex, 0);
-                for (int i = 1; i < path.Count - 1; i++)
+                var path = step.Path;
+                if (v)
                 {
-                    tex = Style[TeamType].PathTextures[(int)(path[i - 1] - path[i]).ToVecDirMask() | (int)(path[i + 1] - path[i]).ToVecDirMask()];
-                    SetSprite(step.Coords + path[i], tex, i);
-                }
-                tex = Style[TeamType].PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
-                SetSprite(step.Coords + path[^1], tex, path.Count - 1);
+                    if (path.Count < 2) return;
+                    var tex = Style[TeamType].PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
+                    SetSprite(step.Coords + path[0], tex, 0);
+                    for (int i = 1; i < path.Count - 1; i++)
+                    {
+                        tex = Style[TeamType]
+                            .PathTextures[
+                                (int)(path[i - 1] - path[i]).ToVecDirMask() |
+                                (int)(path[i + 1] - path[i]).ToVecDirMask()];
+                        SetSprite(step.Coords + path[i], tex, i);
+                    }
 
-                void SetSprite(in Vector2I coords, Texture2D tex, int index)
-                {
-                    usedSprites[index] = SpritePool.Pop();
-                    usedSprites[index].Texture = tex;
-                    usedSprites[index].Position = TilesView.GetRenderPosition(coords , Layer.Underground, -1);
-                    usedSprites[index].Offset = TilesView.GetRenderOffset(coords, Layer.Underground, -1);
-                    usedSprites[index].Modulate = Colors.White with {A = IsFocused ? 1 : 0.6f};
+                    tex = Style[TeamType].PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
+                    SetSprite(step.Coords + path[^1], tex, path.Count - 1);
+
+                    void SetSprite(in Vector2I coords, Texture2D tex, int index)
+                    {
+                        usedSprites[index] = SpritePool.Pop();
+                        usedSprites[index].Texture = tex;
+                        usedSprites[index].Position = TilesView.GetRenderPosition(coords, Layer.Underground, -1);
+                        usedSprites[index].Offset = TilesView.GetRenderOffset(coords, Layer.Underground, -1);
+                        usedSprites[index].Modulate = Colors.White with { A = IsFocused ? 1 : 0.6f };
+                    }
                 }
-            }
-            else
-            {
-                for (int i = usedSprites.Length - 1; i >= 0; i--)
+                else
                 {
-                    if (usedSprites[i] == null) break;
-                    usedSprites[i].Texture = null;
-                    usedSprites[i].Offset = Vector2.Zero;
-                    usedSprites[i].Modulate = Colors.White;
-                    SpritePool.Push(usedSprites[i]);
+                    for (int i = usedSprites.Length - 1; i >= 0; i--)
+                    {
+                        if (usedSprites[i] == null) break;
+                        usedSprites[i].Texture = null;
+                        usedSprites[i].Offset = Vector2.Zero;
+                        usedSprites[i].Modulate = Colors.White;
+                        SpritePool.Push(usedSprites[i]);
+                    }
                 }
-            }
-        };
-        node.QueueRedraw();
+            },
+            Vector2.Zero);
     }
     
     public void DropUnit(DropUnitStep step)
     {
-        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
-        var node = DrawNodePool.Pop();
-        _nodes.Add(node);
-        node.DrawAction += (u, v) =>
-        {
-            if (v)
+        Draw((u, v) =>
             {
-                u.DrawCircle(Vector2.Zero, 10, step.ResultIsValid ? Colors.Green : Colors.Red);
-            }
-        };
-        node.Position = TilesView.GetRenderPosition(step.Coords, Layer.Sky, 0);
-        node.QueueRedraw();
+                if (v)
+                {
+                    u.DrawCircle(Vector2.Zero, 10, step.ResultIsValid ? Colors.Green : Colors.Red);
+                }
+            },
+            TilesView.GetRenderPosition(step.Coords, Layer.Sky, 0));
     }
     
     public void PushUnit(PushUnitStep step)
     {
-        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
-        var node = DrawNodePool.Pop();
-        _nodes.Add(node);
-        node.DrawAction += (u, v) =>
-        {
-            if (v)
+        var pos = TilesView.GetRenderPosition(step.Coords, Layer.Sky, 0) +
+                  TilesView.GetLocalVec(step.PushDir) * (step.ResultPush ? 0.5f : 0.2f);
+        Draw((u, v) =>
             {
-                u.DrawTextureCentered(Style[TeamType].PushTextures[step.PushDir.ToIndex()], 
-                    TilesView.GetRenderOffset(step.Coords, Layer.Sky, 0),
-                    new Color(1,1,1,IsFocused ? 1 : 0.3f));
-            }
-        };
-        node.Position = TilesView.GetRenderPosition(step.Coords, Layer.Sky, 0) +
-                        TilesView.GetLocalVec(step.PushDir) * (step.ResultPush ? 0.5f : 0.2f);
-        node.QueueRedraw();
+                if (v)
+                {
+                    u.DrawTextureCentered(Style[TeamType].PushTextures[step.PushDir.ToIndex()],
+                        TilesView.GetRenderOffset(step.Coords, Layer.Sky, 0),
+                        new Color(1, 1, 1, IsFocused ? 1 : 0.3f));
+                }
+            },
+            pos);
     }
     public void ModifyUnitBuff(ModifyUnitBuffStep step)
     {
-        
-        //GD.Print($"PlaceUnit: {coords} {unit.Name} {isValid} {isFocus}");
-        var node = DrawNodePool.Pop();
-        _nodes.Add(node);
         var c = step.ResultOperation switch
         {
             BuffOperation.AddBuff => 1,
             BuffOperation.RemoveBuff => -1,
             _ => 0,
-        };
-        var color = step.Operation switch
-        {
-            BuffOperation.AddBuff => Colors.White,
-            BuffOperation.RemoveBuff => Colors.OrangeRed,
-            _ => Colors.White,
         };
         var isAdd = step.Operation switch
         {
@@ -234,38 +172,13 @@ public class EventView
             BuffOperation.ChangeDuration => step.Duration >= 0,
             BuffOperation.SetDuration => true,
         };
-        color.A = IsFocused ? 1 : 0.6f;
         
-        node.DrawAction += (u, v) =>
+        if (!step.IsChildStep) BlockDraw.AddBuffChange(step.Coords, step.BuffType, isAdd, IsFocused, TeamType);
+        if (IsFocused)
         {
-            if (v)
-            {
-                /*BlockBuffView.AddBuffChange(step.Coords,
-                    step.BuffType,
-                    isAdd,
-                    IsFocused
-                );*/
-                if (!step.IsChildStep) BlockDraw.AddBuffChange(step.Coords, step.BuffType, isAdd, IsFocused, TeamType);
-                if (IsFocused)
-                {
-                    UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, c);
-                }
-            }
-            else
-            {
-                /*BlockBuffView.RemoveBuffChange(step.Coords,
-                    step.BuffType,
-                    isAdd,
-                    IsFocused
-                );*/
-                if (IsFocused)
-                {
-                    UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, -c);
-                }
-            }
-        };
-        node.Position = TilesView.GetRenderPosition(step.Coords, Layer.Sky, 0);
-        node.QueueRedraw();
+            UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, c);
+        }
+        NeedClearUnit(step.ResultUnitId);
     }
 
     public void Animation(AnimationStep step)
@@ -340,6 +253,16 @@ public class EventView
         }
     }
 
+    private DrawNode Draw(Action<DrawNode, bool> drawAction, Vector2 position)
+    {
+        var node = DrawNodePool.Pop();
+        _nodes.Add(node);
+        node.DrawAction += drawAction;
+        node.Position = position;
+        node.QueueRedraw();
+        return node;
+    }
+    
     private void Clear()
     {
         for (int i = _nodes.Count - 1; i >= 0; i--) DrawNodePool.Push(_nodes[i]);

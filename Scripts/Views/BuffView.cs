@@ -5,6 +5,7 @@ using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using Autoload = TheBlockWar.Scripts.Tools.Autoload;
 
 namespace TheBlockWar.Scripts.Views;
 
@@ -17,17 +18,15 @@ public partial class BuffView : Node2D
     [Export] public Godot.Collections.Dictionary<string, Vector2> BuffEffectOffsets { get; set; } = null!;
     [Export] public UnitView UnitView { get; set; } = null!;
     // 【元素外框尺寸】默认值匹配截图
-    [Export] public Vector2 SymbolBoxSize { get; private set; } = new(24, 24);
     [Export] public Vector2 IconBoxSize { get; private set; } = new(32, 32);
 
     // 【边距间隔】默认值匹配截图
     [Export] public float ElementSpacing { get; private set; } = 2f;
-    [Export] public float RowSpacing { get; private set; } = 4f;
-
+ 
     // 加减号纹理
     [ExportGroup("符号纹理")]
-    [Export] public Texture2D PlusTexture { get; set; }
-    [Export] public Texture2D MinusTexture { get; set; }
+    [Export] public Texture2D? PlusTexture { get; set; }
+    [Export] public Texture2D? MinusTexture { get; set; }
 
     // 【动画效果】默认值匹配截图
     [ExportGroup("动画效果")]
@@ -37,25 +36,34 @@ public partial class BuffView : Node2D
     [Export] public float LoseDimMin { get; set; } = 0.2f;
     [Export] public float LoseDimMax { get; set; } = 0.6f;
 
-    // 【新增：颜色调制】给buff符号+图标统一上色
-    [ExportGroup("颜色调制")]
-    [Export] public Color GainTint { get; set; } = Colors.LimeGreen;   // 增益buff颜色（加号+图标）
-    [Export] public Color LoseTint { get; set; } = Colors.OrangeRed;    // 减益buff颜色（减号+图标）
-
     
     public GameView GameView { get; set; } = null!;
     // ===================== 缓存列表（无GC） =====================
     private readonly List<BuffTypeEnum> _gainBuffs = new();
     private readonly List<BuffTypeEnum> _loseBuffs = new();
     private double _animationTime;
-    private float _gainAlpha;
-    private float _loseAlpha;
+    private float _gainLight;
+    private float _loseLight;
     
     // Buff数据
     private readonly Dictionary<BuffTypeEnum, int> _buffChanges = new();
     private readonly Dictionary<BuffTypeEnum, AnimatedSprite2D> _visibleBuffs = new();
     private bool _refreshBuffListsDirty = true;
+    private ItemTabStyle _gainItemTabStyle = new()
+    {
+        ItemSize = new(12,12),
+        ItemSpacing = 0,
+        Layout = -1,
+        Modulate = Colors.White
+    };
 
+    private ItemTabStyle _loseTabStyle = new()
+    {
+        ItemSize = new(12, 12),
+        ItemSpacing = 0,
+        Layout = -1,
+        Modulate = Colors.White
+    };
     public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType)
     {
         GameView = gameView;
@@ -71,8 +79,8 @@ public partial class BuffView : Node2D
         float wave = (Mathf.Sin((float)_animationTime) + 1) / 2;
 
         // 周期透明度计算
-        _gainAlpha = Mathf.Lerp(GainHighlightMin, GainHighlightMax, wave);
-        _loseAlpha = Mathf.Lerp(LoseDimMin, LoseDimMax, wave);
+        _gainLight = Mathf.Lerp(GainHighlightMin, GainHighlightMax, wave);
+        _loseLight = Mathf.Lerp(LoseDimMin, LoseDimMax, wave);
 
         QueueRedraw();
     }
@@ -137,26 +145,61 @@ public partial class BuffView : Node2D
     public override void _Draw()
     {
         base._Draw();
+
         if (_refreshBuffListsDirty)
         {
             RefreshBuffLists();
             _refreshBuffListsDirty = false;
         }
+
         if (_gainBuffs.Count == 0 && _loseBuffs.Count == 0) return;
 
-        int rowCount = (_gainBuffs.Count > 0 ? 1 : 0) + (_loseBuffs.Count > 0 ? 1 : 0);
-        float singleRowHeight = Mathf.Max(SymbolBoxSize.Y, IconBoxSize.Y);
-        float totalHeight = rowCount * singleRowHeight + (rowCount > 1 ? RowSpacing : 0);
-        float currentRowCenterY = -totalHeight / 2 + singleRowHeight / 2;
+        // 设置样式
+        _gainItemTabStyle.ItemSize = _loseTabStyle.ItemSize = IconBoxSize;
+        _gainItemTabStyle.Modulate = _gainItemTabStyle.Modulate with { V = _gainLight };
+        _loseTabStyle.Modulate = _loseTabStyle.Modulate with { V = _loseLight };
+        _gainItemTabStyle.ItemSpacing = _loseTabStyle.ItemSpacing = ElementSpacing;
 
-        if (_gainBuffs.Count > 0)
+        // 构建图标列表
+        var gainIcons = BuildIconList(_gainBuffs, PlusTexture);
+        var loseIcons = BuildIconList(_loseBuffs, MinusTexture);
+
+        // 计算长度
+        var gainLength = CalculateLength(gainIcons);
+        var loseLength = CalculateLength(loseIcons);
+
+        // 计算位置
+        var p = (gainLength + loseLength) / 2;
+        var offset = gainIcons != null && loseIcons != null ? new Vector2(ElementSpacing / 2, 0) : Vector2.Zero;
+        var losePosition = new Vector2(-(loseLength - p), 0) + offset;
+        var gainPosition = losePosition + new Vector2(-gainLength, 0) - offset;
+
+        // 绘制
+        if (gainIcons != null) this.DrawItemTab(gainPosition, gainIcons, _gainItemTabStyle);
+        if (loseIcons != null) this.DrawItemTab(losePosition, loseIcons, _loseTabStyle);
+        
+        List<Texture2D> BuildIconList(List<BuffTypeEnum> buffs, Texture2D defaultTexture)
         {
-            DrawRow(new Vector2(0, currentRowCenterY), _gainBuffs, true, _gainAlpha);
-            currentRowCenterY += singleRowHeight + RowSpacing;
+            if (buffs.Count == 0) return null;
+
+            var icons = new List<Texture2D>(buffs.Count + 1);
+            icons.Add(defaultTexture ?? Autoload.DefaultTexture);
+
+            foreach (var buff in buffs)
+            {
+                icons.Add(buff.GetInstance().Info.Icon ?? Autoload.DefaultTexture);
+            }
+
+            return icons;
         }
-        if (_loseBuffs.Count > 0)
-            DrawRow(new Vector2(0, currentRowCenterY), _loseBuffs, false, _loseAlpha);
+        float CalculateLength(List<Texture2D>? icons)
+        {
+            if (icons == null || icons.Count == 0) return 0;
+            return icons.Count * IconBoxSize.X + ElementSpacing * (icons.Count - 1);
+        }
     }
+
+
 
     /// <summary>
     /// 仅数据变化时刷新缓存列表
@@ -172,85 +215,11 @@ public partial class BuffView : Node2D
             else if (kvp.Value < 0 && _visibleBuffs.ContainsKey(kvp.Key)) _loseBuffs.Add(kvp.Key);
         }
     }
-
-    /// <summary>
-    /// 绘制单行（带颜色+透明度）
-    /// </summary>
-    private void DrawRow(Vector2 rowCenter, List<BuffTypeEnum> buffs, bool isGain, float alpha)
-    {
-        float totalWidth = SymbolBoxSize.X;
-        if (buffs.Count > 0)
-        {
-            totalWidth += ElementSpacing + buffs.Count * IconBoxSize.X;
-            totalWidth += (buffs.Count - 1) * ElementSpacing;
-        }
-
-        float currentX = rowCenter.X - totalWidth / 2;
-        float rowCenterY = rowCenter.Y;
-        Color currentTint = isGain ? GainTint : LoseTint; // 选择对应颜色
-        Texture2D symbolTex = isGain ? PlusTexture : MinusTexture;
-
-        // 绘制符号
-        if (symbolTex != null)
-        {
-            DrawTextureInBox(
-                symbolTex,
-                new Vector2(currentX, rowCenterY - SymbolBoxSize.Y / 2),
-                SymbolBoxSize,
-                currentTint,
-                alpha
-            );
-        }
-        currentX += SymbolBoxSize.X + ElementSpacing;
-
-        // 绘制图标
-        foreach (var type in buffs)
-        {
-            var icon = type.GetInstance().Info.Icon;
-            if (icon != null)
-            {
-                DrawTextureInBox(
-                    icon,
-                    new Vector2(currentX, rowCenterY - IconBoxSize.Y / 2),
-                    IconBoxSize,
-                    currentTint,
-                    alpha
-                );
-            }
-            currentX += IconBoxSize.X + ElementSpacing;
-        }
-    }
-
-    /// <summary>
-    /// 统一绘制：等比缩放+居中+不超出+颜色调制+透明度
-    /// </summary>
-    private void DrawTextureInBox(Texture2D tex, Vector2 boxTopLeft, Vector2 boxSize, Color tint, float alpha)
-    {
-        float scale = Mathf.Min(boxSize.X / tex.GetWidth(), boxSize.Y / tex.GetHeight());
-        Vector2 fitSize = new(tex.GetWidth() * scale, tex.GetHeight() * scale);
-        Vector2 offset = (boxSize - fitSize) / 2;
-        Vector2 drawPos = boxTopLeft + offset;
-
-        // 合并颜色与透明度（颜色保留，透明度由动画控制）
-        Color finalColor = new Color(tint.R, tint.G, tint.B, alpha);
-        DrawTextureRect(tex, new Rect2(drawPos, fitSize), false, finalColor);
-    }
-
-    // ===================== 原有接口完全保留 =====================
+    
     public void ClearAllBuffChanges()
     {
         _buffChanges.Clear();
         RefreshBuffLists();
         QueueRedraw();
     }
-
-    public void SetBuffChange(BuffTypeEnum type, int value)
-    {
-        _buffChanges[type] = value;
-        if (value == 0) _buffChanges.Remove(type);
-        RefreshBuffLists();
-        QueueRedraw();
-    }
-
-    public int GetBuffChange(BuffTypeEnum type) => _buffChanges.GetValueOrDefault(type, 0);
 }

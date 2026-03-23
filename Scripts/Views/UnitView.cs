@@ -84,6 +84,16 @@ public partial class UnitView : Node2D
         return fake;
     }
 
+    public void ClearFacks()
+    {
+        if (_fakes is null) return;
+        foreach (var fakePair in _fakes)
+        {
+            PushFackSprite(fakePair);
+        }
+        _fakes.Clear();
+    }
+    
     public void RemoveFack(Vector2I coords)
     {
         if (_fakes is null) return;
@@ -91,8 +101,12 @@ public partial class UnitView : Node2D
         if (index == -1) return;
         var fake = _fakes[index];
         _fakes.RemoveAt(index);
-        
-        var sprite = fake.sprite;
+        PushFackSprite(fake);
+    }
+    
+    private void PushFackSprite(in (Vector2I coords, Sprite2D sprite) fakePair)
+    {
+        var sprite = fakePair.sprite;
         sprite.Texture = null;
         sprite.Offset = Vector2.Zero;
         sprite.Modulate = Colors.White;
@@ -129,4 +143,5 @@ public partial class UnitView : Node2D
 
         return tween.WaitForTween();
     }
+    
 }

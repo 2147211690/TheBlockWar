@@ -16,6 +16,7 @@ public partial class EventsView : Node2D
     private EventView.EventViewPool _eventViewPool;
     private Dictionary<uint, EventView> _eventViews = new();
     private EventView? _currentView;
+    private HashSet<uint> _clearUnitIds = new();
     
     public override void _Ready()
     {
@@ -36,6 +37,16 @@ public partial class EventsView : Node2D
         foreach (var eventView in _eventViews.Values) _eventViewPool.Push(eventView);
         _eventViews.Clear();
         BlockDraw.Clear();
+        foreach (var id in _clearUnitIds)
+        {
+            var view = GameView.UnitsView.GetUnitView(id);
+            if (view is null) continue;
+            view.ClearFacks();
+            view.HealthBar.ClearAllChanges();
+            view.BuffView.ClearAllBuffChanges();
+            view.UnitsView.SetUnitAimCoords(id, null);
+        }
+        _clearUnitIds.Clear();
     }
 
     public EventView? BeginAddEventView(uint id, bool isFocused, TeamTypeEnum teamType)
@@ -56,7 +67,10 @@ public partial class EventsView : Node2D
         _eventViews.Add(id, _currentView);
         return _currentView;
     }
-    
+    public void NeedClearUnit(uint id)
+    {
+        _clearUnitIds.Add(id);
+    }
     
     
     public void EndAddEventView()
