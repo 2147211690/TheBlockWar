@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using Godot;
+using GodotTask;
 using ImGuiNET;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Modes;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
 
@@ -33,8 +36,14 @@ public partial class Test : Node2D
     private SchedulerEvent _damage;
     private SchedulerEvent _follow;
     private StatePlayer _player;
+    private PvpMode _pvpMode;
+    private TurnManager _turnManager;
+    private bool _checkNextTurn;
+
     public override void _Ready()
     {
+        TaskTracker.ShowTrackerWindow();
+        
         _currentGameState = new GameState(new Vector2I(10, 10),
             new Dictionary<string, ISkill[]>() 
             {
@@ -58,6 +67,9 @@ public partial class Test : Node2D
         _view.Bind(_gameScheduler);
         _view.Player = _player;
         
+        _pvpMode = new PvpMode([_player], _player);
+        _turnManager = new TurnManager(_gameScheduler, _view, _pvpMode);
+        _turnManager.Start();
     }
 
     public override void _Process(double delta)
@@ -223,7 +235,7 @@ public partial class Test : Node2D
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    for (int j = 0; j < 10; j++)
+                    for (int j = 0; j < 9; j++)
                     {
                         s.ApplyPlaceUnit(new(i,j), "Unit_0", 1, null, r);
                     }
@@ -318,6 +330,18 @@ public partial class Test : Node2D
         }
         
         ImGui.End();
-        
+
+        ImGui.Begin("回合");
+        if (ImGui.Button("完成回合"))
+        {
+            _player.CompleteTurn();
+        }
+
+        if (ImGui.Checkbox("关注结束回合", ref _checkNextTurn))
+        {
+            _gameScheduler.SetNextTurnEventFocused(_checkNextTurn);
+        }
+
+        ImGui.End();
     }
 }

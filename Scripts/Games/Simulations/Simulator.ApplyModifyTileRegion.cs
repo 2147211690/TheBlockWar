@@ -55,12 +55,12 @@ partial class Simulator
                         if (resultOperation == RegionOperation.AddRegion)
                         {
                             state.NotifyTileRegion(tile, regionType,
-                                r => r.OnUnitEnter(state, unit, coords, true, result));
+                                r => r.OnUnitEnter(state, coords, unit, coords, true, result));
                         }
                         else if (resultOperation == RegionOperation.RemoveRegion)
                         {
                             state.NotifyTileRegion(tile, regionType,
-                                r => r.OnUnitLeave(state, unit, coords, true, result));
+                                r => r.OnUnitLeave(state, coords, unit, coords, true, result));
                         }
                     }
                 }

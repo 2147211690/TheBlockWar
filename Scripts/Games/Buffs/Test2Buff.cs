@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
 
@@ -17,5 +18,11 @@ public class Test2Buff() : Buff("res://Resources/Infos/BuffInfos/Test2Buff.tres"
     public override void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result)
     {
         //state.UnitMapState.ModifyUnit(unit.Id, u => u);
+    }
+
+    public override void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationResult result)
+    {
+        base.OnEnterTurn(state, unit, turn, result);
+        state.ApplyPushUnit(unit.Coords, DirMask.Down, result);
     }
 }

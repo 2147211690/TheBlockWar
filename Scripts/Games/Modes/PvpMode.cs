@@ -1,0 +1,38 @@
+using GodotTask;
+using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Games.Turns;
+
+namespace TheBlockWar.Scripts.Games.Modes;
+
+public class PvpMode : GameMode
+{
+    private IPlayer[] _players;
+    private IPlayer _localPlayer;
+
+    public PvpMode(IPlayer[] players, IPlayer localPlayer)
+    {
+        _players = players;
+        _localPlayer = localPlayer;
+    }
+
+    public override void EnterTurn(TurnManager turnManager, int turn)
+    {
+    }
+
+    public override async GDTask Turn(TurnManager turnManager, int turn)
+    {
+        await RunBuffRegionEventAndAddToNextTurnEvent(turnManager, turn);
+        
+        Logger.Info($"开始回合{turn}");
+        foreach (var player in _players)
+        {
+            Logger.Info($"开始玩家{player.GetHashCode()}的回合");
+            await player.Complete;
+            Logger.Info($"玩家{player.GetHashCode()}的回合完成");
+        }
+    }
+
+    public override void ExitTurn(TurnManager turnManager, int turn)
+    {
+    }
+}

@@ -57,7 +57,7 @@ public static partial class Simulator
                 var toTile = state.TileMapState.GetTile(coords);
                 if (!toTile.IsNull())
                 {
-                    state.NotifyTileRegions(toTile, r => r.OnUnitEnter(state, unit, coords, false, result));
+                    state.NotifyTileRegions(toTile, r => r.OnUnitEnter(state, coords, unit, coords, false, result));
                 }
                 // 移除所有一次性区域
                 for (var i = toTile.Regions.Count - 1; i >= 0; i--)
@@ -73,7 +73,7 @@ public static partial class Simulator
             var fromTile = state.TileMapState.GetTile(coords);
             if (!fromTile.IsNull())
             {
-                state.NotifyTileRegions(fromTile, r => r.OnUnitLeave(state, unit, coords, false, result));
+                state.NotifyTileRegions(fromTile, r => r.OnUnitLeave(state, coords, unit, coords, false, result));
             }
         }
 

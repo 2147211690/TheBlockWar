@@ -49,4 +49,8 @@ public class Buff : IBuff
         SimulationResult result)
     {
     }
+
+    public virtual void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationResult result)
+    {
+    }
 }

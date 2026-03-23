@@ -1,4 +1,5 @@
 using Godot;
+using GodotTask;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Players;
@@ -6,18 +7,22 @@ namespace TheBlockWar.Scripts.Games.Players;
 public partial class StatePlayer : Node, IPlayer
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+    public GameScheduler? GameScheduler { get; set; }
+    public Vector2I CurrentMouseCoords { get; private set; }
+    public GDTask Complete => _completionSource.Task;
+    private GDTaskCompletionSource _completionSource = new();
     private StateMachine<State> _stateMachine;
     private FreeState _freeState;
     private SkillState _skillState;
-    public GameScheduler? GameScheduler { get; set; }
-    public Vector2I CurrentMouseCoords { get; private set; }
     public StatePlayer()
     {
         _freeState = new(this);
         _skillState = new(this);
         _stateMachine = new StateMachine<State>(_freeState);
     }
-    
+
+
     public void OnInput<T>(in T input)
     {
         Logger.Trace("玩家{player}获取到输入{input}", GetHashCode(), input);
@@ -31,5 +36,10 @@ public partial class StatePlayer : Node, IPlayer
     public void Init()
     {
         _stateMachine.Init();
+    }
+    public void CompleteTurn()
+    {
+        _completionSource.TrySetResult();
+        _completionSource = new();
     }
 }

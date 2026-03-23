@@ -40,7 +40,10 @@ public static class Skills
         }
         if (args.TryGetArgs(2, out var v3))
         {
-            gameState.ApplyModifyUnitBuff(v3 + useCoords, BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
+            foreach(var offset in CoordsRegion.GetSquareRegion(Vector2I.Zero, 1))
+            {
+                gameState.ApplyModifyUnitBuff(v3 + useCoords + offset, BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
+            }
         }
         if (args.TryGetArgs(3, out var v4))
         {

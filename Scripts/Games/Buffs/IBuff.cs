@@ -20,4 +20,5 @@ public interface IBuff
         SimulationResult result);
     void OnDurationChanged(IGameState state, IReadOnlyUnitState unit,
         int oldDuration, int newDuration, SimulationResult result);
+    void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationResult result);
 }

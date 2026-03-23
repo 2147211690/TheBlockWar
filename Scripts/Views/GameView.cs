@@ -21,6 +21,9 @@ public partial class GameView : Node2D
     [Export] public UnitsView UnitsView { get; set; }
     [Export] public EventsView EventsView { get; set; }
     [Export] public AnimationView AnimationView { get; set; }
+    public IPlayer? Player { get; set; }
+    public ViewPools ViewPools { get; private set; } = null!;
+    public bool IsRunning { get; private set; }
     
     private Dictionary<uint, SimulationResult> _runningSimulations = new();
     private List<SimulationResult> _lastSimulations = new();
@@ -30,9 +33,6 @@ public partial class GameView : Node2D
     private Vector2I? _previousMousceCoords = null;
     private Vector2I _currentCoords;
     private bool _refocus = false;
-    public GDTask RunSimulationTask { get; private set; } = GDTask.CompletedTask;
-    public IPlayer? Player { get; set; }
-    public ViewPools ViewPools { get; private set; } = null!;
 
     public override void _Ready()
     {
@@ -56,7 +56,7 @@ public partial class GameView : Node2D
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (!RunSimulationTask.Status.IsCompleted()) return;
+        if (IsRunning) return;
         switch (@event)
         {
             case InputEventMouseMotion e:
@@ -95,7 +95,7 @@ public partial class GameView : Node2D
     /// <param name="simulations">确保传入有序的模拟结果</param>
     private void SetSimulations(IEnumerable<SimulationResult> simulations)
     {
-        if (!RunSimulationTask.Status.IsCompleted())
+        if (IsRunning)
         {
             Logger.Info("缓存操作结果");
             _simulationCache.Enqueue(simulations.ToArray());
@@ -113,29 +113,43 @@ public partial class GameView : Node2D
             else
                 _prepareSimulations.Add(simulation);
         }
-
-        RunSimulationTask = StartSimulations();
-        RunSimulationTask.GetAwaiter().OnCompleted(RunCompleted);
+        IsRunning = true;
+        Run().Forget();
+        
+        async GDTaskVoid Run()
+        {
+            await StartSimulations();
+            RunCompleted();
+        }
     }
 
     private void RunCompleted()
     {
+        IsRunning = false;
         if (_simulationCache.TryDequeue(out var simulations))
         {
             SetSimulations(simulations);
         }
-        else if (_refocus) //如果完全完成了且运行过模拟,则重置下关注的坐标
+        else
         {
-            Player?.OnInput(new PlayerInputMousceCoords(_currentCoords));
-            _refocus = false;
+            if (_refocus) //如果完全完成了且运行过模拟,则重置下关注的坐标
+            {
+                Player?.OnInput(new PlayerInputMousceCoords(_currentCoords));
+                _refocus = false;
+            }
+            
         }
     }
+
+
     private async GDTask StartSimulations()
     {
-        if (_runningSimulations.Count > 0) _refocus = true;
         //绘制运行前的事件
         if (_runningSimulations.Count > 0)
+        {
+            _refocus = true;
             DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
+        }
         await RunSimulations(_runningSimulations.Values);
         DrawEvents(_prepareSimulations);
     }
