@@ -36,6 +36,7 @@ public partial class Test : Node2D
     private PvpMode _pvpMode;
     private TurnManager _turnManager;
     private bool _checkNextTurn;
+    
 
     public override void _Ready()
     {

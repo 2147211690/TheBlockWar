@@ -14,17 +14,21 @@
 [ext_resource type="Script" uid="uid://d1jjn6pd0t1w8" path="res://Scripts/Views/EventViews/BlockBuffView.cs" id="11_rc7cs"]
 [ext_resource type="Script" uid="uid://ckyskgma4rbc0" path="res://Scripts/Views/EventViews/BlockRegionView.cs" id="12_d1b21"]
 [ext_resource type="Texture2D" uid="uid://bc0rv0tg0wvqo" path="res://Art/Img/ui/power.png" id="12_r6p7k"]
+[ext_resource type="PackedScene" uid="uid://clbp4km484ly4" path="res://View/Uis/CombatUi.tscn" id="15_ilduj"]
 
 [sub_resource type="TileSet" id="TileSet_8tn2x"]
 tile_shape = 1
 tile_layout = 5
 tile_size = Vector2i(56, 42)
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_ilduj"]
+viewport_path = NodePath("../../../../../../../../../../SubViewport")
+
 [node name="Node2D" type="Node2D" unique_id=1155941121 node_paths=PackedStringArray("_view")]
 script = ExtResource("1_myinc")
 _view = NodePath("GameView")
 
-[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView", "AnimationView")]
+[node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView", "AnimationView", "SubCamera", "SubViewport")]
 script = ExtResource("2_njov2")
 DrawContainer = NodePath("DrawContainer")
 Style = ExtResource("3_c4vo5")
@@ -32,6 +36,8 @@ TilesView = NodePath("TilesView")
 UnitsView = NodePath("UnitsView")
 EventsView = NodePath("EventsView")
 AnimationView = NodePath("AnimationView")
+SubCamera = NodePath("../SubViewport/Camera2D")
+SubViewport = NodePath("../SubViewport")
 
 [node name="TilesView" type="TileMapLayer" parent="GameView" unique_id=1800037625 node_paths=PackedStringArray("GameView", "_nodeContainer")]
 tile_set = SubResource("TileSet_8tn2x")
@@ -85,6 +91,24 @@ metadata/_custom_type_script = "uid://c2bb8fdqy4ca4"
 [node name="DrawContainer" type="Node2D" parent="GameView" unique_id=1071978760]
 y_sort_enabled = true
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1503643200]
+[node name="Camera2D" type="Camera2D" parent="GameView" unique_id=1503643200]
 position = Vector2(0, 112)
-zoom = Vector2(1.705, 1.705)
+zoom = Vector2(2.14, 2.14)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=892010729]
+
+[node name="CombatUi" parent="CanvasLayer" unique_id=100001026 instance=ExtResource("15_ilduj")]
+
+[node name="TextureRect" parent="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer" parent_id_path=PackedInt32Array(100001026, 1163128792, 38520972) index="0" unique_id=408846773]
+texture = SubResource("ViewportTexture_ilduj")
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=1510478228]
+disable_3d = true
+canvas_item_default_texture_filter = 0
+size = Vector2i(50, 50)
+
+[node name="Camera2D" type="Camera2D" parent="SubViewport" unique_id=1324955972]
+
+[editable path="CanvasLayer/CombatUi"]
+[editable path="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]
+[editable path="CanvasLayer/CombatUi/MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]

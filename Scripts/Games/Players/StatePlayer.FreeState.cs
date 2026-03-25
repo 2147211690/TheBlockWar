@@ -19,7 +19,7 @@ public partial class StatePlayer
                     if (skill is null)
                     {
                         //单位没有等待中的技能
-                        StateMachine.ChangeState(_player._skillState);
+                        StateMachine.ChangeState(_player._skillingState);
                     }
                     else
                     {
@@ -27,7 +27,7 @@ public partial class StatePlayer
                         skill.Run();
                     }
                     break;
-                case PlayerInputMousceCoords coords:
+                case PlayerInputMouseCoords coords:
                         GameScheduler?.FocusCoords(coords.Coords);
                     break;
             }

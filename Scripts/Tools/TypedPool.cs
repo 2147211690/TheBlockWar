@@ -22,7 +22,7 @@ public class TypedPool<T> : IDisposable
         {
             foreach (var item in _pool)
                 if (item is Node node)
-                    node.Free();
+                    node.QueueFree();
         }
         else if (typeof(IDisposable).IsAssignableFrom(typeof(T)))
         {
@@ -34,17 +34,8 @@ public class TypedPool<T> : IDisposable
 
     public virtual T Pop()
     {
-        T item;
-        if (_pool.Count > 0)
-        {
-            item = _pool.Pop();
-            BeforePop?.Invoke(item);
-        }
-        else
-        {
-            item = _createFunc();
-        }
-
+        var item = _pool.Count > 0 ? _pool.Pop() : _createFunc();
+        BeforePop?.Invoke(item);
         return item;
     }
 

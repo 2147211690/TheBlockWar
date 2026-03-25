@@ -1,0 +1,336 @@
+[gd_scene format=3 uid="uid://clbp4km484ly4"]
+
+[ext_resource type="Script" uid="uid://c1mw0tej24mld" path="res://View/Uis/CombatUi.cs" id="1_oj4sa"]
+[ext_resource type="Theme" uid="uid://bdvmqnfsqqedl" path="res://Resources/Themes/UiTheme.tres" id="1_sc23d"]
+[ext_resource type="Script" uid="uid://ddpxkxmsjjhg3" path="res://View/Uis/TooltipManager.cs" id="3_68gct"]
+[ext_resource type="PackedScene" uid="uid://iynvkll1jmie" path="res://View/Uis/InfoPanel.tscn" id="4_68gct"]
+[ext_resource type="PackedScene" uid="uid://cnrjig48e67mq" path="res://View/Uis/ItemBox.tscn" id="4_yg6ci"]
+
+[node name="CombatUi" type="Control" unique_id=100001026 node_paths=PackedStringArray("_infoPanel", "_skillContainer", "_buffContainer", "_tooltipManager")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme = ExtResource("1_sc23d")
+script = ExtResource("1_oj4sa")
+_infoPanel = NodePath("InfoPanel")
+_itemBoxScene = ExtResource("4_yg6ci")
+_skillContainer = NodePath("MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab")
+_buffContainer = NodePath("MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab")
+_tooltipManager = NodePath("TooltipManager")
+
+[node name="TooltipManager" type="Control" parent="." unique_id=1180370096]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_68gct")
+metadata/_custom_type_script = "uid://ddpxkxmsjjhg3"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1977850310]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Control" type="Control" parent="MarginContainer" unique_id=1213896419]
+layout_mode = 2
+mouse_filter = 1
+
+[node name="UnitPanel" type="Control" parent="MarginContainer/Control" unique_id=1201691244]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/Control/UnitPanel" unique_id=1455136430]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -283.0
+offset_right = 661.0
+grow_vertical = 0
+theme_override_constants/separation = -3
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer" unique_id=1901094507]
+layout_mode = 2
+theme_override_constants/separation = -3
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2" unique_id=1928425366]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.42
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2" unique_id=326026483]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer" unique_id=1933351664]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="Shield" type="HSlider" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=1075776668]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"PlayerShield"
+value = 42.0
+editable = false
+scrollable = false
+
+[node name="Label" type="Label" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer/Shield" unique_id=1904179415]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+text = "20/100"
+
+[node name="Health" type="HSlider" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer" unique_id=1006017158]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"PlayerHealth"
+editable = false
+scrollable = false
+
+[node name="Label" type="Label" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer/Health" unique_id=34046863]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+text = "30/100"
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2" unique_id=1975226856]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.71
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer" unique_id=437687047]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ItemBox" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer" unique_id=1163128792 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer" unique_id=576262248]
+layout_mode = 2
+theme_override_constants/separation = -3
+
+[node name="Space" type="Control" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer" unique_id=212160599]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.15
+mouse_filter = 1
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer" unique_id=917738945]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.4
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2" unique_id=2103388981]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="BuffTab" type="HBoxContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer" unique_id=1380078006]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ItemBox" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab" unique_id=2045452837 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="ItemBox2" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab" unique_id=1476820055 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="ItemBox3" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab" unique_id=1104979902 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer" unique_id=1284206198]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.8
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer" unique_id=1053181147]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="SkillTab" type="HBoxContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer" unique_id=209471003]
+layout_mode = 2
+
+[node name="ItemBox" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab" unique_id=964420473 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+
+[node name="ItemBox2" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab" unique_id=1648201849 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+
+[node name="ItemBox3" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab" unique_id=1297588899 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+
+[node name="TilePanel" type="Control" parent="MarginContainer/Control" unique_id=445884549]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/Control/TilePanel" unique_id=1354289339]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -430.0
+offset_top = -224.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = -3
+alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer" unique_id=89863499]
+layout_mode = 2
+theme_override_constants/separation = -3
+
+[node name="Space" type="Control" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer" unique_id=2107686910]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.85
+mouse_filter = 1
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer" unique_id=290615629]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.4
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2" unique_id=1486135700]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="RegionTab" type="HBoxContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer" unique_id=1603277619]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ItemBox" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab" unique_id=1865873670 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="ItemBox2" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab" unique_id=2104529457 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="ItemBox3" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab" unique_id=1997635406 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer" unique_id=876437054]
+layout_mode = 2
+theme_override_constants/separation = -3
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer2" unique_id=668597103]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.71
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer" unique_id=1703619974]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ItemBox" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer" unique_id=488290554 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+CanClick = false
+
+[node name="Button" type="Button" parent="MarginContainer/Control" unique_id=2063061246]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -324.0
+offset_bottom = 120.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 64
+text = "结束回合"
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control" unique_id=915683738]
+layout_mode = 1
+offset_right = 403.0
+offset_bottom = 120.0
+
+[node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/Control/PanelContainer" unique_id=2039760701]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="MarginContainer/Control/PanelContainer/MarginContainer2" unique_id=1836274531]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 64
+text = "当前阶段:"
+
+[node name="ItemBox" parent="MarginContainer/Control/PanelContainer/MarginContainer2" unique_id=1263563737 instance=ExtResource("4_yg6ci")]
+layout_mode = 2
+size_flags_horizontal = 8
+CanClick = false
+
+[node name="InfoPanel" parent="." unique_id=772088334 instance=ExtResource("4_68gct")]
+visible = false
+layout_mode = 0
+
+[editable path="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]
+[editable path="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]

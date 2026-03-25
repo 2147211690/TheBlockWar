@@ -17,6 +17,8 @@ public partial class GameView : Node2D
     [Export] public UnitsView UnitsView { get; set; }
     [Export] public EventsView EventsView { get; set; }
     [Export] public AnimationView AnimationView { get; set; }
+    [Export] public Camera2D SubCamera { get; set; }
+    [Export] public SubViewport SubViewport { get; set; }
     public IPlayer? Player { get; set; }
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
@@ -26,7 +28,7 @@ public partial class GameView : Node2D
     private List<SimulationResult> _prepareSimulations = new();
     private GameScheduler? _gameScheduler;
     private Queue<SimulationResult[]> _simulationCache = new();
-    private Vector2I? _previousMousceCoords = null;
+    private Vector2I? _previousMouseCoords = null;
     private Vector2I _currentCoords;
     private bool _refocus = false;
 
@@ -34,6 +36,7 @@ public partial class GameView : Node2D
     {
         base._Ready();
         ViewPools = new ViewPools(DrawContainer, Style);
+        SubViewport.World2D = GetTree().Root.World2D;
     }
 
     public void Bind(GameScheduler gameScheduler)
@@ -57,10 +60,10 @@ public partial class GameView : Node2D
         {
             case InputEventMouseMotion e:
                 _currentCoords = TilesView.GlobalMouseToTileCoords(GetGlobalMousePosition());
-                if (_previousMousceCoords is null || _currentCoords != _previousMousceCoords)
+                if (_previousMouseCoords is null || _currentCoords != _previousMouseCoords)
                 {
-                    _previousMousceCoords = _currentCoords;
-                    Player?.OnInput(new PlayerInputMousceCoords(_currentCoords));
+                    _previousMouseCoords = _currentCoords;
+                    Player?.OnInput(new PlayerInputMouseCoords(_currentCoords));
                 }
                 break;
             case InputEventMouseButton e:
@@ -75,6 +78,9 @@ public partial class GameView : Node2D
         {
             case GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId:
                 UnitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
+                SubCamera.Position = TilesView.GetRealPosition(
+                    UnitsView.GetUnitView(_gameScheduler!.FocusedUnitId)?.WishCoords ?? _currentCoords, 
+                    Layer.Underground);
                 break;
             case GameScheduler.OtherStateUpdateTypeEnum.CoordsRegion:
                 TilesView.DrawRegions(_gameScheduler!.CoordsRegions.Values,
@@ -130,7 +136,7 @@ public partial class GameView : Node2D
         {
             if (_refocus) //如果完全完成了且运行过模拟,则重置下关注的坐标
             {
-                Player?.OnInput(new PlayerInputMousceCoords(_currentCoords));
+                Player?.OnInput(new PlayerInputMouseCoords(_currentCoords));
                 _refocus = false;
             }
             
@@ -229,7 +235,7 @@ public partial class GameView : Node2D
             var teamType = simulation.TeamType;
             var view = EventsView.BeginAddEventView(simulation.SourceId, isFocused, teamType);
             if (view is null) continue;
-            foreach (var step in simulation.Steps)
+            foreach (var step in simulation.Steps ?? [])
             {
                 switch (step)
                 {

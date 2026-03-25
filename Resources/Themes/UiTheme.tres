@@ -1,0 +1,106 @@
+[gd_resource type="Theme" format=3 uid="uid://bdvmqnfsqqedl"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvut4"]
+bg_color = Color(0.060000002, 0.068, 0.1, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4bnpr"]
+bg_color = Color(0.141806, 0.16068244, 0.23603845, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ondq0"]
+bg_color = Color(0.19800001, 0.22440001, 0.33, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.11, 0.11, 0.11, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_duu4d"]
+bg_color = Color(0.141806, 0.16068244, 0.23603845, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cqnbv"]
+bg_color = Color(0.10800001, 0.12240001, 0.18, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kwtt4"]
+bg_color = Color(0.141806, 0.16068244, 0.23603845, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ah3ab"]
+bg_color = Color(0.35281152, 0.39000103, 0.528714, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.15575728, 0.56471676, 0.69902104, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ubeaa"]
+bg_color = Color(0.141806, 0.16068244, 0.23603845, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="ImageTexture" id="ImageTexture_ubeaa"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_ah3ab"]
+color = Color(0, 1, 0, 1)
+thickness = 26
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_kwtt4"]
+color = Color(0, 0.07450981, 0.17254902, 1)
+thickness = 26
+
+[sub_resource type="ImageTexture" id="ImageTexture_ah3ab"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_yvut4"]
+color = Color(0.62722766, 0.62722766, 0.6272276, 1)
+thickness = 26
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_4bnpr"]
+color = Color(0, 0.07450981, 0.17254902, 1)
+thickness = 25
+
+[resource]
+Button/styles/disabled = SubResource("StyleBoxFlat_yvut4")
+Button/styles/focus = SubResource("StyleBoxFlat_4bnpr")
+Button/styles/hover = SubResource("StyleBoxFlat_ondq0")
+Button/styles/normal = SubResource("StyleBoxFlat_duu4d")
+Button/styles/pressed = SubResource("StyleBoxFlat_cqnbv")
+ItemBox_Normal/base_type = &"PanelContainer"
+ItemBox_Normal/styles/panel = SubResource("StyleBoxFlat_kwtt4")
+ItemBox_Selected/base_type = &"PanelContainer"
+ItemBox_Selected/styles/panel = SubResource("StyleBoxFlat_ah3ab")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_ubeaa")
+PlayerHealth/base_type = &"HSlider"
+PlayerHealth/constants/center_grabber = 0
+PlayerHealth/icons/grabber_disabled = SubResource("ImageTexture_ubeaa")
+PlayerHealth/styles/grabber_area = SubResource("StyleBoxLine_ah3ab")
+PlayerHealth/styles/slider = SubResource("StyleBoxLine_kwtt4")
+PlayerShield/base_type = &"HSlider"
+PlayerShield/icons/grabber_disabled = SubResource("ImageTexture_ah3ab")
+PlayerShield/styles/grabber_area = SubResource("StyleBoxLine_yvut4")
+PlayerShield/styles/slider = SubResource("StyleBoxLine_4bnpr")

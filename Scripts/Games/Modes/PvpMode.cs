@@ -26,7 +26,7 @@ public class PvpMode : GameMode
         foreach (var player in _players)
         {
             Logger.Info($"开始玩家{player.GetHashCode()}的回合");
-            await player.Complete;
+            await GDTask.WaitUntil(() => !player.IsTurn);
             Logger.Info($"玩家{player.GetHashCode()}的回合完成");
         }
     }

@@ -1,9 +1,20 @@
+using System.ComponentModel;
+
 namespace TheBlockWar.Scripts.Games.Players;
 
-public interface IPlayer
+public interface IPlayer : INotifyPropertyChanged
 {
     GameScheduler? GameScheduler { get; set; }
-    GDTask Complete { get; }
+    IReadOnlyList<SkillState> SkillingUnitSkillStates { get; }
+    int Power { get; }
+    bool IsTurn { get; }
     void OnInput<T>(in T input);
     void Init();
+}
+
+public struct SkillState
+{
+    public ISkill Skill { get; set; }
+    public int RemainingUses { get; set; }
+    public bool IsSelecting { get; set; }
 }

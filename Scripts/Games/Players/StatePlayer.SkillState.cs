@@ -5,8 +5,9 @@ namespace TheBlockWar.Scripts.Games.Players;
 
 public partial class StatePlayer
 {
-    private class SkillState(StatePlayer player) : State(player)
+    private class SkillingState(StatePlayer player) : State(player)
     {
+        public SkillState[] SkillStates = [];
         private SkillEvent? _currentSkillEvent;
         private IReadOnlyList<ISkill> _validSkills = [];
         private ISkill _currentSkill;
@@ -18,6 +19,17 @@ public partial class StatePlayer
         {
             _unitState = GameState?.UnitMapState.GetUnit(FocusedUnitId);
             _validSkills = GameState?.GetUnitValidSkills("defalut") ?? [];
+            SkillStates = new SkillState[_validSkills.Count];
+            for (int i = 0; i < _validSkills.Count; i++)
+            {
+                SkillStates[i] = new SkillState()
+                {
+                    Skill = _validSkills[i],
+                    IsSelecting = false,
+                    RemainingUses = 1, //TODO:使用Info加载剩余次数
+                };
+            }
+            //从这里面通知SkillStates改变
             TryBeginNewSkill(0);
         }
 
@@ -26,12 +38,14 @@ public partial class StatePlayer
             base.OnExit();
             //GameScheduler!.RemoveCoordsRegion(_validRegionId);
             _validSkills = [];
+            SkillStates = [];
             _currentSkill = null;
             _currentSkillEvent = null;
             _unitState = null;
             _currentSkillArgs = null;
             _validRegionId = 0;
             _currentArgIndex = -1;
+            NotifySkillStatesChanged();
         }
 
         public override void OnInput<T>(in T input)
@@ -45,7 +59,7 @@ public partial class StatePlayer
                 case PlayerInputClick {Button: MouseButtonMask.Right} click: //取消
                     TryBackToPreviousArg();
                     break;
-                case PlayerInputMousceCoords coords:
+                case PlayerInputMouseCoords coords:
                     SetCurrentIndexArgGlobal(coords.Coords);
                     break;
             }
@@ -60,9 +74,15 @@ public partial class StatePlayer
                  StateMachine.ChangeState(player._freeState);
                  return;
              }
+
+             for (var i = 0; i < SkillStates.Length; i++) SkillStates[i].IsSelecting = false;
+             SkillStates[index].IsSelecting = true;
+             NotifySkillStatesChanged();
              TryEnterToNextArg();
         }
-        
+
+
+
         private void TryEnterToNextArg()
         {
             if (_currentArgIndex == -1) //进入第一个参数
@@ -137,5 +157,9 @@ public partial class StatePlayer
         }
         private bool IsArgGlobalValid(Vector2I? coords) =>  coords is not null && 
                                                             GameScheduler?.IsInCoordsRegion(_validRegionId, coords.Value) == true;
+        private void NotifySkillStatesChanged()
+        {
+            _player.OnPropertyChanged(nameof(_player.SkillingUnitSkillStates));
+        }
     }
 }

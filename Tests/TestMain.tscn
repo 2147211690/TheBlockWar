@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://dm7188puqyhc8" path="res://Art/Img/ui/strategy/plus.png" id="5_rcr67"]
 [ext_resource type="Texture2D" uid="uid://c5ayhd5fgh63i" path="res://icon.svg" id="6_74xl5"]
 [ext_resource type="Texture2D" uid="uid://bll45ntridu3t" path="res://Art/Img/ui/x.png" id="6_rcr67"]
+[ext_resource type="PackedScene" uid="uid://cnrjig48e67mq" path="res://View/Uis/ItemBox.tscn" id="7_74xl5"]
+[ext_resource type="PackedScene" uid="uid://clbp4km484ly4" path="res://View/Uis/CombatUi.tscn" id="8_e3vl4"]
 
 [node name="TestMain" type="Node2D" unique_id=606139785]
 script = ExtResource("1_yoo7l")
@@ -15,8 +17,6 @@ script = ExtResource("1_35o47")
 Style = ExtResource("2_oh1sm")
 PlusTexture = ExtResource("5_rcr67")
 MinusTexture = ExtResource("6_rcr67")
-GainTint = Color(1, 1, 1, 1)
-LoseTint = Color(1, 0.8189716, 0.77014244, 1)
 metadata/_custom_type_script = "uid://dmemr0krwh881"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1296258764]
@@ -26,3 +26,9 @@ zoom = Vector2(1.74, 1.74)
 scale = Vector2(1.09, 1.09)
 texture = ExtResource("6_74xl5")
 offset = Vector2(0.97, -100)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=109419562]
+
+[node name="ItemBox" parent="CanvasLayer" unique_id=1163128792 instance=ExtResource("7_74xl5")]
+
+[node name="CombatUi" parent="CanvasLayer" unique_id=100001026 instance=ExtResource("8_e3vl4")]
