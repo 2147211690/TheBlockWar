@@ -24,9 +24,10 @@ tile_size = Vector2i(56, 42)
 [sub_resource type="ViewportTexture" id="ViewportTexture_ilduj"]
 viewport_path = NodePath("../../../../../../../../../../SubViewport")
 
-[node name="Node2D" type="Node2D" unique_id=1155941121 node_paths=PackedStringArray("_view")]
+[node name="Node2D" type="Node2D" unique_id=1155941121 node_paths=PackedStringArray("_view", "_combatUi")]
 script = ExtResource("1_myinc")
 _view = NodePath("GameView")
+_combatUi = NodePath("CanvasLayer/CombatUi")
 
 [node name="GameView" type="Node2D" parent="." unique_id=1704173793 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView", "AnimationView", "SubCamera", "SubViewport")]
 script = ExtResource("2_njov2")
@@ -97,7 +98,8 @@ zoom = Vector2(2.14, 2.14)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=892010729]
 
-[node name="CombatUi" parent="CanvasLayer" unique_id=100001026 instance=ExtResource("15_ilduj")]
+[node name="CombatUi" parent="CanvasLayer" unique_id=100001026 node_paths=PackedStringArray("GameView") instance=ExtResource("15_ilduj")]
+GameView = NodePath("../../GameView")
 
 [node name="TextureRect" parent="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer" parent_id_path=PackedInt32Array(100001026, 1163128792, 38520972) index="0" unique_id=408846773]
 texture = SubResource("ViewportTexture_ilduj")

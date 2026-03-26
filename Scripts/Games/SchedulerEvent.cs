@@ -14,18 +14,13 @@ public class SchedulerEvent : ISchedulerEvnet
         Id = id;
     }
     public uint Id { get; }
-    //TODO:可能在修改时不通知,因为他只能由调度器管理
-    /// <summary>
-    /// 原则上不要修改它,除非你知道自己在做什么
-    /// </summary>
-    SimulationLayer ISchedulerEvnet.Layer
+    public SimulationLayer Layer
     {
         get => field;
         set => SetField(ref field, value);
     } = SimulationLayer.Waiting;
 
     public int Team { get => field; set => SetField(ref field, value); }
-    public SimulationLayer Layer => ((ISchedulerEvnet)this).Layer;
     public int Priority { get => field; set => SetField(ref field, value); }
     public object? Args { get => field; set => SetField(ref field, value, false); }
     public ISchedulerEvnet.EventAction? Action { get => field; set => SetField(ref field, value, false); }

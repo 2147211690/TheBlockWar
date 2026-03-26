@@ -12,6 +12,7 @@ public partial class CombatUi : Control
     [Export] private Control _skillContainer;
     [Export] private Control _buffContainer;
     [Export] private TooltipManager _tooltipManager;
+    [Export] private Button _stopTurnButton;
     private IPlayer _player;
     private GameScheduler _gameScheduler;
     public override void _Ready()
@@ -22,7 +23,35 @@ public partial class CombatUi : Control
 
     public void Bind(GameScheduler gameScheduler, IPlayer player)
     {
+        _gameScheduler = gameScheduler;
+        _player = player;
         
+        
+        _stopTurnButton.MouseEntered += StopTurnButtonOnMouseEntered;
+        _stopTurnButton.MouseExited += StopTurnButtonOnMouseExited;
+        _stopTurnButton.Pressed += StopTurnButtonOnPressed;
+
+        TreeExiting += () =>
+        {
+        };
+        
+        
+        void StopTurnButtonOnPressed()
+        {
+            if (GameView.IsRunning) return;
+            _player.OnInput(new PlayerInputStopTurn(PlayerSotpTurnEnum.Click));
+        }
+
+        void StopTurnButtonOnMouseExited()
+        {
+            if (GameView.IsRunning) return;
+            _player.OnInput(new PlayerInputStopTurn(PlayerSotpTurnEnum.HoverExit));
+        }
+        void StopTurnButtonOnMouseEntered()
+        {
+            if (GameView.IsRunning) return;
+            _player.OnInput(new PlayerInputStopTurn(PlayerSotpTurnEnum.HoverEnter));
+        }
     }
 
     private void OnHoverChange(object sender, object? hoverObject, bool isHover)

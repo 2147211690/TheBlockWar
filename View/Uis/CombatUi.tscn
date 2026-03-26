@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://iynvkll1jmie" path="res://View/Uis/InfoPanel.tscn" id="4_68gct"]
 [ext_resource type="PackedScene" uid="uid://cnrjig48e67mq" path="res://View/Uis/ItemBox.tscn" id="4_yg6ci"]
 
-[node name="CombatUi" type="Control" unique_id=100001026 node_paths=PackedStringArray("_infoPanel", "_skillContainer", "_buffContainer", "_tooltipManager")]
+[node name="CombatUi" type="Control" unique_id=100001026 node_paths=PackedStringArray("_infoPanel", "_skillContainer", "_buffContainer", "_tooltipManager", "_stopTurnButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,6 +21,7 @@ _itemBoxScene = ExtResource("4_yg6ci")
 _skillContainer = NodePath("MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab")
 _buffContainer = NodePath("MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab")
 _tooltipManager = NodePath("TooltipManager")
+_stopTurnButton = NodePath("MarginContainer/Control/Button")
 
 [node name="TooltipManager" type="Control" parent="." unique_id=1180370096]
 anchors_preset = 0
@@ -70,7 +71,6 @@ theme_override_constants/separation = -3
 [node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2" unique_id=1928425366]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.42
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2" unique_id=326026483]
 layout_mode = 2
@@ -133,7 +133,7 @@ text = "30/100"
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2" unique_id=1975226856]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 5.71
+size_flags_stretch_ratio = 3.2
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer" unique_id=437687047]
 layout_mode = 2
@@ -153,14 +153,12 @@ theme_override_constants/separation = -3
 [node name="Space" type="Control" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer" unique_id=212160599]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.15
 mouse_filter = 1
 
 [node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer" unique_id=917738945]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.4
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2" unique_id=2103388981]
 layout_mode = 2
@@ -189,7 +187,7 @@ CanClick = false
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 3
-size_flags_stretch_ratio = 2.8
+size_flags_stretch_ratio = 2.2
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer" unique_id=1053181147]
 layout_mode = 2
@@ -242,14 +240,13 @@ theme_override_constants/separation = -3
 [node name="Space" type="Control" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer" unique_id=2107686910]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 2.85
+size_flags_stretch_ratio = 2.3
 mouse_filter = 1
 
 [node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer" unique_id=290615629]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.4
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2" unique_id=1486135700]
 layout_mode = 2

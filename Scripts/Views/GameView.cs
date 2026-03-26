@@ -27,11 +27,12 @@ public partial class GameView : Node2D
     private List<SimulationResult> _lastSimulations = new();
     private List<SimulationResult> _prepareSimulations = new();
     private GameScheduler? _gameScheduler;
-    private Queue<SimulationResult[]> _simulationCache = new();
+    private Queue<(SimulationResult[] simulations, int? delay)> _simulationCache = new();
     private Vector2I? _previousMouseCoords = null;
     private Vector2I _currentCoords;
     private bool _refocus = false;
-
+    private Queue<int> _nextDelays = new();
+    private int? _currentDelay;
     public override void _Ready()
     {
         base._Ready();
@@ -44,13 +45,20 @@ public partial class GameView : Node2D
         _gameScheduler = gameScheduler;
         _gameScheduler.SimulationUpdated += GameSchedulerOnSimulationUpdated;
         _gameScheduler.OtherStateUpdated += GameSchedulerOnOtherStateUpdated;
+        _gameScheduler.NextDelay += GameSchedulerOnNextDelay;
         
         
         TreeExiting += () =>
         {
             _gameScheduler.SimulationUpdated -= GameSchedulerOnSimulationUpdated;
             _gameScheduler.OtherStateUpdated -= GameSchedulerOnOtherStateUpdated;
+            _gameScheduler.NextDelay -= GameSchedulerOnNextDelay;
         };
+    }
+
+    private void GameSchedulerOnNextDelay(object? sender, int e)
+    {
+        _nextDelays.Enqueue(e);
     }
 
     public override void _UnhandledInput(InputEvent @event)
@@ -91,19 +99,19 @@ public partial class GameView : Node2D
 
     private void GameSchedulerOnSimulationUpdated(object? sender, EventArgs e)
     {
-        SetSimulations(_gameScheduler!.SimulationResults);
+        var hasDelay = _nextDelays.TryDequeue(out var delay);
+        SetSimulations(_gameScheduler!.SimulationResults, hasDelay ? delay : null);
     }
 
     /// <param name="simulations">确保传入有序的模拟结果</param>
-    private void SetSimulations(IEnumerable<SimulationResult> simulations)
+    private void SetSimulations(IEnumerable<SimulationResult> simulations, int? delay = null)
     {
         if (IsRunning)
         {
             Logger.Info("缓存操作结果");
-            _simulationCache.Enqueue(simulations.ToArray());
+            _simulationCache.Enqueue((simulations: simulations.ToArray(), delay));
             return;
         }
-
         (_lastSimulations, _prepareSimulations) = (_prepareSimulations, _lastSimulations);
         
         _prepareSimulations.Clear();
@@ -120,7 +128,7 @@ public partial class GameView : Node2D
         
         async GDTaskVoid Run()
         {
-            await StartSimulations();
+            await StartSimulations(delay);
             RunCompleted();
         }
     }
@@ -130,7 +138,8 @@ public partial class GameView : Node2D
         IsRunning = false;
         if (_simulationCache.TryDequeue(out var simulations))
         {
-            SetSimulations(simulations);
+            _currentDelay = simulations.delay;
+            SetSimulations(simulations.simulations, simulations.delay);
         }
         else
         {
@@ -144,7 +153,7 @@ public partial class GameView : Node2D
     }
 
 
-    private async GDTask StartSimulations()
+    private async GDTask StartSimulations(int? delay = null)
     {
         //绘制运行前的事件
         if (_runningSimulations.Count > 0)
@@ -154,6 +163,7 @@ public partial class GameView : Node2D
         }
         await RunSimulations(_runningSimulations.Values);
         DrawEvents(_prepareSimulations);
+        if (delay != null) await GDTask.Delay(delay.Value);
     }
 
     private async GDTask RunSimulations(IEnumerable<SimulationResult> simulations)
@@ -167,6 +177,9 @@ public partial class GameView : Node2D
             {
                 switch (step)
                 {
+                    case DelayStep delayStep:
+                        await GDTask.Delay(delayStep.Delay);
+                        break;
                     case PlaceTileStep placeStep:
                         await TilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
                         UnitsView.UpdateUnitPosition(placeStep.Coords);

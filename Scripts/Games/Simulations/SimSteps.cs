@@ -9,7 +9,7 @@ public record SimStep(bool IsChildStep)
 {
     public static readonly SimStep Default = new(false);
 }
-
+public record DelayStep(bool IsChildStep, int Delay) : SimStep(IsChildStep);
 public record ParallelStep(bool IsChildStep, bool IsStart) : SimStep(IsChildStep);
 public record DamageStep(bool IsChildStep, Vector2I Coords,float Damage, uint ResultUnitId, float ResultValidDamage) : SimStep(IsChildStep);
 public record CureStep(bool IsChildStep, Vector2I Coords,float Cure, uint ResultUnitId, float ResultValidCure) : SimStep(IsChildStep);

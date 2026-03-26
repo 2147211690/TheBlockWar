@@ -16,6 +16,7 @@ public partial class BlockEventDrawNode : Node2D
     
     private float _healthOriginChange;
     private float _healthValidChange;
+    private bool _healthHasAim;
 
     private HashSet<BuffTypeEnum> _addBuffs = new();
     private HashSet<BuffTypeEnum> _removeBuffs = new();
@@ -38,10 +39,10 @@ public partial class BlockEventDrawNode : Node2D
     public TeamTypeEnum FocusedTeam { get; set; }
     public bool IsFocused { get; private set; }
 
-    public void AddHealthChange(float originChange, float validChange, bool isFocused, TeamTypeEnum team)
+    public void AddHealthChange(float originChange, float validChange, bool hasAim, bool isFocused, TeamTypeEnum team)
     {
         if (!UpdateFocused(isFocused, team)) return;
-
+        _healthHasAim |= hasAim;
         _healthOriginChange += originChange;
         _healthValidChange += validChange;
         QueueRedraw();
@@ -105,7 +106,7 @@ public partial class BlockEventDrawNode : Node2D
 
         if (hasHelath)
         {
-            var healthValue = IsFocused ? _healthValidChange : _healthOriginChange;
+            var healthValue = IsFocused && _healthHasAim ? _healthValidChange : _healthOriginChange;
             var healtColor = healthValue > 0 ? Colors.Green : Colors.Red;
             healtColor.A = IsFocused ? 1 : 0.5f;
             this.DrawTextureCentered(

@@ -16,6 +16,7 @@ public class PvpMode : GameMode
 
     public override void EnterTurn(TurnManager turnManager, int turn)
     {
+        turnManager.AddTurnEvent(turn + 1, GetBuffRegionEvent(turn + 1));
     }
 
     public override async GDTask Turn(TurnManager turnManager, int turn)
@@ -26,6 +27,7 @@ public class PvpMode : GameMode
         foreach (var player in _players)
         {
             Logger.Info($"开始玩家{player.GetHashCode()}的回合");
+            player.IsTurn = true;
             await GDTask.WaitUntil(() => !player.IsTurn);
             Logger.Info($"玩家{player.GetHashCode()}的回合完成");
         }

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Players;
@@ -11,8 +12,9 @@ public partial class StatePlayer : Node, IPlayer
     public GameScheduler? GameScheduler { get; set; }
     public IReadOnlyList<SkillState> SkillingUnitSkillStates => _skillingState.SkillStates;
     public int Power { get; set => SetField(ref field, value); }
-    public bool IsTurn { get; private set => SetField(ref field, value); } = true;
+    public bool IsTurn { get; set => SetField(ref field, value); }
     public Vector2I CurrentMouseCoords { get; private set; }
+    public TurnManager TurnManager { get; set; }
     private GDTaskCompletionSource _completionSource = new();
     private StateMachine<State> _stateMachine;
     private FreeState _freeState;

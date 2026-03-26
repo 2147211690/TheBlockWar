@@ -16,11 +16,11 @@ public class BlockDraw
         _eventsView = eventsView;
     }
 
-    public void AddHealthChange(Vector2I coords, float originChange, float validChange, bool isFocused, TeamTypeEnum team)
+    public void AddHealthChange(Vector2I coords, float originChange, float validChange, bool hasAim, bool isFocused, TeamTypeEnum team)
     {
         var node = GetBlockEventDrawNode(coords);
         node.Coords = coords;
-        node.AddHealthChange(originChange, validChange, isFocused, team);
+        node.AddHealthChange(originChange, validChange, hasAim, isFocused, team);
     }
 
     public void AddBuffChange(Vector2I coords, BuffTypeEnum buffType, bool isAdd, bool isFocused, TeamTypeEnum team)

@@ -46,21 +46,21 @@ public class EventView
     }
     public void Damage(DamageStep step)
     {
-        ChangeUnitHealth(step.Coords, step.ResultUnitId, -step.Damage, -step.ResultValidDamage);
+        ChangeUnitHealth(step.Coords, step.ResultUnitId, -step.Damage, -step.ResultValidDamage, step.ResultUnitId != 0);
     }
     public void Cure(CureStep step)
     {
-        ChangeUnitHealth(step.Coords, step.ResultUnitId, step.Cure, step.ResultValidCure);
+        ChangeUnitHealth(step.Coords, step.ResultUnitId, step.Cure, step.ResultValidCure, step.ResultUnitId != 0);
     }
     
-    private void ChangeUnitHealth(Vector2I coords, uint unitId, float originChange, float healthChange)
+    private void ChangeUnitHealth(Vector2I coords, uint unitId, float originChange, float healthChange, bool hasAim)
     {
         if (IsFocused)
         {
             UnitsView.GetUnitView(unitId)?.HealthBar.HealthChange += healthChange;
             NeedClearUnit(unitId);
         }
-        BlockDraw.AddHealthChange(coords, originChange, healthChange, IsFocused, TeamType);
+        BlockDraw.AddHealthChange(coords, originChange, healthChange, hasAim, IsFocused, TeamType);
     }
     
     public void MoveUnit(MoveUnitStep step)

@@ -7,6 +7,7 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
+using TheBlockWar.View.Uis;
 
 namespace TheBlockWar;
 
@@ -28,6 +29,7 @@ public partial class Test : Node2D
     private GameScheduler _gameScheduler = new();
     private SchedulerEvent _event0;
     [Export] private GameView _view;
+    [Export] private CombatUi _combatUi;
     private SchedulerEvent _event2;
     private SchedulerEvent _move;
     private SchedulerEvent _damage;
@@ -67,6 +69,8 @@ public partial class Test : Node2D
         
         _pvpMode = new PvpMode([_player], _player);
         _turnManager = new TurnManager(_gameScheduler, _view, _pvpMode);
+        _player.TurnManager = _turnManager;
+        _combatUi.Bind(_gameScheduler, _player);
         _turnManager.Start();
     }
 
@@ -238,7 +242,7 @@ public partial class Test : Node2D
                         s.ApplyPlaceUnit(new(i,j), "Unit_0", 1, null, r);
                     }
                 }
-            }), true);
+            }), SimulationLayer.Running);
         }
         if (ImGui.Button("测试放置"))
         {
@@ -257,7 +261,7 @@ public partial class Test : Node2D
                     }
                 }
                 s.ApplyPlaceUnit(new(2, 2), "Unit_0", 0, null, r);
-            }), true);
+            }), SimulationLayer.Running);
         }
         if (ImGui.Button("测试放置2"))
         {
@@ -332,14 +336,21 @@ public partial class Test : Node2D
         ImGui.Begin("回合");
         if (ImGui.Button("完成回合"))
         {
-            _player.CompleteTurn();
+            _player.IsTurn = false;
         }
 
         if (ImGui.Checkbox("关注结束回合", ref _checkNextTurn))
         {
-            _gameScheduler.SetNextTurnEventFocused(_checkNextTurn);
+            _turnManager.FocusTurnEvent(_checkNextTurn ? _turnManager.CurrentTurn + 1 : -1);
         }
 
+        if (ImGui.Button("添加到下一回合事件"))
+        {
+            _turnManager.AddTurnEvent(_turnManager.CurrentTurn + 1, EventFactory.CreateEvent(((state, args, result) =>
+            {
+                state.ApplyDamage(new(2,2), 50, result);
+            })));
+        }
         ImGui.End();
     }
 }

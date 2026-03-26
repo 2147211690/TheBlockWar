@@ -45,7 +45,9 @@ public class GameScheduler
     
     public event EventHandler? SimulationUpdated;
     public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
+    public event EventHandler<int>? NextDelay;
 
+    private int nextDelay = 0;
 
     public GameScheduler()
     {
@@ -60,25 +62,18 @@ public class GameScheduler
     public void FocusUnit(uint id)
     {
         if (FocusedUnitId == id) return;
-        //调整对应技能层
         FocusedUnitId = id;
-        var skillEvent = _skillEvents.Find(e => e.BindUnitId == FocusedUnitId);
-        FocusEvent(skillEvent?.Id ?? 0);
-        
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.FocusedUnitId);
     }
 
-    public uint FocusCoords(Vector2I coords)
+    public void SetNextCompleteDelay(int delay)
     {
-        var unit = _gameState?.UnitMapState.GetUnit(coords);
-        var id = unit?.Id ?? 0;
-        FocusUnit(id);
-        return id;
+        NextDelay?.Invoke(this, delay);
     }
     public async GDTask DealyRun(SchedulerEvent ev, int delay)
     {
         if (!_events.ContainsKey(ev.Id)) AddEvent(ev);
-        FocusEvent(ev.Id);
+        ev.Layer = SimulationLayer.Focused;
         await GDTask.Delay(delay);
         ev.Run();
     }
@@ -86,26 +81,41 @@ public class GameScheduler
     {
         return _skillEvents.Find(e => e.BindUnitId == unitId);
     }
-    public SchedulerEvent AddEvent(SchedulerEvent ev, bool run = false)
+    public SchedulerEvent AddEvent(SchedulerEvent ev, SimulationLayer? layer = null)
     {
-        if (run) (ev as ISchedulerEvnet).Layer = SimulationLayer.Running;
-        else (ev as ISchedulerEvnet)?.Layer = SimulationLayer.Waiting;
-        _events[ev.Id] = ev;
+        ev.Layer = layer ?? ev.Layer;
+        if (!_events.TryAdd(ev.Id, ev)) return ev;
+
         //调整对应技能层
         if (ev is SkillEvent skillEvent)
         {
-            Logger.Debug("添加技能{event}", skillEvent);
             _skillEvents.Add(skillEvent);
-            if (FocusedUnitId == skillEvent.BindUnitId)
-                FocusEvent(skillEvent.Id);
         }
-        
         AddEventList(ev);
         ev.Update += OnEventUpdate;
         UpdateSimulation();
         return ev;
     }
 
+    public void AddEventMany(IEnumerable<SchedulerEvent> ev, SimulationLayer? layer = null)
+    {
+        BlockUpdate();
+        foreach (var e in ev)
+        {
+            e.Layer = layer ?? e.Layer;
+            AddEvent(e);
+        }
+        UnblockUpdate();
+    }
+    public void RemoveEventMany(IEnumerable<SchedulerEvent> ev)
+    {
+        BlockUpdate();
+        foreach (var e in ev)
+        {
+            RemoveEvent(e);
+        }
+        UnblockUpdate(false);
+    }
     public void RemoveEvent(SchedulerEvent ev)
     {
         if (!RemoveEventList(ev)) return;
@@ -137,53 +147,7 @@ public class GameScheduler
         _coordsRegions.Remove(id);
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
     }
-
-    public void FocusEvent(uint id)
-    {
-        var last = _events.GetValueOrDefault(_focusedEventId);
-        BlockUpdate();
-        (last as ISchedulerEvnet)?.Layer = SimulationLayer.Waiting;
-        _focusedEventId = id;
-
-        if (!_events.TryGetValue(id, out var ev) || ev.Layer == SimulationLayer.Focused)
-        {
-            UnblockUpdate();
-            return;
-        }
-
-        (ev as ISchedulerEvnet).Layer = SimulationLayer.Focused;
-        UnblockUpdate();
-    }
-    public void SetNextTurnEvent(SchedulerEvent ev)
-    {
-        if (_nextTurnEvent != null && _events.ContainsKey(_nextTurnEvent.Id))
-        {
-            RemoveEvent(_nextTurnEvent);
-        }
-        _nextTurnEvent = ev;
-    }
-    public void SetNextTurnEventFocused(bool focus)
-    {
-        if (_nextTurnEvent is null) return;
-        if (focus && !_events.ContainsKey(_nextTurnEvent.Id))
-        {
-            AddEvent(_nextTurnEvent);
-            FocusEvent(_nextTurnEvent.Id);
-        }
-        else if (!focus && _events.ContainsKey(_nextTurnEvent.Id))
-        {
-            RemoveEvent(_nextTurnEvent);
-        }
-    }
-
-    public void RunNextTurnEvent()
-    {
-        if (_nextTurnEvent is null) return;
-        SetNextTurnEventFocused(true);
-        _nextTurnEvent.Run();
-        _nextTurnEvent = null;
-    }
-
+    
     private void AddEventList(SchedulerEvent ev)
     {
         var list = ev.Layer switch
@@ -227,17 +191,15 @@ public class GameScheduler
         Logger.Info("触发更新");
         
         _runningSchedulers.Push(this);
-        var snapshot = _snapshotChache =
-            (_snapshotChache is null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
-        snapshot.ClearIfSnapshot();
-        foreach (var layer in _simulationLayers)
-        foreach (var ev in layer)
+        
+        // 运行层直接执行
+        foreach (var ev in _runningSimulations)
         {
             var result = new SimulationResult(
                 ev.Id,
                 GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
                 ev.Layer);
-            ev.Action?.Invoke(snapshot, ev.Args, result);
+            ev.Action?.Invoke(_gameState, ev.Args, result);
             _simulationResults.Add(result);
         }
         // 运行层事件执行完毕后，清空运行层
@@ -248,27 +210,34 @@ public class GameScheduler
             ev.Update -= OnEventUpdate;
         }
         _runningSimulations.Clear();
-        
-        // 应用运行层事件结果
-        foreach (var a in SimulationResults)
+        // 创建快照，用于焦点层和等待层事件执行
+        var snapshot = _snapshotChache =
+            (_snapshotChache is null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
+        snapshot.ClearIfSnapshot();
+        // 焦点层和等待层事件执行
+        foreach (var ev in _focusedSimulations.Concat(_waitingSimulations))
         {
-            if (a.Layer != SimulationLayer.Running) break;
-            Logger.Debug("应用结果 {result}", a);
-            _gameState.ApplyResult(a);
+            var result = new SimulationResult(
+                ev.Id,
+                GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
+                ev.Layer);
+            ev.Action?.Invoke(snapshot, ev.Args, result);
+            _simulationResults.Add(result);
         }
+        
         Logger.Debug("更新结果:\n{results}", string.Join("\n", SimulationResults));
         SimulationUpdated?.Invoke(this, EventArgs.Empty);
         
         _runningSchedulers.Pop();
     }
 
-    private void BlockUpdate()
+    public void BlockUpdate()
     {
         _blockingUpdate += 1;
         Logger.Trace("更新阻塞{count}", _blockingUpdate);
     }
 
-    private void UnblockUpdate(bool endUpdate = true)
+    public void UnblockUpdate(bool endUpdate = true)
     {
         _blockingUpdate -= 1;
         Logger.Trace("更新解除阻塞{count}", _blockingUpdate);

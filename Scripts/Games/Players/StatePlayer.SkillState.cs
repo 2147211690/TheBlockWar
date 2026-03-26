@@ -1,5 +1,6 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games.Players;
 
@@ -91,7 +92,7 @@ public partial class StatePlayer
                 _currentSkillEvent.Team = _unitState!.Team;
                 _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
                 _currentSkillEvent.Args = _currentSkillArgs;
-                
+                _currentSkillEvent.Layer = SimulationLayer.Focused;
                 _currentArgIndex++;
                 
                 UpdateCurrentValidSkillCoords();
@@ -103,7 +104,7 @@ public partial class StatePlayer
                 if (!IsCurrentValidArg()) return;
                 //所有参数完成
                 GameScheduler!.RemoveCoordsRegion(_validRegionId);
-                //_currentSkillEvent!.Run();
+                _player.TurnManager.AddTurnEvent(_player.TurnManager.CurrentTurn + 1, _currentSkillEvent);
                 StateMachine.ChangeState(player._freeState);
             }
             else //进入下一个参数

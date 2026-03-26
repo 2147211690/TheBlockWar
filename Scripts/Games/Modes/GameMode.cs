@@ -21,16 +21,12 @@ public abstract class GameMode : IGameMode
     
     protected async GDTask RunBuffRegionEventAndAddToNextTurnEvent(TurnManager turnManager, int turn, int delay = 800)
     {
-        turnManager.GameScheduler.SetNextTurnEventFocused(true);
-        await GDTask.Delay(delay);
-        turnManager.GameScheduler.RunNextTurnEvent();
-        await GDTask.WaitUntil(() => !turnManager.GameView.IsRunning);
-        turnManager.GameScheduler.SetNextTurnEvent(GetNextBuffRegionEvent(turn + 1));
+
     }
 
-    protected SchedulerEvent GetNextBuffRegionEvent(int turn)
+    protected SchedulerEvent GetBuffRegionEvent(int turn)
     {
-        return EventFactory.CreateEvent((state, args, result) =>
+        var e = EventFactory.CreateEvent((state, args, result) =>
             {
                 var regionPairs = new List<(Vector2I coords, IRegion[] regions)>();
                 var size = state.TileMapState.Size;
@@ -71,5 +67,7 @@ public abstract class GameMode : IGameMode
                 GC.Collect();
             }
         );
+        e.Priority = int.MinValue;
+        return e;
     }
 }
