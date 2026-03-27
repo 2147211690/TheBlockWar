@@ -8,5 +8,5 @@ script = ExtResource("1_w85jb")
 BuffType = 1
 Icon = ExtResource("1_fjt8a")
 Priority = -1
-Description = "测试"
+Description = "冰冻,不可进行任何主动操作,在方格受到伤害后解除冰冻并免疫伤害"
 metadata/_custom_type_script = "uid://qrkhfr53ls33"

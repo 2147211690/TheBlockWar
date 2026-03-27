@@ -25,7 +25,7 @@ public class EventView
     {
         _pool = pool;
     }
-    private void NeedClearUnit(uint id)
+    private void NeedClearUnit(long id)
     {
         _pool.EventsView.NeedClearUnit(id);
     }
@@ -53,7 +53,7 @@ public class EventView
         ChangeUnitHealth(step.Coords, step.ResultUnitId, step.Cure, step.ResultValidCure, step.ResultUnitId != 0);
     }
     
-    private void ChangeUnitHealth(Vector2I coords, uint unitId, float originChange, float healthChange, bool hasAim)
+    private void ChangeUnitHealth(Vector2I coords, long unitId, float originChange, float healthChange, bool hasAim)
     {
         if (IsFocused)
         {

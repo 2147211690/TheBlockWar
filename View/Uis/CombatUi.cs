@@ -1,4 +1,6 @@
+using System.ComponentModel;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Views;
 
@@ -26,16 +28,40 @@ public partial class CombatUi : Control
         _gameScheduler = gameScheduler;
         _player = player;
         
-        
+        _player.PropertyChanged += PlayerOnPropertyChanged;
+
+
+
         _stopTurnButton.MouseEntered += StopTurnButtonOnMouseEntered;
         _stopTurnButton.MouseExited += StopTurnButtonOnMouseExited;
         _stopTurnButton.Pressed += StopTurnButtonOnPressed;
 
         TreeExiting += () =>
         {
+            _player.PropertyChanged -= PlayerOnPropertyChanged;
         };
         
-        
+        void PlayerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var player = sender as IPlayer;
+            if (e.PropertyName is nameof(IPlayer.SkillingUnitSkillStates))
+            {
+                ClearSkillItem();
+                foreach (var skill in _player.SkillingUnitSkillStates)
+                {
+                    AddSkillItem(skill);
+                }
+            }
+            if (e.PropertyName is nameof(IPlayer.SelectedUnitId))
+            {
+                var unit = _gameScheduler.GameState.UnitMapState.GetUnit(player.SelectedUnitId);
+                ClearBuffItem();
+                foreach (var buff in unit.Buffs)
+                {
+                    AddBuffItem(buff.BuffType);
+                }
+            }
+        }
         void StopTurnButtonOnPressed()
         {
             if (GameView.IsRunning) return;
@@ -54,21 +80,27 @@ public partial class CombatUi : Control
         }
     }
 
-    private void OnHoverChange(object sender, object? hoverObject, bool isHover)
+    private void OnHoverChange(object sender, object hoverObject, bool isHover)
     {
         _infoPanel.Visible = isHover;
+        var itemBox = (hoverObject as ItemBox)!;
         //设置位置
-        var viewSize = GetViewportRect().Size;
-        var pos = GetLocalMousePosition() + new Vector2(0, -_infoPanel.Size.Y);
-        if (pos.X > viewSize.X - _infoPanel.Size.X) pos.X = viewSize.X - _infoPanel.Size.X;
-        if (pos.Y < _infoPanel.Size.Y) pos.Y = _infoPanel.Size.Y;
-        _infoPanel.Position = pos;
+        if (isHover)
+        {
+            _infoPanel.IconTexture = (itemBox.MetaData as IBuff)?.Info.Icon;
+            _infoPanel.TitleName = (itemBox.MetaData as IBuff)?.Info.BuffType.ToString() ?? "";
+            _infoPanel.Description = (itemBox.MetaData as IBuff)?.Info.Description ?? "";
+            
+            var pos = GetLocalMousePosition();
+            _infoPanel.LeftDownPosition = pos;
+        }
     }
 
-    public void AddSkillItem()
+    public void AddSkillItem(SkillState skillState)
     {
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _skillContainer.AddChild(itemBox);
+        itemBox.MetaData = skillState.Skill;
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
     }
@@ -79,6 +111,25 @@ public partial class CombatUi : Control
         for (var i = count - 1; i >= 0; i--)
         {
             _skillContainer.GetChild(i).QueueFree();
+        }
+    }
+    
+    public void AddBuffItem(BuffTypeEnum buffTypeEnum)
+    {
+        var itemBox = _itemBoxScene.Instantiate<ItemBox>();
+        _buffContainer.AddChild(itemBox);
+        itemBox.Texture = buffTypeEnum.GetInstance().Info.Icon;
+        itemBox.MetaData = buffTypeEnum.GetInstance();
+        itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
+        itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
+    }
+
+    public void ClearBuffItem()
+    {
+        var count = _buffContainer.GetChildCount();
+        for (var i = count - 1; i >= 0; i--)
+        {
+            _buffContainer.GetChild(i).QueueFree();
         }
     }
 }

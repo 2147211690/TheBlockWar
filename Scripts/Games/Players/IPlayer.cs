@@ -6,6 +6,7 @@ public interface IPlayer : INotifyPropertyChanged
 {
     GameScheduler? GameScheduler { get; set; }
     IReadOnlyList<SkillState> SkillingUnitSkillStates { get; }
+    long SelectedUnitId { get; }
     int Power { get; }
     bool IsTurn { get; set; }
     void OnInput<T>(in T input);

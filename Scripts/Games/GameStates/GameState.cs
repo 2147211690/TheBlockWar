@@ -14,7 +14,7 @@ public class GameState : IGameState
     public IReadOnlyList<ISkill> GetUnitValidSkills(string name)
     {
         //TODO: 根据单位名称获取有效技能
-        return _unitSkillMap["defalut"];
+        return _unitSkillMap.TryGetValue(name, out var value) ? value : [];
     }
 
     public IGameState GetSnapshot() => new GameStateSnapshot(this);

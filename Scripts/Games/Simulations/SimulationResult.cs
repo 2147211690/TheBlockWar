@@ -5,14 +5,14 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 public class SimulationResult
 {
-    public SimulationResult(uint sourceId, TeamTypeEnum teamType, SimulationLayer layer, bool collectSteps = true)
+    public SimulationResult(long sourceId, TeamTypeEnum teamType, SimulationLayer layer, bool collectSteps = true)
     {
         SourceId = sourceId;
         TeamType = teamType;
         Layer = layer;
         Steps = collectSteps ? new SimStepList() : null;
     }
-    public uint SourceId { get; }
+    public long SourceId { get; }
     public TeamTypeEnum TeamType { get; }
     public SimulationLayer Layer { get; }
     public IEnumerable<SimStep> MasterSteps => Steps?.Where(a => !a.IsChildStep) ?? [];

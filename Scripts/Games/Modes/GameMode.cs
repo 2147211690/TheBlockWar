@@ -26,19 +26,22 @@ public abstract class GameMode : IGameMode
 
     protected SchedulerEvent GetBuffRegionEvent(int turn)
     {
-        var e = EventFactory.CreateEvent((state, args, result) =>
+        var e = new ActionSchedulerEvent()
+        {
+            ApplyAction = e =>
             {
                 var regionPairs = new List<(Vector2I coords, IRegion[] regions)>();
-                var size = state.TileMapState.Size;
+                var size = e.State.TileMapState.Size;
                 for (var i = 0; i < size.X; i++)
                 {
                     for (var j = 0; j < size.Y; j++)
                     {
                         var coords = new Vector2I(i, j);
-                        var tile = state.TileMapState.GetTile(coords);
+                        var tile = e.State.TileMapState.GetTile(coords);
                         if (tile.Regions.Count > 0)
                             regionPairs.Add(
-                                new(coords, tile.Regions.Select(r => Regions.Regions.GetInstance(r.RegionType)).ToArray()));
+                                new(coords,
+                                    tile.Regions.Select(r => Regions.Regions.GetInstance(r.RegionType)).ToArray()));
                     }
                 }
 
@@ -46,13 +49,13 @@ public abstract class GameMode : IGameMode
                 {
                     foreach (var region in pair.regions)
                     {
-                        region.OnEnterTurn(state, pair.coords, turn, result);
+                        region.OnEnterTurn(e.State, pair.coords, turn, e.Result);
                     }
                 }
-                
-                
+
+
                 List<(IReadOnlyUnitState unit, IBuff[] buffs)> buffPairs =
-                    state.UnitMapState.GetAllUnits()
+                    e.State.UnitMapState.GetAllUnits()
                         .Where(a => a.Buffs.Count > 0)
                         .Select(a => (a, a.Buffs.Select(u => u.BuffType.GetInstance()).ToArray()))
                         .ToList();
@@ -60,14 +63,15 @@ public abstract class GameMode : IGameMode
                 {
                     foreach (var buff in pair.buffs)
                     {
-                        buff.OnEnterTurn(state, pair.unit, turn, result);
+                        buff.OnEnterTurn(e.State, pair.unit, turn, e.Result);
                     }
                 }
-                
+
                 GC.Collect();
-            }
-        );
-        e.Priority = int.MinValue;
+            },
+            Turn = turn,
+            Priority = int.MinValue,
+        };
         return e;
     }
 }

@@ -5,8 +5,8 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 public class UnitMapState : IUnitMapState
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    private Dictionary<uint, UnitState> _units = new();
-    private Dictionary<Vector2I, uint> _unitAt = new();
+    private Dictionary<long, UnitState> _units = new();
+    private Dictionary<Vector2I, long> _unitAt = new();
 
     public UnitMapState(Vector2I size)
     {
@@ -17,7 +17,7 @@ public class UnitMapState : IUnitMapState
     public Vector2I Size { get; }
     public IEnumerable<IReadOnlyUnitState> GetAllUnits() => _units.Values;
 
-    public bool HasUnit(uint id)
+    public bool HasUnit(long id)
     {
         return _units.ContainsKey(id);
     }
@@ -27,7 +27,7 @@ public class UnitMapState : IUnitMapState
         return _unitAt.ContainsKey(coords);
     }
 
-    public IReadOnlyUnitState GetUnit(uint id) => _units.GetValueOrDefault(id) ?? IReadOnlyUnitState.Null;
+    public IReadOnlyUnitState GetUnit(long id) => _units.GetValueOrDefault(id) ?? IReadOnlyUnitState.Null;
 
     public IReadOnlyUnitState GetUnit(Vector2I coords) =>
         _unitAt.TryGetValue(coords, out var id)
@@ -57,13 +57,13 @@ public class UnitMapState : IUnitMapState
         _unitAt[unit.Coords] = unit.Id;
     }
 
-    public void RemoveUnit(uint id)
+    public void RemoveUnit(long id)
     {
         if (!_units.Remove(id, out var unit)) return;
         _unitAt.Remove(unit.Coords);
     }
 
-    public void ModifyUnit(uint id, Action<UnitState> modifier)
+    public void ModifyUnit(long id, Action<UnitState> modifier)
     {
         if (!_units.TryGetValue(id, out var unitState))
         {
@@ -99,9 +99,9 @@ public class UnitMapState : IUnitMapState
         public Vector2I Size => Owner.Size;
 
         // 增量存储：仅包含相对于owner的变更
-        private Dictionary<uint, UnitState>? _modifiedUnits; // 修改/新增的单位 + 读时克隆的单位
-        private HashSet<uint>? _removedUnitIds; // 删除的单位ID
-        private Dictionary<Vector2I, uint>? _modifiedUnitAt; // 坐标变更（仅包含变更的坐标）
+        private Dictionary<long, UnitState>? _modifiedUnits; // 修改/新增的单位 + 读时克隆的单位
+        private HashSet<long>? _removedUnitIds; // 删除的单位ID
+        private Dictionary<Vector2I, long>? _modifiedUnitAt; // 坐标变更（仅包含变更的坐标）
 
         private List<UnitState>? _pooledUnits;
 
@@ -117,19 +117,19 @@ public class UnitMapState : IUnitMapState
             Owner = owner;
         }
 
-        private Dictionary<uint, UnitState> GetModifiedUnits() =>
-            _modifiedUnits ??= new Dictionary<uint, UnitState>();
+        private Dictionary<long, UnitState> GetModifiedUnits() =>
+            _modifiedUnits ??= new Dictionary<long, UnitState>();
 
-        private HashSet<uint> GetRemovedIds() =>
-            _removedUnitIds ??= new HashSet<uint>();
+        private HashSet<long> GetRemovedIds() =>
+            _removedUnitIds ??= new HashSet<long>();
 
-        private Dictionary<Vector2I, uint> GetModifiedCoords() =>
-            _modifiedUnitAt ??= new Dictionary<Vector2I, uint>();
+        private Dictionary<Vector2I, long> GetModifiedCoords() =>
+            _modifiedUnitAt ??= new Dictionary<Vector2I, long>();
 
         private List<UnitState> GetPooledUnits() =>
             _pooledUnits ??= new List<UnitState>();
 
-        public bool HasUnit(uint id)
+        public bool HasUnit(long id)
         {
             if (_removedUnitIds?.Contains(id) == true)
                 return false;
@@ -158,7 +158,7 @@ public class UnitMapState : IUnitMapState
         /// <summary>
         /// 核心：首次读取自动克隆到本地修改表，永久返回克隆体
         /// </summary>
-        public IReadOnlyUnitState GetUnit(uint id)
+        public IReadOnlyUnitState GetUnit(long id)
         {
             // 1. 已删除 → 返回空
             if (_removedUnitIds?.Contains(id) == true)
@@ -212,7 +212,7 @@ public class UnitMapState : IUnitMapState
         /// </summary>
         public IEnumerable<IReadOnlyUnitState> GetAllUnits()
         {
-            var processed = new HashSet<uint>();
+            var processed = new HashSet<long>();
 
             // 1. 遍历本地已修改/已克隆的单位
             if (_modifiedUnits != null)
@@ -278,7 +278,7 @@ public class UnitMapState : IUnitMapState
             coordsMap[unit.Coords] = id;
         }
 
-        public void RemoveUnit(uint id)
+        public void RemoveUnit(long id)
         {
             var unit = GetUnit(id);
             if (unit.IsNull()) return;
@@ -289,7 +289,7 @@ public class UnitMapState : IUnitMapState
             _isModified = true;
         }
 
-        public void ModifyUnit(uint id, Action<UnitState> modifier)
+        public void ModifyUnit(long id, Action<UnitState> modifier)
         {
             if (_removedUnitIds?.Contains(id) == true) return;
 

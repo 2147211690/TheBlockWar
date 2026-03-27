@@ -2,6 +2,7 @@ using System.Linq;
 using NLog;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -12,46 +13,44 @@ public class GameScheduler
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static Stack<GameScheduler> _runningSchedulers = new();
+    
     /// <summary>
     /// 当前正在运行的调度器,如果没有正在运行的调度器,则为null
     /// 注意不要在模拟时更新调度器内容,仅用来查询当前游戏状态
     /// </summary>
     public static GameScheduler? CurrentScheduler => _runningSchedulers.Peek();
-    public IReadOnlyList<SchedulerEvent> WaitingSimulations => _waitingSimulations;
-    public IReadOnlyList<SchedulerEvent> FocusedSimulations => _focusedSimulations;
-    public IReadOnlyList<SchedulerEvent> RunningSimulations => _runningSimulations;
+    public ICollection<SchedulerEvent> RunningEvents => _eventList.RunningEvents;
+    public ICollection<SchedulerEvent> FocusedEvents => _eventList.FocusedEvents;
+    public ICollection<SchedulerEvent> WaitingEvents => _eventList.WaitingEvents;
+    public IReadOnlyDictionary<long, SkillSchedulerEvent> SkillEvents => _eventList.SkillEvents;
     public IReadOnlyList<SimulationResult> SimulationResults => _simulationResults;
     public IReadOnlyGameState? GameState => _gameState;
-    public uint FocusedUnitId { get; private set; }
+    public long FocusedUnitId { get; private set; }
     public int PlayerTeam { get; private set; }
-
-    public IReadOnlyDictionary<uint, (HashSet<Vector2I> Coords, int type)> CoordsRegions => _coordsRegions;
-
-    private Dictionary<uint, SchedulerEvent> _events = new();
-    private List<SchedulerEvent> _waitingSimulations = new();
-    private List<SchedulerEvent> _focusedSimulations = new();
-    private List<SchedulerEvent> _runningSimulations = new();
+    public IReadOnlyDictionary<long, (HashSet<Vector2I> Coords, int type)> CoordsRegions => _coordsRegions;
+    
+    private SchedulerEventList _eventList = new();
+    
     private List<SimulationResult> _simulationResults = new();
-    private List<SchedulerEvent>[] _simulationLayers;
-    private int _blockingUpdate = 0;
-    private List<SkillEvent> _skillEvents = new();
-    private bool _needUpdate;
     private IGameState? _gameState;
-    private Dictionary<uint, (HashSet<Vector2I> Coords, int type)> _coordsRegions = new();
-    private uint _coordsRegionsId;
+    private Dictionary<long, (HashSet<Vector2I> Coords, int type)> _coordsRegions = new();
+    private long _coordsRegionsId;
     private IGameState? _snapshotChache;
-    private uint _focusedEventId = 0;
-    private SchedulerEvent? _nextTurnEvent;
     
     public event EventHandler? SimulationUpdated;
     public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
     public event EventHandler<int>? NextDelay;
-
-    private int nextDelay = 0;
-
+    
+    private bool _isRunning = false;
+    
     public GameScheduler()
     {
-        _simulationLayers = [_runningSimulations, _focusedSimulations, _waitingSimulations];
+        _eventList.ListUpdated += OnEventListUpdate;
+    }
+
+    private void OnEventListUpdate(object? sender, EventArgs e)
+    {
+        UpdateSimulation();
     }
 
     public void InitScheduler(IGameState gameState, int playerTeam)
@@ -59,7 +58,7 @@ public class GameScheduler
         _gameState = gameState;
         PlayerTeam = playerTeam;
     }
-    public void FocusUnit(uint id)
+    public void FocusUnit(long id)
     {
         if (FocusedUnitId == id) return;
         FocusedUnitId = id;
@@ -70,183 +69,94 @@ public class GameScheduler
     {
         NextDelay?.Invoke(this, delay);
     }
-    public async GDTask DealyRun(SchedulerEvent ev, int delay)
+    public SkillSchedulerEvent? GetUnitSkillEvent(long unitId)
     {
-        if (!_events.ContainsKey(ev.Id)) AddEvent(ev);
-        ev.Layer = SimulationLayer.Focused;
-        await GDTask.Delay(delay);
-        ev.Run();
-    }
-    public SkillEvent? GetUnitSkillEvent(uint unitId)
-    {
-        return _skillEvents.Find(e => e.BindUnitId == unitId);
+        _eventList.SkillEvents.TryGetValue(unitId, out var skillEvent);
+        return skillEvent;
     }
     public SchedulerEvent AddEvent(SchedulerEvent ev, SimulationLayer? layer = null)
     {
-        ev.Layer = layer ?? ev.Layer;
-        if (!_events.TryAdd(ev.Id, ev)) return ev;
-
-        //调整对应技能层
-        if (ev is SkillEvent skillEvent)
-        {
-            _skillEvents.Add(skillEvent);
-        }
-        AddEventList(ev);
-        ev.Update += OnEventUpdate;
-        UpdateSimulation();
+        _eventList.AddEvent(ev, layer);
         return ev;
     }
-
     public void AddEventMany(IEnumerable<SchedulerEvent> ev, SimulationLayer? layer = null)
     {
-        BlockUpdate();
-        foreach (var e in ev)
-        {
-            e.Layer = layer ?? e.Layer;
-            AddEvent(e);
-        }
-        UnblockUpdate();
+        _eventList.AddEventMany(ev, layer);
     }
     public void RemoveEventMany(IEnumerable<SchedulerEvent> ev)
     {
-        BlockUpdate();
-        foreach (var e in ev)
-        {
-            RemoveEvent(e);
-        }
-        UnblockUpdate(false);
+        _eventList.RemoveEventMany(ev);
     }
     public void RemoveEvent(SchedulerEvent ev)
     {
-        if (!RemoveEventList(ev)) return;
-        _events.Remove(ev.Id);
-        ev.Update -= OnEventUpdate;
-        
-        //调整对应技能层
-        if (ev is SkillEvent skillEvent)
-        {
-            _skillEvents.Remove(skillEvent);
-        }
-        BlockUpdate();
-        (ev as ISchedulerEvnet)?.Layer = SimulationLayer.Waiting;
-        UnblockUpdate(false);
-        UpdateSimulation();
+        _eventList.RemoveEvent(ev);
     }
-
-    public uint AddCoordsRegion(IEnumerable<Vector2I> coords, int type)
+    public void BlockUpdate()
+    {
+        _eventList.BlockUpdate();
+    }
+    public void UnblockUpdate()
+    {
+        _eventList.UnblockUpdate();
+    }
+    public long AddCoordsRegion(IEnumerable<Vector2I> coords, int type)
     {
         var id = _coordsRegionsId++;
         _coordsRegions[id] = (coords.ToHashSet(), type);
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
         return id;
     }
-    public bool IsInCoordsRegion(uint id,in Vector2I coord) =>
+    public bool IsInCoordsRegion(long id,in Vector2I coord) =>
         CoordsRegions.TryGetValue(id, out var region) && region.Coords.Contains(coord);
-    public void RemoveCoordsRegion(uint id)
+    public void RemoveCoordsRegion(long id)
     {
         _coordsRegions.Remove(id);
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
     }
-    
-    private void AddEventList(SchedulerEvent ev)
-    {
-        var list = ev.Layer switch
-        {
-            SimulationLayer.Waiting => _waitingSimulations,
-            SimulationLayer.Focused => _focusedSimulations,
-            SimulationLayer.Running => _runningSimulations,
-            _ => throw new ArgumentOutOfRangeException(nameof(ev.Layer), ev.Layer, null)
-        };
-        var index = list.BinarySearch(ev);
-        index = index < 0 ? ~index : index;
-        list.Insert(index, ev);
-    }
 
-    private void OnEventUpdate(object? sender, EventArgs e)
-    {
-        var ev = (sender as SchedulerEvent)!;
-        RemoveEventList(ev);
-        AddEventList(ev);
-        UpdateSimulation();
-    }
-
-    private bool RemoveEventList(SchedulerEvent ev)
-    {
-        return _runningSimulations.Remove(ev) || _focusedSimulations.Remove(ev) || _waitingSimulations.Remove(ev);
-    }
     private void UpdateSimulation()
     {
-        if (_blockingUpdate > 0)
-        {
-            _needUpdate = true;
-            return;
-        }
-        UpdateCore();
-    }
-    
-    private void UpdateCore()
-    {
-        _simulationResults.Clear();
         if (_gameState is null) return;
+        if (_isRunning) return;
+        _isRunning = true;
         Logger.Info("触发更新");
         
+        _simulationResults.Clear();
         _runningSchedulers.Push(this);
         
         // 运行层直接执行
-        foreach (var ev in _runningSimulations)
+        foreach (var ev in _eventList.RunningEvents)
         {
             var result = new SimulationResult(
                 ev.Id,
                 GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
                 ev.Layer);
-            ev.Action?.Invoke(_gameState, ev.Args, result);
+            ev.OnApply(ev, _gameState, result);
             _simulationResults.Add(result);
         }
         // 运行层事件执行完毕后，清空运行层
-        foreach (var ev in _runningSimulations)
-        {
-            if (ev is SkillEvent skillEvent) _skillEvents.Remove(skillEvent);
-            _events.Remove(ev.Id);
-            ev.Update -= OnEventUpdate;
-        }
-        _runningSimulations.Clear();
+        _eventList.ClearLayerEvent(SimulationLayer.Running);
         // 创建快照，用于焦点层和等待层事件执行
         var snapshot = _snapshotChache =
             (_snapshotChache is null || _snapshotChache.Owner != GameState) ? _gameState.GetSnapshot() : _snapshotChache;
         snapshot.ClearIfSnapshot();
         // 焦点层和等待层事件执行
-        foreach (var ev in _focusedSimulations.Concat(_waitingSimulations))
+        foreach (var ev in _eventList.FocusedEvents.Concat( _eventList.WaitingEvents))
         {
             var result = new SimulationResult(
                 ev.Id,
                 GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
                 ev.Layer);
-            ev.Action?.Invoke(snapshot, ev.Args, result);
+            ev.OnApply(ev, snapshot, result);
             _simulationResults.Add(result);
         }
-        
-        Logger.Debug("更新结果:\n{results}", string.Join("\n", SimulationResults));
+        Logger.Debug("更新结果:\n{results}", string.Join("\n", _simulationResults));
+        _isRunning = false;
         SimulationUpdated?.Invoke(this, EventArgs.Empty);
-        
         _runningSchedulers.Pop();
+        
     }
-
-    public void BlockUpdate()
-    {
-        _blockingUpdate += 1;
-        Logger.Trace("更新阻塞{count}", _blockingUpdate);
-    }
-
-    public void UnblockUpdate(bool endUpdate = true)
-    {
-        _blockingUpdate -= 1;
-        Logger.Trace("更新解除阻塞{count}", _blockingUpdate);
-        if (_blockingUpdate > 0 || !_needUpdate) return;
-        if (endUpdate) UpdateSimulation();
-        _needUpdate = false;
-    }
-
-
+    
     public enum OtherStateUpdateTypeEnum
     {
         None,

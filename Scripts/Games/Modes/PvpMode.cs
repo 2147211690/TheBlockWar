@@ -16,7 +16,7 @@ public class PvpMode : GameMode
 
     public override void EnterTurn(TurnManager turnManager, int turn)
     {
-        turnManager.AddTurnEvent(turn + 1, GetBuffRegionEvent(turn + 1));
+        turnManager.AddTurnEvent(GetBuffRegionEvent(turn + 1));
     }
 
     public override async GDTask Turn(TurnManager turnManager, int turn)

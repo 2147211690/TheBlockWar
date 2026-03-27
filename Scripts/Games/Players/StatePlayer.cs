@@ -10,15 +10,18 @@ public partial class StatePlayer : Node, IPlayer
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
     public GameScheduler? GameScheduler { get; set; }
-    public IReadOnlyList<SkillState> SkillingUnitSkillStates => _skillingState.SkillStates;
+    public IReadOnlyList<SkillState> SkillingUnitSkillStates => _skillStates;
     public int Power { get; set => SetField(ref field, value); }
     public bool IsTurn { get; set => SetField(ref field, value); }
     public Vector2I CurrentMouseCoords { get; private set; }
     public TurnManager TurnManager { get; set; }
+    public long SelectedUnitId { get; set => SetField(ref field, value); }
+    
     private GDTaskCompletionSource _completionSource = new();
     private StateMachine<State> _stateMachine;
     private FreeState _freeState;
     private SkillingState _skillingState;
+    private SkillState[] _skillStates = [];
     public event PropertyChangedEventHandler? PropertyChanged;
     
     public StatePlayer()

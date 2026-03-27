@@ -8,6 +8,7 @@ using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
 using TheBlockWar.View.Uis;
+using Yitter.IdGenerator;
 
 namespace TheBlockWar;
 
@@ -42,12 +43,29 @@ public partial class Test : Node2D
 
     public override void _Ready()
     {
+        //配置Yitter.IdGenerator.IdHelper
+        var options = new IdGeneratorOptions
+        {
+            // 核心：WorkerId（机器/进程唯一标识，0~63，分布式必须唯一）
+            WorkerId = 1, //TODO:联机需要根据机器ID设置
+                
+            // 可选：WorkerId占用位数（默认6，最大63）
+            // WorkerIdBitLength = 6,
+                
+            // 可选：序列号位数（默认6，每毫秒最多 2^6-1=63 个ID）
+            // SeqBitLength = 6,
+                
+            // 可选：基准时间（默认1970-01-01，建议设为项目启动时间）
+            // BaseTime = new DateTime(2025, 1, 1),
+        };
+        YitIdHelper.SetIdGenerator(options);
+        
         TaskTracker.ShowTrackerWindow();
         
         _currentGameState = new GameState(new Vector2I(10, 10),
             new Dictionary<string, ISkill[]>() 
             {
-                {"defalut", [Skills.Skill1]},
+                {"Unit_0", [Skills.Skill1]},
             },
             new int[,] 
             {
@@ -71,7 +89,7 @@ public partial class Test : Node2D
         _turnManager = new TurnManager(_gameScheduler, _view, _pvpMode);
         _player.TurnManager = _turnManager;
         _combatUi.Bind(_gameScheduler, _player);
-        _turnManager.Start();
+        _turnManager.Start().Forget();
     }
 
     public override void _Process(double delta)
@@ -201,134 +219,149 @@ public partial class Test : Node2D
                 GD.Print($"{e.GetType()}: {e.Layer} {e.Steps.Count}");
             }
             GD.Print("当前运行层");
-            foreach (var e in _gameScheduler.RunningSimulations)
+            foreach (var e in _gameScheduler.RunningEvents)
             {
-                GD.Print($"{e.GetType()}: {e.Layer}");
+                GD.Print($"{e.GetType()}: {e.Layer} {e}");
             }
             GD.Print("当前关注层");
-            foreach (var e in _gameScheduler.FocusedSimulations)
+            foreach (var e in _gameScheduler.FocusedEvents)
             {
-                GD.Print($"{e.GetType()}: {e.Layer}");
+                GD.Print($"{e.GetType()}: {e.Layer} {e}");
             }
             GD.Print("当前等待层");
-            foreach (var e in _gameScheduler.WaitingSimulations)
+            foreach (var e in _gameScheduler.WaitingEvents)
             {
-                GD.Print($"{e.GetType()}: {e.Layer}");
+                GD.Print($"{e.GetType()}: {e.Layer} {e}");
+            }
+            GD.Print("当前技能层");
+            foreach (var e in _gameScheduler.SkillEvents.Values)
+            {
+                GD.Print($"{e.GetType()}: {e.Layer} {e}");
             }
         }
         if (ImGui.Button("添加调度事件"))
         {
-            _event0 = EventFactory.CreateEvent((s, a, r) =>
+            _event0 = new ActionSchedulerEvent()
+            {
+                ApplyAction = e =>
                 {
-                    s.ApplyDamage(new(3, 3),
-                        10, r);
-                });
+                    e.State.ApplyDamage(new(3, 3),
+                        10, e.Result);
+                }
+            };
             _gameScheduler.AddEvent(_event0);
         }
 
         if (ImGui.Button("触发调度事件"))
         {
-            (_event0 as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
+            _event0.Layer = SimulationLayer.Running;
         }
         if (ImGui.Button("测试放置压力"))
         {
 
-            _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
+            _gameScheduler.AddEvent(new ActionSchedulerEvent()
             {
-                for (int i = 0; i < 10; i++)
+                ApplyAction = e =>
                 {
-                    for (int j = 0; j < 9; j++)
+                    for (int i = 0; i < 10; i++)
                     {
-                        s.ApplyPlaceUnit(new(i,j), "Unit_0", 1, null, r);
+                        for (int j = 0; j < 9; j++)
+                        {
+                            e.State.ApplyPlaceUnit(new(i, j), "Unit_0", 1, null, e.Result);
+                        }
                     }
                 }
-            }), SimulationLayer.Running);
+            }, SimulationLayer.Running);
         }
         if (ImGui.Button("测试放置"))
         {
 
-            _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
-            {
-                for (int i = 0; i < 10; i++)
+            _gameScheduler.AddEvent(new ActionSchedulerEvent( e =>
                 {
-                    for (int j = 0; j < 10; j++)
+                    for (int i = 0; i < 10; i++)
                     {
-                        var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
-                        s.ApplyPlaceTile(new(i, j), new TileState()
+                        for (int j = 0; j < 10; j++)
                         {
-                            Tag = empty ? TileTag.Empty : TileTag.Ground
-                        }, r);
+                            var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
+                            e.State.ApplyPlaceTile(new(i, j), new TileState()
+                                {
+                                    Tag = empty ? TileTag.Empty : TileTag.Ground
+                                },
+                                e.Result);
+                        }
                     }
-                }
-                s.ApplyPlaceUnit(new(2, 2), "Unit_0", 0, null, r);
-            }), SimulationLayer.Running);
+                    e.State.ApplyPlaceUnit(new(2, 2), "Unit_0", 0, null, e.Result);
+                }), SimulationLayer.Running);
         }
         if (ImGui.Button("测试放置2"))
         {
 
-            _event2 = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
+            _event2 = _gameScheduler.AddEvent(new ActionSchedulerEvent()
             {
-                for (int i = 0; i < 3; i++)
+                ApplyAction = e =>
                 {
-                    for (int j = 0; j < 3; j++)
+                    for (int i = 0; i < 3; i++)
                     {
-                        s.ApplyPlaceUnit(new(i,j), "Unit_0", 1, null, r);
+                        for (int j = 0; j < 3; j++)
+                        {
+                            e.State.ApplyPlaceUnit(new(i, j), "Unit_0", 1, null, e.Result);
+                        }
                     }
                 }
-            }));
+            });
         }
 
         if (ImGui.Button("使用事件2"))
         {
-            (_event2 as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
+            _event2.Layer = SimulationLayer.Running;
         }
         
         if (ImGui.Button("测试移动2,2 -> 6,3"))
         {
 
-            _move = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
+            _move = _gameScheduler.AddEvent(new ActionSchedulerEvent(e =>
             {
-                 s.ApplyMoveUnitPath(new(2,2), 
+                 e.State.ApplyMoveUnitPath(new(2,2), 
                      [new(0,0), new(0,1), new(0,2),new(1,2),new(2,2)],
-                     r);
+                     e.Result);
             }));
         }
 
         if (ImGui.Button("使用移动"))
         {
-            (_move as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
+            _move.Layer = SimulationLayer.Running;
         }
 
         if (ImGui.Button("改变移动的关注性"))
         {
-            (_move as ISchedulerEvnet)?.Layer = _move.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+            _move.Layer = _move.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
         
         if (ImGui.Button("测试伤害"))
         {
 
-            _damage = _gameScheduler.AddEvent(EventFactory.CreateEvent((s, a, r) =>
+            _damage = _gameScheduler.AddEvent(new ActionSchedulerEvent(e =>
             {
-                 s.ApplyDamage(new(2,2), 50, r);
+                 e.State.ApplyDamage(new(2,2), 50, e.Result);
             }));
         }
 
         if (ImGui.Button("使用伤害"))
         {
-            (_damage as ISchedulerEvnet)?.Layer = SimulationLayer.Running;
+            _damage.Layer = SimulationLayer.Running;
         }
         if (ImGui.Button("改变伤害的关注性"))
         {
-            (_damage as ISchedulerEvnet)?.Layer = _damage.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+            _damage.Layer = _damage.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
 
         if (ImGui.Button("添加跟随技能"))
         {
-            _follow = _gameScheduler.AddEvent(EventFactory.CreateSkill(1, Skills.Skill1));
+            _follow = _gameScheduler.AddEvent(new SkillSchedulerEvent(1, Skills.Skill1, 0));
         }
         if (ImGui.Button("改变跟随的关注性"))
         {
-            (_follow as ISchedulerEvnet)?.Layer = _follow.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
+            _follow.Layer = _follow.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
         
         ImGui.End();
@@ -346,10 +379,13 @@ public partial class Test : Node2D
 
         if (ImGui.Button("添加到下一回合事件"))
         {
-            _turnManager.AddTurnEvent(_turnManager.CurrentTurn + 1, EventFactory.CreateEvent(((state, args, result) =>
+            _turnManager.AddTurnEvent(new ActionSchedulerEvent(e =>
             {
-                state.ApplyDamage(new(2,2), 50, result);
-            })));
+                e.State.ApplyDamage(new(2,2), 50, e.Result);
+            })
+            {
+                Turn = _turnManager.CurrentTurn + 1
+            });
         }
         ImGui.End();
     }

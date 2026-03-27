@@ -101,7 +101,7 @@ zoom = Vector2(2.14, 2.14)
 [node name="CombatUi" parent="CanvasLayer" unique_id=100001026 node_paths=PackedStringArray("GameView") instance=ExtResource("15_ilduj")]
 GameView = NodePath("../../GameView")
 
-[node name="TextureRect" parent="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer" parent_id_path=PackedInt32Array(100001026, 1163128792, 38520972) index="0" unique_id=408846773]
+[node name="TextureRect" parent="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer/AspectRatioContainer" parent_id_path=PackedInt32Array(100001026, 1163128792, 1775412479) index="0" unique_id=408846773]
 texture = SubResource("ViewportTexture_ilduj")
 
 [node name="SubViewport" type="SubViewport" parent="." unique_id=1510478228]

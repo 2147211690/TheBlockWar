@@ -4,13 +4,14 @@
 [ext_resource type="Texture2D" uid="uid://c5ayhd5fgh63i" path="res://icon.svg" id="1_us0sw"]
 [ext_resource type="Script" uid="uid://d4cltyu51ueg5" path="res://View/Uis/ItemBox.cs" id="1_yit01"]
 
-[node name="ItemBox" type="PanelContainer" unique_id=1163128792]
+[node name="ItemBox" type="PanelContainer" unique_id=1163128792 node_paths=PackedStringArray("_textureRect")]
 offset_right = 134.0
 offset_bottom = 134.0
 pivot_offset_ratio = Vector2(0.5, 0.5)
 theme = ExtResource("1_ohqpj")
 theme_type_variation = &"ItemBox_Normal"
 script = ExtResource("1_yit01")
+_textureRect = NodePath("MarginContainer/AspectRatioContainer/TextureRect")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=38520972]
 layout_mode = 2
@@ -19,7 +20,12 @@ theme_override_constants/margin_top = 3
 theme_override_constants/margin_right = 3
 theme_override_constants/margin_bottom = 3
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=408846773]
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="MarginContainer" unique_id=1775412479]
+layout_mode = 2
+stretch_mode = 1
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/AspectRatioContainer" unique_id=408846773]
 layout_mode = 2
 texture = ExtResource("1_us0sw")
-expand_mode = 3
+expand_mode = 2
+stretch_mode = 5

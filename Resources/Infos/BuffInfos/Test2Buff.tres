@@ -7,5 +7,5 @@
 script = ExtResource("2_eug6t")
 BuffType = 2
 Icon = ExtResource("1_6bd36")
-Description = "测试"
+Description = "向下推动,下一回合开始的时候会向下推动单位"
 metadata/_custom_type_script = "uid://qrkhfr53ls33"

@@ -23,7 +23,7 @@ public partial class GameView : Node2D
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
     
-    private Dictionary<uint, SimulationResult> _runningSimulations = new();
+    private Dictionary<long, SimulationResult> _runningSimulations = new();
     private List<SimulationResult> _lastSimulations = new();
     private List<SimulationResult> _prepareSimulations = new();
     private GameScheduler? _gameScheduler;

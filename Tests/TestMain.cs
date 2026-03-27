@@ -1,10 +1,22 @@
 using ImGuiNET;
+using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Tests;
 [SceneTree]
 public partial class TestMain : Node2D
 {
+    private TaskQueue _taskQueue = new();
+    private int animationIndex = 0;
+    public override void _Ready()
+    {
+        base._Ready();
+        TaskTracker.ShowTrackerWindow();
+
+    }
+
     public override void _Process(double delta)
     {
         base._Process(delta);
@@ -33,12 +45,35 @@ public partial class TestMain : Node2D
 
         if (ImGui.Button("添加ItemBox"))
         {
-            _.CanvasLayer.CombatUi.AddSkillItem();
+            _.CanvasLayer.CombatUi.AddSkillItem(new SkillState()
+            {
+                Skill = Skills.Skill1
+            });
         }
         if (ImGui.Button("移除ItemBox"))
         {
             _.CanvasLayer.CombatUi.ClearSkillItem();
         }
+        
         ImGui.End();
+
+        ImGui.Begin("测试动画队列");
+        if (ImGui.Button("添加3s动画"))
+        {
+            AddAnim().Forget();
+            
+        }
+        ImGui.End();
+    }
+    async GDTask AddAnim()
+    {
+        var index = animationIndex++;
+        GD.Print($"开始添加动画{index}");
+        await _taskQueue.AddTask(async () =>
+        {
+            await GDTask.Delay(3000);
+            GD.Print($"动画{index}完成");
+        });
+        GD.Print($"检测到动画{index}完成");
     }
 }

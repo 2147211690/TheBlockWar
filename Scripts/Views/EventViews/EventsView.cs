@@ -12,9 +12,9 @@ public partial class EventsView : Node2D
     [Export] public BlockRegionView BlockRegionView { get; set; }
     public BlockDraw BlockDraw { get; set; }
     private EventView.EventViewPool _eventViewPool;
-    private Dictionary<uint, EventView> _eventViews = new();
+    private Dictionary<long, EventView> _eventViews = new();
     private EventView? _currentView;
-    private HashSet<uint> _clearUnitIds = new();
+    private HashSet<long> _clearUnitIds = new();
     
     public override void _Ready()
     {
@@ -23,7 +23,7 @@ public partial class EventsView : Node2D
         BlockDraw = new BlockDraw(this);
     }
 
-    public void ClearEventView(uint id)
+    public void ClearEventView(long id)
     {
         if (!_eventViews.TryGetValue(id, out var eventView)) return;
         _eventViewPool.Push(eventView);
@@ -47,7 +47,7 @@ public partial class EventsView : Node2D
         _clearUnitIds.Clear();
     }
 
-    public EventView? BeginAddEventView(uint id, bool isFocused, TeamTypeEnum teamType)
+    public EventView? BeginAddEventView(long id, bool isFocused, TeamTypeEnum teamType)
     {
         if (_eventViews.ContainsKey(id))
         {
@@ -65,7 +65,7 @@ public partial class EventsView : Node2D
         _eventViews.Add(id, _currentView);
         return _currentView;
     }
-    public void NeedClearUnit(uint id)
+    public void NeedClearUnit(long id)
     {
         _clearUnitIds.Add(id);
     }

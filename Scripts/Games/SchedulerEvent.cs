@@ -1,4 +1,8 @@
+using System.Runtime.CompilerServices;
+using System.Threading;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using Yitter.IdGenerator;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -6,48 +10,38 @@ namespace TheBlockWar.Scripts.Games;
 /// 事件类,用于游戏调度器
 /// 事件越小,优先级越高
 /// </summary>
-public class SchedulerEvent : ISchedulerEvnet
+public abstract class SchedulerEvent : IComparable<SchedulerEvent>
 {
-    private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public SchedulerEvent(uint id)
+    protected static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    public long Id { get; } = YitIdHelper.NextId();
+    public SimulationLayer Layer { get; set => SetField(ref field, value); } = SimulationLayer.Waiting;
+    public int Team { get; set => SetField(ref field, value); }
+    public int Turn { get; set => SetField(ref field, value); } //用于排序
+    public int Priority { get; set => SetField(ref field, value); } //用于排序
+    public event EventHandler<(string? PropertyName, bool IsChanging)>? PropertyChange;
+    public abstract void OnApply(SchedulerEvent root, IGameState state, SimulationResult result);
+    public override string ToString() => $"事件Hash:{GetHashCode()} 事件层:{Layer} 事件队伍:{Team} 事件回合:{Turn} 事件优先级:{Priority}";
+    protected void OnPropertyChange(string? propertyName, bool isChanging) 
+        => PropertyChange?.Invoke(this, (propertyName, isChanging));
+    protected bool SetField<T>(ref T field, in T value, bool checkEqual = true, [CallerMemberName]string? propertyName = null)
     {
-        Id = id;
-    }
-    public uint Id { get; }
-    public SimulationLayer Layer
-    {
-        get => field;
-        set => SetField(ref field, value);
-    } = SimulationLayer.Waiting;
-
-    public int Team { get => field; set => SetField(ref field, value); }
-    public int Priority { get => field; set => SetField(ref field, value); }
-    public object? Args { get => field; set => SetField(ref field, value, false); }
-    public ISchedulerEvnet.EventAction? Action { get => field; set => SetField(ref field, value, false); }
-    public void UpdateEvent() => Update?.Invoke(this, EventArgs.Empty);
-    protected void SetField<T>(ref T field, in T value, bool checkEqual = true)
-    {
-        if (checkEqual && EqualityComparer<T>.Default.Equals(field, value)) return;
+        if (checkEqual && EqualityComparer<T>.Default.Equals(field, value)) return false;
+        OnPropertyChange(propertyName, true);
         field = value;
-        Update?.Invoke(this, EventArgs.Empty);
+        OnPropertyChange(propertyName, false);
+        return true;
     }
-    public event EventHandler? Update;
-    
-    //TODO:可能分离与Layer的绑定,使用单独的事件通知
-    /// <summary>
-    /// 运行事件,将事件层设置为Running
-    /// </summary>
-    public void Run() =>
-        ((ISchedulerEvnet)this).Layer = SimulationLayer.Running;
-    public static bool operator <(SchedulerEvent a, SchedulerEvent b) => a.CompareTo(b) < 0;
-    public static bool operator >(SchedulerEvent a, SchedulerEvent b) => a.CompareTo(b) > 0;
-    public int CompareTo(ISchedulerEvnet? other)
+
+    public int CompareTo(SchedulerEvent? other)
     {
         if (ReferenceEquals(this, other)) return 0;
         if (other is null) return 1;
-        if (Layer != other.Layer) return Layer.CompareTo(other.Layer);
-        return Priority.CompareTo(other.Priority);
+        var layerComparison = Layer.CompareTo(other.Layer);
+        if (layerComparison != 0) return layerComparison;
+        var turnComparison = Turn.CompareTo(other.Turn);
+        if (turnComparison != 0) return turnComparison;
+        var priorityComparison = Priority.CompareTo(other.Priority);
+        if (priorityComparison != 0) return priorityComparison;
+        return Id.CompareTo(other.Id);
     }
-    
-    public override string ToString() => $"事件ID:{Id} 事件层:{Layer} 事件优先级:{Priority} 事件参数类型:{Args?.GetType().Name}";
 }

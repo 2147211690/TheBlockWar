@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games.Players;
@@ -6,8 +7,9 @@ public partial class StatePlayer
 {
     private class FreeState(StatePlayer player) : State(player)
     {
-        private SkillEvent? _skillEvent;
-        public uint FocusedUnitId
+        private SkillSchedulerEvent? _skillEvent;
+        public IReadOnlyUnitState SelectedUnit { get; set; }
+        public long FocusedUnitId
         {
             get => field;
             set
@@ -19,10 +21,32 @@ public partial class StatePlayer
                 _skillEvent?.Layer = SimulationLayer.Focused;
             }
         } = 0;
-
+        public long SelectedUnitId
+        {
+            get => _player.SelectedUnitId;
+            set
+            {
+                if (value == _player.SelectedUnitId) return;
+                SelectedUnit = GameState?.UnitMapState.GetUnit(value)!;
+                var skills = GameState.GetUnitValidSkills(SelectedUnit.Name);
+                player._skillStates = new SkillState[skills.Count];
+                for (int i = 0; i < skills.Count; i++)
+                {
+                    player._skillStates[i] = new SkillState()
+                    {
+                        Skill = skills[i],
+                        IsSelecting = false,
+                        RemainingUses = 1, //TODO:使用Info加载剩余次数
+                    };
+                }
+                _player.OnPropertyChanged(nameof(SkillingUnitSkillStates));
+                _player.SelectedUnitId = value;
+            }
+        }
         public override void OnEnter()
         {
             FocusCoords(_player.CurrentMouseCoords);
+            SelectedUnitId = 0;
         }
         public override void OnInput<T>(in T input)
         {
@@ -32,6 +56,7 @@ public partial class StatePlayer
             {
                 case PlayerInputClick {Button: MouseButtonMask.Left} click:
                     if (GameState?.UnitMapState.HasUnit(FocusedUnitId) == false) break;
+                    SelectedUnitId = FocusedUnitId;
                     var skill = GameScheduler?.GetUnitSkillEvent(FocusedUnitId);
                     if (skill is null)
                     {

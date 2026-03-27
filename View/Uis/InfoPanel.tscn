@@ -2,76 +2,82 @@
 
 [ext_resource type="Script" uid="uid://dj4fhptrjcqa4" path="res://View/Uis/InfoPanel.cs" id="1_fb8w8"]
 [ext_resource type="Theme" uid="uid://bdvmqnfsqqedl" path="res://Resources/Themes/UiTheme.tres" id="1_i4inr"]
+[ext_resource type="Texture2D" uid="uid://ddlrcufxdgb0e" path="res://Art/Img/ui/pod_strat.png" id="3_27cnd"]
 [ext_resource type="Texture2D" uid="uid://c5ayhd5fgh63i" path="res://icon.svg" id="3_ij2at"]
 
-[node name="InfoPanel" type="PanelContainer" unique_id=772088334 node_paths=PackedStringArray("_iconTextureRect", "_nameLabel", "_descriptionLabel", "_useTextureRect")]
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="CenterContainer" type="CenterContainer" unique_id=1776366673 node_paths=PackedStringArray("_iconTextureRect", "_nameLabel", "_descriptionLabel", "_useTextureRect")]
+use_top_left = true
+script = ExtResource("1_fb8w8")
+_iconTextureRect = NodePath("Panel/MarginContainer/VBoxContainer/HBoxContainer/TextureRect")
+_nameLabel = NodePath("Panel/MarginContainer/VBoxContainer/HBoxContainer/Label")
+_descriptionLabel = NodePath("Panel/MarginContainer/VBoxContainer/Label")
+_useTextureRect = NodePath("Panel/MarginContainer/VBoxContainer/PanelContainer/TextureRect")
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=1242246510]
+layout_mode = 2
+size_flags_vertical = 8
 mouse_filter = 2
 theme = ExtResource("1_i4inr")
-script = ExtResource("1_fb8w8")
-_iconTextureRect = NodePath("MarginContainer/VBoxContainer/HBoxContainer/TextureRect")
-_nameLabel = NodePath("MarginContainer/VBoxContainer/HBoxContainer/Label")
-_descriptionLabel = NodePath("MarginContainer/VBoxContainer/Label")
-_useTextureRect = NodePath("MarginContainer/VBoxContainer/PanelContainer/TextureRect")
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1761737403]
+[node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=1761737403]
 layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1999694075]
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer" unique_id=1999694075]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1902517660]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=1902517660]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 8
 mouse_filter = 2
 alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1238070197]
+[node name="TextureRect" type="TextureRect" parent="Panel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1238070197]
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("3_ij2at")
+texture = ExtResource("3_27cnd")
 expand_mode = 3
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=323697817]
+[node name="Label" type="Label" parent="Panel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=323697817]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "测试"
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=520705559]
+[node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=520705559]
 layout_mode = 2
+size_flags_vertical = 8
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_bottom = 6
 
-[node name="ColorRect2" type="ColorRect" parent="MarginContainer/VBoxContainer/MarginContainer" unique_id=992721937]
+[node name="ColorRect2" type="ColorRect" parent="Panel/MarginContainer/VBoxContainer/MarginContainer" unique_id=992721937]
 custom_minimum_size = Vector2(0, 3)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1775716543]
+[node name="Label" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1775716543]
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 8
 theme_override_constants/line_spacing = 0
 theme_override_font_sizes/font_size = 24
-text = "这是个测试文本这是个测试文本这是个测试文本这是个测试"
 horizontal_alignment = 1
-autowrap_mode = 2
+autowrap_mode = 3
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=1327569615]
+[node name="PanelContainer" type="PanelContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=1327569615]
 visible = false
 layout_mode = 2
+size_flags_vertical = 8
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/PanelContainer" unique_id=1822263237]
+[node name="TextureRect" type="TextureRect" parent="Panel/MarginContainer/VBoxContainer/PanelContainer" unique_id=1822263237]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("3_ij2at")

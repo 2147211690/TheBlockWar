@@ -2,8 +2,7 @@ namespace TheBlockWar.View.Uis;
 
 public partial class ItemBox : PanelContainer
 {
-    private TextureRect _textureRect;
-    private MarginContainer _marginContainer;
+    [Export] private TextureRect _textureRect;
     private Tween? _currentTween;
     [Export] public bool CanClick { get; set; } = true;
     public Texture2D Texture
@@ -11,6 +10,7 @@ public partial class ItemBox : PanelContainer
         get => _textureRect.Texture;
         set => _textureRect.Texture = value;
     }
+    public object? MetaData { get; set; }
     public static float MouseEnterScale = 1.04f;
     public static float AnimationDuration = 0.05f;
     public static float ClickScale = 0.96f;
@@ -65,9 +65,6 @@ public partial class ItemBox : PanelContainer
 
     public override void _Ready()
     {
-        _marginContainer = GetNode<MarginContainer>("MarginContainer");
-        _textureRect = _marginContainer.GetNode<TextureRect>("TextureRect");
-
         ApplyNormalState();
 
         MouseEntered += OnMouseEntered;

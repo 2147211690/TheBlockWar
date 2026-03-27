@@ -6,7 +6,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 public class UnitState : IReadOnlyUnitState
 {
     public static readonly UnitState Null = IReadOnlyUnitState.Null.Clone();
-    public uint Id { get; set; }
+    public long Id { get; set; }
     public int Team { get; set; } = 0;
     public string Name { get; set; } =  string.Empty;
     public Vector2I Coords { get; set; }
