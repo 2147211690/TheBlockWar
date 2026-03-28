@@ -28,22 +28,14 @@ public static class Skills
         }
         if (args.TryGetArgs(1, out var v2) && result.PeekStep is MoveUnitPathStep moveStep)
         {
-            var start = moveStep.Path[moveStep.ResultTargetIndex];
-            var dir = (v2 - v1).ToVecDirMask();
-            gameState.MoveHit(start, dir, 20, 4, !unit.IsFlying ,result);
-            gameState.ApplyAnimation(new ThrowSomethingAnim(start, v2 + useCoords, "Test", 100, 1), result);
-            gameState.ApplyModifyUnitBuff(v2 + useCoords, BuffTypeEnum.Test, BuffOperation.AddBuff, 1, result);
-        }
-        if (args.TryGetArgs(2, out var v3))
-        {
-            foreach(var offset in CoordsRegion.GetSquareRegion(Vector2I.Zero, 1))
+            var coords = v2 + useCoords;
+            for (int i = 0; i < 4; i++)
             {
-                gameState.ApplyModifyUnitBuff(v3 + useCoords + offset, BuffTypeEnum.Test2, BuffOperation.AddBuff, 1, result);
+                var vec = (DirMask)(1 << i);
+                if (i != 0) gameState.NextParallel(result);
+                gameState.NextDelay(i * 1000, result);
+                gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, result);
             }
-        }
-        if (args.TryGetArgs(3, out var v4))
-        {
-            gameState.ApplyModifyUnitBuff(v4 + useCoords, BuffTypeEnum.Test, BuffOperation.RemoveBuff, 1, result);
         }
     }
     /// <summary>
@@ -64,7 +56,7 @@ public static class Skills
         }
         else if(argsIndex == 1)
         {
-            return CoordsRegion.GetCrossRegion(args[0] ?? Vector2I.Zero, 4, 4, 4, 4);
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6);
             //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
         else if(argsIndex == 2)
@@ -79,7 +71,7 @@ public static class Skills
         }
         return [];
     }
-    public static ISkill Skill1 { get; } = new ActionSkill(4, Skill1Args, Skill1Core);
+    public static ISkill Skill1 { get; } = new ActionSkill(2, Skill1Args, Skill1Core);
 
 
 

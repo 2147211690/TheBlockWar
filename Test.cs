@@ -326,6 +326,16 @@ public partial class Test : Node2D
                      e.Result);
             }));
         }
+        if (ImGui.Button("添加十字单位"))
+        {
+            _gameScheduler.AddEvent(new ActionSchedulerEvent(e =>
+            {
+                e.State.ApplyPlaceUnit(new(3,2), "Unit_0", 0, null, e.Result);
+                e.State.ApplyPlaceUnit(new(2,3), "Unit_0", 0, null, e.Result);
+                e.State.ApplyPlaceUnit(new(1,2), "Unit_0", 0, null, e.Result);
+                e.State.ApplyPlaceUnit(new(2,1), "Unit_0", 0, null, e.Result);
+            }), SimulationLayer.Running);
+        }
 
         if (ImGui.Button("使用移动"))
         {

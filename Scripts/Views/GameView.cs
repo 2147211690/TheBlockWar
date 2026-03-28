@@ -7,6 +7,7 @@ using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.EventViews;
 
 namespace TheBlockWar.Scripts.Views;
+
 [GlobalClass]
 public partial class GameView : Node2D
 {
@@ -22,7 +23,7 @@ public partial class GameView : Node2D
     public IPlayer? Player { get; set; }
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
-    
+
     private Dictionary<long, SimulationResult> _runningSimulations = new();
     private List<SimulationResult> _lastSimulations = new();
     private List<SimulationResult> _prepareSimulations = new();
@@ -33,6 +34,13 @@ public partial class GameView : Node2D
     private bool _refocus = false;
     private Queue<int> _nextDelays = new();
     private int? _currentDelay;
+    private SimStepHandler _simStepHandler;
+
+    public GameView()
+    {
+        _simStepHandler = new(HandleSimStep);
+    }
+
     public override void _Ready()
     {
         base._Ready();
@@ -46,8 +54,8 @@ public partial class GameView : Node2D
         _gameScheduler.SimulationUpdated += GameSchedulerOnSimulationUpdated;
         _gameScheduler.OtherStateUpdated += GameSchedulerOnOtherStateUpdated;
         _gameScheduler.NextDelay += GameSchedulerOnNextDelay;
-        
-        
+
+
         TreeExiting += () =>
         {
             _gameScheduler.SimulationUpdated -= GameSchedulerOnSimulationUpdated;
@@ -73,13 +81,14 @@ public partial class GameView : Node2D
                     _previousMouseCoords = _currentCoords;
                     Player?.OnInput(new PlayerInputMouseCoords(_currentCoords));
                 }
+
                 break;
             case InputEventMouseButton e:
                 Player?.OnInput(new PlayerInputClick(_currentCoords, e.ButtonMask));
                 break;
         }
     }
-    
+
     private void GameSchedulerOnOtherStateUpdated(object? sender, GameScheduler.OtherStateUpdateTypeEnum e)
     {
         switch (e)
@@ -87,7 +96,7 @@ public partial class GameView : Node2D
             case GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId:
                 UnitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
                 SubCamera.Position = TilesView.GetRealPosition(
-                    UnitsView.GetUnitView(_gameScheduler!.FocusedUnitId)?.WishCoords ?? _currentCoords, 
+                    UnitsView.GetUnitView(_gameScheduler!.FocusedUnitId)?.WishCoords ?? _currentCoords,
                     Layer.Underground);
                 break;
             case GameScheduler.OtherStateUpdateTypeEnum.CoordsRegion:
@@ -112,8 +121,9 @@ public partial class GameView : Node2D
             _simulationCache.Enqueue((simulations: simulations.ToArray(), delay));
             return;
         }
+
         (_lastSimulations, _prepareSimulations) = (_prepareSimulations, _lastSimulations);
-        
+
         _prepareSimulations.Clear();
         _runningSimulations.Clear();
         foreach (var simulation in simulations)
@@ -123,9 +133,10 @@ public partial class GameView : Node2D
             else
                 _prepareSimulations.Add(simulation);
         }
+
         IsRunning = true;
         Run().Forget();
-        
+
         async GDTaskVoid Run()
         {
             await StartSimulations(delay);
@@ -148,95 +159,98 @@ public partial class GameView : Node2D
                 Player?.OnInput(new PlayerInputMouseCoords(_currentCoords));
                 _refocus = false;
             }
-            
         }
     }
 
 
     private async GDTask StartSimulations(int? delay = null)
     {
-        //绘制运行前的事件
+        //await _simStepHandler.Handle(_runningSimulations.Values);
+        //绘制运行前的事件 TODO: 可能优化
         if (_runningSimulations.Count > 0)
         {
             _refocus = true;
             DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
+            await RunSimulations(_runningSimulations.Values);
         }
-        await RunSimulations(_runningSimulations.Values);
         DrawEvents(_prepareSimulations);
         if (delay != null) await GDTask.Delay(delay.Value);
     }
 
-    private async GDTask RunSimulations(IEnumerable<SimulationResult> simulations)
+    private async GDTask HandleSimStep(SimStep step)
     {
-        foreach (var simulation in simulations)
+        var id = step.GetHashCode();
+        Logger.Debug("处理事件开始:{0}-{1}-{2}-0.1s", id, step.GetType(), Time.GetTicksMsec() / 100);
+        switch (step)
         {
-            // 清空当前事件视图
-            //EventsView.ClearEventView(simulation.SourceId);
-            if (simulation.Steps == null) continue;
-            foreach (var step in simulation.Steps)
-            {
-                switch (step)
+            case DelayStep delayStep:
+                await GDTask.Delay(delayStep.Delay);
+                break;
+            case PlaceTileStep placeStep:
+                await TilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
+                UnitsView.UpdateUnitPosition(placeStep.Coords);
+                break;
+            case DropTileStep dropStep:
+                await TilesView.DropTile(dropStep.Coords);
+                UnitsView.UpdateUnitPosition(dropStep.Coords);
+                break;
+            case PlaceUnitStep placeStep:
+                if (placeStep.ResultIsValid)
                 {
-                    case DelayStep delayStep:
-                        await GDTask.Delay(delayStep.Delay);
-                        break;
-                    case PlaceTileStep placeStep:
-                        await TilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
-                        UnitsView.UpdateUnitPosition(placeStep.Coords);
-                        break;
-                    case DropTileStep dropStep:
-                        await TilesView.DropTile(dropStep.Coords);
-                        UnitsView.UpdateUnitPosition(dropStep.Coords);
-                        break;
-                    case PlaceUnitStep placeStep:
-                        if (placeStep.ResultIsValid)
-                        {
-                            var u = UnitFactory.CreateUnit(placeStep.UnitName, placeStep.Team, placeStep.Coords);
-                            u.Id = placeStep.ResultUnit.Id;
-                            await UnitsView.PlaceUnit(
-                                placeStep.Coords,
-                                u,
-                                placeStep.Team.GetTeamTypeRelativeToPlayer(_gameScheduler!));
-                        }
-                        break;
-                    case MoveUnitStep moveStep:
-                        if (moveStep.ResultIsValid) UnitsView.MoveUnit(moveStep.ResultUnitId, moveStep.To);
-                        UnitsView.UpdateUnitPosition(moveStep.To);
-                        break;
-                    case DamageStep damageStep:
-                        UnitsView.GetUnitView(damageStep.ResultUnitId)?.HealthBar.CurrentHealth -= damageStep.ResultValidDamage;
-                        break;
-                    case CureStep cureStep:
-                        UnitsView.GetUnitView(cureStep.ResultUnitId)?.HealthBar.CurrentHealth += cureStep.ResultValidCure;
-                        break;
-                    case MoveUnitPathStep movePathStep:
-                        if (movePathStep.ResultIsValid) 
-                            await UnitsView.MovePathUnit(movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path, movePathStep.ResultTargetIndex);
-                        break;
-                    case DropUnitStep dropStep:
-                        await UnitsView.DropUnit(dropStep.ResultUnitId);
-                        break;
-                    case PushUnitStep pushStep:
-                        await UnitsView.PushUnit(pushStep.ResultUnitId, pushStep.PushDir, pushStep.ResultPush);
-                        break;
-                    case ModifyUnitBuffStep modifyUnitBuffStep:
-                        if (modifyUnitBuffStep.Operation == BuffOperation.AddBuff)
-                        {
-                            UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView.AddVisibleBuff(modifyUnitBuffStep.BuffType);
-                        }
-                        else if (modifyUnitBuffStep.Operation == BuffOperation.RemoveBuff)
-                        {
-                            UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView.RemoveVisibleBuff(modifyUnitBuffStep.BuffType);
-                        }
-                        break;
-                    case AnimationStep animationStep:
-                        await AnimationView.Play(animationStep.Animation);
-                        break;
-                    case null:
-                        break;
+                    var u = UnitFactory.CreateUnit(placeStep.UnitName, placeStep.Team, placeStep.Coords);
+                    u.Id = placeStep.ResultUnit.Id;
+                    await UnitsView.PlaceUnit(
+                        placeStep.Coords,
+                        u,
+                        placeStep.Team.GetTeamTypeRelativeToPlayer(_gameScheduler!));
                 }
-            }
+
+                break;
+            case MoveUnitStep moveStep:
+                if (moveStep.ResultIsValid) UnitsView.MoveUnit(moveStep.ResultUnitId, moveStep.To);
+                UnitsView.UpdateUnitPosition(moveStep.To);
+                break;
+            case DamageStep damageStep:
+                UnitsView.GetUnitView(damageStep.ResultUnitId)?.HealthBar.CurrentHealth -= damageStep.ResultValidDamage;
+                break;
+            case CureStep cureStep:
+                UnitsView.GetUnitView(cureStep.ResultUnitId)?.HealthBar.CurrentHealth += cureStep.ResultValidCure;
+                break;
+            case MoveUnitPathStep movePathStep:
+                if (movePathStep.ResultIsValid)
+                    await UnitsView.MovePathUnit(movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path,
+                        movePathStep.ResultTargetIndex);
+                break;
+            case DropUnitStep dropStep:
+                await UnitsView.DropUnit(dropStep.ResultUnitId);
+                break;
+            case PushUnitStep pushStep:
+                await UnitsView.PushUnit(pushStep.ResultUnitId, pushStep.PushDir, pushStep.ResultPush);
+                break;
+            case ModifyUnitBuffStep modifyUnitBuffStep:
+                if (modifyUnitBuffStep.Operation == BuffOperation.AddBuff)
+                {
+                    UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView
+                        .AddVisibleBuff(modifyUnitBuffStep.BuffType);
+                }
+                else if (modifyUnitBuffStep.Operation == BuffOperation.RemoveBuff)
+                {
+                    UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView
+                        .RemoveVisibleBuff(modifyUnitBuffStep.BuffType);
+                }
+
+                break;
+            case AnimationStep animationStep:
+                await AnimationView.Play(animationStep.Animation);
+                break;
+            case null:
+                break;
         }
+    }
+
+    private GDTask RunSimulations(IEnumerable<SimulationResult> simulations)
+    {
+        return _simStepHandler.Handle(simulations);
     }
 
     private void DrawEvents(IEnumerable<SimulationResult> s)
@@ -289,6 +303,7 @@ public partial class GameView : Node2D
                         break;
                 }
             }
+
             EventsView.EndAddEventView();
         }
     }
