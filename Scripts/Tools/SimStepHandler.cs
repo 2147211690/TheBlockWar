@@ -44,7 +44,7 @@ public class SimStepHandler
                     stepCollection = [];
                 }
             }
-            if (step is ParallelStep or DelayStep) events.Add(step);
+            if (step is NextParallelStep or NextDelayStep) events.Add(step);
             else if (step != _endStep) stepCollection.Add(step);
         }
 
@@ -82,8 +82,8 @@ public class SimStepHandler
             }
             else
             {
-                if (eventItem is DelayStep delay) nextDelay = delay.Delay;
-                else if (eventItem is ParallelStep parallel) nextParallel = true;
+                if (eventItem is NextDelayStep delay) nextDelay = delay.Delay;
+                else if (eventItem is NextParallelStep parallel) nextParallel = true;
             }
         }
 

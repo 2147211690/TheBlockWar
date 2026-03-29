@@ -23,8 +23,8 @@ public static class Skills
         if (args.TryGetArgs(0, out var v1))
         {
             
-            var path = GameNavigator.FindShortestPath(gameState, unit, useCoords, v1 + unit.Coords);
-            gameState.ApplyMoveUnitPath(Vector2I.Zero, path, result);
+            var (path, cost) = GameNavigator.FindShortestPath(gameState, unit, useCoords, v1 + unit.Coords);
+            if (cost <= 4) gameState.ApplyMoveUnitPath(Vector2I.Zero, path, result);
         }
         if (args.TryGetArgs(1, out var v2) && result.PeekStep is MoveUnitPathStep moveStep)
         {
@@ -33,7 +33,6 @@ public static class Skills
             {
                 var vec = (DirMask)(1 << i);
                 if (i != 0) gameState.NextParallel(result);
-                gameState.NextDelay(i * 1000, result);
                 gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, result);
             }
         }

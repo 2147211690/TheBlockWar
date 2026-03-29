@@ -12,7 +12,7 @@ partial class Simulator
         public void NextDelay(int delay, SimulationResult result)
         {
             if (result.Layer == SimulationLayer.Running && _simulationStack == 0) 
-                result.Steps?.AddStep(new DelayStep(false, delay));
+                result.Steps?.AddStep(new NextDelayStep(false, delay));
         }
     }
 }

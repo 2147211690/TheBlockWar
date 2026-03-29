@@ -37,13 +37,13 @@ public class GridNavigator
     /// 寻找起点到终点的最短路径（带消耗）
     /// 终点必须满足：可经过 + 可作为最终点
     /// </summary>
-    public List<Vector2I> FindShortestPath(Vector2I start, Vector2I end)
+    public (List<Vector2I>? path, int cost) FindShortestPath(Vector2I start, Vector2I end)
     {
         if (!_canPass(end) || !_canBeDestination(end))
-            return null;
+            return (null, int.MaxValue);
 
         if (start == end)
-            return new List<Vector2I> { start };
+            return ([start], 0);
 
         var dist = new Dictionary<Vector2I, int>();
         var prev = new Dictionary<Vector2I, Vector2I>();
@@ -57,7 +57,7 @@ public class GridNavigator
             queue.TryDequeue(out var current, out var currentCost);
 
             if (current == end)
-                return BuildPath(prev, current);
+                return (BuildPath(prev, current), currentCost);
 
             if (dist.TryGetValue(current, out var knownCost) && knownCost < currentCost)
                 continue;
@@ -80,8 +80,7 @@ public class GridNavigator
                 }
             }
         }
-
-        return null;
+        return (null, int.MaxValue);
     }
 
     // ====================== 2. 指定消耗内所有可达格子（包括可经过不可落脚） ======================

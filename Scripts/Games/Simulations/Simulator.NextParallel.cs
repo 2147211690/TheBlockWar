@@ -12,7 +12,7 @@ partial class Simulator
         public void NextParallel(SimulationResult result)
         {
             if (result.Layer == SimulationLayer.Running && _simulationStack == 0) 
-                result.Steps?.AddStep(new ParallelStep(false));
+                result.Steps?.AddStep(new NextParallelStep(false));
         }
     }
 }

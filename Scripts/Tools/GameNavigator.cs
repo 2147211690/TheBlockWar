@@ -54,7 +54,7 @@ public static class GameNavigator
 
     private static bool CanPass(Vector2I arg) => _unit!.IsCanPass(_gameState!, arg);
 
-    public static List<Vector2I> FindShortestPath(IReadOnlyGameState gameState, IReadOnlyUnitState unit, Vector2I start, Vector2I end)
+    public static (List<Vector2I>? path, int cost) FindShortestPath(IReadOnlyGameState gameState, IReadOnlyUnitState unit, Vector2I start, Vector2I end)
     {
         _gameState = gameState;
         _unit = unit;

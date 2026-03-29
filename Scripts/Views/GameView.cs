@@ -183,7 +183,7 @@ public partial class GameView : Node2D
         Logger.Debug("处理事件开始:{0}-{1}-{2}-0.1s", id, step.GetType(), Time.GetTicksMsec() / 100);
         switch (step)
         {
-            case DelayStep delayStep:
+            case NextDelayStep delayStep:
                 await GDTask.Delay(delayStep.Delay);
                 break;
             case PlaceTileStep placeStep:
@@ -242,6 +242,9 @@ public partial class GameView : Node2D
                 break;
             case AnimationStep animationStep:
                 await AnimationView.Play(animationStep.Animation);
+                break;
+            case DelayStep delayStep:
+                await GDTask.Delay(delayStep.Delay);
                 break;
             case null:
                 break;
