@@ -34,7 +34,7 @@ public partial class BlockEventDrawNode : Node2D
         Layout = 0,
         Modulate = Colors.White
     };
-    private static Vector2[] TabSizes = [new(12,12), new(11,11), new(8,8), new(6,6)];
+    private static readonly Vector2[] TabSizes = [new(12,12), new(11,11), new(8,8), new(6,6)];
     
     public TeamTypeEnum FocusedTeam { get; set; }
     public bool IsFocused { get; private set; }
