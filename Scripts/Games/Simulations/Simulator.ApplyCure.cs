@@ -7,7 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyCure(Vector2I coords, float cure, SimulationResult result)
+        public void ApplyCure(Vector2I coords, float cure, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -15,9 +15,9 @@ partial class Simulator
 
             void Main()
             {
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new CureStep(IsCurrentChildSimulation, coords, cure, 0, 0));
+                    context.Steps?.AddStep(new CureStep(IsCurrentChildSimulation, coords, cure, 0, 0));
                     return;
                 }
 
@@ -25,23 +25,23 @@ partial class Simulator
                 float validCure = 0;
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    result.Steps?.AddStep(
+                    context.Steps?.AddStep(
                         new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
                     return;
                 }
 
                 var rawCure = cure;
 
-                if (ComplexSimulationRegion(result, 0))
+                if (ComplexSimulationRegion(context, 0))
                 {
                     state.NotifyUnitBuffs(unit,
-                        b => b.OnUnitBeforeCure(state, unit, rawCure, ref rawCure, result));
+                        b => b.OnUnitBeforeCure(state, unit, rawCure, ref rawCure, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
 
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(
+                    context.Steps?.AddStep(
                         new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
                     return;
                 }
@@ -52,16 +52,16 @@ partial class Simulator
 
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(
+                    context.Steps?.AddStep(
                         new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
                     return;
                 }
 
-                result.Steps?.AddStep(new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
+                context.Steps?.AddStep(new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
 
-                if (validCure > 0 && ComplexSimulationRegion(result, 0))
+                if (validCure > 0 && ComplexSimulationRegion(context, 0))
                 {
-                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterCure(state, unit, validCure, result));
+                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterCure(state, unit, validCure, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
             }

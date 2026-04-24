@@ -6,11 +6,16 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyResult(SimulationResult result)
+        public void ApplyResult(SimulationContext context)
         {
             //运行站位
-            var runningResult = new SimulationResult(0, result.TeamType, SimulationLayer.Running, false);
-            foreach (var step in result.MasterSteps)
+            var runningResult = new SimulationContext(false)
+            {
+                SourceId = 0,
+                TeamType = context.TeamType,
+                Layer = SimulationLayer.Running,
+            };
+            foreach (var step in context.MasterSteps)
             {
                 switch (step)
                 {

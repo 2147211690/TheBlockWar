@@ -7,18 +7,18 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 public interface IBuff
 {
     BuffInfo Info { get; }
-    void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result);
+    void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context);
     void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
-        ref float resultDamage, SimulationResult result);
+        ref float resultDamage, SimulationContext context);
     void OnUnitAfterDamage(IGameState state, IReadOnlyUnitState unit, float getDamage, 
-        SimulationResult result);
+        SimulationContext context);
     void OnUnitBeforeCure(IGameState state, IReadOnlyUnitState unit, float rawCure,
-        ref float resultCure, SimulationResult result);
+        ref float resultCure, SimulationContext context);
     void OnUnitAfterCure(IGameState state, IReadOnlyUnitState unit, float getCure,
-        SimulationResult result);
+        SimulationContext context);
     void OnRemoveFromUnit(IGameState state, IReadOnlyUnitState unit,
-        SimulationResult result);
+        SimulationContext context);
     void OnDurationChanged(IGameState state, IReadOnlyUnitState unit,
-        int oldDuration, int newDuration, SimulationResult result);
-    void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationResult result);
+        int oldDuration, int newDuration, SimulationContext context);
+    void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationContext context);
 }

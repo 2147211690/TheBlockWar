@@ -9,7 +9,7 @@ partial class Simulator
     extension(IGameState state)
     {
         public void ApplyModifyTileRegion(Vector2I coords, RegionTypeEnum regionType, RegionOperation operation, 
-            int duration, SimulationResult result)
+            int duration, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -17,9 +17,9 @@ partial class Simulator
             
             void Main()
             {
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType,
+                    context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType,
                         operation, duration, operation, duration));
                     return;
                 }
@@ -43,10 +43,10 @@ partial class Simulator
                     };
                 }
 
-                result.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType, operation,
+                context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType, operation,
                     duration, resultOperation, resultDuration));
 
-                if (ComplexSimulationRegion(result, 1))
+                if (ComplexSimulationRegion(context, 1))
                 {
                     var unit = state.UnitMapState.GetUnit(coords);
                     if (!unit.IsNull())
@@ -54,12 +54,12 @@ partial class Simulator
                         if (resultOperation == RegionOperation.AddRegion)
                         {
                             state.NotifyTileRegion(tile, regionType,
-                                r => r.OnUnitEnter(state, coords, unit, coords, true, result));
+                                r => r.OnUnitEnter(state, coords, unit, coords, true, context));
                         }
                         else if (resultOperation == RegionOperation.RemoveRegion)
                         {
                             state.NotifyTileRegion(tile, regionType,
-                                r => r.OnUnitLeave(state, coords, unit, coords, true, result));
+                                r => r.OnUnitLeave(state, coords, unit, coords, true, context));
                         }
                     }
                 }

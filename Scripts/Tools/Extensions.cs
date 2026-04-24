@@ -61,15 +61,15 @@ public static class Extensions
     extension(IGameState state)
     {
         public (Vector2I coords, bool isHit) MoveHit(in Vector2I start, DirMask dir, float damage, int length, bool checkGround,
-            SimulationResult result)
+            SimulationContext context)
         {
             if (!dir.IsOneVec()) return (start, false);
             var (aim, isHit) = state.CastRayToUnit(start, dir.ToVec2I(), length, checkGround);
-            state.ApplyMoveUnitPath(start, CoordsRegion.GetPathRegion(Vector2I.Zero, aim - dir.ToVec2I() - start).ToList(), result);
+            state.ApplyMoveUnitPath(start, CoordsRegion.GetPathRegion(Vector2I.Zero, aim - dir.ToVec2I() - start).ToList(), context);
             if (isHit)
             {
-                state.ApplyDamage(aim, damage, result);
-                state.ApplyDamage(aim - dir.ToVec2I(), damage, result);
+                state.ApplyDamage(aim, damage, context);
+                state.ApplyDamage(aim - dir.ToVec2I(), damage, context);
             }
             return (aim, isHit);
         }

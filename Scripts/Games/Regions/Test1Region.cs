@@ -7,16 +7,16 @@ namespace TheBlockWar.Scripts.Games.Regions;
 public class Test1Region() : Region("res://Resources/Infos/RegionInfos/Test1Region.tres")
 {
     public override void OnUnitEnter(IGameState state, Vector2I regionCoords,  IReadOnlyUnitState unit, Vector2I enterCoords, 
-        bool isAddRegion, SimulationResult result)
+        bool isAddRegion, SimulationContext context)
     {
         Logger.Info($"Test1 OnUnitEnter {unit} {enterCoords}");
-        state.ApplyPushUnit(enterCoords, DirMask.Right, result);
+        state.ApplyPushUnit(enterCoords, DirMask.Right, context);
     }
 
     public override void OnUnitLeave(IGameState state, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I leaveCoords, 
-        bool isRemoveRegion, SimulationResult result)
+        bool isRemoveRegion, SimulationContext context)
     {
         Logger.Info($"Test1 OnUnitLeave {unit} {leaveCoords}");
-        state.ApplyDamage(unit.Coords, 30, result);
+        state.ApplyDamage(unit.Coords, 30, context);
     }
 }

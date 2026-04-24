@@ -8,21 +8,21 @@ public class Test2Buff() : Buff("res://Resources/Infos/BuffInfos/Test2Buff.tres"
 {
     public override void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
         ref float resultDamage,
-        SimulationResult result)
+        SimulationContext context)
     {
         if (rawDamage == 0) return;
         resultDamage = 0;
-        state.ApplyModifyUnitBuff(unit.Coords, Info.BuffType, BuffOperation.RemoveBuff, 0, result);
+        state.ApplyModifyUnitBuff(unit.Coords, Info.BuffType, BuffOperation.RemoveBuff, 0, context);
     }
 
-    public override void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result)
+    public override void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
     {
         //state.UnitMapState.ModifyUnit(unit.Id, u => u);
     }
 
-    public override void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationResult result)
+    public override void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationContext context)
     {
-        base.OnEnterTurn(state, unit, turn, result);
-        state.ApplyPushUnit(unit.Coords, DirMask.Down, result);
+        base.OnEnterTurn(state, unit, turn, context);
+        state.ApplyPushUnit(unit.Coords, DirMask.Down, context);
     }
 }

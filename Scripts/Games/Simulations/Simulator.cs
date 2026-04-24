@@ -28,8 +28,8 @@ public static partial class Simulator
     }
     private static void ExitSimulation() => _simulationStack--;
     private static int CurrentComplexSimulationMaxLevel { get; set; }
-    private static bool ComplexSimulationRegion(SimulationResult result, int level) 
-        => CurrentComplexSimulationMaxLevel >= level || result.Layer == SimulationLayer.Running;
+    private static bool ComplexSimulationRegion(SimulationContext context, int level) 
+        => CurrentComplexSimulationMaxLevel >= level || context.Layer == SimulationLayer.Running;
     
     extension(IGameState state)
     {
@@ -37,7 +37,7 @@ public static partial class Simulator
         /// <summary>
         /// 触发单位进入到新坐标的事件
         /// </summary>
-        private void ApplyUnitSetInCoords(IReadOnlyUnitState unit, SimulationResult result)
+        private void ApplyUnitSetInCoords(IReadOnlyUnitState unit, SimulationContext context)
         {
             if (unit.IsNull())
             {
@@ -47,14 +47,14 @@ public static partial class Simulator
             var coords = unit.Coords;
             if (unit.IsWillDrop(state, coords)) // 单位会掉落
             {
-                state.ApplyDropUnit(coords, result);
+                state.ApplyDropUnit(coords, context);
             }
             else
             {
                 var toTile = state.TileMapState.GetTile(coords);
                 if (!toTile.IsNull())
                 {
-                    state.NotifyTileRegions(toTile, r => r.OnUnitEnter(state, coords, unit, coords, false, result));
+                    state.NotifyTileRegions(toTile, r => r.OnUnitEnter(state, coords, unit, coords, false, context));
                 }
                 // 移除所有一次性区域
                 for (var i = toTile.Regions.Count - 1; i >= 0; i--)
@@ -65,12 +65,12 @@ public static partial class Simulator
             }
         }
 
-        private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, Vector2I coords, SimulationResult result)
+        private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, Vector2I coords, SimulationContext context)
         {
             var fromTile = state.TileMapState.GetTile(coords);
             if (!fromTile.IsNull())
             {
-                state.NotifyTileRegions(fromTile, r => r.OnUnitLeave(state, coords, unit, coords, false, result));
+                state.NotifyTileRegions(fromTile, r => r.OnUnitLeave(state, coords, unit, coords, false, context));
             }
         }
 

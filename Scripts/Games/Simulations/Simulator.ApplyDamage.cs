@@ -7,7 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyDamage(Vector2I coords, float damage, SimulationResult result)
+        public void ApplyDamage(Vector2I coords, float damage, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -15,9 +15,9 @@ partial class Simulator
 
             void Main()
             {
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, 0, 0));
+                    context.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, 0, 0));
                     return;
                 }
 
@@ -25,7 +25,7 @@ partial class Simulator
                 float validDamage = 0;
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    result.Steps?.AddStep(
+                    context.Steps?.AddStep(
                         new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
                     return;
                 }
@@ -33,16 +33,16 @@ partial class Simulator
                 var rawDamage = damage;
 
                 //应用单位伤害前事件
-                if (ComplexSimulationRegion(result, 0))
+                if (ComplexSimulationRegion(context, 0))
                 {
                     state.NotifyUnitBuffs(unit,
-                        b => b.OnUnitBeforeDamage(state, unit, rawDamage, ref rawDamage, result));
+                        b => b.OnUnitBeforeDamage(state, unit, rawDamage, ref rawDamage, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
 
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(
+                    context.Steps?.AddStep(
                         new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
                     return;
                 }
@@ -53,24 +53,24 @@ partial class Simulator
 
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(
+                    context.Steps?.AddStep(
                         new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
-                result.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                context.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
 
                 // 触发受伤后事件, 仅在运行层触发
-                if (validDamage > 0 && ComplexSimulationRegion(result, 0))
+                if (validDamage > 0 && ComplexSimulationRegion(context, 0))
                 {
                     // 触发受伤后事件
-                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterDamage(state, unit, validDamage, result));
+                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterDamage(state, unit, validDamage, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
 
                 if (!unit.IsNull() && unit.Health <= 0)
                 {
-                    ApplyDeath(state, coords, result);
+                    ApplyDeath(state, coords, context);
                 }
             }
         }

@@ -23,7 +23,6 @@ public class GameScheduler
     public ICollection<SchedulerEvent> FocusedEvents => _eventList.FocusedEvents;
     public ICollection<SchedulerEvent> WaitingEvents => _eventList.WaitingEvents;
     public IReadOnlyDictionary<long, SkillSchedulerEvent> SkillEvents => _eventList.SkillEvents;
-    public IReadOnlyList<SimulationResult> SimulationResults => _simulationResults;
     public IReadOnlyGameState? GameState => _gameState;
     public long FocusedUnitId { get; private set; }
     public int PlayerTeam { get; private set; }
@@ -31,13 +30,12 @@ public class GameScheduler
     
     private SchedulerEventList _eventList = new();
     
-    private List<SimulationResult> _simulationResults = new();
     private IGameState? _gameState;
     private Dictionary<long, (HashSet<Vector2I> Coords, int type)> _coordsRegions = new();
     private long _coordsRegionsId;
     private IGameState? _snapshotChache;
     
-    public event EventHandler? SimulationUpdated;
+    public event EventHandler<List<SimulationContext>>? SimulationUpdated;
     public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
     public event EventHandler<int>? NextDelay;
     
@@ -120,19 +118,15 @@ public class GameScheduler
         if (_isRunning) return;
         _isRunning = true;
         Logger.Info("触发更新");
-        
-        _simulationResults.Clear();
+        var contexts = new List<SimulationContext>();
         _runningSchedulers.Push(this);
         
         // 运行层直接执行
         foreach (var ev in _eventList.RunningEvents)
         {
-            var result = new SimulationResult(
-                ev.Id,
-                GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
-                ev.Layer);
-            ev.OnApply(ev, _gameState, result);
-            _simulationResults.Add(result);
+            var context = CreateSimulationContext(ev);
+            ev.OnApply(ev, _gameState, context);
+            contexts.Add(context);
         }
         // 运行层事件执行完毕后，清空运行层
         _eventList.ClearLayerEvent(SimulationLayer.Running);
@@ -143,20 +137,28 @@ public class GameScheduler
         // 焦点层和等待层事件执行
         foreach (var ev in _eventList.FocusedEvents.Concat( _eventList.WaitingEvents))
         {
-            var result = new SimulationResult(
-                ev.Id,
-                GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
-                ev.Layer);
-            ev.OnApply(ev, snapshot, result);
-            _simulationResults.Add(result);
+            var context = CreateSimulationContext(ev);
+            ev.OnApply(ev, snapshot, context);
+            contexts.Add(context);
         }
-        Logger.Debug("更新结果:\n{results}", string.Join("\n", _simulationResults));
+        Logger.Debug("更新结果:\n{results}", string.Join("\n", contexts));
         _isRunning = false;
-        SimulationUpdated?.Invoke(this, EventArgs.Empty);
+        SimulationUpdated?.Invoke(this, contexts);
         _runningSchedulers.Pop();
-        
     }
-    
+
+    private SimulationContext CreateSimulationContext(SchedulerEvent ev)
+    {
+        var context = new SimulationContext()
+        {
+            SourceId = ev.Id,
+            Layer = ev.Layer,
+            TeamType = GameState!.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, ev.Team),
+            SourceUnitId = (ev as SkillSchedulerEvent)?.BindUnitId ?? 0,
+        };
+        return context;
+    }
+
     public enum OtherStateUpdateTypeEnum
     {
         None,

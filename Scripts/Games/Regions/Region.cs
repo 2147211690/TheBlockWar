@@ -14,19 +14,19 @@ public class Region : IRegion
     }
     public RegionInfo Info { get; }
 
-    public virtual void OnUnitEnter(IGameState state, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I enterCoords, bool isAddRegion, SimulationResult result)
+    public virtual void OnUnitEnter(IGameState state, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I enterCoords, bool isAddRegion, SimulationContext context)
     {
     }
 
-    public virtual void OnUnitLeave(IGameState state, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I leaveCoords, bool isRemoveRegion, SimulationResult result)
+    public virtual void OnUnitLeave(IGameState state, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I leaveCoords, bool isRemoveRegion, SimulationContext context)
     {
     }
 
-    public virtual void OnEnterTurn(IGameState state, Vector2I regionCoords, int turn, SimulationResult result)
+    public virtual void OnEnterTurn(IGameState state, Vector2I regionCoords, int turn, SimulationContext context)
     {
     }
 
-    public virtual void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationResult result)
+    public virtual void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationContext context)
     {
         
     }

@@ -7,7 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path, SimulationResult result)
+        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -19,7 +19,7 @@ partial class Simulator
                 var unit = state.UnitMapState.GetUnit(coords + path[0]);
                 if (unit.IsNull())
                 {
-                    result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, 0,
+                    context.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, 0,
                         false));
                     return;
                 }
@@ -35,16 +35,16 @@ partial class Simulator
                         break;
 
 
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id,
+                    context.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id,
                         targetIndex, true));
                     return;
                 }
 
-                result.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, targetIndex,
+                context.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, targetIndex,
                     true));
-                if (targetIndex > 0) state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], result);
+                if (targetIndex > 0) state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], context);
             }
         }
     }

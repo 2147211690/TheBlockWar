@@ -9,10 +9,10 @@ partial class Simulator
         /// <summary>
         /// 用来标记下次动画延迟执行
         /// </summary>
-        public void NextDelay(int delay, SimulationResult result)
+        public void NextDelay(int delay, SimulationContext context)
         {
-            if (result.Layer == SimulationLayer.Running && _simulationStack == 0) 
-                result.Steps?.AddStep(new NextDelayStep(false, delay));
+            if (context.Layer == SimulationLayer.Running && _simulationStack == 0) 
+                context.Steps?.AddStep(new NextDelayStep(false, delay));
         }
     }
 }

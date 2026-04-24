@@ -7,7 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyPlaceUnit(Vector2I coords, string unitName, int team, UnitState? prefabUnit, SimulationResult result)
+        public void ApplyPlaceUnit(Vector2I coords, string unitName, int team, UnitState? prefabUnit, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -16,32 +16,32 @@ partial class Simulator
             void Main()
             {
                 bool isValid = !state.UnitMapState.HasUnit(coords);
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
+                    context.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
                     return;
                 }
                 
-                if (ComplexSimulationRegion(result, 2))
+                if (ComplexSimulationRegion(context, 2))
                 {
                     //如果在等待层,或者此处有单位,则放置失败
                     if (!isValid)
                     {
-                        result.Steps?.AddStep(
+                        context.Steps?.AddStep(
                             new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
                         return;
                     }
                     var unitState = prefabUnit is null || prefabUnit.IsNull() ? 
                         UnitFactory.CreateUnit(unitName, team, coords) : prefabUnit;
                     state.UnitMapState.AddUnit(unitState);
-                    result.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, unitState,
+                    context.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, unitState,
                         isValid));
                     //应用单位放置到坐标的额外操作
-                    state.ApplyUnitSetInCoords(state.UnitMapState.GetUnit(unitState.Id), result);
+                    state.ApplyUnitSetInCoords(state.UnitMapState.GetUnit(unitState.Id), context);
                 }
                 else
                 {
-                    result.Steps?.AddStep(
+                    context.Steps?.AddStep(
                         new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
                 }
             }

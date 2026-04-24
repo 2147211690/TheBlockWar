@@ -6,10 +6,10 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyAnimation(AnimationType animation, SimulationResult result)
+        public void ApplyAnimation(AnimationType animation, SimulationContext context)
         {
             EnterSimulation();
-            result.Steps?.AddStep(new AnimationStep(IsCurrentChildSimulation, animation));
+            context.Steps?.AddStep(new AnimationStep(IsCurrentChildSimulation, animation));
             ExitSimulation();
         }
     }

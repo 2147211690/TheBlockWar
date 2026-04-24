@@ -45,11 +45,11 @@ public class SkillSchedulerEvent : SchedulerEvent
     }
     private Vector2I?[]? RawSkillArgs { get;set => SetField(ref field, value, false); }
 
-    public override void OnApply(SchedulerEvent root, IGameState state, SimulationResult result)
+    public override void OnApply(SchedulerEvent root, IGameState state, SimulationContext context)
     {
         var unit = state.UnitMapState.GetUnit(BindUnitId);
         if (unit.IsNull() || Skill == null) return;
         var useCoords = unit.Coords;
-        Skill.SkillCore(state, result, unit, useCoords, SkillArgs ?? []);
+        Skill.SkillCore(state, context, unit, useCoords, SkillArgs ?? []);
     }
 }

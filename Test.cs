@@ -17,7 +17,7 @@ public partial class Test : Node2D
     IGameState? _currentGameState;
     IGameState? _snapshot;
     IGameState? _gameState;
-    SimulationResult? _simulationResult;
+    SimulationContext? _simulationResult;
     uint _nextUnitId = 1;
     int x = 0, y = 0;
     int unitId = 1, newX = 0, newY = 0;
@@ -213,11 +213,6 @@ public partial class Test : Node2D
         ImGui.Begin("游戏调度器");
         if (ImGui.Button("输出调度器信息"))
         {
-            GD.Print("调度结果");
-            foreach (var e in _gameScheduler.SimulationResults)
-            {
-                GD.Print($"{e.GetType()}: {e.Layer} {e.Steps.Count}");
-            }
             GD.Print("当前运行层");
             foreach (var e in _gameScheduler.RunningEvents)
             {

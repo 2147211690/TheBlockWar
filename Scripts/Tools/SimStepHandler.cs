@@ -14,7 +14,7 @@ public class SimStepHandler
         _handleAction = handleAction;
     }
 
-    public async GDTask Handle(IEnumerable<SimulationResult> results)
+    public async GDTask Handle(IEnumerable<SimulationContext> results)
     {
         var nextParallel = false;
         var nextDelay = 0;

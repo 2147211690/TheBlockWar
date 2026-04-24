@@ -32,6 +32,7 @@
   <ItemGroup>
     <Folder Include="Scripts\Games\Tiles\" />
     <Folder Include="Scripts\Games\Units\" />
+    <Folder Include="Scripts\Tools\Jsons\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="addons\**" />

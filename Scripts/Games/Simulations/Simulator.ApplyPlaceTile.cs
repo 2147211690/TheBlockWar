@@ -7,7 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyPlaceTile(Vector2I coords, TileState tile, SimulationResult result)
+        public void ApplyPlaceTile(Vector2I coords, TileState tile, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -15,9 +15,9 @@ partial class Simulator
 
             void Main()
             {
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
+                    context.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
                     return;
                 }
 
@@ -27,9 +27,9 @@ partial class Simulator
                     t.Name = tile.Name;
                     t.Tag = tile.Tag;
                 });
-                result.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
+                context.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
                 var unit = state.UnitMapState.GetUnit(coords);
-                if (!unit.IsNull()) state.ApplyUnitSetInCoords(unit, result);
+                if (!unit.IsNull()) state.ApplyUnitSetInCoords(unit, context);
             }
         }
     }

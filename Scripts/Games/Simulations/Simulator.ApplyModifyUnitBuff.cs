@@ -9,7 +9,7 @@ partial class Simulator
     extension(IGameState state)
     {
         public void ApplyModifyUnitBuff(Vector2I coords, BuffTypeEnum buffType, BuffOperation operation, 
-            int duration, SimulationResult result)
+            int duration, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -17,9 +17,9 @@ partial class Simulator
             
             void Main()
             {
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
+                    context.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
                         duration, 0, operation, duration));
                     return;
                 }
@@ -42,22 +42,22 @@ partial class Simulator
                     };
                 }
 
-                result.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
+                context.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffType, operation,
                     duration, unit.Id, resultOperation, resultDuration));
 
-                if (ComplexSimulationRegion(result, 1))
+                if (ComplexSimulationRegion(context, 1))
                 {
                     switch (resultOperation)
                     {
                         case BuffOperation.AddBuff:
-                            state.NotifyUnitBuffs(unit, b => b.OnAddToUnit(state, unit, result));
+                            state.NotifyUnitBuffs(unit, b => b.OnAddToUnit(state, unit, context));
                             break;
                         case BuffOperation.RemoveBuff:
-                            state.NotifyUnitBuff(unit, buffType, b => b.OnRemoveFromUnit(state, unit, result));
+                            state.NotifyUnitBuff(unit, buffType, b => b.OnRemoveFromUnit(state, unit, context));
                             break;
                         case BuffOperation.ChangeDuration:
                             state.NotifyUnitBuff(unit, buffType, b => b.OnDurationChanged(state, unit,
-                                resultOldDuration, resultOldDuration + resultDuration, result));
+                                resultOldDuration, resultOldDuration + resultDuration, context));
                             break;
                     }
                 }

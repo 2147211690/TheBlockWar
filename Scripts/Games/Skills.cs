@@ -15,7 +15,7 @@ public static class Skills
     /// </summary>
     private static void Skill1Core(
         IGameState gameState,
-        SimulationResult result,
+        SimulationContext context,
         IReadOnlyUnitState unit,
         Vector2I useCoords,
         Vector2I?[] args)
@@ -24,16 +24,16 @@ public static class Skills
         {
             
             var (path, cost) = GameNavigator.FindShortestPath(gameState, unit, useCoords, v1 + unit.Coords);
-            if (cost <= 4) gameState.ApplyMoveUnitPath(Vector2I.Zero, path, result);
+            if (cost <= 4) gameState.ApplyMoveUnitPath(Vector2I.Zero, path, context);
         }
-        if (args.TryGetArgs(1, out var v2) && result.PeekStep is MoveUnitPathStep moveStep)
+        if (args.TryGetArgs(1, out var v2) && context.PeekStep is MoveUnitPathStep moveStep)
         {
             var coords = v2 + useCoords;
             for (int i = 0; i < 4; i++)
             {
                 var vec = (DirMask)(1 << i);
-                if (i != 0) gameState.NextParallel(result);
-                gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, result);
+                if (i != 0) gameState.NextParallel(context);
+                gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, context);
             }
         }
     }
@@ -84,7 +84,7 @@ public static class Skills
             Vector2I?[] args);
         public delegate void SkillCoreFunc(
             IGameState gameState,
-            SimulationResult result,
+            SimulationContext context,
             IReadOnlyUnitState unit,
             Vector2I useCoords,
             Vector2I?[] args);
@@ -111,9 +111,9 @@ public static class Skills
             return _getSkillArgs(state, caster, useCoords, argsIndex, args);
         }
 
-        public void SkillCore(IGameState gameState, SimulationResult result, IReadOnlyUnitState unit, Vector2I useCoords, Vector2I?[] args)
+        public void SkillCore(IGameState gameState, SimulationContext context, IReadOnlyUnitState unit, Vector2I useCoords, Vector2I?[] args)
         {
-            _skillCore(gameState, result, unit, useCoords, args);
+            _skillCore(gameState, context, unit, useCoords, args);
         }
     }
 }

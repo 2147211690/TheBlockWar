@@ -24,11 +24,11 @@ public partial class GameView : Node2D
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
 
-    private Dictionary<long, SimulationResult> _runningSimulations = new();
-    private List<SimulationResult> _lastSimulations = new();
-    private List<SimulationResult> _prepareSimulations = new();
+    private Dictionary<long, SimulationContext> _runningSimulations = new();
+    private List<SimulationContext> _lastSimulations = new();
+    private List<SimulationContext> _prepareSimulations = new();
     private GameScheduler? _gameScheduler;
-    private Queue<(SimulationResult[] simulations, int? delay)> _simulationCache = new();
+    private Queue<(IReadOnlyList<SimulationContext> simulations, int? delay)> _simulationCache = new();
     private Vector2I? _previousMouseCoords = null;
     private Vector2I _currentCoords;
     private bool _refocus = false;
@@ -106,19 +106,19 @@ public partial class GameView : Node2D
         }
     }
 
-    private void GameSchedulerOnSimulationUpdated(object? sender, EventArgs e)
+    private void GameSchedulerOnSimulationUpdated(object? sender, List<SimulationContext> e)
     {
         var hasDelay = _nextDelays.TryDequeue(out var delay);
-        SetSimulations(_gameScheduler!.SimulationResults, hasDelay ? delay : null);
+        SetSimulations(e, hasDelay ? delay : null);
     }
 
     /// <param name="simulations">确保传入有序的模拟结果</param>
-    private void SetSimulations(IEnumerable<SimulationResult> simulations, int? delay = null)
+    private void SetSimulations(IReadOnlyList<SimulationContext> simulations, int? delay = null)
     {
         if (IsRunning)
         {
             Logger.Info("缓存操作结果");
-            _simulationCache.Enqueue((simulations: simulations.ToArray(), delay));
+            _simulationCache.Enqueue((simulations, delay));
             return;
         }
 
@@ -251,12 +251,12 @@ public partial class GameView : Node2D
         }
     }
 
-    private GDTask RunSimulations(IEnumerable<SimulationResult> simulations)
+    private GDTask RunSimulations(IEnumerable<SimulationContext> simulations)
     {
         return _simStepHandler.Handle(simulations);
     }
 
-    private void DrawEvents(IEnumerable<SimulationResult> s)
+    private void DrawEvents(IEnumerable<SimulationContext> s)
     {
         EventsView.ClearAll();
         foreach (var simulation in s)

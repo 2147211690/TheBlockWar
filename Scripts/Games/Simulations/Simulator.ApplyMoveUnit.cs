@@ -7,7 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyMoveUnit(Vector2I coords, Vector2I to, SimulationResult result)
+        public void ApplyMoveUnit(Vector2I coords, Vector2I to, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -17,9 +17,9 @@ partial class Simulator
             {
 
                 bool isValid = true;
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, 0, isValid));
+                    context.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, 0, isValid));
                     return;
                 }
 
@@ -27,11 +27,11 @@ partial class Simulator
                 if (!unit.IsNull())
                 {
                     state.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
-                    result.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, unit.Id, isValid));
-                    state.ApplyUnitRemoveFromCoords(unit, coords, result);
-                    state.ApplyUnitSetInCoords(unit, result);
+                    context.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, unit.Id, isValid));
+                    state.ApplyUnitRemoveFromCoords(unit, coords, context);
+                    state.ApplyUnitSetInCoords(unit, context);
                 }
-                else result.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, unit.Id, isValid));
+                else context.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, unit.Id, isValid));
             }
         }
     }

@@ -7,14 +7,14 @@ public class TestBuff() : Buff("res://Resources/Infos/BuffInfos/TestBuff.tres")
 {
     public override void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
         ref float resultDamage,
-        SimulationResult result)
+        SimulationContext context)
     {
         if (rawDamage == 0) return;
         resultDamage = 0;
-        state.ApplyModifyUnitBuff(unit.Coords, BuffTypeEnum.Test, BuffOperation.RemoveBuff, 0, result);
+        state.ApplyModifyUnitBuff(unit.Coords, BuffTypeEnum.Test, BuffOperation.RemoveBuff, 0, context);
     }
 
-    public override void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result)
+    public override void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
     {
         //state.UnitMapState.ModifyUnit(unit.Id, u => u);
     }

@@ -3,18 +3,16 @@ using System.Linq;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
-public class SimulationResult
+public class SimulationContext
 {
-    public SimulationResult(long sourceId, TeamTypeEnum teamType, SimulationLayer layer, bool collectSteps = true)
+    public SimulationContext(bool collectSteps = true)
     {
-        SourceId = sourceId;
-        TeamType = teamType;
-        Layer = layer;
         Steps = collectSteps ? new SimStepList() : null;
     }
-    public long SourceId { get; }
-    public TeamTypeEnum TeamType { get; }
-    public SimulationLayer Layer { get; }
+    public required long SourceId { get; init;}
+    public required TeamTypeEnum TeamType { get; init;}
+    public required SimulationLayer Layer { get; init;}
+    public long SourceUnitId { get; init; } = 0;
     public IEnumerable<SimStep> MasterSteps => Steps?.Where(a => !a.IsChildStep) ?? [];
     public SimStepList? Steps { get; }
     public SimStep? PeekStep => Steps?.PeekStep;

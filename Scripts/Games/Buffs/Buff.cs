@@ -15,41 +15,41 @@ public class Buff : IBuff
 
     public BuffInfo Info { get; }
 
-    public virtual void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result)
+    public virtual void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
     {
     }
 
     public virtual void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
         ref float resultDamage,
-        SimulationResult result)
+        SimulationContext context)
     {
     }
 
     public virtual void OnUnitAfterDamage(IGameState state, IReadOnlyUnitState unit, float getDamage,
-        SimulationResult result)
+        SimulationContext context)
     {
     }
 
     public virtual void OnUnitBeforeCure(IGameState state, IReadOnlyUnitState unit, float rawCure, ref float resultCure,
-        SimulationResult result)
+        SimulationContext context)
     {
     }
 
     public virtual void OnUnitAfterCure(IGameState state, IReadOnlyUnitState unit, float getCure,
-        SimulationResult result)
+        SimulationContext context)
     {
     }
 
-    public virtual void OnRemoveFromUnit(IGameState state, IReadOnlyUnitState unit, SimulationResult result)
+    public virtual void OnRemoveFromUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
     {
     }
 
     public virtual void OnDurationChanged(IGameState state, IReadOnlyUnitState unit, int oldDuration, int newDuration,
-        SimulationResult result)
+        SimulationContext context)
     {
     }
 
-    public virtual void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationResult result)
+    public virtual void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationContext context)
     {
     }
 }

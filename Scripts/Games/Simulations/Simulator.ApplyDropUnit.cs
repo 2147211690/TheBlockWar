@@ -6,7 +6,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyDropUnit(Vector2I coords, SimulationResult result)
+        public void ApplyDropUnit(Vector2I coords, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -15,15 +15,15 @@ partial class Simulator
             void Main()
             {
 
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, 0, false));
+                    context.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, 0, false));
                     return;
                 }
 
                 var unit = state.UnitMapState.GetUnit(coords);
                 state.UnitMapState.RemoveUnit(unit.Id);
-                result.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, unit.Id, true));
+                context.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, unit.Id, true));
             }
         }
     }

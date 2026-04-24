@@ -16,5 +16,5 @@ public interface ISkill
     /// <param name="args">参数列表</param>
     /// <returns>当前有效参数列表</returns>
     IEnumerable<Vector2I> GetSkillArgs(IReadOnlyGameState state, IReadOnlyUnitState caster, Vector2I useCoords, int argsIndex, Vector2I?[] args);
-    void SkillCore(IGameState gameState, SimulationResult result, IReadOnlyUnitState unit, Vector2I useCoords, Vector2I?[] args);
+    void SkillCore(IGameState gameState, SimulationContext context, IReadOnlyUnitState unit, Vector2I useCoords, Vector2I?[] args);
 }

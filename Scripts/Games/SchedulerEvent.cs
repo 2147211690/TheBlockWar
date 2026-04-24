@@ -19,7 +19,7 @@ public abstract class SchedulerEvent : IComparable<SchedulerEvent>
     public int Turn { get; set => SetField(ref field, value); } //用于排序
     public int Priority { get; set => SetField(ref field, value); } //用于排序
     public event EventHandler<(string? PropertyName, bool IsChanging)>? PropertyChange;
-    public abstract void OnApply(SchedulerEvent root, IGameState state, SimulationResult result);
+    public abstract void OnApply(SchedulerEvent root, IGameState state, SimulationContext context);
     public override string ToString() => $"事件Hash:{GetHashCode()} 事件层:{Layer} 事件队伍:{Team} 事件回合:{Turn} 事件优先级:{Priority}";
     protected void OnPropertyChange(string? propertyName, bool isChanging) 
         => PropertyChange?.Invoke(this, (propertyName, isChanging));

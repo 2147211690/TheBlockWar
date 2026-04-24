@@ -7,7 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyPushUnit(Vector2I coords, DirMask dir, SimulationResult result)
+        public void ApplyPushUnit(Vector2I coords, DirMask dir, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -15,9 +15,9 @@ partial class Simulator
 
             void Main()
             {
-                if (result.Layer == SimulationLayer.Waiting)
+                if (context.Layer == SimulationLayer.Waiting)
                 {
-                    result.Steps?.AddStep(new PushUnitStep(IsCurrentChildSimulation, coords, dir, 0, true));
+                    context.Steps?.AddStep(new PushUnitStep(IsCurrentChildSimulation, coords, dir, 0, true));
                     return;
                 }
 
@@ -25,16 +25,16 @@ partial class Simulator
                 var target = coords + dir.ToVec2I();
                 var targetUnit = state.UnitMapState.GetUnit(target);
                 var validPush = !unit.IsNull() && targetUnit.IsNull() && state.IsInMap(target);
-                result.Steps?.AddStep(new PushUnitStep(IsCurrentChildSimulation, coords, dir, unit.Id, validPush));
+                context.Steps?.AddStep(new PushUnitStep(IsCurrentChildSimulation, coords, dir, unit.Id, validPush));
                 if (unit.IsNull()) return;
                 if (validPush)
                 {
-                    state.ApplyMoveUnit(coords, target, result);
+                    state.ApplyMoveUnit(coords, target, context);
                 }
                 else
                 {
-                    state.ApplyDamage(coords, 10, result);
-                    if (!targetUnit.IsNull()) state.ApplyDamage(target, 10, result);
+                    state.ApplyDamage(coords, 10, context);
+                    if (!targetUnit.IsNull()) state.ApplyDamage(target, 10, context);
                 }
             }
         }
