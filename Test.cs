@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ImGuiNET;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
@@ -6,6 +7,7 @@ using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Tools.Jsons;
 using TheBlockWar.Scripts.Views;
 using TheBlockWar.View.Uis;
 using Yitter.IdGenerator;
@@ -59,6 +61,8 @@ public partial class Test : Node2D
             // BaseTime = new DateTime(2025, 1, 1),
         };
         YitIdHelper.SetIdGenerator(options);
+        var a = new DefaultIdGenerator(options);
+        a.NewLong();
         
         TaskTracker.ShowTrackerWindow();
         
@@ -92,6 +96,8 @@ public partial class Test : Node2D
         _turnManager.Start().Forget();
     }
 
+
+
     public override void _Process(double delta)
     {
         ImGui.Begin("游戏状态");
@@ -124,7 +130,7 @@ public partial class Test : Node2D
             if (ImGui.Button("添加单位"))
             {
                 var coords = new Vector2I(x, y);
-                var unit = UnitFactory.CreateUnit("Unit_0", 0);
+                var unit = UnitFactory.CreateUnit("Unit_0", 0, _gameState.IdGenerator.NewLong(), coords);
                 _currentGameState.UnitMapState.AddUnit(unit);
             }
             
@@ -391,6 +397,31 @@ public partial class Test : Node2D
             {
                 Turn = _turnManager.CurrentTurn + 1
             });
+        }
+        ImGui.End();
+        
+        
+        ImGui.Begin("Json");
+
+        if (ImGui.Button("序列化TileState"))
+        {
+            var json = JsonSerializer.Serialize(_gameState.TileMapState.ToData(), GameJsonSerializerContext.Default.TileMapStateData);
+            GD.Print(json);
+        }
+        if (ImGui.Button("序列化UnitState"))
+        {
+            var json = JsonSerializer.Serialize(_gameState.UnitMapState.ToData(), GameJsonSerializerContext.Default.UnitMapStateData);
+            GD.Print(json);
+        }
+        if (ImGui.Button("序列化TeamState"))
+        {
+            var json = JsonSerializer.Serialize(_gameState.TeamState.ToData(), GameJsonSerializerContext.Default.TeamStateData);
+            GD.Print(json);
+        }
+        if (ImGui.Button("序列化GameState"))
+        {
+            var json = JsonSerializer.Serialize(_gameState.ToData(), GameJsonSerializerContext.Default.GameStateData);
+            GD.Print(json);
         }
         ImGui.End();
     }

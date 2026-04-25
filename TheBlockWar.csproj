@@ -12,7 +12,7 @@
     <PackageReference Include="GDTask" Version="2.0.0" />
     <PackageReference Include="GodotSharp.SourceGenerators" Version="2.6.0" />
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
-    <PackageReference Include="NLog" Version="6.1.1" />
+    <PackageReference Include="NLog" Version="6.1.2" />
     <PackageReference Include="SoftUni.Wintellect.PowerCollections" Version="2.0.0" />
     <PackageReference Include="Yitter.IdGenerator" Version="1.0.14" />
   </ItemGroup>
@@ -32,7 +32,6 @@
   <ItemGroup>
     <Folder Include="Scripts\Games\Tiles\" />
     <Folder Include="Scripts\Games\Units\" />
-    <Folder Include="Scripts\Tools\Jsons\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="addons\**" />

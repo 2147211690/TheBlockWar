@@ -32,7 +32,7 @@ partial class Simulator
                         return;
                     }
                     var unitState = prefabUnit is null || prefabUnit.IsNull() ? 
-                        UnitFactory.CreateUnit(unitName, team, coords) : prefabUnit;
+                        UnitFactory.CreateUnit(unitName, team, state.IdGenerator.NewLong(), coords) : prefabUnit;
                     state.UnitMapState.AddUnit(unitState);
                     context.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, unitState,
                         isValid));

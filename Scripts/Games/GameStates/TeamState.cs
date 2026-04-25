@@ -1,3 +1,5 @@
+using TheBlockWar.Scripts.Games.GameStates.Datas;
+
 namespace TheBlockWar.Scripts.Games.GameStates;
 
 public class TeamState
@@ -13,6 +15,35 @@ public class TeamState
     public TeamState(int[,] teamRelations)
     {
         _teamRelations = (int[,])teamRelations.Clone();
+    }
+    public TeamState(TeamStateData teamStateData)
+    {
+        var x = teamStateData.TeamRelations.Length;
+        var y = teamStateData.TeamRelations[0].Length;
+        _teamRelations = new int[x, y];
+        for (int i = 0; i < x; i++)
+        {
+            for (int j = 0; j < y; j++)
+            {
+                _teamRelations[i, j] = teamStateData.TeamRelations[i][j];
+            }
+        }
+    }
+    public TeamStateData ToData()
+    {
+        var teamRelations = new int[_teamRelations.GetLength(0)][];
+        for (int i = 0; i < _teamRelations.GetLength(0); i++)
+        {
+            teamRelations[i] = new int[_teamRelations.GetLength(1)];
+            for (int j = 0; j < _teamRelations.GetLength(1); j++)
+            {
+                teamRelations[i][j] = _teamRelations[i, j];
+            }
+        }
+        return new TeamStateData
+        {
+            TeamRelations = teamRelations
+        };
     }
     public bool IsEnemy(int team1, int team2)
     {

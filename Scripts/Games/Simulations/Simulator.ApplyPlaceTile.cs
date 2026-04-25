@@ -23,7 +23,6 @@ partial class Simulator
 
                 state.TileMapState.ModifyTile(coords, t =>
                 {
-                    t.IsOccupied = tile.IsOccupied;
                     t.Name = tile.Name;
                     t.Tag = tile.Tag;
                 });

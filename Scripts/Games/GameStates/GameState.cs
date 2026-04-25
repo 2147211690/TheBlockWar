@@ -1,8 +1,15 @@
+using TheBlockWar.Scripts.Games.GameStates.Datas;
+using TheBlockWar.Scripts.Tools;
+using Yitter.IdGenerator;
+
 namespace TheBlockWar.Scripts.Games.GameStates;
 
 public class GameState : IGameState
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    public Vector2I Size { get; }
+    public DefaultIdGenerator IdGenerator { get; }
+    public DateTime BaseTime { get; }
     public IReadOnlyGameState? Owner => null;
     public ITileMapState TileMapState { get; }
     public IUnitMapState UnitMapState { get; }
@@ -19,14 +26,47 @@ public class GameState : IGameState
 
     public IGameState GetSnapshot() => new GameStateSnapshot(this);
 
+    public GameState(GameStateData data)
+    {
+        _unitSkillMap = new Dictionary<string, ISkill[]>();
+        Size = data.Size;
+        BaseTime = data.BaseTime;
+        IdGenerator = new DefaultIdGenerator(new IdGeneratorOptions()
+        {
+            WorkerId = IdGeneratorConfig.WorkerId,
+            BaseTime = data.BaseTime,
+        });
+        TileMapState = new TileMapState(data.TileMapState);
+        UnitMapState = new UnitMapState(data.UnitMapState);
+        TeamState = new TeamState(data.TeamState);
+    }
+
     public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations)
     {
         _unitSkillMap = unitSkillMap;
+        Size = mapSize;
+        BaseTime = DateTime.UtcNow;
+        IdGenerator = new DefaultIdGenerator(new IdGeneratorOptions()
+        {
+            WorkerId = IdGeneratorConfig.WorkerId,
+            BaseTime = BaseTime,
+        });
         TileMapState = new TileMapState(mapSize);
         UnitMapState = new UnitMapState(mapSize);
         TeamState = new TeamState(teamRelations);
     }
     public void ClearIfSnapshot(){}
+    public GameStateData ToData()
+    {
+        return new GameStateData
+        {
+            Size = Size,
+            BaseTime = BaseTime,
+            TileMapState = TileMapState.ToData(),
+            UnitMapState = UnitMapState.ToData(),
+            TeamState = TeamState.ToData(),
+        };
+    }
     /// <summary>
     /// 增量游戏状态快照 - 写时复制（COW）实现
     /// 内存优化：仅存储变更，未变更数据保持对原状态的引用
@@ -34,6 +74,9 @@ public class GameState : IGameState
     public sealed class GameStateSnapshot : IGameState
     {
         // 父状态引用 - 未修改数据的回退源
+        public Vector2I Size => Owner.Size;
+        public DefaultIdGenerator IdGenerator => Owner.IdGenerator;
+        public DateTime BaseTime => Owner.BaseTime;
         public IReadOnlyGameState Owner { get; }
 
         public ITileMapState TileMapState { get; }
@@ -50,14 +93,23 @@ public class GameState : IGameState
             TileMapState = owner.TileMapState.GetSnapshot();
             UnitMapState = owner.UnitMapState.GetSnapshot();
         }
-
+        public GameStateData ToData()
+        {
+            return new GameStateData
+            {
+                BaseTime = BaseTime,
+                TileMapState = TileMapState.ToData(),
+                UnitMapState = UnitMapState.ToData(),
+                TeamState = TeamState.ToData(),
+                Size = Size,
+            };
+        }
         public IReadOnlyList<ISkill> GetUnitValidSkills(string name) => Owner.GetUnitValidSkills(name);
         public void ClearIfSnapshot()
         {
             TileMapState.ClearIfSnapshot();
             UnitMapState.ClearIfSnapshot();
         }
-
         public IGameState GetSnapshot()
         {
             return new GameStateSnapshot(this);

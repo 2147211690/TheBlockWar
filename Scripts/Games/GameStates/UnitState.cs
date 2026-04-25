@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -19,6 +20,39 @@ public class UnitState : IReadOnlyUnitState
     public IReadOnlyList<BuffState> Buffs => _buffs ?? [];
     private List<BuffState>? _buffs;
 
+    public UnitState(){}
+
+    public UnitState(UnitStateData data)
+    {
+        Id = data.Id;
+        Team = data.Team;
+        Name = data.Name;
+        Coords = data.Coords;
+        Health = data.Health;
+        MaxHealth = data.MaxHealth;
+        Shield = data.Shield;
+        MaxShield = data.MaxShield;
+        IsDead = data.IsDead;
+        IsFlying = data.IsFlying;
+        _buffs = data.Buffs.CloneToListOrNullWhenCountZero();
+    }
+    public UnitStateData ToData()
+    {
+        return new UnitStateData
+        {
+            Id = Id,
+            Team = Team,
+            Name = Name,
+            Coords = Coords,
+            Health = Health,
+            MaxHealth = MaxHealth,
+            Shield = Shield,
+            MaxShield = MaxShield,
+            IsDead = IsDead,
+            IsFlying = IsFlying,
+            Buffs = _buffs.CloneToListOrNullWhenCountZero(),
+        };
+    }   
     /// <summary>
     /// 添加一个buff,不做检查
     /// </summary>
@@ -89,7 +123,9 @@ public class UnitState : IReadOnlyUnitState
         unit.MaxShield = MaxShield;
         unit.IsDead = IsDead;
         unit.IsFlying = IsFlying;
-        unit._buffs = _buffs?.Count > 0 ? _buffs.CloneToList() : null;
+        unit._buffs = _buffs.CloneToListOrNullWhenCountZero();
         return unit;
     }
+
+
 }

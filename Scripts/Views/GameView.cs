@@ -197,8 +197,8 @@ public partial class GameView : Node2D
             case PlaceUnitStep placeStep:
                 if (placeStep.ResultIsValid)
                 {
-                    var u = UnitFactory.CreateUnit(placeStep.UnitName, placeStep.Team, placeStep.Coords);
-                    u.Id = placeStep.ResultUnit.Id;
+                    var u = UnitFactory.CreateUnit(placeStep.UnitName, placeStep.Team, 
+                        placeStep.ResultUnit.Id, placeStep.Coords);
                     await UnitsView.PlaceUnit(
                         placeStep.Coords,
                         u,

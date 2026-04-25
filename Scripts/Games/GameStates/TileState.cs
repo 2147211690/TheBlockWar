@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Tools;
 
@@ -8,10 +9,25 @@ public class TileState : IReadOnlyTileState
     public static readonly TileState Empty = new() { Tag = TileTag.Empty };
     public TileTag Tag { get; set; }
     public string Name { get; set; } = string.Empty;
-    public bool IsOccupied { get; set; }
     public IReadOnlyList<RegionState> Regions => _regions ?? [];
     private List<RegionState>? _regions;
     
+    public TileStateData ToData()
+    {
+        return new TileStateData
+        {
+            Tag = Tag,
+            Name = Name,
+            Regions = _regions.CloneToListOrNullWhenCountZero(),
+        };
+    }
+    public TileState(){}
+    public TileState(TileStateData data)
+    {
+        Tag = data.Tag;
+        Name = data.Name;
+        _regions = data.Regions.CloneToListOrNullWhenCountZero();
+    }
     /// <summary>
     /// 添加一个区域效果,不做检查
     /// </summary>
@@ -68,17 +84,18 @@ public class TileState : IReadOnlyTileState
     {
         tile.Tag = Tag;
         tile.Name = Name;
-        tile.IsOccupied = IsOccupied;
-        if (tile._regions is {Count: > 0} && _regions is {Count: > 0} && _regions.Count == tile._regions.Count)
+        if (tile._regions is { Count: > 0 } && _regions is { Count: > 0 } && _regions.Count == tile._regions.Count)
         {
             for (int i = 0; i < _regions.Count; i++)
             {
                 tile._regions[i] = _regions[i];
             }
         }
-        else tile._regions = _regions?.Count > 0 ? _regions.CloneToList() : null;
+        else tile._regions = _regions.CloneToListOrNullWhenCountZero();
         return tile;
     }
+
+
 }
 [Flags]
 public enum TileTag

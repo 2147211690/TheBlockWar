@@ -1,3 +1,5 @@
+using TheBlockWar.Scripts.Games.GameStates.Datas;
+
 namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IReadOnlyTileMapState
@@ -7,4 +9,5 @@ public interface IReadOnlyTileMapState
     IReadOnlyTileState GetTile(Vector2I coords);
     bool IsEmpty(Vector2I coords);
     ITileMapState GetSnapshot();
+    TileMapStateData ToData();
 }

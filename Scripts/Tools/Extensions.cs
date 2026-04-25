@@ -262,6 +262,16 @@ public static class Extensions
             return l;
         }
     }
+    extension<T>(IReadOnlyList<T>? list)
+    {
+        public List<T>? CloneToListOrNullWhenCountZero()
+        {
+            if (list is not { Count: > 0 }) return null;
+            var l = new List<T>(list.Count);
+            for (var i = 0; i < list.Count; i++) l.Add(list[i]);
+            return l;
+        }
+    }
     extension(DirMask dirMask)
     {
         public Vector2I ToVec2I()
@@ -359,7 +369,6 @@ public static class Extensions
             return gameScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(gameScheduler.PlayerTeam, team) ?? TeamTypeEnum.Neutral;
         }
     }
-    
 }
 
 public class ItemTabStyle

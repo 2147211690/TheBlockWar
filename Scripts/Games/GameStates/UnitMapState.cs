@@ -1,3 +1,5 @@
+using System.Linq;
+using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -7,14 +9,39 @@ public class UnitMapState : IUnitMapState
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     private Dictionary<long, UnitState> _units = new();
     private Dictionary<Vector2I, long> _unitAt = new();
-
+    public IReadOnlyUnitMapState? Owner => null;
+    public Vector2I Size { get; }
     public UnitMapState(Vector2I size)
     {
         Size = size;
     }
 
-    public IReadOnlyUnitMapState? Owner => null;
-    public Vector2I Size { get; }
+    public UnitMapState(UnitMapStateData data)
+    {
+        Size = data.Size;
+        if (data.Units == null) return;
+        foreach (var unitData in data.Units)
+        {
+            var unit = new UnitState(unitData);
+            _units[unit.Id] = unit;
+            _unitAt[unit.Coords] = unit.Id;
+        }
+    }
+
+    public UnitMapStateData ToData()
+    {
+        var units = new List<UnitStateData>(_units.Count);
+        foreach (var unit in _units.Values)
+        {
+            units.Add(unit.ToData());
+        }
+        return new UnitMapStateData
+        {
+            Size = Size,
+            Units = units
+        };
+    }
+
     public IEnumerable<IReadOnlyUnitState> GetAllUnits() => _units.Values;
 
     public bool HasUnit(long id)
@@ -86,6 +113,8 @@ public class UnitMapState : IUnitMapState
     public void ClearIfSnapshot()
     {
     }
+
+
 
     /// <summary>
     /// 单位地图状态快照 - 写时复制（COW）实现
@@ -337,6 +366,16 @@ public class UnitMapState : IUnitMapState
         {
             if (!_isModified) return this;
             return new UnitMapStateSnapshot(this);
+        }
+
+        public UnitMapStateData ToData()
+        {
+            var units = GetAllUnits().Select(u => u.ToData()).ToList();
+            return new UnitMapStateData
+            {
+                Size = Size,
+                Units = units
+            };
         }
     }
 }

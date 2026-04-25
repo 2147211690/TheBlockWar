@@ -1,3 +1,5 @@
+using TheBlockWar.Scripts.Games.GameStates.Datas;
+
 namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IReadOnlyUnitState
@@ -21,4 +23,5 @@ public interface IReadOnlyUnitState
     IReadOnlyList<BuffState> Buffs { get; }
     UnitState Clone();
     UnitState CopyTo(UnitState unit);
+    UnitStateData ToData();
 }

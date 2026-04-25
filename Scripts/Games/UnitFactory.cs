@@ -5,11 +5,11 @@ namespace TheBlockWar.Scripts.Games;
 //TODO:可能使用其他方式创建单位
 public static class UnitFactory
 {
-    public static UnitState CreateUnit(string name, int team, Vector2I coords = default)
+    public static UnitState CreateUnit(string name, int team, long id, Vector2I coords = default)
     {
         return new UnitState()
         {
-            Id = YitIdHelper.NextId(),
+            Id = id,
             Name = name,
             Coords = coords,
             MaxHealth = 100,

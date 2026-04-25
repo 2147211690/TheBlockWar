@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -19,6 +20,37 @@ public class TileMapState : ITileMapState
                 _tiles[x, y] = TileState.Empty.Clone();
             }
         }
+    }
+    public TileMapState(TileMapStateData data)
+    {
+        Size = data.Size;
+        _tiles = new TileState[Size.X, Size.Y];
+        if (data.Tiles == null) return;
+        for (int x = 0; x < Size.X; x++)
+        {
+            for (int y = 0; y < Size.Y; y++)
+            {
+                _tiles[x, y] = new TileState(data.Tiles[x][y]);
+            }
+        }
+    }
+
+    public TileMapStateData ToData()
+    {
+        var tiles = new TileStateData[Size.X][];
+        for (int x = 0; x < Size.X; x++)
+        {
+            tiles[x] = new TileStateData[Size.Y];
+            for (int y = 0; y < Size.Y; y++)
+            {
+                tiles[x][y] = _tiles[x, y].ToData();
+            }
+        }
+        return new TileMapStateData()
+        {
+            Size = Size,
+            Tiles = tiles,
+        };
     }
 
     public IReadOnlyTileState GetTile(Vector2I coords)
@@ -54,7 +86,7 @@ public class TileMapState : ITileMapState
         public IReadOnlyTileMapState Owner { get; }
         public Vector2I Size => Owner.Size;
         // 核心：预分配 二维数组（全量TileState，Size大小）
-        private TileState[,] _tileArray;
+        private TileState[,] _tiles;
         // 标记：哪些坐标已经从Owner克隆初始化过（第一次读取标记）
         private HashSet<Vector2I> _initializedCoords = new();
         
@@ -64,13 +96,13 @@ public class TileMapState : ITileMapState
 
             // 关键：构造时 提前生成Size数量的空TileState（二维数组）
             var size = owner.Size;
-            _tileArray = new TileState[size.X, size.Y];
+            _tiles = new TileState[size.X, size.Y];
             // 预分配池对象（一次性拿够，避免运行时分配）
             for (int x = 0; x < size.X; x++)
             {
                 for (int y = 0; y < size.Y; y++)
                 {
-                    _tileArray[x, y] = TileState.Empty.Clone();
+                    _tiles[x, y] = TileState.Empty.Clone();
                 }
             }
         }
@@ -91,12 +123,12 @@ public class TileMapState : ITileMapState
             // 第一次访问：从Owner克隆到本地数组
             if (!_initializedCoords.Contains(coords))
             {
-                Owner.GetTile(coords).CopyTo(_tileArray[x, y]);
+                Owner.GetTile(coords).CopyTo(_tiles[x, y]);
                 _initializedCoords.Add(coords);
             }
 
             // 永远返回本地数组的对象
-            return _tileArray[x, y];
+            return _tiles[x, y];
         }
 
         public bool IsEmpty(Vector2I coords)
@@ -128,5 +160,22 @@ public class TileMapState : ITileMapState
             return new TileMapStateSnapshot(this);
         }
 
+        public TileMapStateData ToData()
+        {
+            var tiles = new TileStateData[Size.X][];
+            for (int x = 0; x < Size.X; x++)
+            {
+                tiles[x] = new TileStateData[Size.Y];
+                for (int y = 0; y < Size.Y; y++)
+                {
+                    tiles[x][y] = _tiles[x, y].ToData();
+                }
+            }
+            return new TileMapStateData()
+            {
+                Size = Size,
+                Tiles = tiles,
+            };
+        }
     }
 }
