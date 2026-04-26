@@ -18,7 +18,6 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 [JsonDerivedType(typeof(ApplyModifyUnitBuffStep), nameof(ApplyModifyUnitBuffStep))]
 [JsonDerivedType(typeof(ApplyMoveUnitStep), nameof(ApplyMoveUnitStep))]
 [JsonDerivedType(typeof(ApplyMoveUnitPathStep), nameof(ApplyMoveUnitPathStep))]
-[JsonDerivedType(typeof(ApplyNextParallelStep), nameof(ApplyNextParallelStep))]
 [JsonDerivedType(typeof(ApplyPlaceTileStep), nameof(ApplyPlaceTileStep))]
 [JsonDerivedType(typeof(ApplyPlaceUnitStep), nameof(ApplyPlaceUnitStep))]
 [JsonDerivedType(typeof(ApplyPushUnitStep), nameof(ApplyPushUnitStep))]
@@ -117,14 +116,6 @@ public record ApplyMoveUnitPathStep(Vector2I Coords, List<Vector2I>? Path) : App
     }
 }
 
-public record ApplyNextParallelStep() : ApplyStep
-{
-    public override void Apply(IGameState state, SimulationContext context)
-    {
-        state.ApplyNextParallel(context);
-    }
-}
-
 public record ApplyPlaceTileStep(Vector2I Coords, TileState Tile) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
@@ -157,10 +148,10 @@ public record ApplyRectWindStep(Rect2I Rect, DirMask Dir) : ApplyStep
     }
 }
 
-public record ApplyStepsStep(ApplyStep[] Applys) : ApplyStep
+public record ApplyStepsStep(IEnumerable<ApplyStep> Applys, int StartDelay, int EndDelay, StepsRunningMode RunningMode) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
-        state.ApplySteps(Applys, context);
+        state.ApplySteps(Applys, StartDelay, EndDelay, RunningMode, context);
     }
 }

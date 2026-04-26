@@ -11,7 +11,6 @@ public record SimStep(int Deep)
 {
     public static readonly SimStep Default = new(0);
 }
-public record NextParallelStep(int Deep) : SimStep(Deep);
 public record DelayStep(int Deep, int Delay) : SimStep(Deep);
 public record DamageStep(int Deep, Vector2I Coords,float Damage, long ResultUnitId, float ResultValidDamage) : SimStep(Deep);
 public record CureStep(int Deep, Vector2I Coords,float Cure, long ResultUnitId, float ResultValidCure) : SimStep(Deep);
@@ -24,6 +23,8 @@ public record MoveUnitPathStep(int Deep, Vector2I Coords, List<Vector2I> Path, l
 public record DropUnitStep(int Deep, Vector2I Coords, long ResultUnitId, bool ResultIsValid) : SimStep(Deep);
 public record PushUnitStep(int Deep, Vector2I Coords, DirMask PushDir ,long ResultUnitId, bool ResultPush) : SimStep(Deep);
 public record RectWindStep(int Deep, Rect2I Rect, DirMask Dir) : SimStep(Deep);
+public record StepsStep(int Deep, int StartDelay, int EndDelay, StepsRunningMode RunningMode) : SimStep(Deep);
+
 
 /// <param name="ResultOperation">只有AddBuff,RemoveBuff,ChangeDuration结果</param>
 public record ModifyUnitBuffStep(int Deep, Vector2I Coords, string BuffName, BuffOperation Operation, int Duration,
@@ -59,4 +60,13 @@ public enum RegionOperation
     RemoveRegion,
     ChangeDuration,
     SetDuration
+}
+
+public enum StepsRunningMode
+{
+    QueueWaitAll,
+    QueueWithoutWait,
+    ParallelWaitAny,
+    ParallelWaitAll,
+    ParallelWithoutWait,
 }

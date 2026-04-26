@@ -105,5 +105,22 @@ public static partial class Simulator
             if (!tile.TryFindRegion(regionName, out var index)) return;
             action(tile.Regions[index].RegionName.GetRegionInstance());
         }
+        /// <summary>
+        /// 开始封装一系列步骤, 请记住调用EndSteps结束
+        /// </summary>
+        public void BeginSteps(int startDelay, int endDelay, StepsRunningMode runningMode, SimulationContext context)
+        {
+            if (context.Layer != SimulationLayer.Running) return;
+            EnterSimulation();
+            context.Steps?.AddStep(new StepsStep(CurrentDeep, startDelay, endDelay, runningMode));
+        }
+        /// <summary>
+        /// 结束封装一系列步骤
+        /// </summary>
+        public void EndSteps(SimulationContext context)
+        {
+            if (context.Layer != SimulationLayer.Running) return;
+            ExitSimulation();
+        }
     }
 }

@@ -46,12 +46,13 @@ public class Test1Skill() : Skill(SkillNames.Test1, 2)
         if (args.TryGetArgs(1, out var v2) && context.PeekStep is MoveUnitPathStep moveStep)
         {
             var coords = v2 + useCoords;
+            gameState.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
             for (int i = 0; i < 4; i++)
             {
                 var vec = (DirMask)(1 << i);
-                if (i != 0) gameState.ApplyNextParallel(context);
                 gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, context);
             }
+            gameState.EndSteps(context);
         }
     }
 }

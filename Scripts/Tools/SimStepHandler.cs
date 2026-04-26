@@ -6,73 +6,77 @@ namespace TheBlockWar.Scripts.Tools;
 public class SimStepHandler
 {
     private Func<SimStep, GDTask> _handleAction;
-    
-    private SimStep _endStep = new SimStep(0);
 
     public SimStepHandler(Func<SimStep, GDTask> handleAction)
     {
         _handleAction = handleAction;
     }
 
-    public async GDTask Handle(IEnumerable<SimulationContext> results)
+    public async GDTask Handle(IEnumerable<SimStep> steps)
     {
-        var nextParallel = false;
-        var events = new List<object>();
-        var stepCollection = new List<SimStep>();
-        // 处理为事件列表
-        foreach (var step in results.SelectMany(x => x.Steps!.Append(_endStep)))
+        var tree = steps.ToTree();   // 根节点 Deep = -1
+        await ProcessNode(tree);
+    }
+
+    private async GDTask ProcessNode(SimStepsAnalyzer.TreeNode node)
+    {
+        var step = node.Step;
+
+        if (step is StepsStep stepsStep)
         {
-            if (step.Deep == 0) // 如果是主步骤
-            {
-                var collection = stepCollection;
-                if (collection.Count == 1)
-                {
-                    var last = collection[0];
-                    Func<GDTask> ev = () => _handleAction(last);
-                    events.Add(ev);
-                    stepCollection.Clear();
-                }
-                else if (collection.Count > 0)
-                {
-                    // 一个完整链完成
-                    Func<GDTask> ev = async () =>
-                    {
-                        foreach (var s in collection) await _handleAction(s);
-                    };
-                    events.Add(ev);
-                    stepCollection = [];
-                }
-            }
-            if (step is NextParallelStep) events.Add(step);
-            else if (step != _endStep) stepCollection.Add(step);
+            await ProcessStepsStep(stepsStep, node.Children);
+            return;
         }
 
-        var result = new List<Func<GDTask>>();
-        var parallelTasks = new List<GDTask>();
-        foreach (var eventItem in events)
-        {
-            if (eventItem is Func<GDTask> func)
-            {
-                var targetFunc = func;
-                if (nextParallel)
-                {
-                    var prev = result[^1];
-                    var targetFuncCopy = targetFunc;
-                    targetFunc = () =>
-                    {
-                        var task = prev();
-                        parallelTasks.Add(targetFuncCopy());
-                        return task;
-                    };
-                    result.RemoveAt(result.Count - 1);
-                }
-                nextParallel = false;
-                result.Add(targetFunc);
-            }
-            else if (eventItem is NextParallelStep parallel) nextParallel = true;
-        }
+        await _handleAction(step);
 
-        foreach (var func in result) await func();
-        await GDTask.WhenAll(parallelTasks);
+        foreach (var child in node.Children)
+            await ProcessNode(child);
+    }
+
+    /// <summary>
+    /// 处理 StepsStep：先 StartDelay，再按模式执行所有子节点，最后 EndDelay
+    /// </summary>
+    private async GDTask ProcessStepsStep(StepsStep stepsStep, List<SimStepsAnalyzer.TreeNode> children)
+    {
+        // 前置延迟
+        if (stepsStep.StartDelay > 0) await GDTask.Delay(stepsStep.StartDelay);
+
+        // 根据运行模式执行子节点
+        switch (stepsStep.RunningMode)
+        {
+            case StepsRunningMode.QueueWaitAll:
+                // 顺序执行，每个等待完成
+                foreach (var child in children)
+                    await ProcessNode(child);
+                break;
+
+            case StepsRunningMode.QueueWithoutWait:
+                // 顺序启动，但不等待完成（并行执行，但启动顺序保证）
+                Main().Forget();
+                break;
+
+                async GDTask Main()
+                {
+                    foreach (var child in children) await ProcessNode(child);
+                }
+
+            case StepsRunningMode.ParallelWaitAll:
+                // 并行执行，等待所有完成
+                await GDTask.WhenAll(children.Select(ProcessNode));
+                break;
+
+            case StepsRunningMode.ParallelWaitAny:
+                // 并行执行，等待任意一个完成
+                await GDTask.WhenAny(children.Select(ProcessNode));
+                break;
+
+            case StepsRunningMode.ParallelWithoutWait:
+                // 并行启动，不等待任何完成
+                foreach (var child in children) ProcessNode(child).Forget();
+                break;
+        }
+        // 后置延迟
+        if (stepsStep.EndDelay > 0) await GDTask.Delay(stepsStep.EndDelay);
     }
 }

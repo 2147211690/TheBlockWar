@@ -265,6 +265,7 @@ public partial class Test : Node2D
             {
                 ActionCore = (e, state, context) =>
                 {
+                    state.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
                     for (int i = 0; i < 10; i++)
                     {
                         for (int j = 0; j < 9; j++)
@@ -272,6 +273,7 @@ public partial class Test : Node2D
                             state.ApplyPlaceUnit(new(i, j), UnitNames.Unit_0, 1, context);
                         }
                     }
+                    state.EndSteps(context);
                 },
                 Layer = SimulationLayer.Running,
             });
@@ -285,6 +287,7 @@ public partial class Test : Node2D
                 {
                     for (int i = 0; i < 10; i++)
                     {
+                        state.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
                         for (int j = 0; j < 10; j++)
                         {
                             var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
@@ -293,8 +296,8 @@ public partial class Test : Node2D
                                     Tag = empty ? TileTag.Empty : TileTag.Ground
                                 },
                                 context);
-                            if (j != 9) state.ApplyNextParallel(context);
                         }
+                        state.EndSteps(context);
                     }
                     state.ApplyPlaceUnit(new(2, 2), UnitNames.Unit_0, 0, context);
                 },

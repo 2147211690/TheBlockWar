@@ -7,10 +7,14 @@ namespace TheBlockWar.Scripts.Games.Events;
 public class StepsEvent(long id) : SchedulerEvent(id)
 {
     public ApplyStep[]? Steps { get; set => SetField(ref field, value, false); }
+    public int StartDelay { get; set => SetField(ref field, value, false); } = 0;
+    public int EndDelay { get; set => SetField(ref field, value, false); } = 0;
+    public StepsRunningMode RunningMode { get; set => SetField(ref field, value, false); }
+    
     public override void OnApply(SchedulerEvent root, IGameState state, SimulationContext context)
     {
         if (Steps is null) return;
-        state.ApplySteps(Steps, context);
+        state.ApplySteps(Steps, StartDelay, EndDelay, RunningMode, context);
     }
 
     public override string ToString()

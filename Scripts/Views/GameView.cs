@@ -250,7 +250,7 @@ public partial class GameView : Node2D
 
     private GDTask RunSimulations(IEnumerable<SimulationContext> simulations)
     {
-        return _simStepHandler.Handle(simulations);
+        return _simStepHandler.Handle(simulations.SelectMany(a => a.Steps ?? []));
     }
 
     private void DrawEvents(IEnumerable<SimulationContext> s)

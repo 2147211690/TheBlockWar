@@ -26,7 +26,6 @@ partial class Simulator
                 context.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
                 if (!unit.IsNull())
                 {
-                    state.ApplyNextParallel(context);
                     state.ApplyDropUnit(coords, context);
                 }
                 var tile = state.TileMapState.GetTile(coords);

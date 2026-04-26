@@ -4,6 +4,7 @@ using NLog;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -155,6 +156,7 @@ public class EventScheduler
             sb.AppendLine("==========");
         }
         Logger.Debug("更新结果:\n{results}", sb.ToString());
+        Logger.Debug("结构树:\n{tree}", contexts.SelectMany(a => a.Steps ?? []).ToTree().ToString());
         
         // 运行层事件执行完毕后，清空运行层
         _eventManager.ClearLayerEvent(SimulationLayer.Running);

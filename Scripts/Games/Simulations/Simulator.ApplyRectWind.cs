@@ -53,20 +53,36 @@ partial class Simulator
                     DirMask.Right => rect.Size.X,
                     _ => 0,
                 };
-                var aims = new Queue<Vector2I>();
+                context.Steps?.AddStep(new RectWindStep(CurrentDeep, rect, dir));
+                var aims = new Queue<Queue<Vector2I>>();
+                var currentLine = new Queue<Vector2I>();
                 for (var j = 0; j < secondOffsetCount; j++)
                 {
                     for (var i = 0; i < firstOffsetCount; i++)
                     {
                         var coords = start + firstOffset * i + secondOffset * j;
                         if (state.UnitMapState.HasUnit(coords))
-                            aims.Enqueue(coords);
+                        {
+                            currentLine.Enqueue(coords);
+                        }
+                    }
+
+                    if (currentLine.Count > 0)
+                    {
+                        aims.Enqueue(currentLine);
+                        currentLine = new Queue<Vector2I>();
                     }
                 }
                 while (aims.Count > 0)
                 {
-                    var coords = aims.Dequeue();
-                    state.ApplyPushUnit(coords, dir, context);
+                    var line = aims.Dequeue();
+                    state.BeginSteps(0, 0 , StepsRunningMode.ParallelWaitAll, context);
+                    while (line.Count > 0)
+                    {
+                        var coord = line.Dequeue();
+                        state.ApplyPushUnit(coord, dir, context);
+                    }
+                    state.EndSteps(context);
                 }
             }
         }

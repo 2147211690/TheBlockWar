@@ -6,11 +6,19 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplySteps(ApplyStep[] applys, SimulationContext context)
+        public void ApplySteps(IEnumerable<ApplyStep> applys, int startDelay, int endDelay, StepsRunningMode runningMode, SimulationContext context)
         {
-            foreach (var apply in applys)
+            EnterSimulation();
+            Main();
+            ExitSimulation();
+
+            void Main()
             {
-                apply.Apply(state, context);
+                context.Steps?.AddStep(new StepsStep(CurrentDeep, startDelay, endDelay, runningMode));
+                foreach (var apply in applys)
+                {
+                    apply.Apply(state, context);
+                }
             }
         }
     }
