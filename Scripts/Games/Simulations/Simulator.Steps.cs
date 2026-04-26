@@ -132,11 +132,11 @@ public record ApplyPlaceTileStep(Vector2I Coords, TileState Tile) : ApplyStep
     }
 }
 
-public record ApplyPlaceUnitStep(Vector2I Coords, UnitNameEnum UnitName, int Team, UnitState? PrefabUnit) : ApplyStep
+public record ApplyPlaceUnitStep(Vector2I Coords, UnitNameEnum UnitName, int Team) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
-        state.ApplyPlaceUnit(Coords, UnitName, Team, PrefabUnit, context);
+        state.ApplyPlaceUnit(Coords, UnitName, Team, context);
     }
 }
 

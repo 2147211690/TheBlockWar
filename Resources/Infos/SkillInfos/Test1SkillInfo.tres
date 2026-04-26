@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="SkillInfo" format=3 uid="uid://biw3ess4prfnh"]
+
+[ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="1_asx24"]
+
+[resource]
+script = ExtResource("1_asx24")
+Name = 1

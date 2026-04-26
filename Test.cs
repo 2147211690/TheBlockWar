@@ -10,6 +10,7 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Games.Units;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Tools.Jsons;
 using TheBlockWar.Scripts.Views;
@@ -48,6 +49,9 @@ public partial class Test : Node2D
     
     public override void _Ready()
     {
+        InfoExtensions.InfoManager = ResourceLoader.Load<InfoManager>("uid://cidx5e6oa1bc8");
+        Registerer.Register();
+        
         //配置Yitter.IdGenerator.IdHelper
         var options = new IdGeneratorOptions
         {
@@ -265,7 +269,7 @@ public partial class Test : Node2D
                     {
                         for (int j = 0; j < 9; j++)
                         {
-                            state.ApplyPlaceUnit(new(i, j), UnitNameEnum.Unit_0, 1, null, context);
+                            state.ApplyPlaceUnit(new(i, j), UnitNameEnum.Unit_0, 1, context);
                         }
                     }
                 },
@@ -292,7 +296,7 @@ public partial class Test : Node2D
                             if (j != 9) state.ApplyNextParallel(context);
                         }
                     }
-                    state.ApplyPlaceUnit(new(2, 2), UnitNameEnum.Unit_0, 0, null, context);
+                    state.ApplyPlaceUnit(new(2, 2), UnitNameEnum.Unit_0, 0, context);
                 },
                 Layer = SimulationLayer.Running,
             });
@@ -304,10 +308,10 @@ public partial class Test : Node2D
             {
                 ActionCore = (e, state, context) =>
                 {
-                    state.ApplyPlaceUnit(new(3,2), UnitNameEnum.Unit_0, 0, null, context);
-                    state.ApplyPlaceUnit(new(2,3), UnitNameEnum.Unit_0, 0, null, context);
-                    state.ApplyPlaceUnit(new(1,2), UnitNameEnum.Unit_0, 0, null, context);
-                    state.ApplyPlaceUnit(new(2,1), UnitNameEnum.Unit_0, 0, null, context);
+                    state.ApplyPlaceUnit(new(3,2), UnitNameEnum.Unit_0, 0, context);
+                    state.ApplyPlaceUnit(new(2,3), UnitNameEnum.Unit_0, 0, context);
+                    state.ApplyPlaceUnit(new(1,2), UnitNameEnum.Unit_0, 0, context);
+                    state.ApplyPlaceUnit(new(2,1), UnitNameEnum.Unit_0, 0, context);
                 },
                 Layer = SimulationLayer.Running,
             });

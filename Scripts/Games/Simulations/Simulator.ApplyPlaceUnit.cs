@@ -9,7 +9,7 @@ partial class Simulator
     extension(IGameState state)
     {
         //TODO:prefabUnit改为枚举
-        public void ApplyPlaceUnit(Vector2I coords, UnitNameEnum unitName, int team, UnitState? prefabUnit, SimulationContext context)
+        public void ApplyPlaceUnit(Vector2I coords, UnitNameEnum unitName, int team, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -33,8 +33,7 @@ partial class Simulator
                             new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
                         return;
                     }
-                    var unitState = prefabUnit is null || prefabUnit.IsNull() ? 
-                        UnitFactory.CreateUnit(unitName, team, state.IdGenerator.NewLong(), coords) : prefabUnit;
+                    var unitState = UnitFactory.CreateUnit(unitName, team, state.IdGenerator.NewLong(), coords);
                     state.UnitMapState.AddUnit(unitState);
                     context.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, unitState,
                         isValid));

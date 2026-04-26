@@ -106,7 +106,7 @@ internal sealed class RegisterChildClassAttribute : Attribute
 
         sb.AppendLine("    public static class Registerer");
         sb.AppendLine("    {");
-        sb.AppendLine("        [System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("        ");
         sb.AppendLine("        public static void Register()");
         sb.AppendLine("        {");
 

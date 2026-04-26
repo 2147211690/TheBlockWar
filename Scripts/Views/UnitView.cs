@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
@@ -6,11 +7,10 @@ namespace TheBlockWar.Scripts.Views;
 
 public partial class UnitView : Node2D
 {
-    [Export] public Godot.Collections.Dictionary<string, Vector2> Offsets = new();
-    [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
     [Export] public Node2D Center { get; set; } = null!;
     [Export] public HealthBar HealthBar { get; set; } = null!;
     [Export] public BuffView BuffView { get; set; } = null!;
+    [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
     [ExportGroup("PlaceDown")]
     [Export] public float DropHeight { get; set; } = 50f;
     [Export] public float DropDuration { get; set; } = 0.1f;
@@ -28,22 +28,25 @@ public partial class UnitView : Node2D
     public GameView GameView { get; set; } = null!;
     private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
     private ShaderMaterial? _shaderMaterial = null!;
+    private UnitInfo? _unitInfo;
     public Color OutlineColor
     {
         get => _shaderMaterial?.GetShaderParameter("outline1_color").AsColor() ?? Colors.White;
         set => _shaderMaterial?.SetShaderParameter("outline1_color", value);
     }
 
-    public string UnitName
+    public UnitNameEnum UnitName
     {
         get;
         set
         {
-            MainSprite.Play(value);
-            MainSprite.Offset = Offsets.GetValueOrDefault(value, Vector2.Zero);
+            _unitInfo = value.GetInfo();
+            MainSprite.SpriteFrames = _unitInfo.ViewFrames;
+            MainSprite.Play("idle");
+            MainSprite.Offset = _unitInfo.ViewOffset;
             field = value;
         }
-    } = string.Empty;
+    }
 
     public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType, UnitsView unitsView)
     {
@@ -74,7 +77,8 @@ public partial class UnitView : Node2D
         
         var fake = GameView.ViewPools.Sprite2DPool.Pop();
         fake.Texture = MainSprite.SpriteFrames.GetFrameTexture(MainSprite.Animation, MainSprite.Frame);
-        fake.Offset = tilesView.GetRenderOffset(coords, Layer.Underground, 0) + Offsets.GetValueOrDefault(UnitName);
+        fake.Offset = tilesView.GetRenderOffset(coords, Layer.Underground, 0) + 
+                      _unitInfo?.ViewOffset ?? Vector2.Zero;
         fake.Modulate = new Color(1, 1, 1, 0.3f);
         fake.Position = tilesView.GetRenderPosition(coords, Layer.Underground, 0);
         

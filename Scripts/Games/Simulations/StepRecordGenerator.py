@@ -15,7 +15,8 @@ BASE_USINGS = [
     "using TheBlockWar.Scripts.Games.Buffs;",
     "using TheBlockWar.Scripts.Games.GameStates;",
     "using TheBlockWar.Scripts.Games.Regions;",
-    "using TheBlockWar.Scripts.Tools;"
+    "using TheBlockWar.Scripts.Tools;",
+    "using TheBlockWar.Scripts.Games.Units;"
 ]
 
 NAMESPACE = "TheBlockWar.Scripts.Games.Simulations"

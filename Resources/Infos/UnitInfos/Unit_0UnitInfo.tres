@@ -1,7 +1,46 @@
 [gd_resource type="Resource" script_class="UnitInfo" format=3 uid="uid://cdpppapttf5to"]
 
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_cqclv"]
+[ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="1_oc4v6"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0q3gl"]
+atlas = ExtResource("1_oc4v6")
+region = Rect2(0, 0, 44, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pwqu6"]
+atlas = ExtResource("1_oc4v6")
+region = Rect2(44, 0, 44, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6gtyg"]
+atlas = ExtResource("1_oc4v6")
+region = Rect2(88, 0, 44, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jgpft"]
+atlas = ExtResource("1_oc4v6")
+region = Rect2(132, 0, 44, 34)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cqclv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0q3gl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pwqu6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6gtyg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jgpft")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
 
 [resource]
 script = ExtResource("1_cqclv")
 Name = 1
+ViewOffset = Vector2(7, -6)
+ViewFrames = SubResource("SpriteFrames_cqclv")

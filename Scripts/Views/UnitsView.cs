@@ -42,7 +42,7 @@ public partial class UnitsView : Node2D
         //设置单位位置和动画
         render.RealCoords = coords;
         SetUnitMapPosition(render.WishCoords, render);
-        render.UnitName = unit.Name.ToString();
+        render.UnitName = unit.Name;
         await render.PlayPlaceDownAnim();
         //血条
         render.HealthBar.MaxHealth = unit.MaxHealth;

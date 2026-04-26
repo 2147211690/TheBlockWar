@@ -12,7 +12,9 @@
 [ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="9_imjp5"]
 [ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="9_yw7y4"]
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="10_lsjiv"]
+[ext_resource type="Resource" uid="uid://pfjlqp4ac3uo" path="res://Resources/Infos/SkillInfos/NoneSkillInfo.tres" id="10_mjrgt"]
 [ext_resource type="Resource" uid="uid://butmthc4wh23q" path="res://Resources/Infos/TileInfos/NoneTileInfo.tres" id="10_u2eed"]
+[ext_resource type="Resource" uid="uid://biw3ess4prfnh" path="res://Resources/Infos/SkillInfos/Test1SkillInfo.tres" id="11_cgp2c"]
 [ext_resource type="Resource" uid="uid://6sf2fdur4vsy" path="res://Resources/Infos/UnitInfos/NoneUnitInfo.tres" id="12_fu7tl"]
 [ext_resource type="Resource" uid="uid://cdpppapttf5to" path="res://Resources/Infos/UnitInfos/Unit_0UnitInfo.tres" id="14_in3he"]
 
@@ -34,6 +36,10 @@ UnitInfos = Dictionary[int, ExtResource("10_lsjiv")]({
 })
 TileInfos = Dictionary[int, ExtResource("9_imjp5")]({
 0: ExtResource("10_u2eed")
+})
+SkillInfos = Dictionary[int, ExtResource("9_yw7y4")]({
+0: ExtResource("10_mjrgt"),
+1: ExtResource("11_cgp2c")
 })
 BuffInfoPath = "res://Resources/Infos/BuffInfos"
 RegionInfoPath = "res://Resources/Infos/RegionInfos"

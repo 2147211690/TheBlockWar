@@ -6,4 +6,12 @@ namespace TheBlockWar.Scripts.Resources;
 public partial class UnitInfo : Resource, IInfo<UnitNameEnum>
 {
     [Export] public UnitNameEnum Name { get; set; }
+    [ExportGroup("Unit")]
+    [Export] public float MaxHealth { get; set; }
+    [Export] public float MaxShield { get; set; }
+    [Export] public bool IsFlying { get; set; }
+    [ExportGroup("View")]
+    [Export] public Vector2 ViewOffset { get; set; }
+    [Export] public SpriteFrames? ViewFrames { get; set; }
+    
 }

@@ -346,15 +346,12 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="UnitView" type="Node2D" unique_id=1880059611 node_paths=PackedStringArray("MainSprite", "Center", "HealthBar", "BuffView")]
+[node name="UnitView" type="Node2D" unique_id=1880059611 node_paths=PackedStringArray("Center", "HealthBar", "BuffView", "MainSprite")]
 script = ExtResource("1_hq4fu")
-Offsets = Dictionary[String, Vector2]({
-"Unit_0": Vector2(7, -5)
-})
-MainSprite = NodePath("Center/AnimatedSprite2D")
 Center = NodePath("Center")
 HealthBar = NodePath("Center/HealthBar")
 BuffView = NodePath("Center/BuffView")
+MainSprite = NodePath("Center/AnimatedSprite2D")
 
 [node name="Center" type="Node2D" parent="." unique_id=1069590474]
 
