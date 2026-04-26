@@ -13,7 +13,7 @@ public class SimulationContext
     public required TeamTypeEnum TeamType { get; init;}
     public required SimulationLayer Layer { get; init;}
     public long SourceUnitId { get; init; } = 0;
-    public IEnumerable<SimStep> MasterSteps => Steps?.Where(a => !a.IsChildStep) ?? [];
+    public IEnumerable<SimStep> MasterSteps => Steps?.Where(a => a.Deep == 0) ?? [];
     public SimStepList? Steps { get; }
     public SimStep? PeekStep => Steps?.PeekStep;
     
@@ -31,7 +31,7 @@ public class SimulationContext
         public void AddStep(SimStep step)
         {
             _steps.Add(step);
-            if (!step.IsChildStep) PeekStep = step;
+            if (step.Deep == 0) PeekStep = step;
         }
     
         public IEnumerator<SimStep> GetEnumerator()

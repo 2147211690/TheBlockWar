@@ -23,20 +23,20 @@ public partial class BlockBuffView : Node2D
 
     private TilesView TilesView => EventsView.GameView.TilesView;
 
-    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForAddBuff = new(false);
-    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForRemoveBuff = new(false);
-    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForAddBuffFocused = new(false);
-    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForRemoveBuffFocused = new(false);
-    private Bag<(Vector2I, BuffNameEnum)> _coordsForAddBuffCount = new();
-    private Bag<(Vector2I, BuffNameEnum)> _coordsForRemoveBuffCount = new();
-    private Bag<(Vector2I, BuffNameEnum)> _coordsForAddBuffFocusedCount = new();
-    private Bag<(Vector2I, BuffNameEnum)> _coordsForRemoveBuffFocusedCount = new();
+    private MultiDictionary<Vector2I, string> _coordsForAddBuff = new(false);
+    private MultiDictionary<Vector2I, string> _coordsForRemoveBuff = new(false);
+    private MultiDictionary<Vector2I, string> _coordsForAddBuffFocused = new(false);
+    private MultiDictionary<Vector2I, string> _coordsForRemoveBuffFocused = new(false);
+    private Bag<(Vector2I, string)> _coordsForAddBuffCount = new();
+    private Bag<(Vector2I, string)> _coordsForRemoveBuffCount = new();
+    private Bag<(Vector2I, string)> _coordsForAddBuffFocusedCount = new();
+    private Bag<(Vector2I, string)> _coordsForRemoveBuffFocusedCount = new();
     
     
 
     private double _animationTime;
     
-    public void AddBuffChange(Vector2I coords, BuffNameEnum buffName, bool isAdd, bool isFocused = false)
+    public void AddBuffChange(Vector2I coords, string buffName, bool isAdd, bool isFocused = false)
     {
         var (countDict, multiDict) = GetDictPair(isAdd, isFocused);
         
@@ -45,7 +45,7 @@ public partial class BlockBuffView : Node2D
         QueueRedraw();
     }
 
-    public void RemoveBuffChange(Vector2I coords, BuffNameEnum buffName, bool isAdd, bool isFocused = false)
+    public void RemoveBuffChange(Vector2I coords, string buffName, bool isAdd, bool isFocused = false)
     {
         var (countDict, multiDict) = GetDictPair(isAdd, isFocused);
         
@@ -56,10 +56,10 @@ public partial class BlockBuffView : Node2D
         QueueRedraw();
     }
 
-    private (Bag<(Vector2I, BuffNameEnum)> countDict, MultiDictionary<Vector2I, BuffNameEnum> multiDict) GetDictPair(bool isAdd, bool isFocused)
+    private (Bag<(Vector2I, string)> countDict, MultiDictionary<Vector2I, string> multiDict) GetDictPair(bool isAdd, bool isFocused)
     {
-        Bag<(Vector2I, BuffNameEnum)> countDict;
-        MultiDictionary<Vector2I, BuffNameEnum> multiDict;
+        Bag<(Vector2I, string)> countDict;
+        MultiDictionary<Vector2I, string> multiDict;
         if (isFocused)
         {
             countDict = isAdd ? _coordsForAddBuffFocusedCount : _coordsForRemoveBuffFocusedCount;
@@ -124,7 +124,7 @@ public partial class BlockBuffView : Node2D
         }
     }
 
-    private void DrawBuffRow(Vector2 rowCenter, ICollection<BuffNameEnum> buffs, bool isGain, float alpha)
+    private void DrawBuffRow(Vector2 rowCenter, ICollection<string> buffs, bool isGain, float alpha)
     {
         float totalWidth = SymbolBoxSize.X;
         if (buffs.Count > 0)
@@ -152,7 +152,7 @@ public partial class BlockBuffView : Node2D
 
         foreach (var type in buffs)
         {
-            var icon = type.GetInfo().Icon;
+            var icon = type.GetBuffInfo().Icon;
             if (icon != null)
             {
                 DrawTextureInBox(

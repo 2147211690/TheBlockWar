@@ -17,7 +17,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, 0, 0));
+                    context.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, 0, 0));
                     return;
                 }
 
@@ -26,7 +26,7 @@ partial class Simulator
                 if (unit.IsNull() || unit.IsDead)
                 {
                     context.Steps?.AddStep(
-                        new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                        new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
@@ -43,7 +43,7 @@ partial class Simulator
                 if (unit.IsNull())
                 {
                     context.Steps?.AddStep(
-                        new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                        new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
@@ -54,11 +54,11 @@ partial class Simulator
                 if (unit.IsNull())
                 {
                     context.Steps?.AddStep(
-                        new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                        new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
-                context.Steps?.AddStep(new DamageStep(IsCurrentChildSimulation, coords, damage, unit.Id, validDamage));
+                context.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
 
                 // 触发受伤后事件, 仅在运行层触发
                 if (validDamage > 0 && ComplexSimulationRegion(context, 0))

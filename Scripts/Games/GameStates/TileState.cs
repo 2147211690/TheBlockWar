@@ -32,7 +32,7 @@ public class TileState : IReadOnlyTileState
     /// <summary>
     /// 添加一个区域效果,不做检查
     /// </summary>
-    public void AddRegion(RegionNameEnum regionName, int duration)
+    public void AddRegion(string regionName, int duration)
     {
         GetRegionList().Add(new RegionState
         {
@@ -41,7 +41,7 @@ public class TileState : IReadOnlyTileState
         });
     }
 
-    public void RemoveRegion(RegionNameEnum regionName)
+    public void RemoveRegion(string regionName)
     {
         if (!this.TryFindRegion(regionName, out var index)) return;
         GetRegionList().RemoveAt(index);
@@ -52,7 +52,7 @@ public class TileState : IReadOnlyTileState
         GetRegionList().RemoveAt(index);
     }
 
-    public void ModifyRegion(RegionNameEnum regionName, int modifyDuration)
+    public void ModifyRegion(string regionName, int modifyDuration)
     {
         if (!this.TryFindRegion(regionName, out var index)) return;
         GetRegionList()[index] = new RegionState

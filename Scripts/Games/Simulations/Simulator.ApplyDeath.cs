@@ -17,7 +17,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DeathStep(IsCurrentChildSimulation, coords, 0, false));
+                    context.Steps?.AddStep(new DeathStep(CurrentDeep, coords, 0, false));
                     return;
                 }
 
@@ -25,11 +25,11 @@ partial class Simulator
 
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    context.Steps?.AddStep(new DeathStep(IsCurrentChildSimulation, coords, unit.Id, false));
+                    context.Steps?.AddStep(new DeathStep(CurrentDeep, coords, unit.Id, false));
                     return;
                 }
 
-                context.Steps?.AddStep(new DeathStep(IsCurrentChildSimulation, coords, unit.Id, true));
+                context.Steps?.AddStep(new DeathStep(CurrentDeep, coords, unit.Id, true));
                 state.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
                 //TODO:可能引入区域相关事件
             }

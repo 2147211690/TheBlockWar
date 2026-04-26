@@ -16,7 +16,7 @@ public interface IReadOnlyGameState
     IReadOnlyTileMapState TileMapState { get; }
     IReadOnlyUnitMapState UnitMapState { get; }
     TeamState TeamState { get; }
-    IReadOnlyList<ISkill> GetUnitValidSkills(UnitNameEnum name);
+    IReadOnlyList<ISkill> GetUnitValidSkills(string unitName);
     IGameState GetSnapshot();
     GameStateData ToData();
 }

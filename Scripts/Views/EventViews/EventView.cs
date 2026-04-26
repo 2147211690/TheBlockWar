@@ -169,7 +169,7 @@ public class EventView
             _ => false,
         };
         
-        if (!step.IsChildStep) BlockDraw.AddBuffChange(step.Coords, step.BuffName, isAdd, IsFocused, TeamType);
+        if (step.Deep == 0) BlockDraw.AddBuffChange(step.Coords, step.BuffName, isAdd, IsFocused, TeamType);
         if (IsFocused)
         {
             UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffName, c);

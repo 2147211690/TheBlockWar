@@ -7,28 +7,30 @@ using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
-public record SimStep(bool IsChildStep)
+public record SimStep(int Deep)
 {
-    public static readonly SimStep Default = new(false);
+    public static readonly SimStep Default = new(0);
 }
-public record NextParallelStep(bool IsChildStep) : SimStep(IsChildStep);
-public record DelayStep(bool IsChildStep, int Delay) : SimStep(IsChildStep);
-public record DamageStep(bool IsChildStep, Vector2I Coords,float Damage, long ResultUnitId, float ResultValidDamage) : SimStep(IsChildStep);
-public record CureStep(bool IsChildStep, Vector2I Coords,float Cure, long ResultUnitId, float ResultValidCure) : SimStep(IsChildStep);
-public record DeathStep(bool IsChildStep, Vector2I Coords, long ResultUnitId, bool ResultIsValid) : SimStep(IsChildStep);
-public record PlaceTileStep(bool IsChildStep, Vector2I Coords, TileState Tile) : SimStep(IsChildStep);
-public record DropTileStep(bool IsChildStep, Vector2I Coords) : SimStep(IsChildStep);
-public record PlaceUnitStep(bool IsChildStep, Vector2I Coords, UnitNameEnum UnitName, int Team, UnitState ResultUnit, bool ResultIsValid) : SimStep(IsChildStep);
-public record MoveUnitStep(bool IsChildStep, Vector2I Coords, Vector2I To, long ResultUnitId, bool ResultIsValid) : SimStep(IsChildStep);
-public record MoveUnitPathStep(bool IsChildStep, Vector2I Coords, List<Vector2I> Path, long ResultUnitId, int ResultTargetIndex ,bool ResultIsValid) : SimStep(IsChildStep);
-public record DropUnitStep(bool IsChildStep, Vector2I Coords, long ResultUnitId, bool ResultIsValid) : SimStep(IsChildStep);
-public record PushUnitStep(bool IsChildStep, Vector2I Coords, DirMask PushDir ,long ResultUnitId, bool ResultPush) : SimStep(IsChildStep);
+public record NextParallelStep(int Deep) : SimStep(Deep);
+public record DelayStep(int Deep, int Delay) : SimStep(Deep);
+public record DamageStep(int Deep, Vector2I Coords,float Damage, long ResultUnitId, float ResultValidDamage) : SimStep(Deep);
+public record CureStep(int Deep, Vector2I Coords,float Cure, long ResultUnitId, float ResultValidCure) : SimStep(Deep);
+public record DeathStep(int Deep, Vector2I Coords, long ResultUnitId, bool ResultIsValid) : SimStep(Deep);
+public record PlaceTileStep(int Deep, Vector2I Coords, TileState Tile) : SimStep(Deep);
+public record DropTileStep(int Deep, Vector2I Coords) : SimStep(Deep);
+public record PlaceUnitStep(int Deep, Vector2I Coords, string UnitName, int Team, UnitState ResultUnit, bool ResultIsValid) : SimStep(Deep);
+public record MoveUnitStep(int Deep, Vector2I Coords, Vector2I To, long ResultUnitId, bool ResultIsValid) : SimStep(Deep);
+public record MoveUnitPathStep(int Deep, Vector2I Coords, List<Vector2I> Path, long ResultUnitId, int ResultTargetIndex ,bool ResultIsValid) : SimStep(Deep);
+public record DropUnitStep(int Deep, Vector2I Coords, long ResultUnitId, bool ResultIsValid) : SimStep(Deep);
+public record PushUnitStep(int Deep, Vector2I Coords, DirMask PushDir ,long ResultUnitId, bool ResultPush) : SimStep(Deep);
+public record RectWindStep(int Deep, Rect2I Rect, DirMask Dir) : SimStep(Deep);
+
 /// <param name="ResultOperation">只有AddBuff,RemoveBuff,ChangeDuration结果</param>
-public record ModifyUnitBuffStep(bool IsChildStep, Vector2I Coords, BuffNameEnum BuffName, BuffOperation Operation, int Duration,
-    long ResultUnitId, BuffOperation ResultOperation, int ResultDuration) : SimStep(IsChildStep);
-public record ModifyTileRegionStep(bool IsChildStep, Vector2I Coords, RegionNameEnum RegionName, RegionOperation Operation, int Duration,
-    RegionOperation ResultOperation, int ResultDuration) : SimStep(IsChildStep);
-public record AnimationStep(bool IsChildStep, AnimationType Animation) : SimStep(IsChildStep);
+public record ModifyUnitBuffStep(int Deep, Vector2I Coords, string BuffName, BuffOperation Operation, int Duration,
+    long ResultUnitId, BuffOperation ResultOperation, int ResultDuration) : SimStep(Deep);
+public record ModifyTileRegionStep(int Deep, Vector2I Coords, string RegionName, RegionOperation Operation, int Duration,
+    RegionOperation ResultOperation, int ResultDuration) : SimStep(Deep);
+public record AnimationStep(int Deep, AnimationType Animation) : SimStep(Deep);
 
 //Animations
 [JsonDerivedType(typeof(ShotSomethingAnim), typeDiscriminator: nameof(ShotSomethingAnim))]

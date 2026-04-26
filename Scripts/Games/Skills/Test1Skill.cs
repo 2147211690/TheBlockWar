@@ -5,7 +5,7 @@ using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Skills;
 
-public class Test1Skill() : Skill(SkillNameEnum.Test1, 2)
+public class Test1Skill() : Skill(SkillNames.Test1, 2)
 {
     public override IEnumerable<Vector2I> GetSkillArgs(IReadOnlyGameState state, IReadOnlyUnitState caster, Vector2I useCoords, int argsIndex,
         Vector2I?[] args)

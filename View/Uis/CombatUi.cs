@@ -88,9 +88,9 @@ public partial class CombatUi : Control
         //设置位置
         if (isHover)
         {
-            _infoPanel.IconTexture = (itemBox.MetaData as IBuff)?.Name.GetInfo().Icon;
-            _infoPanel.TitleName = (itemBox.MetaData as IBuff)?.Name.ToString() ?? "";
-            _infoPanel.Description = (itemBox.MetaData as IBuff)?.Name.GetInfo().Description ?? "";
+            _infoPanel.IconTexture = (itemBox.MetaData as IBuff)?.Name.GetBuffInfo().Icon;
+            _infoPanel.TitleName = (itemBox.MetaData as IBuff)?.Name ?? string.Empty;
+            _infoPanel.Description = (itemBox.MetaData as IBuff)?.Name.GetBuffInfo().Description ?? "";
             
             var pos = GetLocalMousePosition();
             _infoPanel.LeftDownPosition = pos;
@@ -115,12 +115,12 @@ public partial class CombatUi : Control
         }
     }
     
-    public void AddBuffItem(BuffNameEnum buffNameEnum)
+    public void AddBuffItem(string buffNameEnum)
     {
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _buffContainer.AddChild(itemBox);
-        itemBox.Texture = buffNameEnum.GetInfo().Icon!;
-        itemBox.MetaData = buffNameEnum.GetInstance();
+        itemBox.Texture = buffNameEnum.GetBuffInfo().Icon!;
+        itemBox.MetaData = buffNameEnum.GetBuffInstance();
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
     }

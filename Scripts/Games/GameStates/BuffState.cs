@@ -5,7 +5,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 public struct 
     BuffState
 {
-    public BuffNameEnum BuffName { get; set; }
+    public string BuffName { get; set; }
     /// <summary>
     /// 回合为单位
     /// </summary>

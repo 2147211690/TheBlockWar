@@ -224,7 +224,7 @@ public static class Extensions
         {
             return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Neutral;
         }
-        public bool TryFindBuff(BuffNameEnum buffName, out int index)
+        public bool TryFindBuff(string buffName, out int index)
         {
             for (var i = 0; i < unit.Buffs.Count; i++)
                 if (unit.Buffs[i].BuffName == buffName)
@@ -240,7 +240,7 @@ public static class Extensions
 
     extension(IReadOnlyTileState tile)
     {
-        public bool TryFindRegion(RegionNameEnum regionName, out int index)
+        public bool TryFindRegion(string regionName, out int index)
         {
             for (var i = 0; i < tile.Regions.Count; i++)
                 if (tile.Regions[i].RegionName == regionName)

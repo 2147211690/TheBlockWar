@@ -17,13 +17,13 @@ partial class Simulator
 
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, 0, false));
+                    context.Steps?.AddStep(new DropUnitStep(CurrentDeep, coords, 0, false));
                     return;
                 }
 
                 var unit = state.UnitMapState.GetUnit(coords);
                 state.UnitMapState.RemoveUnit(unit.Id);
-                context.Steps?.AddStep(new DropUnitStep(IsCurrentChildSimulation, coords, unit.Id, true));
+                context.Steps?.AddStep(new DropUnitStep(CurrentDeep, coords, unit.Id, true));
             }
         }
     }

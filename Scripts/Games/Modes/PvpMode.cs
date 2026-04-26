@@ -2,6 +2,7 @@ using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Turns;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Modes;
 
@@ -31,6 +32,15 @@ public class PvpMode : GameMode
             Turn = turn + 1,
             Priority = int.MinValue + 1,
             Layer = SimulationLayer.Disabled,
+        });
+        turnManager.EventScheduler.CreateEvent(id => new ActionEvent(id)
+        {
+            ActionCore = (ev, state, ctx) =>
+            {
+                state.ApplyRectWind(new Rect2I(Vector2I.Zero, state.Size), DirMask.Down, ctx);
+            },
+            Priority = int.MinValue + 2,
+            Turn = turn + 1,
         });
     }
 

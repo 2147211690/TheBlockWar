@@ -36,15 +36,15 @@ public partial class BuffView : Node2D
     
     public GameView GameView { get; set; } = null!;
     // ===================== 缓存列表（无GC） =====================
-    private readonly List<BuffNameEnum> _gainBuffs = new();
-    private readonly List<BuffNameEnum> _loseBuffs = new();
+    private readonly List<string> _gainBuffs = new();
+    private readonly List<string> _loseBuffs = new();
     private double _animationTime;
     private float _gainLight;
     private float _loseLight;
     
     // Buff数据
-    private readonly Dictionary<BuffNameEnum, int> _buffChanges = new();
-    private readonly Dictionary<BuffNameEnum, AnimatedSprite2D> _visibleBuffs = new();
+    private readonly Dictionary<string, int> _buffChanges = new();
+    private readonly Dictionary<string, AnimatedSprite2D> _visibleBuffs = new();
     private bool _refreshBuffListsDirty = true;
     private ItemTabStyle _gainItemTabStyle = new()
     {
@@ -82,31 +82,31 @@ public partial class BuffView : Node2D
         QueueRedraw();
     }
 
-    public void ChangeBuffChange(BuffNameEnum name, int change)
+    public void ChangeBuffChange(string buffName, int change)
     {
         if (change == 0) return;
-        if (!_buffChanges.TryAdd(name, change))
-            _buffChanges[name] += change;
+        if (!_buffChanges.TryAdd(buffName, change))
+            _buffChanges[buffName] += change;
 
-        if (_buffChanges[name] == 0)
-            _buffChanges.Remove(name);
+        if (_buffChanges[buffName] == 0)
+            _buffChanges.Remove(buffName);
 
         _refreshBuffListsDirty = true;
         QueueRedraw();
     }
-    public void AddVisibleBuff(BuffNameEnum name)
+    public void AddVisibleBuff(string buffName)
     {
-        if (_visibleBuffs.ContainsKey(name)) return;
+        if (_visibleBuffs.ContainsKey(buffName)) return;
         var s = GameView.ViewPools.AnimatedSprite2DPool.Pop();
         s.GetParent().RemoveChild(s);
         UnitView.Center.AddChild(s);
         s.Position = Vector2.Zero;
-        _visibleBuffs.Add(name, s);
-        if (BuffEffectOffsets.TryGetValue(Enum.GetName(name)!, out var offset)) s.Offset = offset;
+        _visibleBuffs.Add(buffName, s);
+        if (BuffEffectOffsets.TryGetValue(buffName, out var offset)) s.Offset = offset;
         
         s.SpriteFrames = BuffEffectSpriteFrames;
-        var addName = $"{Enum.GetName(name)}_Add";
-        var idleName = $"{Enum.GetName(name)}_Idle";
+        var addName = $"{buffName}_Add";
+        var idleName = $"{buffName}_Idle";
         if (BuffEffectSpriteFrames.HasAnimation(addName))
         {
             s.Play(addName);
@@ -118,11 +118,11 @@ public partial class BuffView : Node2D
         else if (BuffEffectSpriteFrames.HasAnimation(idleName)) s.Play(idleName);
         
     }
-    public void RemoveVisibleBuff(BuffNameEnum buffName)
+    public void RemoveVisibleBuff(string buffName)
     {
         if (!_visibleBuffs.Remove(buffName, out var s)) return;
 
-        var animName = $"{Enum.GetName(buffName)}_Remove";
+        var animName = $"{buffName}_Remove";
         if (BuffEffectSpriteFrames.HasAnimation(animName))
         {
             s.Play(animName);
@@ -175,7 +175,7 @@ public partial class BuffView : Node2D
         if (gainIcons != null) this.DrawItemTab(gainPosition, gainIcons, _gainItemTabStyle);
         if (loseIcons != null) this.DrawItemTab(losePosition, loseIcons, _loseTabStyle);
         
-        List<Texture2D>? BuildIconList(List<BuffNameEnum> buffs, Texture2D? defaultTexture)
+        List<Texture2D>? BuildIconList(List<string> buffs, Texture2D? defaultTexture)
         {
             if (buffs.Count == 0) return null;
 
@@ -184,7 +184,7 @@ public partial class BuffView : Node2D
 
             foreach (var buff in buffs)
             {
-                icons.Add(buff.GetInfo().Icon ?? Autoload.DefaultTexture);
+                icons.Add(buff.GetBuffInfo().Icon ?? Autoload.DefaultTexture);
             }
 
             return icons;

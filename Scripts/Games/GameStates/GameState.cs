@@ -24,20 +24,20 @@ public class GameState : IGameState
     
     IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
-    private Dictionary<UnitNameEnum, ISkill[]> _unitSkillMap;
+    private Dictionary<string, ISkill[]> _unitSkillMap;
     private Dictionary<long, SchedulerEvent> _events;
 
-    public IReadOnlyList<ISkill> GetUnitValidSkills(UnitNameEnum name)
+    public IReadOnlyList<ISkill> GetUnitValidSkills(string unitName)
     {
         //TODO: 根据单位名称获取有效技能
-        return _unitSkillMap.TryGetValue(name, out var value) ? value : [];
+        return _unitSkillMap.TryGetValue(unitName, out var value) ? value : [];
     }
 
     public IGameState GetSnapshot() => new GameStateSnapshot(this);
 
     public GameState(GameStateData data)
     {
-        _unitSkillMap = new Dictionary<UnitNameEnum, ISkill[]>();
+        _unitSkillMap = new Dictionary<string, ISkill[]>();
         _events = new();
         foreach (var eventItem in data.Events)
         {
@@ -55,7 +55,7 @@ public class GameState : IGameState
         TeamState = new TeamState(data.TeamState);
     }
 
-    public GameState(Vector2I mapSize, Dictionary<UnitNameEnum, ISkill[]> unitSkillMap, int[,] teamRelations)
+    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations)
     {
         _unitSkillMap = unitSkillMap;
         _events = new();
@@ -124,7 +124,7 @@ public class GameState : IGameState
             };
         }
 
-        public IReadOnlyList<ISkill> GetUnitValidSkills(UnitNameEnum name) => Owner.GetUnitValidSkills(name);
+        public IReadOnlyList<ISkill> GetUnitValidSkills(string unitName) => Owner.GetUnitValidSkills(unitName);
         public void ClearIfSnapshot()
         {
             TileMapState.ClearIfSnapshot();

@@ -8,7 +8,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyModifyTileRegion(Vector2I coords, RegionNameEnum regionName, RegionOperation operation, 
+        public void ApplyModifyTileRegion(Vector2I coords, string regionName, RegionOperation operation, 
             int duration, SimulationContext context)
         {
             EnterSimulation();
@@ -19,7 +19,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionName,
+                    context.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName,
                         operation, duration, operation, duration));
                     return;
                 }
@@ -43,7 +43,7 @@ partial class Simulator
                     };
                 }
 
-                context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionName, operation,
+                context.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName, operation,
                     duration, resultOperation, resultDuration));
 
                 if (ComplexSimulationRegion(context, 1))
@@ -67,7 +67,7 @@ partial class Simulator
         }
 
         private (RegionOperation operation, int duration) HandleAddOrChangeRegion(IReadOnlyTileState tile, Vector2I coords, 
-            RegionNameEnum regionName, int newDuration, bool isAdd)
+            string regionName, int newDuration, bool isAdd)
         {
             if (tile.TryFindRegion(regionName, out var index))
             {
@@ -89,7 +89,7 @@ partial class Simulator
         }
 
         private (RegionOperation operation, int duration) HandleRemoveRegion(IReadOnlyTileState tile, Vector2I coords, 
-            RegionNameEnum regionName)
+            string regionName)
         {
             if (tile.TryFindRegion(regionName, out var index))
             {
@@ -100,7 +100,7 @@ partial class Simulator
         }
 
         private (RegionOperation operation, int duration) HandleSetDurationRegion(IReadOnlyTileState tile, Vector2I coords, 
-            RegionNameEnum regionName, int newDuration)
+            string regionName, int newDuration)
         {
             if (tile.TryFindRegion(regionName, out var index))
             {

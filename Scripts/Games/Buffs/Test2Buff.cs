@@ -4,7 +4,7 @@ using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
 
-public class Test2Buff() : Buff(BuffNameEnum.Test2)
+public class Test2Buff() : Buff(BuffNames.Test2)
 {
     public override void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
         ref float resultDamage,

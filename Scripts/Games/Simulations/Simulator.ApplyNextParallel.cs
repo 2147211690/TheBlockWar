@@ -11,8 +11,10 @@ partial class Simulator
         /// </summary>
         public void ApplyNextParallel(SimulationContext context)
         {
-            if (context.Layer == SimulationLayer.Running && _simulationStack == 0) 
-                context.Steps?.AddStep(new NextParallelStep(false));
+            EnterSimulation();
+            if (context.Layer == SimulationLayer.Running && CurrentDeep == 0) 
+                context.Steps?.AddStep(new NextParallelStep(0));
+            ExitSimulation();
         }
     }
 }

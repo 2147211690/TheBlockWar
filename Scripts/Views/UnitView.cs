@@ -35,12 +35,12 @@ public partial class UnitView : Node2D
         set => _shaderMaterial?.SetShaderParameter("outline1_color", value);
     }
 
-    public UnitNameEnum UnitName
+    public string UnitName
     {
         get;
         set
         {
-            _unitInfo = value.GetInfo();
+            _unitInfo = value.GetUnitInfo();
             MainSprite.SpriteFrames = _unitInfo.ViewFrames;
             MainSprite.Play("idle");
             MainSprite.Offset = _unitInfo.ViewOffset;

@@ -5,7 +5,7 @@ namespace TheBlockWar.Scripts.Games.Skills;
 
 public interface ISkill
 {
-    SkillNameEnum SkillEnum { get; }
+    string SkillName { get; }
     int ArgCount { get; }
     /// <summary>
     /// 获取技能的参数

@@ -4,7 +4,7 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Regions;
-public class Test1Region() : Region(RegionNameEnum.Test1)
+public class Test1Region() : Region(RegionNames.Test1)
 {
     public override void OnUnitEnter(IGameState state, Vector2I regionCoords,  IReadOnlyUnitState unit, Vector2I enterCoords, 
         bool isAddRegion, SimulationContext context)

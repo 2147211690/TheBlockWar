@@ -1,5 +1,5 @@
 namespace TheBlockWar.Scripts.Games.Units;
-
+[NameEnum]
 public enum UnitNameEnum
 {
     None,

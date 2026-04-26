@@ -17,13 +17,13 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DropTileStep(IsCurrentChildSimulation, coords));
+                    context.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
                     return;
                 }
 
                 var unit = state.UnitMapState.GetUnit(coords);
                 state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
-                context.Steps?.AddStep(new DropTileStep(IsCurrentChildSimulation, coords));
+                context.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
                 if (!unit.IsNull())
                 {
                     state.ApplyNextParallel(context);

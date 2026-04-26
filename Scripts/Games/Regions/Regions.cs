@@ -4,13 +4,13 @@ namespace TheBlockWar.Scripts.Games.Regions;
 
 public static class Regions
 {
-    private static readonly Dictionary<RegionNameEnum, IRegion> _regions = new();
+    private static readonly Dictionary<string, IRegion> _regions = new();
     public static void Register(IRegion region)
     {
         if (_regions.TryAdd(region.Name, region)) return;
         GD.PushWarning($"{region.GetType()}:另一个region已注册为{region.Name}");
     }
-    public static IRegion GetInstance(this RegionNameEnum name)
+    public static IRegion GetRegionInstance(this string name)
     {
         if (_regions.TryGetValue(name, out var region)) return region;
         GD.PushWarning($"未注册region:{name},使用空region");
@@ -18,4 +18,4 @@ public static class Regions
         return region;
     }
 }
-public class EmptyRegion(RegionNameEnum name) : Region(name){}
+public class EmptyRegion(string name) : Region(name){}

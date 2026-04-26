@@ -9,7 +9,7 @@ partial class Simulator
         public void ApplyAnimation(AnimationType animation, SimulationContext context)
         {
             EnterSimulation();
-            context.Steps?.AddStep(new AnimationStep(IsCurrentChildSimulation, animation));
+            context.Steps?.AddStep(new AnimationStep(CurrentDeep, animation));
             ExitSimulation();
         }
     }

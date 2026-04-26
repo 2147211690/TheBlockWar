@@ -7,13 +7,13 @@ namespace TheBlockWar.Scripts.Games.Skills;
 
 public static class Skills
 {
-    private static readonly Dictionary<SkillNameEnum, ISkill> _skills = new();
+    private static readonly Dictionary<string, ISkill> _skills = new();
     public static void Register(ISkill skill)
     {
-        if (_skills.TryAdd(skill.SkillEnum, skill)) return;
-        GD.PushWarning($"{skill.GetType()}:另一个技能已注册为{skill.SkillEnum}");
+        if (_skills.TryAdd(skill.SkillName, skill)) return;
+        GD.PushWarning($"{skill.GetType()}:另一个技能已注册为{skill.SkillName}");
     }
-    public static ISkill GetInstance(this SkillNameEnum type)
+    public static ISkill GetSkillInstance(this string type)
     {
         if (_skills.TryGetValue(type, out var skill)) return skill;
         GD.PushWarning($"未注册技能:{type},使用空技能");
@@ -21,7 +21,7 @@ public static class Skills
         return skill;
     }
 }
-public class EmptySkill(SkillNameEnum skillEnum) : Skill(skillEnum, 0)
+public class EmptySkill(string skillName) : Skill(skillName, 0)
 {
     public override IEnumerable<Vector2I> GetSkillArgs(IReadOnlyGameState state, IReadOnlyUnitState caster,
         Vector2I useCoords, int argsIndex,

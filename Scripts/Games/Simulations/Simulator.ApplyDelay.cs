@@ -10,7 +10,7 @@ partial class Simulator
         {
             EnterSimulation();
             if (context.Layer == SimulationLayer.Running)
-                context.Steps?.AddStep(new DelayStep(IsCurrentChildSimulation, delay));
+                context.Steps?.AddStep(new DelayStep(CurrentDeep, delay));
             ExitSimulation();
         }
     }

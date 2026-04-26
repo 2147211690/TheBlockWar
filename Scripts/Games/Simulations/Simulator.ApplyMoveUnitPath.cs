@@ -19,7 +19,7 @@ partial class Simulator
                 var unit = state.UnitMapState.GetUnit(coords + path[0]);
                 if (unit.IsNull())
                 {
-                    context.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, 0,
+                    context.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, 0,
                         false));
                     return;
                 }
@@ -37,12 +37,12 @@ partial class Simulator
 
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id,
+                    context.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id,
                         targetIndex, true));
                     return;
                 }
 
-                context.Steps?.AddStep(new MoveUnitPathStep(IsCurrentChildSimulation, coords, path, unit.Id, targetIndex,
+                context.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, targetIndex,
                     true));
                 if (targetIndex > 0) state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], context);
             }

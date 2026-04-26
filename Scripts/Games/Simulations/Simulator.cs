@@ -16,11 +16,11 @@ public static partial class Simulator
     /// 是否进行复杂模拟
     /// </summary>
     public static int ComplexSimulationMaxLevel { get; set; } = int.MaxValue;
-    private static int _simulationStack;
-    private static bool IsCurrentChildSimulation => _simulationStack > 1;
+    private static int _simulationStack = -1;
+    private static int CurrentDeep => _simulationStack;
     private static void EnterSimulation()
     {
-        if (_simulationStack == 0)
+        if (_simulationStack == -1)
         {
             CurrentComplexSimulationMaxLevel = ComplexSimulationMaxLevel;
         }
@@ -59,7 +59,7 @@ public static partial class Simulator
                 // 移除所有一次性区域
                 for (var i = toTile.Regions.Count - 1; i >= 0; i--)
                 {
-                    if (!toTile.Regions[i].RegionName.GetInfo().IsOnece) continue;
+                    if (!toTile.Regions[i].RegionName.GetRegionInfo().IsOnece) continue;
                     state.TileMapState.ModifyTile(coords, u => u.RemoveRegion(i));
                 }
             }
@@ -79,15 +79,15 @@ public static partial class Simulator
             if (unit.Buffs.Count == 0) return;
             foreach (var buffType in unit.Buffs.ToArray())
             {
-                action(buffType.BuffName.GetInstance());
+                action(buffType.BuffName.GetBuffInstance());
             }
         }
 
-        private void NotifyUnitBuff(IReadOnlyUnitState unit, BuffNameEnum buffName, Action<IBuff> action)
+        private void NotifyUnitBuff(IReadOnlyUnitState unit, string buffName, Action<IBuff> action)
         {
             if (unit.IsNull()) return;
             if (!unit.TryFindBuff(buffName, out var index)) return;
-            action(unit.Buffs[index].BuffName.GetInstance());
+            action(unit.Buffs[index].BuffName.GetBuffInstance());
         }
 
         private void NotifyTileRegions(IReadOnlyTileState tile, Action<IRegion> action)
@@ -95,15 +95,15 @@ public static partial class Simulator
             if (tile.Regions.Count == 0) return;
             foreach (var regionType in tile.Regions.ToArray())
             {
-                action(regionType.RegionName.GetInstance());
+                action(regionType.RegionName.GetRegionInstance());
             }
         }
         
-        private void NotifyTileRegion(IReadOnlyTileState tile, RegionNameEnum regionName, Action<IRegion> action)
+        private void NotifyTileRegion(IReadOnlyTileState tile, string regionName, Action<IRegion> action)
         {
             if (tile == TileState.Empty) return;
             if (!tile.TryFindRegion(regionName, out var index)) return;
-            action(tile.Regions[index].RegionName.GetInstance());
+            action(tile.Regions[index].RegionName.GetRegionInstance());
         }
     }
 }

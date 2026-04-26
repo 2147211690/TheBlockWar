@@ -8,7 +8,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyModifyUnitBuff(Vector2I coords, BuffNameEnum buffName, BuffOperation operation, 
+        public void ApplyModifyUnitBuff(Vector2I coords, string buffName, BuffOperation operation, 
             int duration, SimulationContext context)
         {
             EnterSimulation();
@@ -19,7 +19,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffName, operation,
+                    context.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
                         duration, 0, operation, duration));
                     return;
                 }
@@ -42,7 +42,7 @@ partial class Simulator
                     };
                 }
 
-                context.Steps?.AddStep(new ModifyUnitBuffStep(IsCurrentChildSimulation, coords, buffName, operation,
+                context.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
                     duration, unit.Id, resultOperation, resultDuration));
 
                 if (ComplexSimulationRegion(context, 1))
@@ -65,7 +65,7 @@ partial class Simulator
         }
 
         private (BuffOperation operation, int duration, int oldDuration) HandleAddOrChangeBuff(IReadOnlyUnitState unit, 
-            BuffNameEnum buffName, int newDuration, bool isAdd)
+            string buffName, int newDuration, bool isAdd)
         {
             if (unit.TryFindBuff(buffName, out var index))
             {
@@ -87,7 +87,7 @@ partial class Simulator
         }
 
         private (BuffOperation operation, int duration, int oldDuration) HandleRemoveBuff(IReadOnlyUnitState unit, 
-            BuffNameEnum buffName)
+            string buffName)
         {
             if (unit.TryFindBuff(buffName, out var index))
             {
@@ -98,7 +98,7 @@ partial class Simulator
         }
 
         private (BuffOperation operation, int duration, int oldDuration) HandleSetDurationBuff(IReadOnlyUnitState unit, 
-            BuffNameEnum buffName, int newDuration)
+            string buffName, int newDuration)
         {
             if (unit.TryFindBuff(buffName, out var index))
             {

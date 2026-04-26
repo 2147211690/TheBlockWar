@@ -1,6 +1,6 @@
 namespace TheBlockWar.Scripts.Resources;
 
-public interface IInfo<TEnum> where TEnum : struct, Enum
+public interface IInfo
 {
-    TEnum Name { get; set; }
+    string Name { get; set; }
 }

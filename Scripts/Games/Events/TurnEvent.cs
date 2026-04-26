@@ -25,7 +25,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
                     if (tile.Regions.Count > 0)
                         regionPairs.Add(
                             new(coords,
-                                tile.Regions.Select(r => r.RegionName.GetInstance()).ToArray()));
+                                tile.Regions.Select(r => r.RegionName.GetRegionInstance()).ToArray()));
                 }
             }
 
@@ -42,7 +42,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
             List<(IReadOnlyUnitState unit, IBuff[] buffs)> buffPairs =
                 state.UnitMapState.GetAllUnits()
                     .Where(a => a.Buffs.Count > 0)
-                    .Select(a => (a, a.Buffs.Select(u => u.BuffName.GetInstance()).ToArray()))
+                    .Select(a => (a, a.Buffs.Select(u => u.BuffName.GetBuffInstance()).ToArray()))
                     .ToList();
             foreach (var pair in buffPairs)
             {

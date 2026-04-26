@@ -41,6 +41,8 @@ animations = [{
 
 [resource]
 script = ExtResource("1_cqclv")
-Name = 1
+Name = "Unit_0"
+MaxHealth = 50.0
+MaxShield = 50.0
 ViewOffset = Vector2(7, -6)
 ViewFrames = SubResource("SpriteFrames_cqclv")

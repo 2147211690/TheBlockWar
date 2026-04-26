@@ -13,7 +13,7 @@ public interface IReadOnlyUnitState
     };
     long Id { get; }
     int Team { get; }
-    UnitNameEnum Name { get; }
+    string Name { get; }
     Vector2I Coords { get; }
     float Health { get; }
     float MaxHealth { get; }

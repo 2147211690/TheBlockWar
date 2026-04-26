@@ -2,8 +2,8 @@ using System.Text.Json.Serialization;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
-using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Games.Units;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -22,6 +22,7 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 [JsonDerivedType(typeof(ApplyPlaceTileStep), nameof(ApplyPlaceTileStep))]
 [JsonDerivedType(typeof(ApplyPlaceUnitStep), nameof(ApplyPlaceUnitStep))]
 [JsonDerivedType(typeof(ApplyPushUnitStep), nameof(ApplyPushUnitStep))]
+[JsonDerivedType(typeof(ApplyRectWindStep), nameof(ApplyRectWindStep))]
 [JsonDerivedType(typeof(ApplyStepsStep), nameof(ApplyStepsStep))]
 public abstract record ApplyStep
 {
@@ -84,7 +85,7 @@ public record ApplyDropUnitStep(Vector2I Coords) : ApplyStep
     }
 }
 
-public record ApplyModifyTileRegionStep(Vector2I Coords, RegionNameEnum RegionName, RegionOperation Operation, int Duration) : ApplyStep
+public record ApplyModifyTileRegionStep(Vector2I Coords, string RegionName, RegionOperation Operation, int Duration) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
@@ -92,7 +93,7 @@ public record ApplyModifyTileRegionStep(Vector2I Coords, RegionNameEnum RegionNa
     }
 }
 
-public record ApplyModifyUnitBuffStep(Vector2I Coords, BuffNameEnum BuffName, BuffOperation Operation, int Duration) : ApplyStep
+public record ApplyModifyUnitBuffStep(Vector2I Coords, string BuffName, BuffOperation Operation, int Duration) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
@@ -132,7 +133,7 @@ public record ApplyPlaceTileStep(Vector2I Coords, TileState Tile) : ApplyStep
     }
 }
 
-public record ApplyPlaceUnitStep(Vector2I Coords, UnitNameEnum UnitName, int Team) : ApplyStep
+public record ApplyPlaceUnitStep(Vector2I Coords, string UnitName, int Team) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
@@ -145,6 +146,14 @@ public record ApplyPushUnitStep(Vector2I Coords, DirMask Dir) : ApplyStep
     public override void Apply(IGameState state, SimulationContext context)
     {
         state.ApplyPushUnit(Coords, Dir, context);
+    }
+}
+
+public record ApplyRectWindStep(Rect2I Rect, DirMask Dir) : ApplyStep
+{
+    public override void Apply(IGameState state, SimulationContext context)
+    {
+        state.ApplyRectWind(Rect, Dir, context);
     }
 }
 

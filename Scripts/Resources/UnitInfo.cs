@@ -3,9 +3,10 @@ using TheBlockWar.Scripts.Games.Units;
 namespace TheBlockWar.Scripts.Resources;
 
 [GlobalClass, Tool]
-public partial class UnitInfo : Resource, IInfo<UnitNameEnum>
+public partial class UnitInfo : Resource, IInfo
 {
-    [Export] public UnitNameEnum Name { get; set; }
+    public static readonly UnitInfo Null = new();
+    [Export] public string Name { get; set; } = "None";
     [ExportGroup("Unit")]
     [Export] public float MaxHealth { get; set; }
     [Export] public float MaxShield { get; set; }

@@ -4,11 +4,11 @@ using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
 [RegisterChildClass(typeof(Buffs))]
-public abstract class Buff(BuffNameEnum name) : IBuff
+public abstract class Buff(string name) : IBuff
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public BuffNameEnum Name { get; } = name;
+    public string Name { get; } = name;
 
     public virtual void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
     {

@@ -3,10 +3,10 @@ using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games.Skills;
 [RegisterChildClass(typeof(Skills))]
-public abstract class Skill(SkillNameEnum skillEnum, int argCount) : ISkill
+public abstract class Skill(string skillName, int argCount) : ISkill
 {
     
-    public SkillNameEnum SkillEnum { get; } = skillEnum;
+    public string SkillName { get; } = skillName;
     public int ArgCount { get; } = argCount;
 
     /// <summary>

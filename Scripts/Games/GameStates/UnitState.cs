@@ -10,7 +10,7 @@ public class UnitState : IReadOnlyUnitState
     public static readonly UnitState Null = IReadOnlyUnitState.Null.Clone();
     public long Id { get; set; }
     public int Team { get; set; } = 0;
-    public UnitNameEnum Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public Vector2I Coords { get; set; }
     public float Health { get; set; } = 100;
     public float MaxHealth { get; set; } = 100;
@@ -57,12 +57,12 @@ public class UnitState : IReadOnlyUnitState
     /// <summary>
     /// 添加一个buff,不做检查
     /// </summary>
-    public void AddBuff(BuffNameEnum buffName, int duration)
+    public void AddBuff(string buffName, int duration)
     {
         var list = GetBuffList();
         for (var i = 0; i < list.Count; i++)
         {
-            if (list[i].BuffName.GetInfo().Priority < buffName.GetInfo().Priority) continue;
+            if (list[i].BuffName.GetBuffInfo().Priority < buffName.GetBuffInfo().Priority) continue;
             list.Insert(i, new BuffState
             {
                 BuffName = buffName,
@@ -77,7 +77,7 @@ public class UnitState : IReadOnlyUnitState
         });
     }
 
-    public void RemoveBuff(BuffNameEnum buffName)
+    public void RemoveBuff(string buffName)
     {
         if (!this.TryFindBuff(buffName, out var index)) return;
         GetBuffList().RemoveAt(index);
@@ -88,7 +88,7 @@ public class UnitState : IReadOnlyUnitState
         GetBuffList().RemoveAt(index);
     }
 
-    public void ModifyBuff(BuffNameEnum buffName, int modifyDuration)
+    public void ModifyBuff(string buffName, int modifyDuration)
     {
         if (!this.TryFindBuff(buffName, out var index)) return;
         GetBuffList()[index] = new BuffState

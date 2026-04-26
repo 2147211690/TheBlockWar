@@ -3,17 +3,18 @@ using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Games.Tiles;
 using TheBlockWar.Scripts.Games.Units;
+using System.Linq;
 
 namespace TheBlockWar.Scripts.Resources;
 
 [GlobalClass, Tool]
 public partial class InfoManager : Resource
 {
-    [Export] public Godot.Collections.Dictionary<BuffNameEnum, BuffInfo?> BuffInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<RegionNameEnum, RegionInfo?> RegionInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<UnitNameEnum, UnitInfo?> UnitInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<TileNameEnum, TileInfo?> TileInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<SkillNameEnum, SkillInfo?> SkillInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, BuffInfo?> BuffInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, RegionInfo?> RegionInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, UnitInfo?> UnitInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, TileInfo?> TileInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, SkillInfo?> SkillInfos { get; set; } = new();
     
     #if TOOLS
     [ExportGroup("Tools")]
@@ -38,10 +39,12 @@ public partial class InfoManager : Resource
     private void OnAutoCreateBuffInfos()
     {
         AutoCreateInfos(
-            BuffInfos, 
+            BuffInfos,
             () => new BuffInfo(),
-            BuffInfoPath, 
-            "BuffInfo");
+            BuffInfoPath,
+            "BuffInfo",
+            Enum.GetValuesAsUnderlyingType<BuffNameEnum>().Cast<BuffNameEnum>().Select(a => a.ToString()).ToArray()
+        );
     }
     private void OnAutoCreateRegionInfos()
     {
@@ -49,7 +52,9 @@ public partial class InfoManager : Resource
             RegionInfos, 
             () => new RegionInfo(),
             RegionInfoPath, 
-            "RegionInfo");
+            "RegionInfo",
+            Enum.GetValuesAsUnderlyingType<RegionNameEnum>().Cast<RegionNameEnum>().Select(a => a.ToString()).ToArray()
+        );
     }
 
     private void OnAutoCreateUnitInfos()
@@ -58,7 +63,9 @@ public partial class InfoManager : Resource
             UnitInfos, 
             () => new UnitInfo(),
             UnitInfoPath, 
-            "UnitInfo");
+            "UnitInfo",
+            Enum.GetValuesAsUnderlyingType<UnitNameEnum>().Cast<UnitNameEnum>().Select(a => a.ToString()).ToArray()
+        );
     }
     private void OnAutoCreateTileInfos()
     {
@@ -66,7 +73,9 @@ public partial class InfoManager : Resource
             TileInfos, 
             () => new TileInfo(),
             TileInfoPath, 
-            "TileInfo");
+            "TileInfo",
+            Enum.GetValuesAsUnderlyingType<TileNameEnum>().Cast<TileNameEnum>().Select(a => a.ToString()).ToArray()
+        );
     }
 
     private void OnAutoCreateSkillInfos()
@@ -75,7 +84,9 @@ public partial class InfoManager : Resource
             SkillInfos, 
             () => new SkillInfo(),
             SkillInfoPath, 
-            "SkillInfo");
+            "SkillInfo",
+            Enum.GetValuesAsUnderlyingType<SkillNameEnum>().Cast<SkillNameEnum>().Select(a => a.ToString()).ToArray()
+        );
     }
 
     private void OnAutoCreateAllInfos()
@@ -86,15 +97,15 @@ public partial class InfoManager : Resource
         OnAutoCreateTileInfos();
         OnAutoCreateSkillInfos();
     }
-    private void AutoCreateInfos<TEnum, TValue>(
-        IDictionary<TEnum, TValue?> dict,
+    private void AutoCreateInfos<TValue>(
+        IDictionary<string, TValue?> dict,
         Func<TValue> resourceFactory,
         string infoDir,
-        string namedSuffix
-        ) where TEnum : struct, Enum where TValue : Resource, IInfo<TEnum>
+        string namedSuffix,
+        string[] names) where TValue : Resource, IInfo
     {
         dict.Clear();
-        var hasCreated = new Dictionary<TEnum, string>();
+        var hasCreated = new Dictionary<string, string>();
         foreach (var name in DirAccess.GetFilesAt(infoDir))
         {
             var path = $"{infoDir}/{name}";
@@ -115,10 +126,9 @@ public partial class InfoManager : Resource
             }
         }
         var isRenamed = false;
-        foreach (var i in Enum.GetValuesAsUnderlyingType<TEnum>())
+        foreach (var name in names)
         {
-            var name = (TEnum)i;
-            var path = $"{infoDir}/{Enum.GetName(name)}{namedSuffix}.tres";
+            var path = $"{infoDir}/{name}{namedSuffix}.tres";
             if (hasCreated.TryGetValue(name, out var oldPath) && oldPath != path)
             {
                 DirAccess.RenameAbsolute(oldPath, path);

@@ -4,11 +4,11 @@ using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Games.Regions;
 [RegisterChildClass(typeof(Regions))]
-public abstract class Region(RegionNameEnum name) : IRegion
+public abstract class Region(string name) : IRegion
 {
     protected Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public RegionNameEnum Name { get; } = name;
+    public string Name => name;
 
     public virtual void OnUnitEnter(IGameState state, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I enterCoords, bool isAddRegion, SimulationContext context)
     {

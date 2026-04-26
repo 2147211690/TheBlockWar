@@ -18,7 +18,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
+                    context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tile));
                     return;
                 }
 
@@ -27,7 +27,7 @@ partial class Simulator
                     t.Name = tile.Name;
                     t.Tag = tile.Tag;
                 });
-                context.Steps?.AddStep(new PlaceTileStep(IsCurrentChildSimulation, coords, tile));
+                context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tile));
                 var unit = state.UnitMapState.GetUnit(coords);
                 if (!unit.IsNull()) state.ApplyUnitSetInCoords(unit, context);
             }

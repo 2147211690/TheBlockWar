@@ -3,7 +3,8 @@ using TheBlockWar.Scripts.Games.Tiles;
 namespace TheBlockWar.Scripts.Resources;
 
 [GlobalClass, Tool]
-public partial class TileInfo : Resource, IInfo<TileNameEnum>
+public partial class TileInfo : Resource, IInfo
 {
-    [Export] public TileNameEnum Name { get; set; }
+    public static readonly TileInfo Null = new();
+    [Export] public string Name { get; set; } = "None";
 }

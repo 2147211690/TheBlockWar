@@ -6,7 +6,7 @@ public class UnitStateData
 {
     public long Id { get; set; }
     public int Team { get; set; } = 0;
-    public UnitNameEnum Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public Vector2I Coords { get; set; }
     public float Health { get; set; } = 100;
     public float MaxHealth { get; set; } = 100;

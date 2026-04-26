@@ -17,7 +17,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new PushUnitStep(IsCurrentChildSimulation, coords, dir, 0, true));
+                    context.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, 0, true));
                     return;
                 }
 
@@ -25,7 +25,7 @@ partial class Simulator
                 var target = coords + dir.ToVec2I();
                 var targetUnit = state.UnitMapState.GetUnit(target);
                 var validPush = !unit.IsNull() && targetUnit.IsNull() && state.IsInMap(target);
-                context.Steps?.AddStep(new PushUnitStep(IsCurrentChildSimulation, coords, dir, unit.Id, validPush));
+                context.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, unit.Id, validPush));
                 if (unit.IsNull()) return;
                 if (validPush)
                 {

@@ -9,10 +9,39 @@ namespace TheBlockWar.Scripts.Tools;
 
 public static class InfoExtensions
 {
-    public static InfoManager InfoManager { get; set; }
-    public static BuffInfo GetInfo(this BuffNameEnum name) => InfoManager.BuffInfos[name]!;
-    public static SkillInfo GetInfo(this SkillNameEnum name) => InfoManager.SkillInfos[name]!;
-    public static UnitInfo GetInfo(this UnitNameEnum name) => InfoManager.UnitInfos[name]!;
-    public static RegionInfo GetInfo(this RegionNameEnum name) => InfoManager.RegionInfos[name]!;
-    public static TileInfo GetInfo(this TileNameEnum name) => InfoManager.TileInfos[name]!;
+    public static InfoManager InfoManager { get; set; } = null!;
+
+    public static BuffInfo GetBuffInfo(this string name)
+    {
+        if (InfoManager.BuffInfos.TryGetValue(name, out var info) && info != null) return info;
+        GD.PushWarning($"BuffInfo {name} 没有找到, 使用空");
+        return BuffInfo.Null;
+    }
+
+    public static SkillInfo GetSkillInfo(this string name)
+    {
+        if (InfoManager.SkillInfos.TryGetValue(name, out var info) && info != null) return info;
+        GD.PushWarning($"SkillInfo {name} 没有找到, 使用空");
+        return SkillInfo.Null;
+    }
+    public static UnitInfo GetUnitInfo(this string name)
+    {
+        if (InfoManager.UnitInfos.TryGetValue(name, out var info) && info != null) return info;
+        GD.PushWarning($"UnitInfo {name} 没有找到, 使用空");
+        return UnitInfo.Null;
+    }
+
+    public static RegionInfo GetRegionInfo(this string name)
+    {
+        if (InfoManager.RegionInfos.TryGetValue(name, out var info) && info != null) return info;
+        GD.PushWarning($"RegionInfo {name} 没有找到, 使用空");
+        return RegionInfo.Null;
+    }
+
+    public static TileInfo GetTileInfo(this string name)
+    {
+        if (InfoManager.TileInfos.TryGetValue(name, out var info) && info != null) return info;
+        GD.PushWarning($"TileInfo {name} 没有找到, 使用空");
+        return TileInfo.Null;
+    }
 }

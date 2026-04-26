@@ -31,8 +31,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-ImGuiRoot="*uid://dugmpnsxaagba"
 CallHelper="*uid://fa1xktpsl2t3"
+ImGuiRoot="*uid://dugmpnsxaagba"
 
 [display]
 

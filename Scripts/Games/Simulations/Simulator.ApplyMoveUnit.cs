@@ -19,7 +19,7 @@ partial class Simulator
                 bool isValid = true;
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, 0, isValid));
+                    context.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, 0, isValid));
                     return;
                 }
 
@@ -27,11 +27,11 @@ partial class Simulator
                 if (!unit.IsNull())
                 {
                     state.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
-                    context.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, unit.Id, isValid));
+                    context.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, unit.Id, isValid));
                     state.ApplyUnitRemoveFromCoords(unit, coords, context);
                     state.ApplyUnitSetInCoords(unit, context);
                 }
-                else context.Steps?.AddStep(new MoveUnitStep(IsCurrentChildSimulation, coords, to, unit.Id, isValid));
+                else context.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, unit.Id, isValid));
             }
         }
     }

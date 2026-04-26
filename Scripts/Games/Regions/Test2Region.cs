@@ -1,7 +1,7 @@
 
 namespace TheBlockWar.Scripts.Games.Regions;
 
-public class Test2Region() : Region(RegionNameEnum.Test2)
+public class Test2Region() : Region(RegionNames.Test2)
 {
 
 }

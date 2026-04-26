@@ -17,7 +17,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new CureStep(IsCurrentChildSimulation, coords, cure, 0, 0));
+                    context.Steps?.AddStep(new CureStep(CurrentDeep, coords, cure, 0, 0));
                     return;
                 }
 
@@ -26,7 +26,7 @@ partial class Simulator
                 if (unit.IsNull() || unit.IsDead)
                 {
                     context.Steps?.AddStep(
-                        new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
+                        new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
                     return;
                 }
 
@@ -42,7 +42,7 @@ partial class Simulator
                 if (unit.IsNull())
                 {
                     context.Steps?.AddStep(
-                        new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
+                        new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
                     return;
                 }
 
@@ -53,11 +53,11 @@ partial class Simulator
                 if (unit.IsNull())
                 {
                     context.Steps?.AddStep(
-                        new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
+                        new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
                     return;
                 }
 
-                context.Steps?.AddStep(new CureStep(IsCurrentChildSimulation, coords, cure, unit.Id, validCure));
+                context.Steps?.AddStep(new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
 
                 if (validCure > 0 && ComplexSimulationRegion(context, 0))
                 {

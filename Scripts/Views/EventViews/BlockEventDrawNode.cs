@@ -18,11 +18,11 @@ public partial class BlockEventDrawNode : Node2D
     private float _healthValidChange;
     private bool _healthHasAim;
 
-    private HashSet<BuffNameEnum> _addBuffs = new();
-    private HashSet<BuffNameEnum> _removeBuffs = new();
+    private HashSet<string> _addBuffs = new();
+    private HashSet<string> _removeBuffs = new();
 
-    private HashSet<RegionNameEnum> _addRegions = new();
-    private HashSet<RegionNameEnum> _removeRegions = new();
+    private HashSet<string> _addRegions = new();
+    private HashSet<string> _removeRegions = new();
     
     
     private Texture2D[][] _tabs = new Texture2D[4][];
@@ -48,7 +48,7 @@ public partial class BlockEventDrawNode : Node2D
         QueueRedraw();
     }
 
-    public void AddBuffChange(BuffNameEnum buffName, bool isAdd, bool isFocused, TeamTypeEnum team)
+    public void AddBuffChange(string buffName, bool isAdd, bool isFocused, TeamTypeEnum team)
     {
         if (!UpdateFocused(isFocused, team)) return;
         if (isAdd)
@@ -62,7 +62,7 @@ public partial class BlockEventDrawNode : Node2D
         QueueRedraw();
     }
 
-    public void AddRegionChange(RegionNameEnum regionName, bool isAdd, bool isFocused, TeamTypeEnum team)
+    public void AddRegionChange(string regionName, bool isAdd, bool isFocused, TeamTypeEnum team)
     {
         if (!UpdateFocused(isFocused, team)) return;
         if (isAdd)
@@ -120,22 +120,22 @@ public partial class BlockEventDrawNode : Node2D
             var i = 0;
             if (_addBuffs.Count > 0)
             {
-                _tabs[i] = _addBuffs.Select(a => a.GetInfo().Icon).ToArray()!;
+                _tabs[i] = _addBuffs.Select(a => a.GetBuffInfo().Icon).ToArray()!;
                 _addTab[i++] = true;
             }
             if (_removeBuffs.Count > 0)
             {
-                _tabs[i] = _removeBuffs.Select(a => a.GetInfo().Icon).ToArray()!;
+                _tabs[i] = _removeBuffs.Select(a => a.GetBuffInfo().Icon).ToArray()!;
                 _addTab[i++] = false;
             }
             if (_addRegions.Count > 0)
             {
-                _tabs[i] = _addRegions.Select(a => a.GetInfo().Icon).ToArray()!;
+                _tabs[i] = _addRegions.Select(a => a.GetBuffInfo().Icon).ToArray()!;
                 _addTab[i++] = true;
             }
             if (_removeRegions.Count > 0)
             {
-                _tabs[i] = _removeRegions.Select(a => a.GetInfo().Icon).ToArray()!;
+                _tabs[i] = _removeRegions.Select(a => a.GetBuffInfo().Icon).ToArray()!;
                 _addTab[i++] = false;
             }
             _itemTabStyle.Layout = hasHelath == hasTab ? -1 : 0;

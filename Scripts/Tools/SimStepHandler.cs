@@ -7,7 +7,7 @@ public class SimStepHandler
 {
     private Func<SimStep, GDTask> _handleAction;
     
-    private SimStep _endStep = new SimStep(false);
+    private SimStep _endStep = new SimStep(0);
 
     public SimStepHandler(Func<SimStep, GDTask> handleAction)
     {
@@ -22,7 +22,7 @@ public class SimStepHandler
         // 处理为事件列表
         foreach (var step in results.SelectMany(x => x.Steps!.Append(_endStep)))
         {
-            if (!step.IsChildStep) // 如果是主步骤
+            if (step.Deep == 0) // 如果是主步骤
             {
                 var collection = stepCollection;
                 if (collection.Count == 1)

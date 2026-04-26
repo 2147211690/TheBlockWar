@@ -7,13 +7,13 @@ namespace TheBlockWar.Scripts.Games;
 //TODO:可能使用其他方式创建单位
 public static class UnitFactory
 {
-    public static UnitState CreateUnit(UnitNameEnum name, int team, long id, Vector2I coords = default)
+    public static UnitState CreateUnit(string unitName, int team, long id, Vector2I coords = default)
     {
-        var unitInfo = name.GetInfo();
+        var unitInfo = unitName.GetUnitInfo();
         return new UnitState()
         {
             Id = id,
-            Name = name,
+            Name = unitName,
             Coords = coords,
             MaxHealth = unitInfo.MaxHealth,
             Health = unitInfo.MaxHealth,

@@ -9,7 +9,7 @@ partial class Simulator
     extension(IGameState state)
     {
         //TODO:prefabUnit改为枚举
-        public void ApplyPlaceUnit(Vector2I coords, UnitNameEnum unitName, int team, SimulationContext context)
+        public void ApplyPlaceUnit(Vector2I coords, string unitName, int team, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -20,7 +20,7 @@ partial class Simulator
                 bool isValid = !state.UnitMapState.HasUnit(coords);
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
+                    context.Steps?.AddStep(new PlaceUnitStep(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
                     return;
                 }
                 
@@ -30,12 +30,12 @@ partial class Simulator
                     if (!isValid)
                     {
                         context.Steps?.AddStep(
-                            new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
+                            new PlaceUnitStep(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
                         return;
                     }
                     var unitState = UnitFactory.CreateUnit(unitName, team, state.IdGenerator.NewLong(), coords);
                     state.UnitMapState.AddUnit(unitState);
-                    context.Steps?.AddStep(new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, unitState,
+                    context.Steps?.AddStep(new PlaceUnitStep(CurrentDeep, coords, unitName, team, unitState,
                         isValid));
                     //应用单位放置到坐标的额外操作
                     state.ApplyUnitSetInCoords(state.UnitMapState.GetUnit(unitState.Id), context);
@@ -43,7 +43,7 @@ partial class Simulator
                 else
                 {
                     context.Steps?.AddStep(
-                        new PlaceUnitStep(IsCurrentChildSimulation, coords, unitName, team, UnitState.Null, isValid));
+                        new PlaceUnitStep(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
                 }
             }
         }
