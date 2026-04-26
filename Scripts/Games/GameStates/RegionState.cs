@@ -4,7 +4,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public struct RegionState
 {
-    public RegionTypeEnum RegionType { get; set; }
+    public RegionNameEnum RegionName { get; set; }
     /// <summary>
     /// 回合为单位
     /// </summary>

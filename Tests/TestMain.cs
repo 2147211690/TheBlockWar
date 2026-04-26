@@ -24,19 +24,19 @@ public partial class TestMain : Node2D
         ImGui.Begin("测试");
         if (ImGui.Button("添加Buff1"))
         {
-            _.BuffView.ChangeBuffChange(BuffTypeEnum.Test, 1);
+            _.BuffView.ChangeBuffChange(BuffNameEnum.Test, 1);
         }
         if (ImGui.Button("移除Buff1"))
         {
-            _.BuffView.ChangeBuffChange(BuffTypeEnum.Test, -1);
+            _.BuffView.ChangeBuffChange(BuffNameEnum.Test, -1);
         }
         if (ImGui.Button("添加Buff2"))
         {
-            _.BuffView.ChangeBuffChange(BuffTypeEnum.None, 1);
+            _.BuffView.ChangeBuffChange(BuffNameEnum.None, 1);
         }
         if (ImGui.Button("移除Buff2"))
         {
-            _.BuffView.ChangeBuffChange(BuffTypeEnum.None, -1);
+            _.BuffView.ChangeBuffChange(BuffNameEnum.None, -1);
         }
 
         if (ImGui.Button("切换ItemBoxIsSelected"))

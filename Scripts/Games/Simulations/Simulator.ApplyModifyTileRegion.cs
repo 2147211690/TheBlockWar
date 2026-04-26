@@ -8,7 +8,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyModifyTileRegion(Vector2I coords, RegionTypeEnum regionType, RegionOperation operation, 
+        public void ApplyModifyTileRegion(Vector2I coords, RegionNameEnum regionName, RegionOperation operation, 
             int duration, SimulationContext context)
         {
             EnterSimulation();
@@ -19,7 +19,7 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType,
+                    context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionName,
                         operation, duration, operation, duration));
                     return;
                 }
@@ -32,18 +32,18 @@ partial class Simulator
                 {
                     (resultOperation, resultDuration) = operation switch
                     {
-                        RegionOperation.AddRegion => state.HandleAddOrChangeRegion(tile, coords, regionType, duration,
+                        RegionOperation.AddRegion => state.HandleAddOrChangeRegion(tile, coords, regionName, duration,
                             true),
-                        RegionOperation.RemoveRegion => state.HandleRemoveRegion(tile, coords, regionType),
-                        RegionOperation.ChangeDuration => state.HandleAddOrChangeRegion(tile, coords, regionType,
+                        RegionOperation.RemoveRegion => state.HandleRemoveRegion(tile, coords, regionName),
+                        RegionOperation.ChangeDuration => state.HandleAddOrChangeRegion(tile, coords, regionName,
                             duration * 2, false),
                         RegionOperation.SetDuration =>
-                            state.HandleSetDurationRegion(tile, coords, regionType, duration),
+                            state.HandleSetDurationRegion(tile, coords, regionName, duration),
                         _ => (RegionOperation.None, duration)
                     };
                 }
 
-                context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionType, operation,
+                context.Steps?.AddStep(new ModifyTileRegionStep(IsCurrentChildSimulation, coords, regionName, operation,
                     duration, resultOperation, resultDuration));
 
                 if (ComplexSimulationRegion(context, 1))
@@ -53,12 +53,12 @@ partial class Simulator
                     {
                         if (resultOperation == RegionOperation.AddRegion)
                         {
-                            state.NotifyTileRegion(tile, regionType,
+                            state.NotifyTileRegion(tile, regionName,
                                 r => r.OnUnitEnter(state, coords, unit, coords, true, context));
                         }
                         else if (resultOperation == RegionOperation.RemoveRegion)
                         {
-                            state.NotifyTileRegion(tile, regionType,
+                            state.NotifyTileRegion(tile, regionName,
                                 r => r.OnUnitLeave(state, coords, unit, coords, true, context));
                         }
                     }
@@ -67,9 +67,9 @@ partial class Simulator
         }
 
         private (RegionOperation operation, int duration) HandleAddOrChangeRegion(IReadOnlyTileState tile, Vector2I coords, 
-            RegionTypeEnum regionType, int newDuration, bool isAdd)
+            RegionNameEnum regionName, int newDuration, bool isAdd)
         {
-            if (tile.TryFindRegion(regionType, out var index))
+            if (tile.TryFindRegion(regionName, out var index))
             {
                 var oldDuration = tile.Regions[index].Duration;
                 var finalDuration = isAdd ? Mathf.Max(newDuration, oldDuration) : Mathf.Max(newDuration, 0);
@@ -84,14 +84,14 @@ partial class Simulator
                 return (RegionOperation.ChangeDuration, finalDuration - oldDuration);
             }
             
-            state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionType, newDuration));
+            state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionName, newDuration));
             return (RegionOperation.AddRegion, newDuration);
         }
 
         private (RegionOperation operation, int duration) HandleRemoveRegion(IReadOnlyTileState tile, Vector2I coords, 
-            RegionTypeEnum regionType)
+            RegionNameEnum regionName)
         {
-            if (tile.TryFindRegion(regionType, out var index))
+            if (tile.TryFindRegion(regionName, out var index))
             {
                 state.TileMapState.ModifyTile(coords, t => t.RemoveRegion(index));
                 return (RegionOperation.RemoveRegion, 0);
@@ -100,9 +100,9 @@ partial class Simulator
         }
 
         private (RegionOperation operation, int duration) HandleSetDurationRegion(IReadOnlyTileState tile, Vector2I coords, 
-            RegionTypeEnum regionType, int newDuration)
+            RegionNameEnum regionName, int newDuration)
         {
-            if (tile.TryFindRegion(regionType, out var index))
+            if (tile.TryFindRegion(regionName, out var index))
             {
                 var oldDuration = tile.Regions[index].Duration;
                 var finalDuration = Mathf.Max(newDuration, 0);
@@ -117,7 +117,7 @@ partial class Simulator
                 return (RegionOperation.ChangeDuration, finalDuration - oldDuration);
             }
             
-            state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionType, newDuration));
+            state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionName, newDuration));
             return (RegionOperation.AddRegion, newDuration);
         }
     }

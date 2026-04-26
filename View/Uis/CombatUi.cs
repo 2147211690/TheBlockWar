@@ -2,6 +2,7 @@ using System.ComponentModel;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.View.Uis;
@@ -58,7 +59,7 @@ public partial class CombatUi : Control
                 ClearBuffItem();
                 foreach (var buff in unit.Buffs)
                 {
-                    AddBuffItem(buff.BuffType);
+                    AddBuffItem(buff.BuffName);
                 }
             }
         }
@@ -87,9 +88,9 @@ public partial class CombatUi : Control
         //设置位置
         if (isHover)
         {
-            _infoPanel.IconTexture = (itemBox.MetaData as IBuff)?.Info.Icon;
-            _infoPanel.TitleName = (itemBox.MetaData as IBuff)?.Info.BuffType.ToString() ?? "";
-            _infoPanel.Description = (itemBox.MetaData as IBuff)?.Info.Description ?? "";
+            _infoPanel.IconTexture = (itemBox.MetaData as IBuff)?.Name.GetInfo().Icon;
+            _infoPanel.TitleName = (itemBox.MetaData as IBuff)?.Name.ToString() ?? "";
+            _infoPanel.Description = (itemBox.MetaData as IBuff)?.Name.GetInfo().Description ?? "";
             
             var pos = GetLocalMousePosition();
             _infoPanel.LeftDownPosition = pos;
@@ -114,12 +115,12 @@ public partial class CombatUi : Control
         }
     }
     
-    public void AddBuffItem(BuffTypeEnum buffTypeEnum)
+    public void AddBuffItem(BuffNameEnum buffNameEnum)
     {
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _buffContainer.AddChild(itemBox);
-        itemBox.Texture = buffTypeEnum.GetInstance().Info.Icon!;
-        itemBox.MetaData = buffTypeEnum.GetInstance();
+        itemBox.Texture = buffNameEnum.GetInfo().Icon!;
+        itemBox.MetaData = buffNameEnum.GetInstance();
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
     }

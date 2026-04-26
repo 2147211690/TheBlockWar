@@ -23,18 +23,18 @@ public class BlockDraw
         node.AddHealthChange(originChange, validChange, hasAim, isFocused, team);
     }
 
-    public void AddBuffChange(Vector2I coords, BuffTypeEnum buffType, bool isAdd, bool isFocused, TeamTypeEnum team)
+    public void AddBuffChange(Vector2I coords, BuffNameEnum buffName, bool isAdd, bool isFocused, TeamTypeEnum team)
     {
         var node = GetBlockEventDrawNode(coords);
         node.Coords = coords;
-        node.AddBuffChange(buffType, isAdd, isFocused, team);
+        node.AddBuffChange(buffName, isAdd, isFocused, team);
     }
 
-    public void AddRegionChange(Vector2I coords, RegionTypeEnum regionType, bool isAdd, bool isFocused, TeamTypeEnum team)
+    public void AddRegionChange(Vector2I coords, RegionNameEnum regionName, bool isAdd, bool isFocused, TeamTypeEnum team)
     {
         var node = GetBlockEventDrawNode(coords);
         node.Coords = coords;
-        node.AddRegionChange(regionType, isAdd, isFocused, team);
+        node.AddRegionChange(regionName, isAdd, isFocused, team);
     }
 
     private BlockEventDrawNode GetBlockEventDrawNode(Vector2I coords)

@@ -169,10 +169,10 @@ public class EventView
             _ => false,
         };
         
-        if (!step.IsChildStep) BlockDraw.AddBuffChange(step.Coords, step.BuffType, isAdd, IsFocused, TeamType);
+        if (!step.IsChildStep) BlockDraw.AddBuffChange(step.Coords, step.BuffName, isAdd, IsFocused, TeamType);
         if (IsFocused)
         {
-            UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffType, c);
+            UnitsView.GetUnitView(step.ResultUnitId)?.BuffView.ChangeBuffChange(step.BuffName, c);
         }
         NeedClearUnit(step.ResultUnitId);
     }

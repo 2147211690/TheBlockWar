@@ -1,6 +1,6 @@
 namespace TheBlockWar.Scripts.Games.Buffs;
 
-public enum BuffTypeEnum
+public enum BuffNameEnum
 {
     None = 0,
     Test,

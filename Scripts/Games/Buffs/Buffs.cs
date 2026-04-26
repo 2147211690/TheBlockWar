@@ -2,19 +2,18 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 
 public static class Buffs
 {
-    private static readonly Dictionary<BuffTypeEnum, IBuff> _buffs = new();
+    private static readonly Dictionary<BuffNameEnum, IBuff> _buffs = new();
     public static void Register(IBuff buff)
     {
-        _buffs[buff.Info.BuffType] = buff;
+        if (_buffs.TryAdd(buff.Name, buff)) return;
+        GD.PushWarning($"{buff.GetType()}:另一个buff已注册为{buff.Name}");
     }
-    public static IBuff GetInstance(this BuffTypeEnum type)
+    public static IBuff GetInstance(this BuffNameEnum name)
     {
-        return _buffs[type];
-    }
-
-    static Buffs()
-    {
-        Register(new TestBuff());
-        Register(new Test2Buff());
+        if (_buffs.TryGetValue(name, out var buff)) return buff;
+        GD.PushWarning($"未注册buff:{name},使用空buff");
+        _buffs[name] = buff = new EmptyBuff(name);
+        return buff;
     }
 }
+public class EmptyBuff(BuffNameEnum name) : Buff(name){}

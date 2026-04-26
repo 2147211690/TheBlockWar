@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Regions;
+using TheBlockWar.Scripts.Games.Tiles;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -8,7 +9,7 @@ public class TileState : IReadOnlyTileState
 {
     public static readonly TileState Empty = new() { Tag = TileTag.Empty };
     public TileTag Tag { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public TileNameEnum Name { get; set; }
     public IReadOnlyList<RegionState> Regions => _regions ?? [];
     private List<RegionState>? _regions;
     
@@ -31,18 +32,18 @@ public class TileState : IReadOnlyTileState
     /// <summary>
     /// 添加一个区域效果,不做检查
     /// </summary>
-    public void AddRegion(RegionTypeEnum regionType, int duration)
+    public void AddRegion(RegionNameEnum regionName, int duration)
     {
         GetRegionList().Add(new RegionState
         {
-            RegionType = regionType,
+            RegionName = regionName,
             Duration = duration
         });
     }
 
-    public void RemoveRegion(RegionTypeEnum regionType)
+    public void RemoveRegion(RegionNameEnum regionName)
     {
-        if (!this.TryFindRegion(regionType, out var index)) return;
+        if (!this.TryFindRegion(regionName, out var index)) return;
         GetRegionList().RemoveAt(index);
     }
     public void RemoveRegion(int index)
@@ -51,12 +52,12 @@ public class TileState : IReadOnlyTileState
         GetRegionList().RemoveAt(index);
     }
 
-    public void ModifyRegion(RegionTypeEnum regionType, int modifyDuration)
+    public void ModifyRegion(RegionNameEnum regionName, int modifyDuration)
     {
-        if (!this.TryFindRegion(regionType, out var index)) return;
+        if (!this.TryFindRegion(regionName, out var index)) return;
         GetRegionList()[index] = new RegionState
         {
-            RegionType = regionType,
+            RegionName = regionName,
             Duration = modifyDuration
         };
     }
@@ -65,7 +66,7 @@ public class TileState : IReadOnlyTileState
         if (index < 0 || index >= Regions.Count) return;
         GetRegionList()[index] = new RegionState
         {
-            RegionType = Regions[index].RegionType,
+            RegionName = Regions[index].RegionName,
             Duration = modifyDuration
         };
     }

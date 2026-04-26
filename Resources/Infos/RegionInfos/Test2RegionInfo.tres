@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://dakcohimqfcnn"]
+
+[ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_4l4m2"]
+
+[resource]
+script = ExtResource("1_4l4m2")
+RegionType = 2

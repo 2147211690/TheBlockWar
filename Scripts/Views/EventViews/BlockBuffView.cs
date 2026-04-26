@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Tools;
 using Wintellect.PowerCollections;
 
 namespace TheBlockWar.Scripts.Views.EventViews;
@@ -22,43 +23,43 @@ public partial class BlockBuffView : Node2D
 
     private TilesView TilesView => EventsView.GameView.TilesView;
 
-    private MultiDictionary<Vector2I, BuffTypeEnum> _coordsForAddBuff = new(false);
-    private MultiDictionary<Vector2I, BuffTypeEnum> _coordsForRemoveBuff = new(false);
-    private MultiDictionary<Vector2I, BuffTypeEnum> _coordsForAddBuffFocused = new(false);
-    private MultiDictionary<Vector2I, BuffTypeEnum> _coordsForRemoveBuffFocused = new(false);
-    private Bag<(Vector2I, BuffTypeEnum)> _coordsForAddBuffCount = new();
-    private Bag<(Vector2I, BuffTypeEnum)> _coordsForRemoveBuffCount = new();
-    private Bag<(Vector2I, BuffTypeEnum)> _coordsForAddBuffFocusedCount = new();
-    private Bag<(Vector2I, BuffTypeEnum)> _coordsForRemoveBuffFocusedCount = new();
+    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForAddBuff = new(false);
+    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForRemoveBuff = new(false);
+    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForAddBuffFocused = new(false);
+    private MultiDictionary<Vector2I, BuffNameEnum> _coordsForRemoveBuffFocused = new(false);
+    private Bag<(Vector2I, BuffNameEnum)> _coordsForAddBuffCount = new();
+    private Bag<(Vector2I, BuffNameEnum)> _coordsForRemoveBuffCount = new();
+    private Bag<(Vector2I, BuffNameEnum)> _coordsForAddBuffFocusedCount = new();
+    private Bag<(Vector2I, BuffNameEnum)> _coordsForRemoveBuffFocusedCount = new();
     
     
 
     private double _animationTime;
     
-    public void AddBuffChange(Vector2I coords, BuffTypeEnum buffType, bool isAdd, bool isFocused = false)
+    public void AddBuffChange(Vector2I coords, BuffNameEnum buffName, bool isAdd, bool isFocused = false)
     {
         var (countDict, multiDict) = GetDictPair(isAdd, isFocused);
         
-        multiDict.Add(coords, buffType);
-        countDict.Add((coords, buffType));
+        multiDict.Add(coords, buffName);
+        countDict.Add((coords, buffName));
         QueueRedraw();
     }
 
-    public void RemoveBuffChange(Vector2I coords, BuffTypeEnum buffType, bool isAdd, bool isFocused = false)
+    public void RemoveBuffChange(Vector2I coords, BuffNameEnum buffName, bool isAdd, bool isFocused = false)
     {
         var (countDict, multiDict) = GetDictPair(isAdd, isFocused);
         
-        if (countDict.Remove((coords, buffType)) && !countDict.Contains((coords, buffType)))
+        if (countDict.Remove((coords, buffName)) && !countDict.Contains((coords, buffName)))
         {
-            multiDict.Remove(coords, buffType); 
+            multiDict.Remove(coords, buffName); 
         }
         QueueRedraw();
     }
 
-    private (Bag<(Vector2I, BuffTypeEnum)> countDict, MultiDictionary<Vector2I, BuffTypeEnum> multiDict) GetDictPair(bool isAdd, bool isFocused)
+    private (Bag<(Vector2I, BuffNameEnum)> countDict, MultiDictionary<Vector2I, BuffNameEnum> multiDict) GetDictPair(bool isAdd, bool isFocused)
     {
-        Bag<(Vector2I, BuffTypeEnum)> countDict;
-        MultiDictionary<Vector2I, BuffTypeEnum> multiDict;
+        Bag<(Vector2I, BuffNameEnum)> countDict;
+        MultiDictionary<Vector2I, BuffNameEnum> multiDict;
         if (isFocused)
         {
             countDict = isAdd ? _coordsForAddBuffFocusedCount : _coordsForRemoveBuffFocusedCount;
@@ -123,7 +124,7 @@ public partial class BlockBuffView : Node2D
         }
     }
 
-    private void DrawBuffRow(Vector2 rowCenter, ICollection<BuffTypeEnum> buffs, bool isGain, float alpha)
+    private void DrawBuffRow(Vector2 rowCenter, ICollection<BuffNameEnum> buffs, bool isGain, float alpha)
     {
         float totalWidth = SymbolBoxSize.X;
         if (buffs.Count > 0)
@@ -151,7 +152,7 @@ public partial class BlockBuffView : Node2D
 
         foreach (var type in buffs)
         {
-            var icon = type.GetInstance().Info.Icon;
+            var icon = type.GetInfo().Icon;
             if (icon != null)
             {
                 DrawTextureInBox(

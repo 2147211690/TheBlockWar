@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.GameStates.Datas;
+using TheBlockWar.Scripts.Games.Units;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 
@@ -12,7 +13,7 @@ public interface IReadOnlyUnitState
     };
     long Id { get; }
     int Team { get; }
-    string Name { get; }
+    UnitNameEnum Name { get; }
     Vector2I Coords { get; }
     float Health { get; }
     float MaxHealth { get; }

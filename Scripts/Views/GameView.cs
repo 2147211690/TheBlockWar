@@ -228,12 +228,12 @@ public partial class GameView : Node2D
                 if (modifyUnitBuffStep.Operation == BuffOperation.AddBuff)
                 {
                     UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView
-                        .AddVisibleBuff(modifyUnitBuffStep.BuffType);
+                        .AddVisibleBuff(modifyUnitBuffStep.BuffName);
                 }
                 else if (modifyUnitBuffStep.Operation == BuffOperation.RemoveBuff)
                 {
                     UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView
-                        .RemoveVisibleBuff(modifyUnitBuffStep.BuffType);
+                        .RemoveVisibleBuff(modifyUnitBuffStep.BuffName);
                 }
 
                 break;

@@ -3,17 +3,12 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
-
-public class Buff : IBuff
+[RegisterChildClass(typeof(Buffs))]
+public abstract class Buff(BuffNameEnum name) : IBuff
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public Buff(string infoPath)
-    {
-        Info = ResourceLoader.Exists(infoPath) ? ResourceLoader.Load<BuffInfo>(infoPath) : BuffInfo.Null;
-        //Logger.Warn("BuffInfo-{path}不存在,使用空替代", infoPath);
-    }
 
-    public BuffInfo Info { get; }
+    public BuffNameEnum Name { get; } = name;
 
     public virtual void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
     {

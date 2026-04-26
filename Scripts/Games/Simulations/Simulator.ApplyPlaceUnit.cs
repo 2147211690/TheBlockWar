@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
@@ -8,7 +9,7 @@ partial class Simulator
     extension(IGameState state)
     {
         //TODO:prefabUnit改为枚举
-        public void ApplyPlaceUnit(Vector2I coords, string unitName, int team, UnitState? prefabUnit, SimulationContext context)
+        public void ApplyPlaceUnit(Vector2I coords, UnitNameEnum unitName, int team, UnitState? prefabUnit, SimulationContext context)
         {
             EnterSimulation();
             Main();

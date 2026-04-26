@@ -18,11 +18,11 @@ public partial class BlockEventDrawNode : Node2D
     private float _healthValidChange;
     private bool _healthHasAim;
 
-    private HashSet<BuffTypeEnum> _addBuffs = new();
-    private HashSet<BuffTypeEnum> _removeBuffs = new();
+    private HashSet<BuffNameEnum> _addBuffs = new();
+    private HashSet<BuffNameEnum> _removeBuffs = new();
 
-    private HashSet<RegionTypeEnum> _addRegions = new();
-    private HashSet<RegionTypeEnum> _removeRegions = new();
+    private HashSet<RegionNameEnum> _addRegions = new();
+    private HashSet<RegionNameEnum> _removeRegions = new();
     
     
     private Texture2D[][] _tabs = new Texture2D[4][];
@@ -48,30 +48,30 @@ public partial class BlockEventDrawNode : Node2D
         QueueRedraw();
     }
 
-    public void AddBuffChange(BuffTypeEnum buffType, bool isAdd, bool isFocused, TeamTypeEnum team)
+    public void AddBuffChange(BuffNameEnum buffName, bool isAdd, bool isFocused, TeamTypeEnum team)
     {
         if (!UpdateFocused(isFocused, team)) return;
         if (isAdd)
         {
-            _addBuffs.Add(buffType);
+            _addBuffs.Add(buffName);
         }
         else
         {
-            _removeBuffs.Add(buffType);
+            _removeBuffs.Add(buffName);
         }
         QueueRedraw();
     }
 
-    public void AddRegionChange(RegionTypeEnum regionType, bool isAdd, bool isFocused, TeamTypeEnum team)
+    public void AddRegionChange(RegionNameEnum regionName, bool isAdd, bool isFocused, TeamTypeEnum team)
     {
         if (!UpdateFocused(isFocused, team)) return;
         if (isAdd)
         {
-            _addRegions.Add(regionType);
+            _addRegions.Add(regionName);
         }
         else
         {
-            _removeRegions.Add(regionType);
+            _removeRegions.Add(regionName);
         }
         QueueRedraw();
     }
@@ -120,22 +120,22 @@ public partial class BlockEventDrawNode : Node2D
             var i = 0;
             if (_addBuffs.Count > 0)
             {
-                _tabs[i] = _addBuffs.Select(a => a.GetInstance().Info.Icon).ToArray()!;
+                _tabs[i] = _addBuffs.Select(a => a.GetInfo().Icon).ToArray()!;
                 _addTab[i++] = true;
             }
             if (_removeBuffs.Count > 0)
             {
-                _tabs[i] = _removeBuffs.Select(a => a.GetInstance().Info.Icon).ToArray()!;
+                _tabs[i] = _removeBuffs.Select(a => a.GetInfo().Icon).ToArray()!;
                 _addTab[i++] = false;
             }
             if (_addRegions.Count > 0)
             {
-                _tabs[i] = _addRegions.Select(a => a.GetInstance().Info.Icon).ToArray()!;
+                _tabs[i] = _addRegions.Select(a => a.GetInfo().Icon).ToArray()!;
                 _addTab[i++] = true;
             }
             if (_removeRegions.Count > 0)
             {
-                _tabs[i] = _removeRegions.Select(a => a.GetInstance().Info.Icon).ToArray()!;
+                _tabs[i] = _removeRegions.Select(a => a.GetInfo().Icon).ToArray()!;
                 _addTab[i++] = false;
             }
             _itemTabStyle.Layout = hasHelath == hasTab ? -1 : 0;

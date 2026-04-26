@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="UnitInfo" format=3 uid="uid://6sf2fdur4vsy"]
+
+[ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_dpl8v"]
+
+[resource]
+script = ExtResource("1_dpl8v")

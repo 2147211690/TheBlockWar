@@ -1,6 +1,7 @@
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Games.Units;
 using Yitter.IdGenerator;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -15,7 +16,7 @@ public interface IReadOnlyGameState
     IReadOnlyTileMapState TileMapState { get; }
     IReadOnlyUnitMapState UnitMapState { get; }
     TeamState TeamState { get; }
-    IReadOnlyList<ISkill> GetUnitValidSkills(string name);
+    IReadOnlyList<ISkill> GetUnitValidSkills(UnitNameEnum name);
     IGameState GetSnapshot();
     GameStateData ToData();
 }

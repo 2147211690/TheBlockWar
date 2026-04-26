@@ -1,10 +1,10 @@
+using System.Runtime.CompilerServices;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Regions;
-
-public class Test1Region() : Region("res://Resources/Infos/RegionInfos/Test1Region.tres")
+public class Test1Region() : Region(RegionNameEnum.Test1)
 {
     public override void OnUnitEnter(IGameState state, Vector2I regionCoords,  IReadOnlyUnitState unit, Vector2I enterCoords, 
         bool isAddRegion, SimulationContext context)

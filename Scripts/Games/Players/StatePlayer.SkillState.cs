@@ -82,7 +82,7 @@ public partial class StatePlayer
                 _currentSkillEvent = EventScheduler!.CreateEvent(id => new SkillEvent(id)
                 {
                     SkillBindUnitId = Player.SelectedUnitId,
-                    SkillEnum = SkillEnum.Test1,
+                    SkillName = SkillNameEnum.Test1,
                     Team = _unitState.Team,
                 });
 

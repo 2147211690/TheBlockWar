@@ -9,6 +9,7 @@ using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Games.Turns;
+using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Tools.Jsons;
 using TheBlockWar.Scripts.Views;
@@ -45,7 +46,6 @@ public partial class Test : Node2D
     private TurnManager _turnManager;
     private bool _checkNextTurn;
     
-
     public override void _Ready()
     {
         //配置Yitter.IdGenerator.IdHelper
@@ -71,9 +71,9 @@ public partial class Test : Node2D
         
         _currentGameState = new GameState(
             new Vector2I(10, 10),
-            new Dictionary<string, ISkill[]>() 
+            new Dictionary<UnitNameEnum, ISkill[]>() 
             {
-                {"Unit_0", [SkillEnum.Test1.GetInstance()!]},
+                [UnitNameEnum.Unit_0] = [SkillNameEnum.Test1.GetInstance()!],
             },
             new int[,] 
             {
@@ -134,7 +134,7 @@ public partial class Test : Node2D
             if (ImGui.Button("添加单位"))
             {
                 var coords = new Vector2I(x, y);
-                var unit = UnitFactory.CreateUnit("Unit_0", 0, _gameState.IdGenerator.NewLong(), coords);
+                var unit = UnitFactory.CreateUnit(UnitNameEnum.Unit_0, 0, _gameState.IdGenerator.NewLong(), coords);
                 _currentGameState.UnitMapState.AddUnit(unit);
             }
             
@@ -265,7 +265,7 @@ public partial class Test : Node2D
                     {
                         for (int j = 0; j < 9; j++)
                         {
-                            state.ApplyPlaceUnit(new(i, j), "Unit_0", 1, null, context);
+                            state.ApplyPlaceUnit(new(i, j), UnitNameEnum.Unit_0, 1, null, context);
                         }
                     }
                 },
@@ -292,7 +292,7 @@ public partial class Test : Node2D
                             if (j != 9) state.ApplyNextParallel(context);
                         }
                     }
-                    state.ApplyPlaceUnit(new(2, 2), "Unit_0", 0, null, context);
+                    state.ApplyPlaceUnit(new(2, 2), UnitNameEnum.Unit_0, 0, null, context);
                 },
                 Layer = SimulationLayer.Running,
             });
@@ -304,10 +304,10 @@ public partial class Test : Node2D
             {
                 ActionCore = (e, state, context) =>
                 {
-                    state.ApplyPlaceUnit(new(3,2), "Unit_0", 0, null, context);
-                    state.ApplyPlaceUnit(new(2,3), "Unit_0", 0, null, context);
-                    state.ApplyPlaceUnit(new(1,2), "Unit_0", 0, null, context);
-                    state.ApplyPlaceUnit(new(2,1), "Unit_0", 0, null, context);
+                    state.ApplyPlaceUnit(new(3,2), UnitNameEnum.Unit_0, 0, null, context);
+                    state.ApplyPlaceUnit(new(2,3), UnitNameEnum.Unit_0, 0, null, context);
+                    state.ApplyPlaceUnit(new(1,2), UnitNameEnum.Unit_0, 0, null, context);
+                    state.ApplyPlaceUnit(new(2,1), UnitNameEnum.Unit_0, 0, null, context);
                 },
                 Layer = SimulationLayer.Running,
             });

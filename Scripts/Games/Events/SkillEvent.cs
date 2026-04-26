@@ -8,7 +8,7 @@ namespace TheBlockWar.Scripts.Games.Events;
 public sealed class SkillEvent(long id) : SchedulerEvent(id)
 {
     public long SkillBindUnitId { get; set => SetField(ref field, value); }
-    public SkillEnum SkillEnum { get; set => SetField(ref field, value); }
+    public SkillNameEnum SkillName { get; set => SetField(ref field, value); }
     public Vector2I?[]? SkillArgs
     {
         get => SkillRawSkillArgs;
@@ -44,10 +44,10 @@ public sealed class SkillEvent(long id) : SchedulerEvent(id)
         var unit = state.UnitMapState.GetUnit(SkillBindUnitId);
         if (unit.IsNull()) return;
         var useCoords = unit.Coords;
-        SkillEnum.GetInstance()?.SkillCore(state, context, unit, useCoords, SkillArgs ?? []);
+        SkillName.GetInstance().SkillCore(state, context, unit, useCoords, SkillArgs ?? []);
     }
     public override string ToString()
     {
-        return $"{base.ToString()} -> SkillEvent 单位:{SkillBindUnitId} 技能:{SkillEnum} 参数:{string.Join(",", SkillArgs ?? [])}";
+        return $"{base.ToString()} -> SkillEvent 单位:{SkillBindUnitId} 技能:{SkillName} 参数:{string.Join(",", SkillArgs ?? [])}";
     }
 }

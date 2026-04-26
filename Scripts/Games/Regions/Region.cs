@@ -3,16 +3,12 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Games.Regions;
-
-public class Region : IRegion
+[RegisterChildClass(typeof(Regions))]
+public abstract class Region(RegionNameEnum name) : IRegion
 {
     protected Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public Region(string infoPath)
-    {
-        Info = ResourceLoader.Exists(infoPath) ? ResourceLoader.Load<RegionInfo>(infoPath) : RegionInfo.Null;
-        Logger.Warn("RegionInfo-{path}不存在,使用空替代", infoPath);
-    }
-    public RegionInfo Info { get; }
+
+    public RegionNameEnum Name { get; } = name;
 
     public virtual void OnUnitEnter(IGameState state, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I enterCoords, bool isAddRegion, SimulationContext context)
     {

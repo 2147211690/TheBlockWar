@@ -59,7 +59,7 @@ public static partial class Simulator
                 // 移除所有一次性区域
                 for (var i = toTile.Regions.Count - 1; i >= 0; i--)
                 {
-                    if (!toTile.Regions[i].RegionType.GetInstance().Info.IsOnece) continue;
+                    if (!toTile.Regions[i].RegionName.GetInfo().IsOnece) continue;
                     state.TileMapState.ModifyTile(coords, u => u.RemoveRegion(i));
                 }
             }
@@ -79,15 +79,15 @@ public static partial class Simulator
             if (unit.Buffs.Count == 0) return;
             foreach (var buffType in unit.Buffs.ToArray())
             {
-                action(buffType.BuffType.GetInstance());
+                action(buffType.BuffName.GetInstance());
             }
         }
 
-        private void NotifyUnitBuff(IReadOnlyUnitState unit, BuffTypeEnum buffType, Action<IBuff> action)
+        private void NotifyUnitBuff(IReadOnlyUnitState unit, BuffNameEnum buffName, Action<IBuff> action)
         {
             if (unit.IsNull()) return;
-            if (!unit.TryFindBuff(buffType, out var index)) return;
-            action(unit.Buffs[index].BuffType.GetInstance());
+            if (!unit.TryFindBuff(buffName, out var index)) return;
+            action(unit.Buffs[index].BuffName.GetInstance());
         }
 
         private void NotifyTileRegions(IReadOnlyTileState tile, Action<IRegion> action)
@@ -95,15 +95,15 @@ public static partial class Simulator
             if (tile.Regions.Count == 0) return;
             foreach (var regionType in tile.Regions.ToArray())
             {
-                action(regionType.RegionType.GetInstance());
+                action(regionType.RegionName.GetInstance());
             }
         }
         
-        private void NotifyTileRegion(IReadOnlyTileState tile, RegionTypeEnum regionType, Action<IRegion> action)
+        private void NotifyTileRegion(IReadOnlyTileState tile, RegionNameEnum regionName, Action<IRegion> action)
         {
             if (tile == TileState.Empty) return;
-            if (!tile.TryFindRegion(regionType, out var index)) return;
-            action(tile.Regions[index].RegionType.GetInstance());
+            if (!tile.TryFindRegion(regionName, out var index)) return;
+            action(tile.Regions[index].RegionName.GetInstance());
         }
     }
 }

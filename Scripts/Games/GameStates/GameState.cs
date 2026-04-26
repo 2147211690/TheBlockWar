@@ -2,6 +2,7 @@ using System.Linq;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
 using Yitter.IdGenerator;
 
@@ -23,10 +24,10 @@ public class GameState : IGameState
     
     IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
-    private Dictionary<string, ISkill[]> _unitSkillMap;
+    private Dictionary<UnitNameEnum, ISkill[]> _unitSkillMap;
     private Dictionary<long, SchedulerEvent> _events;
 
-    public IReadOnlyList<ISkill> GetUnitValidSkills(string name)
+    public IReadOnlyList<ISkill> GetUnitValidSkills(UnitNameEnum name)
     {
         //TODO: 根据单位名称获取有效技能
         return _unitSkillMap.TryGetValue(name, out var value) ? value : [];
@@ -36,7 +37,7 @@ public class GameState : IGameState
 
     public GameState(GameStateData data)
     {
-        _unitSkillMap = new Dictionary<string, ISkill[]>();
+        _unitSkillMap = new Dictionary<UnitNameEnum, ISkill[]>();
         _events = new();
         foreach (var eventItem in data.Events)
         {
@@ -54,7 +55,7 @@ public class GameState : IGameState
         TeamState = new TeamState(data.TeamState);
     }
 
-    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations)
+    public GameState(Vector2I mapSize, Dictionary<UnitNameEnum, ISkill[]> unitSkillMap, int[,] teamRelations)
     {
         _unitSkillMap = unitSkillMap;
         _events = new();
@@ -123,7 +124,7 @@ public class GameState : IGameState
             };
         }
 
-        public IReadOnlyList<ISkill> GetUnitValidSkills(string name) => Owner.GetUnitValidSkills(name);
+        public IReadOnlyList<ISkill> GetUnitValidSkills(UnitNameEnum name) => Owner.GetUnitValidSkills(name);
         public void ClearIfSnapshot()
         {
             TileMapState.ClearIfSnapshot();

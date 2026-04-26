@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
+using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
@@ -83,19 +84,19 @@ public record ApplyDropUnitStep(Vector2I Coords) : ApplyStep
     }
 }
 
-public record ApplyModifyTileRegionStep(Vector2I Coords, RegionTypeEnum RegionType, RegionOperation Operation, int Duration) : ApplyStep
+public record ApplyModifyTileRegionStep(Vector2I Coords, RegionNameEnum RegionName, RegionOperation Operation, int Duration) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
-        state.ApplyModifyTileRegion(Coords, RegionType, Operation, Duration, context);
+        state.ApplyModifyTileRegion(Coords, RegionName, Operation, Duration, context);
     }
 }
 
-public record ApplyModifyUnitBuffStep(Vector2I Coords, BuffTypeEnum BuffType, BuffOperation Operation, int Duration) : ApplyStep
+public record ApplyModifyUnitBuffStep(Vector2I Coords, BuffNameEnum BuffName, BuffOperation Operation, int Duration) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
-        state.ApplyModifyUnitBuff(Coords, BuffType, Operation, Duration, context);
+        state.ApplyModifyUnitBuff(Coords, BuffName, Operation, Duration, context);
     }
 }
 
@@ -131,7 +132,7 @@ public record ApplyPlaceTileStep(Vector2I Coords, TileState Tile) : ApplyStep
     }
 }
 
-public record ApplyPlaceUnitStep(Vector2I Coords, string UnitName, int Team, UnitState? PrefabUnit) : ApplyStep
+public record ApplyPlaceUnitStep(Vector2I Coords, UnitNameEnum UnitName, int Team, UnitState? PrefabUnit) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {

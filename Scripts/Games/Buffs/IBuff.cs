@@ -6,7 +6,7 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 
 public interface IBuff
 {
-    BuffInfo Info { get; }
+    BuffNameEnum Name { get; }
     void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context);
     void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
         ref float resultDamage, SimulationContext context);

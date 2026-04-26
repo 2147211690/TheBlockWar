@@ -1,21 +1,21 @@
+using TheBlockWar.Scripts.Games.Buffs;
+
 namespace TheBlockWar.Scripts.Games.Regions;
 
 public static class Regions
 {
-    private static readonly Dictionary<RegionTypeEnum, IRegion> _regions = new();
-    private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    private static readonly Dictionary<RegionNameEnum, IRegion> _regions = new();
     public static void Register(IRegion region)
     {
-        _regions[region.Info.RegionType] = region;
+        if (_regions.TryAdd(region.Name, region)) return;
+        GD.PushWarning($"{region.GetType()}:另一个region已注册为{region.Name}");
     }
-    public static IRegion GetInstance(this RegionTypeEnum type)
+    public static IRegion GetInstance(this RegionNameEnum name)
     {
-        return _regions[type];
-    }
-
-    static Regions()
-    {
-        Register(new Test1Region());
-        Register(new Test2Region());
+        if (_regions.TryGetValue(name, out var region)) return region;
+        GD.PushWarning($"未注册region:{name},使用空region");
+        _regions[name] = region = new EmptyRegion(name);
+        return region;
     }
 }
+public class EmptyRegion(RegionNameEnum name) : Region(name){}

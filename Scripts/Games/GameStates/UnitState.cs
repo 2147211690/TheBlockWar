@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
+using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
@@ -9,7 +10,7 @@ public class UnitState : IReadOnlyUnitState
     public static readonly UnitState Null = IReadOnlyUnitState.Null.Clone();
     public long Id { get; set; }
     public int Team { get; set; } = 0;
-    public string Name { get; set; } =  string.Empty;
+    public UnitNameEnum Name { get; set; }
     public Vector2I Coords { get; set; }
     public float Health { get; set; } = 100;
     public float MaxHealth { get; set; } = 100;
@@ -56,29 +57,29 @@ public class UnitState : IReadOnlyUnitState
     /// <summary>
     /// 添加一个buff,不做检查
     /// </summary>
-    public void AddBuff(BuffTypeEnum buffType, int duration)
+    public void AddBuff(BuffNameEnum buffName, int duration)
     {
         var list = GetBuffList();
         for (var i = 0; i < list.Count; i++)
         {
-            if (list[i].BuffType.GetInstance().Info.Priority < buffType.GetInstance().Info.Priority) continue;
+            if (list[i].BuffName.GetInfo().Priority < buffName.GetInfo().Priority) continue;
             list.Insert(i, new BuffState
             {
-                BuffType = buffType,
+                BuffName = buffName,
                 Duration = duration
             });
             return;
         }
         list.Add(new BuffState
         {
-            BuffType = buffType,
+            BuffName = buffName,
             Duration = duration
         });
     }
 
-    public void RemoveBuff(BuffTypeEnum buffType)
+    public void RemoveBuff(BuffNameEnum buffName)
     {
-        if (!this.TryFindBuff(buffType, out var index)) return;
+        if (!this.TryFindBuff(buffName, out var index)) return;
         GetBuffList().RemoveAt(index);
     }
     public void RemoveBuff(int index)
@@ -87,12 +88,12 @@ public class UnitState : IReadOnlyUnitState
         GetBuffList().RemoveAt(index);
     }
 
-    public void ModifyBuff(BuffTypeEnum buffType, int modifyDuration)
+    public void ModifyBuff(BuffNameEnum buffName, int modifyDuration)
     {
-        if (!this.TryFindBuff(buffType, out var index)) return;
+        if (!this.TryFindBuff(buffName, out var index)) return;
         GetBuffList()[index] = new BuffState
         {
-            BuffType = buffType,
+            BuffName = buffName,
             Duration =  modifyDuration
         };
     }
@@ -101,7 +102,7 @@ public class UnitState : IReadOnlyUnitState
         if (index < 0 || index >= Buffs.Count) return;
         GetBuffList()[index] = new BuffState
         {
-            BuffType = Buffs[index].BuffType,
+            BuffName = Buffs[index].BuffName,
             Duration =  modifyDuration
         };
     }
