@@ -1,3 +1,5 @@
+using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 
@@ -7,61 +9,59 @@ public partial class StatePlayer
 {
     private class FreeState(StatePlayer player) : State(player)
     {
-        private SkillSchedulerEvent? _skillEvent;
-        public IReadOnlyUnitState SelectedUnit { get; set; }
-        public long FocusedUnitId
+        public IReadOnlyUnitState SelectedUnit { get; set; } = UnitState.Null;
+        public new long FocusedUnitId
         {
-            get => field;
+            get => Player.FocusedUnitId;
             set
             {
-                if (value == field) return;
-                _skillEvent?.Layer = SimulationLayer.Waiting;
-                field = value;
-                _skillEvent = GameScheduler?.GetUnitSkillEvent(value);
-                _skillEvent?.Layer = SimulationLayer.Focused;
+                if (value == Player.FocusedUnitId) return;
+                EventScheduler?.GetUnitSkillEvent(Player.FocusedUnitId)?.Layer = SimulationLayer.Waiting;
+                Player.FocusedUnitId = value;
+                EventScheduler?.GetUnitSkillEvent(Player.FocusedUnitId)?.Layer = SimulationLayer.Focused;
             }
-        } = 0;
+        }
         public long SelectedUnitId
         {
-            get => _player.SelectedUnitId;
+            get => Player.SelectedUnitId;
             set
             {
-                if (value == _player.SelectedUnitId) return;
+                if (value == Player.SelectedUnitId) return;
                 SelectedUnit = GameState?.UnitMapState.GetUnit(value)!;
-                var skills = GameState.GetUnitValidSkills(SelectedUnit.Name);
-                player._skillStates = new SkillState[skills.Count];
+                var skills = GameState?.GetUnitValidSkills(SelectedUnit.Name) ?? [];
+                Player._skillStates = new SkillState[skills.Count];
                 for (int i = 0; i < skills.Count; i++)
                 {
-                    player._skillStates[i] = new SkillState()
+                    Player._skillStates[i] = new SkillState()
                     {
                         Skill = skills[i],
                         IsSelecting = false,
                         RemainingUses = 1, //TODO:使用Info加载剩余次数
                     };
                 }
-                _player.OnPropertyChanged(nameof(SkillingUnitSkillStates));
-                _player.SelectedUnitId = value;
+                Player.OnPropertyChanged(nameof(SkillingUnitSkillStates));
+                Player.SelectedUnitId = value;
             }
         }
         public override void OnEnter()
         {
-            FocusCoords(_player.CurrentMouseCoords);
+            FocusCoords(Player.CurrentMouseCoords);
             SelectedUnitId = 0;
         }
         public override void OnInput<T>(in T input)
         {
-            if (!_player.IsTurn) return;
+            if (!Player.IsTurn) return;
             base.OnInput(in input);
             switch (input)
             {
                 case PlayerInputClick {Button: MouseButtonMask.Left} click:
                     if (GameState?.UnitMapState.HasUnit(FocusedUnitId) == false) break;
                     SelectedUnitId = FocusedUnitId;
-                    var skill = GameScheduler?.GetUnitSkillEvent(FocusedUnitId);
+                    var skill = EventScheduler?.GetUnitSkillEvent(FocusedUnitId);
                     if (skill is null)
                     {
                         //单位没有等待中的技能
-                        StateMachine.ChangeState(_player._skillingState);
+                        StateMachine.ChangeState(Player._skillingState);
                     }
                     break;
                 case PlayerInputMouseCoords coords:
@@ -70,17 +70,17 @@ public partial class StatePlayer
                 case PlayerInputStopTurn stopTurn:
                     if (stopTurn.Type == PlayerSotpTurnEnum.Click)
                     {
-                        _player.TurnManager.FocusTurnEvent(-1);
-                        _player.IsTurn = false;
+                        Player.TurnManager.FocusTurnEvent(-1);
+                        Player.IsTurn = false;
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverExit)
                     {
-                        _player.TurnManager.FocusTurnEvent(-1);
+                        Player.TurnManager.FocusTurnEvent(-1);
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverEnter)
                     {
                         FocusedUnitId = 0;
-                        _player.TurnManager.FocusTurnEvent(_player.TurnManager.CurrentTurn + 1);
+                        Player.TurnManager.FocusTurnEvent(Player.TurnManager.CurrentTurn + 1);
                     }
                     break;
             }
@@ -88,9 +88,9 @@ public partial class StatePlayer
 
         private void FocusCoords(in Vector2I coords)
         {
-            var unit = GameScheduler?.GameState?.UnitMapState.GetUnit(coords);
+            var unit = EventScheduler?.GameState?.UnitMapState.GetUnit(coords);
             FocusedUnitId = unit?.Id ?? 0;
-            GameScheduler?.FocusUnit(unit?.Id ?? 0);
+            EventScheduler?.FocusUnit(unit?.Id ?? 0);
         }
     }
 }

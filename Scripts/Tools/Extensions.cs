@@ -199,11 +199,13 @@ public static class Extensions
                 0 => DirMask.None,
                 1 => DirMask.Right,
                 -1 => DirMask.Left,
+                _ => DirMask.None
             } | c.Y switch
             {
                 0 => DirMask.None,
                 1 => DirMask.Down,
                 -1 => DirMask.Up,
+                _ => DirMask.None
             };
         }
         public bool IsInSize(in Vector2I size, Vector2I offset = default)
@@ -218,9 +220,9 @@ public static class Extensions
         {
             return gameState.TeamState.GetTeamTypeRelativeToPlayer(playerTeam, unit.Team);
         }
-        public TeamTypeEnum GetTeamTypeRelativeToPlayer(GameScheduler gameScheduler)
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(EventScheduler eventScheduler)
         {
-            return gameScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(gameScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Neutral;
+            return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Neutral;
         }
         public bool TryFindBuff(BuffTypeEnum buffType, out int index)
         {
@@ -364,9 +366,9 @@ public static class Extensions
         {
             return gameState.TeamState.GetTeamTypeRelativeToPlayer(playerTeam, team);
         }
-        public TeamTypeEnum GetTeamTypeRelativeToPlayer(GameScheduler gameScheduler)
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(EventScheduler eventScheduler)
         {
-            return gameScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(gameScheduler.PlayerTeam, team) ?? TeamTypeEnum.Neutral;
+            return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, team) ?? TeamTypeEnum.Neutral;
         }
     }
 }

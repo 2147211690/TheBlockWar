@@ -9,13 +9,14 @@ public partial class StatePlayer : Node, IPlayer
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public GameScheduler? GameScheduler { get; set; }
+    public EventScheduler? GameScheduler { get; set; }
     public IReadOnlyList<SkillState> SkillingUnitSkillStates => _skillStates;
     public int Power { get; set => SetField(ref field, value); }
     public bool IsTurn { get; set => SetField(ref field, value); }
     public Vector2I CurrentMouseCoords { get; private set; }
-    public TurnManager TurnManager { get; set; }
+    public TurnManager TurnManager { get; set; } = null!;
     public long SelectedUnitId { get; set => SetField(ref field, value); }
+    public long FocusedUnitId { get; set => SetField(ref field, value); }
     
     private GDTaskCompletionSource _completionSource = new();
     private StateMachine<State> _stateMachine;

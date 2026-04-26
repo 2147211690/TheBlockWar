@@ -3,11 +3,11 @@ namespace TheBlockWar.View.Uis;
 
 public partial class InfoPanel : CenterContainer
 {
-    [Export] private TextureRect _iconTextureRect;
-    [Export] private Label _nameLabel;
-    [Export] private Label _descriptionLabel;
-    [Export] private TextureRect _useTextureRect;
-    private Control _child;
+    [Export] private TextureRect _iconTextureRect = null!;
+    [Export] private Label _nameLabel = null!;
+    [Export] private Label _descriptionLabel = null!;
+    [Export] private TextureRect _useTextureRect = null!;
+    private Control _child = null!;
     public Vector2 LeftDownPosition
     {
         get => field;

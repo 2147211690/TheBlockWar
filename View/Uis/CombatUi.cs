@@ -8,24 +8,24 @@ namespace TheBlockWar.View.Uis;
 
 public partial class CombatUi : Control
 {
-    [Export] public GameView GameView { get; set; }
-    [Export] private InfoPanel _infoPanel;
-    [Export] private PackedScene _itemBoxScene;
-    [Export] private Control _skillContainer;
-    [Export] private Control _buffContainer;
-    [Export] private TooltipManager _tooltipManager;
-    [Export] private Button _stopTurnButton;
-    private IPlayer _player;
-    private GameScheduler _gameScheduler;
+    [Export] public GameView GameView { get; set; } = null!;
+    [Export] private InfoPanel _infoPanel = null!;
+    [Export] private PackedScene _itemBoxScene = null!;
+    [Export] private Control _skillContainer = null!;
+    [Export] private Control _buffContainer = null!;
+    [Export] private TooltipManager _tooltipManager = null!;
+    [Export] private Button _stopTurnButton = null!;
+    private IPlayer _player = null!;
+    private EventScheduler _eventScheduler = null!;
     public override void _Ready()
     {
         base._Ready();
         _tooltipManager.OnHoverChange += OnHoverChange;
     }
 
-    public void Bind(GameScheduler gameScheduler, IPlayer player)
+    public void Bind(EventScheduler eventScheduler, IPlayer player)
     {
-        _gameScheduler = gameScheduler;
+        _eventScheduler = eventScheduler;
         _player = player;
         
         _player.PropertyChanged += PlayerOnPropertyChanged;
@@ -43,7 +43,7 @@ public partial class CombatUi : Control
         
         void PlayerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            var player = sender as IPlayer;
+            var player = (sender as IPlayer)!;
             if (e.PropertyName is nameof(IPlayer.SkillingUnitSkillStates))
             {
                 ClearSkillItem();
@@ -54,7 +54,7 @@ public partial class CombatUi : Control
             }
             if (e.PropertyName is nameof(IPlayer.SelectedUnitId))
             {
-                var unit = _gameScheduler.GameState.UnitMapState.GetUnit(player.SelectedUnitId);
+                var unit = _eventScheduler.GameState.UnitMapState.GetUnit(player.SelectedUnitId);
                 ClearBuffItem();
                 foreach (var buff in unit.Buffs)
                 {
@@ -80,7 +80,7 @@ public partial class CombatUi : Control
         }
     }
 
-    private void OnHoverChange(object sender, object hoverObject, bool isHover)
+    private void OnHoverChange(object sender, object? hoverObject, bool isHover)
     {
         _infoPanel.Visible = isHover;
         var itemBox = (hoverObject as ItemBox)!;
@@ -118,7 +118,7 @@ public partial class CombatUi : Control
     {
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _buffContainer.AddChild(itemBox);
-        itemBox.Texture = buffTypeEnum.GetInstance().Info.Icon;
+        itemBox.Texture = buffTypeEnum.GetInstance().Info.Icon!;
         itemBox.MetaData = buffTypeEnum.GetInstance();
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);

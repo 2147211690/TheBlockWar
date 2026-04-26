@@ -4,7 +4,7 @@ namespace TheBlockWar.Scripts.Views.EventViews;
 [GlobalClass]
 public partial class BlockNumberView : Node2D
 {
-    [Export] public EventsView EventsView { get; set; }
+    [Export] public EventsView EventsView { get; set; } = null!;
     private TilesView TilesView => EventsView.GameView.TilesView;
     private ViewPools ViewPools => EventsView.GameView.ViewPools;
     private Dictionary<Vector2I, Block> _blockNumberSprites = new();

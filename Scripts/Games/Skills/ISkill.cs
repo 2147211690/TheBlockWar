@@ -1,10 +1,11 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.Skills;
 
 public interface ISkill
 {
+    SkillEnum SkillEnum { get; }
     int ArgCount { get; }
     /// <summary>
     /// 获取技能的参数

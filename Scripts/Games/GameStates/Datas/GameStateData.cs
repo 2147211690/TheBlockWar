@@ -1,3 +1,5 @@
+using TheBlockWar.Scripts.Games.Events;
+
 namespace TheBlockWar.Scripts.Games.GameStates.Datas;
 
 public class GameStateData
@@ -7,4 +9,5 @@ public class GameStateData
     public required TileMapStateData TileMapState { get; init; }
     public required UnitMapStateData UnitMapState { get; init; }
     public required TeamStateData TeamState { get; init; }
+    public required List<SchedulerEvent> Events { get; init; }
 }

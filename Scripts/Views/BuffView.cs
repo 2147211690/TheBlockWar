@@ -175,7 +175,7 @@ public partial class BuffView : Node2D
         if (gainIcons != null) this.DrawItemTab(gainPosition, gainIcons, _gainItemTabStyle);
         if (loseIcons != null) this.DrawItemTab(losePosition, loseIcons, _loseTabStyle);
         
-        List<Texture2D> BuildIconList(List<BuffTypeEnum> buffs, Texture2D defaultTexture)
+        List<Texture2D>? BuildIconList(List<BuffTypeEnum> buffs, Texture2D? defaultTexture)
         {
             if (buffs.Count == 0) return null;
 

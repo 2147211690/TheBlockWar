@@ -1,15 +1,29 @@
 using System.Linq;
-using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games;
+namespace TheBlockWar.Scripts.Games.Skills;
 
 public static class Skills
 {
     private static readonly ActionSkill.GetSkillArgsFunc EmptyArgsFunc = (_, _, _, _, _) => [];
     private static readonly ActionSkill.GetSkillArgsFunc SelfArgsFunc = (_, _, _, _, _) => [Vector2I.Zero];
+    private static readonly Dictionary<SkillEnum, ISkill> _skills = new();
+    public static void Register(ISkill skill)
+    {
+        _skills[skill.SkillEnum] = skill;
+    }
+    public static ISkill? GetInstance(this SkillEnum type)
+    {
+        return _skills.GetValueOrDefault(type);
+    }
+
+    static Skills()
+    {
+        Register(new ActionSkill(2, Skill1Args, Skill1Core, SkillEnum.Test1));
+    }
+    
     /// <summary>
     /// 会传入快照状态，需要在快照状态下进行操作
     /// </summary>
@@ -32,7 +46,7 @@ public static class Skills
             for (int i = 0; i < 4; i++)
             {
                 var vec = (DirMask)(1 << i);
-                if (i != 0) gameState.NextParallel(context);
+                if (i != 0) gameState.ApplyNextParallel(context);
                 gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, context);
             }
         }
@@ -70,9 +84,6 @@ public static class Skills
         }
         return [];
     }
-    public static ISkill Skill1 { get; } = new ActionSkill(2, Skill1Args, Skill1Core);
-
-
 
     public class ActionSkill : ISkill
     {
@@ -94,12 +105,15 @@ public static class Skills
         public ActionSkill(
             int argCount,
             GetSkillArgsFunc getSkillArgs,
-            SkillCoreFunc skillCore)
+            SkillCoreFunc skillCore, SkillEnum skillEnum)
         {
             ArgCount = argCount;
             _getSkillArgs = getSkillArgs;
             _skillCore = skillCore;
+            SkillEnum = skillEnum;
         }
+
+        public SkillEnum SkillEnum { get; }
         public int ArgCount { get; }
         public IEnumerable<Vector2I> GetSkillArgs(
             IReadOnlyGameState state,

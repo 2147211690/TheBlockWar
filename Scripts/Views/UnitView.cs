@@ -7,10 +7,10 @@ namespace TheBlockWar.Scripts.Views;
 public partial class UnitView : Node2D
 {
     [Export] public Godot.Collections.Dictionary<string, Vector2> Offsets = new();
-    [Export] public AnimatedSprite2D MainSprite { get; set; }
-    [Export] public Node2D Center { get; set; }
-    [Export] public HealthBar HealthBar { get; set; }
-    [Export] public BuffView BuffView { get; set; }
+    [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
+    [Export] public Node2D Center { get; set; } = null!;
+    [Export] public HealthBar HealthBar { get; set; } = null!;
+    [Export] public BuffView BuffView { get; set; } = null!;
     [ExportGroup("PlaceDown")]
     [Export] public float DropHeight { get; set; } = 50f;
     [Export] public float DropDuration { get; set; } = 0.1f;
@@ -22,17 +22,18 @@ public partial class UnitView : Node2D
     public Vector2I? AimCoords { get; set; }
     public Vector2I RealCoords { get; set; }
     public TeamTypeEnum TeamType { get; set; }
-    public UnitsView UnitsView { get; set; }
+    public UnitsView UnitsView { get; set; } = null!;
     public uint Id { get; set; }
     public Vector2I WishCoords => AimCoords ?? RealCoords;
-    public GameView GameView { get; set; }
+    public GameView GameView { get; set; } = null!;
     private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
-    private ShaderMaterial _shaderMaterial = null!;
+    private ShaderMaterial? _shaderMaterial = null!;
     public Color OutlineColor
     {
-        get => _shaderMaterial.GetShaderParameter("outline1_color").AsColor();
-        set => _shaderMaterial.SetShaderParameter("outline1_color", value);
+        get => _shaderMaterial?.GetShaderParameter("outline1_color").AsColor() ?? Colors.White;
+        set => _shaderMaterial?.SetShaderParameter("outline1_color", value);
     }
+
     public string UnitName
     {
         get;
@@ -42,7 +43,7 @@ public partial class UnitView : Node2D
             MainSprite.Offset = Offsets.GetValueOrDefault(value, Vector2.Zero);
             field = value;
         }
-    }
+    } = string.Empty;
 
     public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType, UnitsView unitsView)
     {

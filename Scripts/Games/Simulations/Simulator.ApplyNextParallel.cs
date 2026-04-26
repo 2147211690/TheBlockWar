@@ -9,7 +9,7 @@ partial class Simulator
         /// <summary>
         /// 用来标记下次动画并行执行
         /// </summary>
-        public void NextParallel(SimulationContext context)
+        public void ApplyNextParallel(SimulationContext context)
         {
             if (context.Layer == SimulationLayer.Running && _simulationStack == 0) 
                 context.Steps?.AddStep(new NextParallelStep(false));

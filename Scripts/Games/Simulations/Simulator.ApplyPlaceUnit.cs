@@ -7,6 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
+        //TODO:prefabUnit改为枚举
         public void ApplyPlaceUnit(Vector2I coords, string unitName, int team, UnitState? prefabUnit, SimulationContext context)
         {
             EnterSimulation();

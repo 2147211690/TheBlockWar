@@ -5,13 +5,13 @@ namespace TheBlockWar.Scripts.Views.EventViews;
 public partial class EventsView : Node2D
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    [Export] public GameView GameView { get; set; }
-    [Export] private Node2D _drawContainer;
-    [Export] public BlockNumberView BlockNumberView { get; set; }
-    [Export] public BlockBuffView BlockBuffView { get; set; }
-    [Export] public BlockRegionView BlockRegionView { get; set; }
-    public BlockDraw BlockDraw { get; set; }
-    private EventView.EventViewPool _eventViewPool;
+    [Export] public GameView GameView { get; set; } = null!;
+    [Export] private Node2D _drawContainer = null!;
+    [Export] public BlockNumberView BlockNumberView { get; set; } = null!;
+    [Export] public BlockBuffView BlockBuffView { get; set; } = null!;
+    [Export] public BlockRegionView BlockRegionView { get; set; } = null!;
+    public BlockDraw BlockDraw { get; set; } = null!;
+    private EventView.EventViewPool _eventViewPool = null!;
     private Dictionary<long, EventView> _eventViews = new();
     private EventView? _currentView;
     private HashSet<long> _clearUnitIds = new();

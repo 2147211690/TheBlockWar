@@ -6,16 +6,16 @@ namespace TheBlockWar.Scripts.Views;
 public partial class TilesView : TileMapLayer
 {
     private readonly Dictionary<Vector2I, TileView> _tileViews = new();
-    [Export] public GameView GameView { get; set; }
-    [Export] private Node2D _nodeContainer;
-    [Export] private PackedScene _tileScene;
+    [Export] public GameView GameView { get; set; } = null!;
+    [Export] private Node2D _nodeContainer = null!;
+    [Export] private PackedScene _tileScene = null!;
     [Export] public float NormalGroundHeight = 32f;
     [Export] public Texture2D? RegionTexture { get; set; }
     public Vector2 LocalLeft { get; private set; }
     public Vector2 LocalUp { get; private set; }
     public Vector2 LocalRightDown{ get; private set; }
     
-    private RecordTypedPool<Sprite2D> _regionSpritePool;
+    private RecordTypedPool<Sprite2D> _regionSpritePool = null!;
     public override void _Ready()
     {
         LocalLeft = MapToLocal(Vector2I.Left) - MapToLocal(Vector2I.Zero);
@@ -51,7 +51,7 @@ public partial class TilesView : TileMapLayer
             _ => Vector2.Zero,
         };
     }
-    public float GetTileHeight(in Vector2I coords) => _tileViews.GetValueOrDefault(coords, null)?.Height ?? 0;
+    public float GetTileHeight(in Vector2I coords) => _tileViews!.GetValueOrDefault(coords, null)?.Height ?? 0;
     public Vector2I GlobalMouseToTileCoords(Vector2 globalMousePos)
     {
         var local = ToLocal(globalMousePos);
@@ -121,6 +121,7 @@ public partial class TilesView : TileMapLayer
         Layer.Ground => 0,
         Layer.Underground => LocalRightDown.Y / 4,
         Layer.Sky => LocalRightDown.Y * 2,
+        _ => 0,
     };
     
     public Vector2 GetRealPosition(in Vector2I coords, Layer layer, float? defineHeight = null)

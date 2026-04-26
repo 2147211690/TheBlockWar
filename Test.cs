@@ -1,10 +1,13 @@
 using System.Text.Json;
 using ImGuiNET;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Modes;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Tools.Jsons;
@@ -29,7 +32,7 @@ public partial class Test : Node2D
     bool _showSnapshot = false;
     private int damageTarget;
     private int damageValue;
-    private GameScheduler _gameScheduler = new();
+    private EventScheduler _eventScheduler;
     private SchedulerEvent _event0;
     [Export] private GameView _view;
     [Export] private CombatUi _combatUi;
@@ -66,10 +69,11 @@ public partial class Test : Node2D
         
         TaskTracker.ShowTrackerWindow();
         
-        _currentGameState = new GameState(new Vector2I(10, 10),
+        _currentGameState = new GameState(
+            new Vector2I(10, 10),
             new Dictionary<string, ISkill[]>() 
             {
-                {"Unit_0", [Skills.Skill1]},
+                {"Unit_0", [SkillEnum.Test1.GetInstance()!]},
             },
             new int[,] 
             {
@@ -79,20 +83,20 @@ public partial class Test : Node2D
             }
             );
         _gameState = _currentGameState;
-        _gameScheduler.InitScheduler(_currentGameState, 0);
+        _eventScheduler = new EventScheduler(_currentGameState, 0);
         _snapshot = null;
 
         _player = new StatePlayer();
-        _player.GameScheduler = _gameScheduler;
+        _player.GameScheduler = _eventScheduler;
         AddChild(_player);
         
-        _view.Bind(_gameScheduler);
+        _view.Bind(_eventScheduler);
         _view.Player = _player;
         
         _pvpMode = new PvpMode([_player], _player);
-        _turnManager = new TurnManager(_gameScheduler, _view, _pvpMode);
+        _turnManager = new TurnManager(_eventScheduler, _view, _pvpMode);
         _player.TurnManager = _turnManager;
-        _combatUi.Bind(_gameScheduler, _player);
+        _combatUi.Bind(_eventScheduler, _player);
         _turnManager.Start().Forget();
     }
 
@@ -220,37 +224,30 @@ public partial class Test : Node2D
         if (ImGui.Button("输出调度器信息"))
         {
             GD.Print("当前运行层");
-            foreach (var e in _gameScheduler.RunningEvents)
+            foreach (var e in _eventScheduler.RunningEvents)
             {
                 GD.Print($"{e.GetType()}: {e.Layer} {e}");
             }
             GD.Print("当前关注层");
-            foreach (var e in _gameScheduler.FocusedEvents)
+            foreach (var e in _eventScheduler.FocusedEvents)
             {
                 GD.Print($"{e.GetType()}: {e.Layer} {e}");
             }
             GD.Print("当前等待层");
-            foreach (var e in _gameScheduler.WaitingEvents)
+            foreach (var e in _eventScheduler.WaitingEvents)
             {
                 GD.Print($"{e.GetType()}: {e.Layer} {e}");
             }
             GD.Print("当前技能层");
-            foreach (var e in _gameScheduler.SkillEvents.Values)
+            foreach (var e in _eventScheduler.SkillEvents.Values)
             {
                 GD.Print($"{e.GetType()}: {e.Layer} {e}");
             }
-        }
-        if (ImGui.Button("添加调度事件"))
-        {
-            _event0 = new ActionSchedulerEvent()
+            GD.Print("当前未激活事件");
+            foreach (var e in _eventScheduler.DisabledEvents)
             {
-                ApplyAction = e =>
-                {
-                    e.State.ApplyDamage(new(3, 3),
-                        10, e.Result);
-                }
-            };
-            _gameScheduler.AddEvent(_event0);
+                GD.Print($"{e.GetType()}: {e.Layer} {e}");
+            }
         }
 
         if (ImGui.Button("触发调度事件"))
@@ -260,82 +257,72 @@ public partial class Test : Node2D
         if (ImGui.Button("测试放置压力"))
         {
 
-            _gameScheduler.AddEvent(new ActionSchedulerEvent()
+            _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ApplyAction = e =>
+                ActionCore = (e, state, context) =>
                 {
                     for (int i = 0; i < 10; i++)
                     {
                         for (int j = 0; j < 9; j++)
                         {
-                            e.State.ApplyPlaceUnit(new(i, j), "Unit_0", 1, null, e.Result);
+                            state.ApplyPlaceUnit(new(i, j), "Unit_0", 1, null, context);
                         }
                     }
-                }
-            }, SimulationLayer.Running);
+                },
+                Layer = SimulationLayer.Running,
+            });
         }
         if (ImGui.Button("测试放置"))
         {
 
-            _gameScheduler.AddEvent(new ActionSchedulerEvent( e =>
+            _eventScheduler.CreateEvent(id => new ActionEvent(id)
+            {
+                ActionCore = (e, state, context) =>
                 {
                     for (int i = 0; i < 10; i++)
                     {
                         for (int j = 0; j < 10; j++)
                         {
                             var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
-                            e.State.ApplyPlaceTile(new(i, j), new TileState()
+                            state.ApplyPlaceTile(new(i, j), new TileState()
                                 {
                                     Tag = empty ? TileTag.Empty : TileTag.Ground
                                 },
-                                e.Result);
+                                context);
+                            if (j != 9) state.ApplyNextParallel(context);
                         }
                     }
-                    e.State.ApplyPlaceUnit(new(2, 2), "Unit_0", 0, null, e.Result);
-                }), SimulationLayer.Running);
+                    state.ApplyPlaceUnit(new(2, 2), "Unit_0", 0, null, context);
+                },
+                Layer = SimulationLayer.Running,
+            });
         }
-        if (ImGui.Button("测试放置2"))
+        
+        if (ImGui.Button("添加十字单位"))
         {
-
-            _event2 = _gameScheduler.AddEvent(new ActionSchedulerEvent()
+            _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ApplyAction = e =>
+                ActionCore = (e, state, context) =>
                 {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        for (int j = 0; j < 3; j++)
-                        {
-                            e.State.ApplyPlaceUnit(new(i, j), "Unit_0", 1, null, e.Result);
-                        }
-                    }
-                }
+                    state.ApplyPlaceUnit(new(3,2), "Unit_0", 0, null, context);
+                    state.ApplyPlaceUnit(new(2,3), "Unit_0", 0, null, context);
+                    state.ApplyPlaceUnit(new(1,2), "Unit_0", 0, null, context);
+                    state.ApplyPlaceUnit(new(2,1), "Unit_0", 0, null, context);
+                },
+                Layer = SimulationLayer.Running,
             });
         }
 
-        if (ImGui.Button("使用事件2"))
+        if (ImGui.Button("添加一个测试步骤事件"))
         {
-            _event2.Layer = SimulationLayer.Running;
-        }
-        
-        if (ImGui.Button("测试移动2,2 -> 6,3"))
-        {
-
-            _move = _gameScheduler.AddEvent(new ActionSchedulerEvent(e =>
+            _eventScheduler.CreateEvent(id => new StepsEvent(id)
             {
-                 e.State.ApplyMoveUnitPath(new(2,2), 
-                     [new(0,0), new(0,1), new(0,2),new(1,2),new(2,2)],
-                     e.Result);
-            }));
-        }
-        if (ImGui.Button("添加十字单位"))
-        {
-            _gameScheduler.AddEvent(new ActionSchedulerEvent(e =>
-            {
-                e.State.ApplyPlaceUnit(new(3,2), "Unit_0", 0, null, e.Result);
-                e.State.ApplyPlaceUnit(new(2,3), "Unit_0", 0, null, e.Result);
-                e.State.ApplyPlaceUnit(new(1,2), "Unit_0", 0, null, e.Result);
-                e.State.ApplyPlaceUnit(new(2,1), "Unit_0", 0, null, e.Result);
-            }), SimulationLayer.Running);
+                Steps = [
+                new ApplyDamageStep(new (2,2), 10),
+                new ApplyPushUnitStep(new (3,3), DirMask.Down)
+                ],
+                Layer = SimulationLayer.Waiting,
+            });
         }
 
         if (ImGui.Button("使用移动"))
@@ -347,15 +334,6 @@ public partial class Test : Node2D
         {
             _move.Layer = _move.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
-        
-        if (ImGui.Button("测试伤害"))
-        {
-
-            _damage = _gameScheduler.AddEvent(new ActionSchedulerEvent(e =>
-            {
-                 e.State.ApplyDamage(new(2,2), 50, e.Result);
-            }));
-        }
 
         if (ImGui.Button("使用伤害"))
         {
@@ -365,11 +343,7 @@ public partial class Test : Node2D
         {
             _damage.Layer = _damage.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
         }
-
-        if (ImGui.Button("添加跟随技能"))
-        {
-            _follow = _gameScheduler.AddEvent(new SkillSchedulerEvent(1, Skills.Skill1, 0));
-        }
+        
         if (ImGui.Button("改变跟随的关注性"))
         {
             _follow.Layer = _follow.Layer == SimulationLayer.Focused ? SimulationLayer.Waiting : SimulationLayer.Focused;
@@ -387,17 +361,7 @@ public partial class Test : Node2D
         {
             _turnManager.FocusTurnEvent(_checkNextTurn ? _turnManager.CurrentTurn + 1 : -1);
         }
-
-        if (ImGui.Button("添加到下一回合事件"))
-        {
-            _turnManager.AddTurnEvent(new ActionSchedulerEvent(e =>
-            {
-                e.State.ApplyDamage(new(2,2), 50, e.Result);
-            })
-            {
-                Turn = _turnManager.CurrentTurn + 1
-            });
-        }
+        
         ImGui.End();
         
         

@@ -1,4 +1,7 @@
+using System.Linq;
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
+using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Tools;
 using Yitter.IdGenerator;
 
@@ -7,6 +10,9 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 public class GameState : IGameState
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    
+    public IDictionary<long, SchedulerEvent> Events => _events;
+    IReadOnlyDictionary<long, SchedulerEvent> IReadOnlyGameState.Events => _events;
     public Vector2I Size { get; }
     public DefaultIdGenerator IdGenerator { get; }
     public DateTime BaseTime { get; }
@@ -18,6 +24,8 @@ public class GameState : IGameState
     IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
     private Dictionary<string, ISkill[]> _unitSkillMap;
+    private Dictionary<long, SchedulerEvent> _events;
+
     public IReadOnlyList<ISkill> GetUnitValidSkills(string name)
     {
         //TODO: 根据单位名称获取有效技能
@@ -29,6 +37,11 @@ public class GameState : IGameState
     public GameState(GameStateData data)
     {
         _unitSkillMap = new Dictionary<string, ISkill[]>();
+        _events = new();
+        foreach (var eventItem in data.Events)
+        {
+            _events[eventItem.Id] = eventItem;
+        }
         Size = data.Size;
         BaseTime = data.BaseTime;
         IdGenerator = new DefaultIdGenerator(new IdGeneratorOptions()
@@ -44,6 +57,7 @@ public class GameState : IGameState
     public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations)
     {
         _unitSkillMap = unitSkillMap;
+        _events = new();
         Size = mapSize;
         BaseTime = DateTime.UtcNow;
         IdGenerator = new DefaultIdGenerator(new IdGeneratorOptions()
@@ -65,6 +79,7 @@ public class GameState : IGameState
             TileMapState = TileMapState.ToData(),
             UnitMapState = UnitMapState.ToData(),
             TeamState = TeamState.ToData(),
+            Events = _events.Values.ToList(),
         };
     }
     /// <summary>
@@ -74,11 +89,13 @@ public class GameState : IGameState
     public sealed class GameStateSnapshot : IGameState
     {
         // 父状态引用 - 未修改数据的回退源
+        IReadOnlyDictionary<long, SchedulerEvent>? IReadOnlyGameState.Events => null;
+        IDictionary<long, SchedulerEvent>? IGameState.Events => null;
+
         public Vector2I Size => Owner.Size;
         public DefaultIdGenerator IdGenerator => Owner.IdGenerator;
         public DateTime BaseTime => Owner.BaseTime;
         public IReadOnlyGameState Owner { get; }
-
         public ITileMapState TileMapState { get; }
         public IUnitMapState UnitMapState { get; }
         public TeamState TeamState => Owner.TeamState;
@@ -101,9 +118,11 @@ public class GameState : IGameState
                 TileMapState = TileMapState.ToData(),
                 UnitMapState = UnitMapState.ToData(),
                 TeamState = TeamState.ToData(),
+                Events = Owner.Events?.Values.ToList() ?? [],
                 Size = Size,
             };
         }
+
         public IReadOnlyList<ISkill> GetUnitValidSkills(string name) => Owner.GetUnitValidSkills(name);
         public void ClearIfSnapshot()
         {

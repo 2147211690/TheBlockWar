@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
@@ -9,7 +10,6 @@ public record SimStep(bool IsChildStep)
 {
     public static readonly SimStep Default = new(false);
 }
-public record NextDelayStep(bool IsChildStep, int Delay) : SimStep(IsChildStep);
 public record NextParallelStep(bool IsChildStep) : SimStep(IsChildStep);
 public record DelayStep(bool IsChildStep, int Delay) : SimStep(IsChildStep);
 public record DamageStep(bool IsChildStep, Vector2I Coords,float Damage, long ResultUnitId, float ResultValidDamage) : SimStep(IsChildStep);
@@ -30,6 +30,10 @@ public record ModifyTileRegionStep(bool IsChildStep, Vector2I Coords, RegionType
 public record AnimationStep(bool IsChildStep, AnimationType Animation) : SimStep(IsChildStep);
 
 //Animations
+[JsonDerivedType(typeof(ShotSomethingAnim), typeDiscriminator: nameof(ShotSomethingAnim))]
+[JsonDerivedType(typeof(ThrowSomethingAnim), typeDiscriminator: nameof(ThrowSomethingAnim))]
+[JsonDerivedType(typeof(UnitJumpToAnim), typeDiscriminator: nameof(UnitJumpToAnim))]
+[JsonDerivedType(typeof(SummonEffectAnim), typeDiscriminator: nameof(SummonEffectAnim))]
 public record AnimationType();
 public record ShotSomethingAnim(Vector2I Coords, Vector2I To, string ThingName, float Time) : AnimationType;
 public record ThrowSomethingAnim(Vector2I Coords, Vector2I To, string ThingName, float ThrowHeight, float Time) : AnimationType;

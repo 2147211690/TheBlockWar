@@ -2,7 +2,7 @@ namespace TheBlockWar.View.Uis;
 
 public partial class ItemBox : PanelContainer
 {
-    [Export] private TextureRect _textureRect;
+    [Export] private TextureRect _textureRect = null!;
     private Tween? _currentTween;
     [Export] public bool CanClick { get; set; } = true;
     public Texture2D Texture

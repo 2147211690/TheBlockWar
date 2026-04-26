@@ -13,13 +13,13 @@ public partial class GameView : Node2D
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     [Export] public Node2D DrawContainer { get; private set; } = null!;
-    [Export] public GameViewStyle Style { get; set; }
-    [Export] public TilesView TilesView { get; set; }
-    [Export] public UnitsView UnitsView { get; set; }
-    [Export] public EventsView EventsView { get; set; }
-    [Export] public AnimationView AnimationView { get; set; }
-    [Export] public Camera2D SubCamera { get; set; }
-    [Export] public SubViewport SubViewport { get; set; }
+    [Export] public GameViewStyle Style { get; set; } = null!;
+    [Export] public TilesView TilesView { get; set; } = null!;
+    [Export] public UnitsView UnitsView { get; set; } = null!;
+    [Export] public EventsView EventsView { get; set; } = null!;
+    [Export] public AnimationView AnimationView { get; set; } = null!;
+    [Export] public Camera2D SubCamera { get; set; } = null!;
+    [Export] public SubViewport SubViewport { get; set; } = null!;
     public IPlayer? Player { get; set; }
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
@@ -27,7 +27,7 @@ public partial class GameView : Node2D
     private Dictionary<long, SimulationContext> _runningSimulations = new();
     private List<SimulationContext> _lastSimulations = new();
     private List<SimulationContext> _prepareSimulations = new();
-    private GameScheduler? _gameScheduler;
+    private EventScheduler? _eventScheduler;
     private Queue<(IReadOnlyList<SimulationContext> simulations, int? delay)> _simulationCache = new();
     private Vector2I? _previousMouseCoords = null;
     private Vector2I _currentCoords;
@@ -48,23 +48,23 @@ public partial class GameView : Node2D
         SubViewport.World2D = GetTree().Root.World2D;
     }
 
-    public void Bind(GameScheduler gameScheduler)
+    public void Bind(EventScheduler eventScheduler)
     {
-        _gameScheduler = gameScheduler;
-        _gameScheduler.SimulationUpdated += GameSchedulerOnSimulationUpdated;
-        _gameScheduler.OtherStateUpdated += GameSchedulerOnOtherStateUpdated;
-        _gameScheduler.NextDelay += GameSchedulerOnNextDelay;
+        _eventScheduler = eventScheduler;
+        _eventScheduler.SimulationUpdated += EventSchedulerOnSimulationUpdated;
+        _eventScheduler.OtherStateUpdated += EventSchedulerOnOtherStateUpdated;
+        _eventScheduler.NextDelay += EventSchedulerOnNextDelay;
 
 
         TreeExiting += () =>
         {
-            _gameScheduler.SimulationUpdated -= GameSchedulerOnSimulationUpdated;
-            _gameScheduler.OtherStateUpdated -= GameSchedulerOnOtherStateUpdated;
-            _gameScheduler.NextDelay -= GameSchedulerOnNextDelay;
+            _eventScheduler.SimulationUpdated -= EventSchedulerOnSimulationUpdated;
+            _eventScheduler.OtherStateUpdated -= EventSchedulerOnOtherStateUpdated;
+            _eventScheduler.NextDelay -= EventSchedulerOnNextDelay;
         };
     }
 
-    private void GameSchedulerOnNextDelay(object? sender, int e)
+    private void EventSchedulerOnNextDelay(object? sender, int e)
     {
         _nextDelays.Enqueue(e);
     }
@@ -89,24 +89,24 @@ public partial class GameView : Node2D
         }
     }
 
-    private void GameSchedulerOnOtherStateUpdated(object? sender, GameScheduler.OtherStateUpdateTypeEnum e)
+    private void EventSchedulerOnOtherStateUpdated(object? sender, EventScheduler.OtherStateUpdateTypeEnum e)
     {
         switch (e)
         {
-            case GameScheduler.OtherStateUpdateTypeEnum.FocusedUnitId:
-                UnitsView.FocusUnit(_gameScheduler!.FocusedUnitId);
+            case EventScheduler.OtherStateUpdateTypeEnum.FocusedUnitId:
+                UnitsView.FocusUnit(_eventScheduler!.FocusedUnitId);
                 SubCamera.Position = TilesView.GetRealPosition(
-                    UnitsView.GetUnitView(_gameScheduler!.FocusedUnitId)?.WishCoords ?? _currentCoords,
+                    UnitsView.GetUnitView(_eventScheduler!.FocusedUnitId)?.WishCoords ?? _currentCoords,
                     Layer.Underground);
                 break;
-            case GameScheduler.OtherStateUpdateTypeEnum.CoordsRegion:
-                TilesView.DrawRegions(_gameScheduler!.CoordsRegions.Values,
-                    _gameScheduler.GameState?.TileMapState.Size ?? Vector2I.Zero);
+            case EventScheduler.OtherStateUpdateTypeEnum.CoordsRegion:
+                TilesView.DrawRegions(_eventScheduler!.CoordsRegions.Values,
+                    _eventScheduler.GameState.TileMapState.Size);
                 break;
         }
     }
 
-    private void GameSchedulerOnSimulationUpdated(object? sender, List<SimulationContext> e)
+    private void EventSchedulerOnSimulationUpdated(object? sender, List<SimulationContext> e)
     {
         var hasDelay = _nextDelays.TryDequeue(out var delay);
         SetSimulations(e, hasDelay ? delay : null);
@@ -167,25 +167,22 @@ public partial class GameView : Node2D
     {
         //await _simStepHandler.Handle(_runningSimulations.Values);
         //绘制运行前的事件 TODO: 可能优化
+        DrawEvents(_prepareSimulations);
         if (_runningSimulations.Count > 0)
         {
             _refocus = true;
-            DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
+            //DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
             await RunSimulations(_runningSimulations.Values);
         }
-        DrawEvents(_prepareSimulations);
         if (delay != null) await GDTask.Delay(delay.Value);
     }
 
     private async GDTask HandleSimStep(SimStep step)
     {
         var id = step.GetHashCode();
-        Logger.Debug("处理事件开始:{0}-{1}-{2}-0.1s", id, step.GetType(), Time.GetTicksMsec() / 100);
+        Logger.Debug("处理事件开始->id:{0}-type:{1}-time:{2}", id, step.GetType(), Time.GetTicksMsec() / 100);
         switch (step)
         {
-            case NextDelayStep delayStep:
-                await GDTask.Delay(delayStep.Delay);
-                break;
             case PlaceTileStep placeStep:
                 await TilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
                 UnitsView.UpdateUnitPosition(placeStep.Coords);
@@ -202,7 +199,7 @@ public partial class GameView : Node2D
                     await UnitsView.PlaceUnit(
                         placeStep.Coords,
                         u,
-                        placeStep.Team.GetTeamTypeRelativeToPlayer(_gameScheduler!));
+                        placeStep.Team.GetTeamTypeRelativeToPlayer(_eventScheduler!));
                 }
 
                 break;

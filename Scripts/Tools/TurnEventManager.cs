@@ -1,4 +1,6 @@
-using TheBlockWar.Scripts.Games;
+/*using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.Events;
 
 namespace TheBlockWar.Scripts.Tools;
 
@@ -6,7 +8,7 @@ public class TurnEventManager
 {
     private Func<SchedulerEvent, bool> _onTurnEventEnter;
     private MultiDictionary<int, SchedulerEvent> _turnNormalEvents = new(false);
-    private MultiDictionary<int, SkillSchedulerEvent> _turnSkillEvents = new(false);
+    private MultiDictionary<int, SchedulerEvent> _turnSkillEvents = new(false);
     
     public TurnEventManager(Func<SchedulerEvent, bool> onTurnEventEnter)
     {
@@ -17,7 +19,7 @@ public class TurnEventManager
     {
         return _turnNormalEvents[turn];
     }
-    public ICollection<SkillSchedulerEvent> GetTurnSkillEvents(int turn)
+    public ICollection<SchedulerEvent> GetTurnSkillEvents(int turn)
     {
         return _turnSkillEvents[turn];
     }
@@ -25,9 +27,9 @@ public class TurnEventManager
     public void AddTurnEvent(SchedulerEvent ev)
     {
         if (!_onTurnEventEnter.Invoke(ev)) return;
-        if (ev is SkillSchedulerEvent skillEv)
+        if (ev.Type == SchedulerEventType.Skill)
         {
-            _turnSkillEvents.Add(ev.Turn, skillEv);
+            _turnSkillEvents.Add(ev.Turn, ev);
         }
         else
         {
@@ -43,9 +45,9 @@ public class TurnEventManager
         {
             if (e.IsChanging)
             {
-                if (ev is SkillSchedulerEvent skillEv)
+                if (ev.Type == SchedulerEventType.Skill)
                 {
-                    _turnSkillEvents.Remove(skillEv.Turn, skillEv);
+                    _turnSkillEvents.Remove(ev.Turn, ev);
                 }
                 else
                 {
@@ -59,9 +61,9 @@ public class TurnEventManager
                     ev.PropertyChange -= EvOnPropertyChange;
                     return;
                 }
-                if (sender is SkillSchedulerEvent skillEv)
+                if (ev.Type == SchedulerEventType.Skill)
                 {
-                    _turnSkillEvents.Add(skillEv.Turn, skillEv);
+                    _turnSkillEvents.Add(ev.Turn, ev);
                 }
                 else
                 {
@@ -87,4 +89,4 @@ public class TurnEventManager
         }
         _turnNormalEvents.Remove(turn); 
     }
-}
+}*/

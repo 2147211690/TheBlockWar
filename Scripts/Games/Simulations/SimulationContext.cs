@@ -19,7 +19,7 @@ public class SimulationContext
     
     public override string ToString()
     {
-        return $"结果来源于事件:{SourceId} 层:{Layer} 步骤数:{Steps.Count}\n详细步骤:\n{string.Join("\n", Steps)}";
+        return $"\n上下文:事件源:{SourceId} 队伍:{TeamType} 层:{Layer} 单位源:{SourceUnitId} 步骤数:{Steps?.Count ?? 0}\n详细步骤:\n{string.Join("\n", Steps ?? [])}";
     }
     
     
@@ -57,4 +57,5 @@ public enum SimulationLayer
     Running,//进行实际的模拟
     Focused,//进行复杂的模拟
     Waiting,//不进行复杂的模拟
+    Disabled,//已禁用
 }

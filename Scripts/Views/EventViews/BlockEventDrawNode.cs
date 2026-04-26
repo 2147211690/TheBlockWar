@@ -10,7 +10,7 @@ namespace TheBlockWar.Scripts.Views.EventViews;
 [GlobalClass]
 public partial class BlockEventDrawNode : Node2D
 {
-    public GameViewStyle Style { get; set; }
+    public GameViewStyle Style { get; set; } = null!;
     public Vector2I Coords { get; set; }
     
     

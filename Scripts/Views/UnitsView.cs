@@ -6,9 +6,9 @@ namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class UnitsView : Node2D
 {
-    [Export] public GameView GameView { get; set; }
+    [Export] public GameView GameView { get; set; } = null!;
     [Export] public Node2D DrawContainer { get; private set; } = null!;
-    [Export] private PackedScene _unitScene;
+    [Export] private PackedScene _unitScene = null!;
     private readonly Dictionary<long, UnitView> _unitViews = new();
     private readonly Dictionary<Vector2I, long> _unitMaps = new();
     private bool _queueUpdateUnitPosition = false;
@@ -40,7 +40,7 @@ public partial class UnitsView : Node2D
             _unitMaps.Add(coords, unit.Id);
         }
         //设置单位位置和动画
-        render!.RealCoords = coords;
+        render.RealCoords = coords;
         SetUnitMapPosition(render.WishCoords, render);
         render.UnitName = unit.Name;
         await render.PlayPlaceDownAnim();
@@ -76,7 +76,7 @@ public partial class UnitsView : Node2D
     public void AddUnitFack(long unitId, Vector2I coords)
     {
         if (!_unitViews.TryGetValue(unitId, out var view)) return;
-        var s = view.AddFack(coords, GameView.TilesView);
+        view.AddFack(coords, GameView.TilesView);
     }
 
     public void RemoveUnitFack(long unitId, Vector2I coords)

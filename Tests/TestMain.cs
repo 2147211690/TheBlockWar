@@ -2,6 +2,7 @@ using ImGuiNET;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Tests;
@@ -42,14 +43,7 @@ public partial class TestMain : Node2D
         {
             _.CanvasLayer.ItemBox.IsSelected = !_.CanvasLayer.ItemBox.IsSelected;
         }
-
-        if (ImGui.Button("添加ItemBox"))
-        {
-            _.CanvasLayer.CombatUi.AddSkillItem(new SkillState()
-            {
-                Skill = Skills.Skill1
-            });
-        }
+        
         if (ImGui.Button("移除ItemBox"))
         {
             _.CanvasLayer.CombatUi.ClearSkillItem();

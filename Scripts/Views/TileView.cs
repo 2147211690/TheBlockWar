@@ -2,7 +2,7 @@ namespace TheBlockWar.Scripts.Views;
 
 public partial class TileView : Node2D
 {
-    [Export] public AnimatedSprite2D MainSprite { get; set; }
+    [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
     [Export] private Godot.Collections.Dictionary<string, float> _tilesHeights = new();
     [Export,ExportGroup("PlaceDown")] public float DropHeight { get; set; } = 30f;
     [Export,ExportGroup("PlaceDown")] public float DropDuration { get; set; } = 0.03f;

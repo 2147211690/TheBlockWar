@@ -1,10 +1,11 @@
 using System.ComponentModel;
+using TheBlockWar.Scripts.Games.Skills;
 
 namespace TheBlockWar.Scripts.Games.Players;
 
 public interface IPlayer : INotifyPropertyChanged
 {
-    GameScheduler? GameScheduler { get; set; }
+    EventScheduler? GameScheduler { get; set; }
     IReadOnlyList<SkillState> SkillingUnitSkillStates { get; }
     long SelectedUnitId { get; }
     int Power { get; }

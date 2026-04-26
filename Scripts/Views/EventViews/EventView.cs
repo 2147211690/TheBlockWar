@@ -166,6 +166,7 @@ public class EventView
             BuffOperation.RemoveBuff => false,
             BuffOperation.ChangeDuration => step.Duration >= 0,
             BuffOperation.SetDuration => true,
+            _ => false,
         };
         
         if (!step.IsChildStep) BlockDraw.AddBuffChange(step.Coords, step.BuffType, isAdd, IsFocused, TeamType);

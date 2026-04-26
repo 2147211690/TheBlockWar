@@ -5,15 +5,14 @@ namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
 public partial class AnimationView : Node2D
 {
-    [Export] public GameView GameView { get; set; }
-    [Export] public Godot.Collections.Dictionary<string, Texture2D> Somethings { get; set; }
+    [Export] public GameView GameView { get; set; } = null!;
+    [Export] public Godot.Collections.Dictionary<string, Texture2D> Somethings { get; set; } = null!;
     public GDTask Play(AnimationType step)
     {
         switch (step)
         {
             case ShotSomethingAnim shotSomethingAnim:
                 return PlayShotSomethingAnim(shotSomethingAnim); 
-                break;
             case ThrowSomethingAnim throwSomethingAnim:
                 return PlayThrowSomethingAnim(throwSomethingAnim);
             case null:

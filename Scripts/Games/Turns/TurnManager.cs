@@ -1,3 +1,5 @@
+using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Modes;
 using TheBlockWar.Scripts.Games.Simulations;
@@ -10,22 +12,20 @@ namespace TheBlockWar.Scripts.Games.Turns;
 public class TurnManager
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public TurnManager(GameScheduler gameScheduler, GameView gameView, IGameMode gameMode)
+    public TurnManager(EventScheduler eventScheduler, GameView gameView, IGameMode gameMode)
     {
-        GameScheduler = gameScheduler;
+        EventScheduler = eventScheduler;
         GameMode = gameMode;
-        _turnEventManager = new TurnEventManager(OnTurnEventEntered);
         GameView = gameView;
     }
 
-    public GameScheduler GameScheduler { get; }
+    public EventScheduler EventScheduler { get; }
     public IGameMode GameMode { get; }
     public GameView GameView { get; }
     public int CurrentTurn { get; private set; }
     public GameStateEnum State => GameMode.State;
-    public IReadOnlyGameState GameState => GameScheduler.GameState!;
+    public IReadOnlyGameState GameState => EventScheduler.GameState!;
     private bool _stop;
-    private TurnEventManager _turnEventManager;
     private int _currentFocusedTurn = -1;
     public async GDTask Start()
     {
@@ -44,57 +44,32 @@ public class TurnManager
     }
     private void RunTurnEvents(int turn)
     {
-        foreach (var ev in _turnEventManager.GetTurnNormalEvents(turn))
+        var turnEvents = EventScheduler.GetTurnEvents(turn);
+        foreach (var ev in turnEvents)
         {
-            GameScheduler.SetNextCompleteDelay(800);
-            GameScheduler.AddEvent(ev, SimulationLayer.Focused);
-            GameScheduler.SetNextCompleteDelay(100);
+            Logger.Debug($"运行回合事件开始一个");
+            EventScheduler.SetNextCompleteDelay(800);
+            Logger.Debug($"Focused");
+            ev.Layer = SimulationLayer.Focused;
+            EventScheduler.SetNextCompleteDelay(100);
+            Logger.Debug($"Running");
             ev.Layer = SimulationLayer.Running;
+            Logger.Debug($"运行回合事件结束一个");
         }
-        _turnEventManager.RemoveTurnNormalEvents(turn);
-        foreach (var ev in _turnEventManager.GetTurnSkillEvents(turn))
-        {
-            GameScheduler.SetNextCompleteDelay(800);
-            GameScheduler.AddEvent(ev, SimulationLayer.Focused);
-            GameScheduler.SetNextCompleteDelay(100);
-            ev.Layer = SimulationLayer.Running;
-        }
-        _turnEventManager.RemoveTurnSkillEvents(turn);
     }
     
-    private bool OnTurnEventEntered(SchedulerEvent ev)
-    {
-        if (_currentFocusedTurn != -1) throw new InvalidOperationException("正在聚焦回合事件，不能添加回合事件");
-        if (ev.Turn <= CurrentTurn)
-        {
-            GameScheduler.AddEvent(ev, SimulationLayer.Running);
-            return false;
-        }
-        if (ev is SkillSchedulerEvent skillEv) GameScheduler.AddEvent(skillEv, SimulationLayer.Waiting);
-        else GameScheduler.RemoveEvent(ev);
-        return true;
-    }
-    public void AddTurnEvent(SchedulerEvent ev)
-    {
-        _turnEventManager.AddTurnEvent(ev);
-    }
     public void FocusTurnEvent(int turn)
     {
         if (_currentFocusedTurn == turn) return;
-        GameScheduler.BlockUpdate();
-        GameScheduler.RemoveEventMany(_turnEventManager.GetTurnNormalEvents(_currentFocusedTurn));
-        foreach(var ev in _turnEventManager.GetTurnSkillEvents(_currentFocusedTurn)) ev.Layer = SimulationLayer.Waiting;
-        
+        EventScheduler.BlockUpdate();
+        var prev = EventScheduler.GetTurnEvents(_currentFocusedTurn);
+        foreach (var ev in prev)
+            ev.Layer = ev is SkillEvent skillEvent ? SimulationLayer.Waiting : SimulationLayer.Disabled;
         _currentFocusedTurn = turn;
-        
-        if (_currentFocusedTurn == -1)
-        {
-            GameScheduler.UnblockUpdate();
-            return;
-        }
-        GameScheduler.AddEventMany(_turnEventManager.GetTurnNormalEvents(turn), SimulationLayer.Focused);
-        foreach(var ev in _turnEventManager.GetTurnSkillEvents(turn)) ev.Layer = SimulationLayer.Focused;
-        GameScheduler.UnblockUpdate();
+        var now = EventScheduler.GetTurnEvents(_currentFocusedTurn);
+        foreach (var ev in now)
+            ev.Layer = SimulationLayer.Focused;
+        EventScheduler.UnblockUpdate();
     }
     public void Stop()
     {

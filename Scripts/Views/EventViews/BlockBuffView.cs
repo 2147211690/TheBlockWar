@@ -6,15 +6,15 @@ namespace TheBlockWar.Scripts.Views.EventViews;
 [GlobalClass]
 public partial class BlockBuffView : Node2D
 {
-    [Export] public EventsView EventsView { get; set; }
+    [Export] public EventsView EventsView { get; set; } = null!;
     [Export] public Vector2 IconSize { get; set; } = new Vector2(32, 32);
     [Export] public Vector2 SymbolBoxSize { get; set; } = new Vector2(24, 24);
     [Export] public float ElementSpacing { get; set; } = 2f;
     [Export] public float RowSpacing { get; set; } = 4f;
 
     [ExportGroup("符号纹理")]
-    [Export] public Texture2D PlusTexture { get; set; }
-    [Export] public Texture2D MinusTexture { get; set; }
+    [Export] public Texture2D? PlusTexture { get; set; }
+    [Export] public Texture2D? MinusTexture { get; set; }
 
     [ExportGroup("颜色设置")]
     [Export] public Color AddTint { get; set; } = Colors.White;
@@ -135,7 +135,7 @@ public partial class BlockBuffView : Node2D
         float currentX = rowCenter.X - totalWidth / 2;
         float rowCenterY = rowCenter.Y;
         Color currentTint = isGain ? AddTint : RemoveTint;
-        Texture2D symbolTex = isGain ? PlusTexture : MinusTexture;
+        Texture2D? symbolTex = isGain ? PlusTexture : MinusTexture;
 
         if (symbolTex != null)
         {

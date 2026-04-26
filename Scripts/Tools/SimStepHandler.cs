@@ -17,7 +17,6 @@ public class SimStepHandler
     public async GDTask Handle(IEnumerable<SimulationContext> results)
     {
         var nextParallel = false;
-        var nextDelay = 0;
         var events = new List<object>();
         var stepCollection = new List<SimStep>();
         // 处理为事件列表
@@ -44,7 +43,7 @@ public class SimStepHandler
                     stepCollection = [];
                 }
             }
-            if (step is NextParallelStep or NextDelayStep) events.Add(step);
+            if (step is NextParallelStep) events.Add(step);
             else if (step != _endStep) stepCollection.Add(step);
         }
 
@@ -55,15 +54,6 @@ public class SimStepHandler
             if (eventItem is Func<GDTask> func)
             {
                 var targetFunc = func;
-                var delay = nextDelay;
-                if (delay != 0)
-                {
-                    targetFunc = async () =>
-                    {
-                        await GDTask.Delay(delay);
-                        await func();
-                    };
-                }
                 if (nextParallel)
                 {
                     var prev = result[^1];
@@ -76,15 +66,10 @@ public class SimStepHandler
                     };
                     result.RemoveAt(result.Count - 1);
                 }
-                nextDelay = 0;
                 nextParallel = false;
                 result.Add(targetFunc);
             }
-            else
-            {
-                if (eventItem is NextDelayStep delay) nextDelay = delay.Delay;
-                else if (eventItem is NextParallelStep parallel) nextParallel = true;
-            }
+            else if (eventItem is NextParallelStep parallel) nextParallel = true;
         }
 
         foreach (var func in result) await func();

@@ -6,10 +6,10 @@
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!--<PublishAOT>true</PublishAOT>-->
+    <PublishAOT>true</PublishAOT>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GDTask" Version="2.0.0" />
+    <PackageReference Include="GDTask" Version="3.0.0" />
     <PackageReference Include="GodotSharp.SourceGenerators" Version="2.6.0" />
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
     <PackageReference Include="NLog" Version="6.1.2" />
@@ -27,13 +27,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Scripts\Games\Simulations\StepRecrodGenerator.py" />
     <Content Include="开发规范\添加新模拟操作步骤的规范流程.md" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Scripts\Games\Tiles\" />
-    <Folder Include="Scripts\Games\Units\" />
+    <EmbeddedResource Remove="addons\**" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Remove="addons\**" />
+    <Compile Remove="Generator\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Generator\Generator.csproj" 
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 </Project>

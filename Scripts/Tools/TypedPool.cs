@@ -26,7 +26,7 @@ public class TypedPool<T> : IDisposable
         }
         else if (typeof(IDisposable).IsAssignableFrom(typeof(T)))
         {
-            foreach (var item in _pool) ((IDisposable)item).Dispose();
+            foreach (var item in _pool) ((IDisposable)item!).Dispose();
         }
 
         _pool.Clear();

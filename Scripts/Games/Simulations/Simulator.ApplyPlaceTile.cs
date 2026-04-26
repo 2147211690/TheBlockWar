@@ -7,6 +7,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
+        //TODO:tile改为枚举
         public void ApplyPlaceTile(Vector2I coords, TileState tile, SimulationContext context)
         {
             EnterSimulation();

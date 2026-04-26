@@ -6,7 +6,7 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        public void ApplyAnimation(int delay, SimulationContext context)
+        public void ApplyDelay(int delay, SimulationContext context)
         {
             EnterSimulation();
             if (context.Layer == SimulationLayer.Running)
