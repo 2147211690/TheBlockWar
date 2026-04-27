@@ -4,13 +4,13 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyDelay(int delay, SimulationContext context)
+        public void ApplyDelay(int delay)
         {
             EnterSimulation();
-            if (context.Layer == SimulationLayer.Running)
-                context.Steps?.AddStep(new DelayStep(CurrentDeep, delay));
+            if (obj.Layer == SimulationLayer.Running)
+                obj.Steps?.AddStep(new DelayStep(CurrentDeep, delay));
             ExitSimulation();
         }
     }

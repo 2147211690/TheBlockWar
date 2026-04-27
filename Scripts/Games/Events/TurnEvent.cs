@@ -11,18 +11,18 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
 {
     public TypeEnum TurnType { get; set => SetField(ref field, value); }
 
-    public override void OnApply(SchedulerEvent root, IGameState state, SimulationContext context)
+    public override void OnApply(SchedulerEvent root, SimObject obj)
     {
         if (TurnType == TypeEnum.Region)
         {
             var regionPairs = new List<(Vector2I coords, List<string> regions)>();
-            var size = state.TileMapState.Size;
+            var size = obj.State.TileMapState.Size;
             for (var i = 0; i < size.X; i++)
             {
                 for (var j = 0; j < size.Y; j++)
                 {
                     var coords = new Vector2I(i, j);
-                    var tile = state.TileMapState.GetTile(coords);
+                    var tile = obj.State.TileMapState.GetTile(coords);
                     if (tile.Name.GetTileInfo().Regions is {Length: > 0} && tile.Regions.Count > 0)
                         regionPairs.Add(
                             new(coords, tile.GetInfoAndCurrentRegions().ToList()));
@@ -33,7 +33,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
             {
                 foreach (var region in pair.regions)
                 {
-                    region.GetRegionInstance().OnEnterTurn(state, pair.coords, Turn, context);
+                    region.GetRegionInstance().OnEnterTurn(obj, pair.coords, Turn);
                 }
             }
 
@@ -41,16 +41,16 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
             {
                 foreach (var region in pair.regions)
                 {
-                    var tile = state.TileMapState.GetTile(pair.coords);
+                    var tile = obj.State.TileMapState.GetTile(pair.coords);
                     if (tile.GetRegionDuration(region) is 0 or int.MaxValue) continue;
-                    state.ApplyModifyTileRegion(pair.coords, region, RegionOperation.ChangeDuration, -1, context);
+                    obj.ApplyModifyTileRegion(pair.coords, region, RegionOperation.ChangeDuration, -1);
                 }
             }
         }
         else if (TurnType == TypeEnum.Buff)
         {
             List<(IReadOnlyUnitState unit, List<string> buffs)> buffPairs =
-                state.UnitMapState.GetAllUnits().Where(
+                obj.State.UnitMapState.GetAllUnits().Where(
                         u => u.Name.GetUnitInfo().Buffs is {Length: > 0} && u.Buffs.Count > 0
                         )
                     .Select(
@@ -60,7 +60,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
             {
                 foreach (var buff in pair.buffs)
                 {
-                    buff.GetBuffInstance().OnEnterTurn(state, pair.unit, Turn, context);
+                    buff.GetBuffInstance().OnEnterTurn(obj, pair.unit, Turn);
                 }
             }
             foreach (var pair in buffPairs)
@@ -68,7 +68,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
                 foreach (var buff in pair.buffs)
                 {
                     if (pair.unit.GetBuffDuration(buff) is 0 or int.MaxValue) continue;
-                    state.ApplyModifyUnitBuff(pair.unit.Coords, buff, BuffOperation.ChangeDuration, -1, context);
+                    obj.ApplyModifyUnitBuff(pair.unit.Coords, buff, BuffOperation.ChangeDuration, -1);
                 }
             }
         }

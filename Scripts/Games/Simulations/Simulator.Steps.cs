@@ -25,133 +25,133 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 [JsonDerivedType(typeof(ApplyStepsStep), nameof(ApplyStepsStep))]
 public abstract record ApplyStep
 {
-    public abstract void Apply(IGameState state, SimulationContext context);
+    public abstract void Apply(SimObject obj);
 }
 
 public record ApplyAnimationStep(AnimationType Animation) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyAnimation(Animation, context);
+        obj.ApplyAnimation(Animation);
     }
 }
 
 public record ApplyCureStep(Vector2I Coords, float Cure) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyCure(Coords, Cure, context);
+        obj.ApplyCure(Coords, Cure);
     }
 }
 
 public record ApplyDamageStep(Vector2I Coords, float Damage) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyDamage(Coords, Damage, context);
+        obj.ApplyDamage(Coords, Damage);
     }
 }
 
 public record ApplyDeathStep(Vector2I Coords) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyDeath(Coords, context);
+        obj.ApplyDeath(Coords);
     }
 }
 
 public record ApplyDelayStep(int Delay) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyDelay(Delay, context);
+        obj.ApplyDelay(Delay);
     }
 }
 
 public record ApplyDropTileStep(Vector2I Coords) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyDropTile(Coords, context);
+        obj.ApplyDropTile(Coords);
     }
 }
 
 public record ApplyDropUnitStep(Vector2I Coords) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyDropUnit(Coords, context);
+        obj.ApplyDropUnit(Coords);
     }
 }
 
 public record ApplyModifyTileRegionStep(Vector2I Coords, string RegionName, RegionOperation Operation, int Duration) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyModifyTileRegion(Coords, RegionName, Operation, Duration, context);
+        obj.ApplyModifyTileRegion(Coords, RegionName, Operation, Duration);
     }
 }
 
 public record ApplyModifyUnitBuffStep(Vector2I Coords, string BuffName, BuffOperation Operation, int Duration) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)       
     {
-        state.ApplyModifyUnitBuff(Coords, BuffName, Operation, Duration, context);
+        obj.ApplyModifyUnitBuff(Coords, BuffName, Operation, Duration);
     }
 }
 
 public record ApplyMoveUnitStep(Vector2I Coords, Vector2I To) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyMoveUnit(Coords, To, context);
+        obj.ApplyMoveUnit(Coords, To);
     }
 }
 
 public record ApplyMoveUnitPathStep(Vector2I Coords, List<Vector2I>? Path) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyMoveUnitPath(Coords, Path, context);
+        obj.ApplyMoveUnitPath(Coords, Path);
     }
 }
 
 public record ApplyPlaceTileStep(Vector2I Coords, string TileName) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyPlaceTile(Coords, TileName, context);
+        obj.ApplyPlaceTile(Coords, TileName);
     }
 }
 
 public record ApplyPlaceUnitStep(Vector2I Coords, string UnitName, int Team) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyPlaceUnit(Coords, UnitName, Team, context);
+        obj.ApplyPlaceUnit(Coords, UnitName, Team);
     }
 }
 
 public record ApplyPushUnitStep(Vector2I Coords, DirMask Dir) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplyPushUnit(Coords, Dir, context);
+        obj.ApplyPushUnit(Coords, Dir);
     }
 }
 
 public record ApplyRectWindStep(Rect2I Rect, DirMask Dir) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)   
     {
-        state.ApplyRectWind(Rect, Dir, context);
+        obj.ApplyRectWind(Rect, Dir);
     }
 }
 
 public record ApplyStepsStep(IEnumerable<ApplyStep> Applys, int StartDelay, int EndDelay, StepsRunningMode RunningMode) : ApplyStep
 {
-    public override void Apply(IGameState state, SimulationContext context)
+    public override void Apply(SimObject obj)
     {
-        state.ApplySteps(Applys, StartDelay, EndDelay, RunningMode, context);
+        obj.ApplySteps(Applys, StartDelay, EndDelay, RunningMode);
     }
 }

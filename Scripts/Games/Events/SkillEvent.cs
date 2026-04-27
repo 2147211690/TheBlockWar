@@ -39,12 +39,12 @@ public sealed class SkillEvent(long id) : SchedulerEvent(id)
     }
     private Vector2I?[]? SkillRawSkillArgs { get;set => SetField(ref field, value, false); }
 
-    public override void OnApply(SchedulerEvent root, IGameState state, SimulationContext context)
+    public override void OnApply(SchedulerEvent root, SimObject obj)
     {
-        var unit = state.UnitMapState.GetUnit(SkillBindUnitId);
+        var unit = obj.State.UnitMapState.GetUnit(SkillBindUnitId);
         if (unit.IsNull()) return;
         var useCoords = unit.Coords;
-        SkillName.GetSkillInstance().SkillCore(state, context, unit, useCoords, SkillArgs ?? [], SkillName);
+        SkillName.GetSkillInstance().SkillCore(obj, unit, useCoords, SkillArgs ?? [], SkillName);
     }
     public override string ToString()
     {

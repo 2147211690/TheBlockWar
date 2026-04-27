@@ -24,7 +24,7 @@ public partial class Test : Node2D
     IGameState? _currentGameState;
     IGameState? _snapshot;
     IGameState? _gameState;
-    SimulationContext? _simulationResult;
+    SimContext? _simulationResult;
     uint _nextUnitId = 1;
     int x = 0, y = 0;
     int unitId = 1, newX = 0, newY = 0;
@@ -46,7 +46,7 @@ public partial class Test : Node2D
     private PvpMode _pvpMode;
     private TurnManager _turnManager;
     private bool _checkNextTurn;
-    
+    private string _buffName = string.Empty;
     public override void _Ready()
     {
         InfoExtensions.InfoManager = ResourceLoader.Load<InfoManager>("uid://cidx5e6oa1bc8");
@@ -263,17 +263,17 @@ public partial class Test : Node2D
 
             _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ActionCore = (e, state, context) =>
+                ActionCore = (e, obj) =>
                 {
-                    state.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
+                    obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
                     for (int i = 0; i < 10; i++)
                     {
                         for (int j = 0; j < 9; j++)
                         {
-                            state.ApplyPlaceUnit(new(i, j), UnitNames.Unit0, 1, context);
+                            obj.ApplyPlaceUnit(new(i, j), UnitNames.Unit0, 1);
                         }
                     }
-                    state.EndSteps(context);
+                    obj.EndSteps();
                 },
                 Layer = SimulationLayer.Running,
             });
@@ -281,21 +281,24 @@ public partial class Test : Node2D
         if (ImGui.Button("测试放置"))
         {
 
+            string[] names = [TileNames.Soil0, TileNames.水块, TileNames.熔岩块];
             _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ActionCore = (e, state, context) =>
+                ActionCore = (e, obj) =>
                 {
                     for (int i = 0; i < 10; i++)
                     {
-                        state.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
+                        obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
+                        
                         for (int j = 0; j < 10; j++)
                         {
                             var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
-                            state.ApplyPlaceTile(new(i, j), empty ? TileNames.水块 : TileNames.Soil0 ,context);
+                            obj.ApplyPlaceTile(new(i, j), empty ? TileNames.水块 : 
+                                (names[Random.Shared.Next(names.Length)]));
                         }
-                        state.EndSteps(context);
+                        obj.EndSteps();
                     }
-                    state.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0, context);
+                    obj.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0);
                 },
                 Layer = SimulationLayer.Running,
             });
@@ -305,46 +308,47 @@ public partial class Test : Node2D
 
             _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ActionCore = (e, state, context) =>
+                ActionCore = (e, obj) =>
                 {
                     for (int i = 0; i < 10; i++)
                     {
-                        state.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
+                        obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
                         for (int j = 0; j < 10; j++)
                         {
-                            state.ApplyDropTile(new (i, j), context);
+                            obj.ApplyDropTile(new (i, j));
                         }
-                        state.EndSteps(context);
+                        obj.EndSteps();
                     }
-                    state.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0, context);
+                    obj.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0);
                 },
                 Layer = SimulationLayer.Running,
             });
         }
 
-        if (ImGui.Button("添加力量1"))
+        ImGui.InputText("BuffName", ref _buffName, 100);
+        if (ImGui.Button("添加力Buff"))
         {
             _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ActionCore = (e, state, context) =>
+                ActionCore = (e, obj) =>
                 {
-                    foreach (var unit in state.UnitMapState.GetAllUnits())
+                    foreach (var unit in obj.State.UnitMapState.GetAllUnits())
                     {
-                        state.ApplyModifyUnitBuff(unit.Coords, BuffNames.力量1, BuffOperation.AddBuff, 1, context);
+                        obj.ApplyModifyUnitBuff(unit.Coords, _buffName, BuffOperation.AddBuff, 1);
                     }
                 },
                 Layer = SimulationLayer.Running,
             });
         }
-        if (ImGui.Button("移除力量1"))
+        if (ImGui.Button("移除Buff"))
         {
             _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ActionCore = (e, state, context) =>
+                ActionCore = (e, obj) =>
                 {
-                    foreach (var unit in state.UnitMapState.GetAllUnits())
+                    foreach (var unit in obj.State.UnitMapState.GetAllUnits())
                     {
-                        state.ApplyModifyUnitBuff(unit.Coords, BuffNames.力量1, BuffOperation.RemoveBuff, 1, context);
+                        obj.ApplyModifyUnitBuff(unit.Coords, _buffName, BuffOperation.RemoveBuff, 1);
                     }
                 },
                 Layer = SimulationLayer.Running,
@@ -355,12 +359,12 @@ public partial class Test : Node2D
         {
             _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
-                ActionCore = (e, state, context) =>
+                ActionCore = (e, obj) =>
                 {
-                    state.ApplyPlaceUnit(new(3,2), UnitNames.Unit0, 0, context);
-                    state.ApplyPlaceUnit(new(2,3), UnitNames.Unit0, 0, context);
-                    state.ApplyPlaceUnit(new(1,2), UnitNames.Unit0, 0, context);
-                    state.ApplyPlaceUnit(new(2,1), UnitNames.Unit0, 0, context);
+                    obj.ApplyPlaceUnit(new(3,2), UnitNames.Unit0, 0);
+                    obj.ApplyPlaceUnit(new(2,3), UnitNames.Unit0, 0);
+                    obj.ApplyPlaceUnit(new(1,2), UnitNames.Unit0, 0);
+                    obj.ApplyPlaceUnit(new(2,1), UnitNames.Unit0, 0);
                 },
                 Layer = SimulationLayer.Running,
             });

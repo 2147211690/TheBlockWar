@@ -24,11 +24,11 @@ public partial class GameView : Node2D
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
 
-    private Dictionary<long, SimulationContext> _runningSimulations = new();
-    private List<SimulationContext> _lastSimulations = new();
-    private List<SimulationContext> _prepareSimulations = new();
+    private Dictionary<long, SimObject> _runningSimulations = new();
+    private List<SimObject> _lastSimulations = new();
+    private List<SimObject> _prepareSimulations = new();
     private EventScheduler? _eventScheduler;
-    private Queue<(IReadOnlyList<SimulationContext> simulations, int? delay)> _simulationCache = new();
+    private Queue<(IReadOnlyList<SimObject> simulations, int? delay)> _simulationCache = new();
     private Vector2I? _previousMouseCoords = null;
     private Vector2I _currentCoords;
     private bool _refocus = false;
@@ -106,14 +106,14 @@ public partial class GameView : Node2D
         }
     }
 
-    private void EventSchedulerOnSimulationUpdated(object? sender, List<SimulationContext> e)
+    private void EventSchedulerOnSimulationUpdated(object? sender, List<SimObject> e)
     {
         var hasDelay = _nextDelays.TryDequeue(out var delay);
         SetSimulations(e, hasDelay ? delay : null);
     }
 
     /// <param name="simulations">确保传入有序的模拟结果</param>
-    private void SetSimulations(IReadOnlyList<SimulationContext> simulations, int? delay = null)
+    private void SetSimulations(IReadOnlyList<SimObject> simulations, int? delay = null)
     {
         if (IsRunning)
         {
@@ -129,7 +129,7 @@ public partial class GameView : Node2D
         foreach (var simulation in simulations)
         {
             if (simulation.Layer == SimulationLayer.Running)
-                _runningSimulations.Add(simulation.SourceId, simulation);
+                _runningSimulations.Add(simulation.SourceEventId, simulation);
             else
                 _prepareSimulations.Add(simulation);
         }
@@ -248,19 +248,19 @@ public partial class GameView : Node2D
         }
     }
 
-    private GDTask RunSimulations(IEnumerable<SimulationContext> simulations)
+    private GDTask RunSimulations(IEnumerable<SimObject> simulations)
     {
         return _simStepHandler.Handle(simulations.SelectMany(a => a.Steps ?? []));
     }
 
-    private void DrawEvents(IEnumerable<SimulationContext> s)
+    private void DrawEvents(IEnumerable<SimObject> s)
     {
         EventsView.ClearAll();
         foreach (var simulation in s)
         {
             var isFocused = simulation.Layer == SimulationLayer.Focused;
-            var teamType = simulation.TeamType;
-            var view = EventsView.BeginAddEventView(simulation.SourceId, isFocused, teamType);
+            var teamType = TeamTypeEnum.Player; //TODO:每一步都不一样
+            var view = EventsView.BeginAddEventView(simulation.SourceEventId, isFocused, teamType);
             if (view is null) continue;
             foreach (var step in simulation.Steps ?? [])
             {

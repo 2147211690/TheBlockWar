@@ -28,16 +28,19 @@ public static partial class Simulator
     }
     private static void ExitSimulation() => _simulationStack--;
     private static int CurrentComplexSimulationMaxLevel { get; set; }
-    private static bool ComplexSimulationRegion(SimulationContext context, int level) 
-        => CurrentComplexSimulationMaxLevel >= level || context.Layer == SimulationLayer.Running;
-    
-    extension(IGameState state)
+
+    public static void PushContext(SimContext context) => _contexts.Push(context);
+    public static SimContext PopContext() => _contexts.Pop();
+    public static SimContext CurrentContext => _contexts.Peek();
+    private static Stack<SimContext> _contexts = [];
+    extension(SimObject obj)
     {
-        
+        private bool ComplexSimulationRegion(int level) 
+            => CurrentComplexSimulationMaxLevel >= level || obj.Layer == SimulationLayer.Running;
         /// <summary>
         /// 触发单位进入到新坐标的事件
         /// </summary>
-        private void ApplyUnitSetInCoords(IReadOnlyUnitState unit, SimulationContext context)
+        private void ApplyUnitSetInCoords(IReadOnlyUnitState unit)
         {
             if (unit.IsNull())
             {
@@ -46,34 +49,52 @@ public static partial class Simulator
             EnterSimulation();
 
             var coords = unit.Coords;
-            if (unit.IsWillDrop(state, coords)) // 单位会掉落
+            if (unit.IsWillDrop(obj.State, coords)) // 单位会掉落
             {
-                state.ApplyDropUnit(coords, context);
+                obj.ApplyDropUnit(coords);
             }
             else
             {
-                var toTile = state.TileMapState.GetTile(coords);
+                var toTile = obj.State.TileMapState.GetTile(coords);
                 if (!toTile.IsNull())
                 {
-                    state.NotifyTileRegions(toTile, r => r.OnUnitEnter(state, coords, unit, coords, false, context));
+                    obj.NotifyTileRegions(toTile, r => r.OnUnitEnter(obj, coords, unit, coords, false));
+                    obj.NotifyTileRegions(toTile, r =>
+                    {
+                        var info = r.Name.GetRegionInfo();
+                        if (info.RegionBuffs != null)
+                        {
+                            foreach (var buff in info.RegionBuffs)
+                                obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.AddBuff, int.MaxValue);
+                        }
+                    });
                 }
                 // 移除所有一次性区域
                 for (var i = toTile.Regions.Count - 1; i >= 0; i--)
                 {
                     if (!toTile.Regions[i].RegionName.GetRegionInfo().IsOnece) continue;
-                    state.TileMapState.ModifyTile(coords, u => u.RemoveRegion(i));
+                    obj.State.TileMapState.ModifyTile(coords, u => u.RemoveRegion(i));
                 }
             }
             ExitSimulation();
         }
 
-        private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, Vector2I coords, SimulationContext context)
+        private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, Vector2I coords)
         {
             EnterSimulation();
-            var fromTile = state.TileMapState.GetTile(coords);
+            var fromTile = obj.State.TileMapState.GetTile(coords);
             if (!fromTile.IsNull())
             {
-                state.NotifyTileRegions(fromTile, r => r.OnUnitLeave(state, coords, unit, coords, false, context));
+                obj.NotifyTileRegions(fromTile, r => r.OnUnitLeave(obj, coords, unit, coords, false));
+                obj.NotifyTileRegions(fromTile, r =>
+                {
+                    var info = r.Name.GetRegionInfo();
+                    if (info.RegionBuffs != null)
+                    {
+                        foreach (var buff in info.RegionBuffs)
+                            obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.RemoveBuff, int.MaxValue);
+                    }
+                });
             }
             ExitSimulation();
         }
@@ -106,18 +127,18 @@ public static partial class Simulator
         /// <summary>
         /// 开始封装一系列步骤, 请记住调用EndSteps结束
         /// </summary>
-        public void BeginSteps(int startDelay, int endDelay, StepsRunningMode runningMode, SimulationContext context)
+        public void BeginSteps(int startDelay, int endDelay, StepsRunningMode runningMode)
         {
-            if (context.Layer != SimulationLayer.Running) return;
+            if (obj.Layer != SimulationLayer.Running) return;
             EnterSimulation();
-            context.Steps?.AddStep(new StepsStep(CurrentDeep, startDelay, endDelay, runningMode));
+            obj.Steps?.AddStep(new StepsStep(CurrentDeep, startDelay, endDelay, runningMode));
         }
         /// <summary>
         /// 结束封装一系列步骤
         /// </summary>
-        public void EndSteps(SimulationContext context)
+        public void EndSteps()
         {
-            if (context.Layer != SimulationLayer.Running) return;
+            if (obj.Layer != SimulationLayer.Running) return;
             ExitSimulation();
         }
     }

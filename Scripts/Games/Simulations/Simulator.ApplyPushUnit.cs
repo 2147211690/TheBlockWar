@@ -5,9 +5,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyPushUnit(Vector2I coords, DirMask dir, SimulationContext context)
+        public void ApplyPushUnit(Vector2I coords, DirMask dir)
         {
             EnterSimulation();
             Main();
@@ -15,26 +15,31 @@ partial class Simulator
 
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, 0, true));
+                    obj.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, 0, true));
                     return;
                 }
 
-                var unit = state.UnitMapState.GetUnit(coords);
+                var unit = obj.State.UnitMapState.GetUnit(coords);
                 var target = coords + dir.ToVec2I();
-                var targetUnit = state.UnitMapState.GetUnit(target);
-                var validPush = !unit.IsNull() && targetUnit.IsNull() && state.IsInMap(target);
-                context.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, unit.Id, validPush));
+                var targetUnit = obj.State.UnitMapState.GetUnit(target);
+                var validPush = !unit.IsNull() && targetUnit.IsNull() && obj.State.IsInMap(target);
+                obj.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, unit.Id, validPush));
                 if (unit.IsNull()) return;
                 if (validPush)
                 {
-                    state.ApplyMoveUnit(coords, target, context);
+                    obj.ApplyMoveUnit(coords, target);
                 }
                 else
                 {
-                    state.ApplyDamage(coords, 10, context);
-                    if (!targetUnit.IsNull()) state.ApplyDamage(target, 10, context);
+                    //推动碰撞伤害是互相给予的
+                    PushContext(new SimContext(targetUnit.Id));
+                    obj.ApplyDamage(coords, 10); 
+                    PopContext();
+                    PushContext(new SimContext(unit.Id));
+                    if (!targetUnit.IsNull()) obj.ApplyDamage(target, 10);
+                    PopContext();
                 }
             }
         }

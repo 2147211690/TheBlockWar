@@ -5,6 +5,5 @@
 [resource]
 script = ExtResource("1_f5oac")
 Name = "水域"
-EnterAddBuffs = PackedStringArray("浸润")
-ExitRemoveBuffs = PackedStringArray("浸润")
+RegionBuffs = PackedStringArray("水域")
 DefaultDuration = 10000000

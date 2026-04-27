@@ -55,7 +55,7 @@ public abstract class SchedulerEvent(long id) : IComparable<SchedulerEvent>
         if (priorityComparison != 0) return priorityComparison;
         return Id.CompareTo(other.Id);
     }
-    public abstract void OnApply(SchedulerEvent root, IGameState state, SimulationContext context);
+    public abstract void OnApply(SchedulerEvent root, SimObject obj);
     public static int DefaultCompare(SchedulerEvent a, SchedulerEvent b) => a.CompareTo(b);
     public static int IgnoreLayerCompare(SchedulerEvent a, SchedulerEvent b)
     {

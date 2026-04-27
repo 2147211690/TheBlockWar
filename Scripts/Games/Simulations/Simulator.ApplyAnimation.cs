@@ -4,12 +4,12 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyAnimation(AnimationType animation, SimulationContext context)
+        public void ApplyAnimation(AnimationType animation)
         {
             EnterSimulation();
-            context.Steps?.AddStep(new AnimationStep(CurrentDeep, animation));
+            obj.Steps?.AddStep(new AnimationStep(CurrentDeep, animation));
             ExitSimulation();
         }
     }

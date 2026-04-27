@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://cdkjb2nqtfpl4"]
+
+[ext_resource type="Texture2D" uid="uid://ddlrcufxdgb0e" path="res://Art/Img/ui/pod_strat.png" id="1_07g3x"]
+[ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_r5wet"]
+
+[resource]
+script = ExtResource("1_r5wet")
+Name = "不稳定"
+Icon = ExtResource("1_07g3x")
+Description = "单位死亡后推动周围的单位"

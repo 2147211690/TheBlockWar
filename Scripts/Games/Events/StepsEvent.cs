@@ -11,10 +11,10 @@ public class StepsEvent(long id) : SchedulerEvent(id)
     public int EndDelay { get; set => SetField(ref field, value, false); } = 0;
     public StepsRunningMode RunningMode { get; set => SetField(ref field, value, false); }
     
-    public override void OnApply(SchedulerEvent root, IGameState state, SimulationContext context)
+    public override void OnApply(SchedulerEvent root, SimObject obj)
     {
         if (Steps is null) return;
-        state.ApplySteps(Steps, StartDelay, EndDelay, RunningMode, context);
+        obj.ApplySteps(Steps, StartDelay, EndDelay, RunningMode);
     }
 
     public override string ToString()

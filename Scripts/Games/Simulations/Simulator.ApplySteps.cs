@@ -4,9 +4,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplySteps(IEnumerable<ApplyStep> applys, int startDelay, int endDelay, StepsRunningMode runningMode, SimulationContext context)
+        public void ApplySteps(IEnumerable<ApplyStep> applys, int startDelay, int endDelay, StepsRunningMode runningMode)
         {
             EnterSimulation();
             Main();
@@ -14,10 +14,10 @@ partial class Simulator
 
             void Main()
             {
-                context.Steps?.AddStep(new StepsStep(CurrentDeep, startDelay, endDelay, runningMode));
+                obj.Steps?.AddStep(new StepsStep(CurrentDeep, startDelay, endDelay, runningMode));
                 foreach (var apply in applys)
                 {
-                    apply.Apply(state, context);
+                    apply.Apply(obj);
                 }
             }
         }

@@ -5,9 +5,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyDropTile(Vector2I coords, SimulationContext context)
+        public void ApplyDropTile(Vector2I coords)
         {
             EnterSimulation();
             Main();
@@ -15,25 +15,25 @@ partial class Simulator
 
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
+                    obj.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
                     return;
                 }
 
-                var unit = state.UnitMapState.GetUnit(coords);
+                var unit = obj.State.UnitMapState.GetUnit(coords);
                 
-                context.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
+                obj.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
+                obj.State.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
                 if (!unit.IsNull())
                 {
-                    if (unit.IsWillDrop(state, coords))
-                        state.ApplyDropUnit(coords, context);
+                    if (unit.IsWillDrop(obj.State, coords))
+                        obj.ApplyDropUnit(coords);
                     else
                     {
-                        state.ApplyUnitRemoveFromCoords(unit, coords, context);
+                        obj.ApplyUnitRemoveFromCoords(unit, coords);
                     }
                 }
-                state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
             }
         }
     }

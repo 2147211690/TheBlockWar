@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_n0adb")
-Name = "浸润"
+Name = "水域"
 Icon = ExtResource("1_0yl76")
 Priority = -1
-Description = "角色被水打湿,暂时无法使用技能"
+Description = "单位处于水域,暂时无法使用技能"

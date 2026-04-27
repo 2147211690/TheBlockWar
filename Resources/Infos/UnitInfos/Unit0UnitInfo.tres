@@ -44,6 +44,6 @@ script = ExtResource("1_cqclv")
 Name = "Unit0"
 MaxHealth = 50.0
 MaxShield = 50.0
-IsFlying = true
+Buffs = PackedStringArray("不稳定")
 ViewOffset = Vector2(7, -6)
 ViewFrames = SubResource("SpriteFrames_cqclv")

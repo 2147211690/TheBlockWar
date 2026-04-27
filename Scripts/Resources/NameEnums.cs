@@ -7,13 +7,17 @@ public enum SkillNameEnum
 [NameEnum]
 public enum BuffNameEnum
 {
-    浸润,
+    水域,
     力量1,
+    荆棘1,
+    不稳定,
+    熔岩域,
 }
 [NameEnum]
 public enum RegionNameEnum
 {
     水域,
+    熔岩域,
 }
 [NameEnum]
 public enum UnitNameEnum
@@ -26,4 +30,5 @@ public enum TileNameEnum
     Air,
     Soil0,
     水块,
+    熔岩块,
 }

@@ -5,10 +5,10 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
         //TODO:tile改为枚举
-        public void ApplyPlaceTile(Vector2I coords, string tileName, SimulationContext context)
+        public void ApplyPlaceTile(Vector2I coords, string tileName)
         {
             EnterSimulation();
             Main();
@@ -16,21 +16,21 @@ partial class Simulator
 
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
+                    obj.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
                     return;
                 }
 
-                state.TileMapState.ModifyTile(coords, t =>
+                obj.State.TileMapState.ModifyTile(coords, t =>
                 {
                     t.Name = tileName;
                 });
-                context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
-                if (ComplexSimulationRegion(context, 2))
+                obj.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
+                if (obj.ComplexSimulationRegion(2))
                 {
-                    var unit = state.UnitMapState.GetUnit(coords);
-                    if (!unit.IsNull()) state.ApplyUnitSetInCoords(unit, context);
+                    var unit = obj.State.UnitMapState.GetUnit(coords);
+                    if (!unit.IsNull()) obj.ApplyUnitSetInCoords(unit);
                 }
             }
         }

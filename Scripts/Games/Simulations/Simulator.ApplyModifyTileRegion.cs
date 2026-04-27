@@ -6,10 +6,10 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
         public void ApplyModifyTileRegion(Vector2I coords, string regionName, RegionOperation operation, 
-            int duration, SimulationContext context)
+            int duration)
         {
             EnterSimulation();
             Main();
@@ -17,14 +17,14 @@ partial class Simulator
             
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName,
+                    obj.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName,
                         operation, duration, operation, duration));
                     return;
                 }
 
-                var tile = state.TileMapState.GetTile(coords);
+                var tile = obj.State.TileMapState.GetTile(coords);
                 var oldDuration = tile.GetRegionDuration(regionName);
                 var resultOperation = RegionOperation.None;
                 var resultDuration = duration;
@@ -33,41 +33,41 @@ partial class Simulator
                 {
                     (resultOperation, resultDuration) = operation switch
                     {
-                        RegionOperation.AddRegion => state.HandleAddOrChangeRegion(tile, coords, regionName, duration,
+                        RegionOperation.AddRegion => obj.HandleAddOrChangeRegion(tile, coords, regionName, duration,
                             true),
-                        RegionOperation.RemoveRegion => state.HandleRemoveRegion(tile, coords, regionName),
-                        RegionOperation.ChangeDuration => state.HandleAddOrChangeRegion(tile, coords, regionName,
+                        RegionOperation.RemoveRegion => obj.HandleRemoveRegion(tile, coords, regionName),
+                        RegionOperation.ChangeDuration => obj.HandleAddOrChangeRegion(tile, coords, regionName,
                             oldDuration + duration, false),
                         RegionOperation.SetDuration =>
-                            state.HandleSetDurationRegion(tile, coords, regionName, duration),
+                            obj.HandleSetDurationRegion(tile, coords, regionName, duration),
                         _ => (RegionOperation.None, duration)
                     };
                 }
 
-                context.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName, operation,
+                obj.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName, operation,
                     duration, resultOperation, resultDuration));
 
-                if (ComplexSimulationRegion(context, 1))
+                if (obj.ComplexSimulationRegion(1))
                 {
-                    var unit = state.UnitMapState.GetUnit(coords);
+                    var unit = obj.State.UnitMapState.GetUnit(coords);
                     if (!unit.IsNull())
                     {
                         if (resultOperation == RegionOperation.AddRegion)
                         {
                             NotifyTileRegion(tile, regionName,
-                                r => r.OnUnitEnter(state, coords, unit, coords, true, context));
+                                r => r.OnUnitEnter(obj, coords, unit, coords, true));
                         }
                         else if (resultOperation == RegionOperation.RemoveRegion)
                         {
                             NotifyTileRegion(tile, regionName,
-                                r => r.OnUnitLeave(state, coords, unit, coords, true, context));
+                                r => r.OnUnitLeave(obj, coords, unit, coords, true));
                         }
                     }
                 }
             }
             void NotifyTileRegion(IReadOnlyTileState tile, string regionName, Action<IRegion> action)
             {
-                if (tile == TileState.Empty) return;
+                if (tile.IsNull()) return;
                 if (!tile.TryFindRegion(regionName, out var index)) return;
                 EnterSimulation();
                 action(tile.Regions[index].RegionName.GetRegionInstance());
@@ -85,15 +85,15 @@ partial class Simulator
                 
                 if (finalDuration == 0)
                 {
-                    state.TileMapState.ModifyTile(coords, t => t.RemoveRegion(index));
+                    obj.State.TileMapState.ModifyTile(coords, t => t.RemoveRegion(index));
                     return (RegionOperation.RemoveRegion, 0);
                 }
                 
-                state.TileMapState.ModifyTile(coords, t => t.ModifyRegion(index, finalDuration));
+                obj.State.TileMapState.ModifyTile(coords, t => t.ModifyRegion(index, finalDuration));
                 return (RegionOperation.ChangeDuration, finalDuration - oldDuration);
             }
             
-            state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionName, newDuration));
+            obj.State.TileMapState.ModifyTile(coords, t => t.AddRegion(regionName, newDuration));
             return (RegionOperation.AddRegion, newDuration);
         }
 
@@ -102,7 +102,7 @@ partial class Simulator
         {
             if (tile.TryFindRegion(regionName, out var index))
             {
-                state.TileMapState.ModifyTile(coords, t => t.RemoveRegion(index));
+                obj.State.TileMapState.ModifyTile(coords, t => t.RemoveRegion(index));
                 return (RegionOperation.RemoveRegion, 0);
             }
             return (RegionOperation.None, 0);
@@ -118,15 +118,15 @@ partial class Simulator
                 
                 if (finalDuration == 0)
                 {
-                    state.TileMapState.ModifyTile(coords, t => t.RemoveRegion(index));
+                    obj.State.TileMapState.ModifyTile(coords, t => t.RemoveRegion(index));
                     return (RegionOperation.RemoveRegion, 0);
                 }
                 
-                state.TileMapState.ModifyTile(coords, t => t.ModifyRegion(index, finalDuration));
+                obj.State.TileMapState.ModifyTile(coords, t => t.ModifyRegion(index, finalDuration));
                 return (RegionOperation.ChangeDuration, finalDuration - oldDuration);
             }
             
-            state.TileMapState.ModifyTile(coords, t => t.AddRegion(regionName, newDuration));
+            obj.State.TileMapState.ModifyTile(coords, t => t.AddRegion(regionName, newDuration));
             return (RegionOperation.AddRegion, newDuration);
         }
     }

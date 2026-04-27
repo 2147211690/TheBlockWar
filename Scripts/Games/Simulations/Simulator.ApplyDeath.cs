@@ -5,9 +5,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyDeath(Vector2I coords, SimulationContext context)
+        public void ApplyDeath(Vector2I coords)
         {
             EnterSimulation();
             Main();
@@ -15,22 +15,23 @@ partial class Simulator
 
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DeathStep(CurrentDeep, coords, 0, false));
+                    obj.Steps?.AddStep(new DeathStep(CurrentDeep, coords, 0, false));
                     return;
                 }
 
-                var unit = state.UnitMapState.GetUnit(coords);
+                var unit = obj.State.UnitMapState.GetUnit(coords);
 
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    context.Steps?.AddStep(new DeathStep(CurrentDeep, coords, unit.Id, false));
+                    obj.Steps?.AddStep(new DeathStep(CurrentDeep, coords, unit.Id, false));
                     return;
                 }
 
-                context.Steps?.AddStep(new DeathStep(CurrentDeep, coords, unit.Id, true));
-                state.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
+                obj.Steps?.AddStep(new DeathStep(CurrentDeep, coords, unit.Id, true));
+                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
+                obj.NotifyUnitBuffs(unit, b => b.OnUnitDeath(obj, unit));
                 //TODO:可能引入区域相关事件
             }
         }

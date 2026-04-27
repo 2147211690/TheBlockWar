@@ -33,15 +33,6 @@ public class PvpMode : GameMode
             Priority = int.MinValue + 1,
             Layer = SimulationLayer.Disabled,
         });
-        turnManager.EventScheduler.CreateEvent(id => new ActionEvent(id)
-        {
-            ActionCore = (ev, state, ctx) =>
-            {
-                state.ApplyRectWind(new Rect2I(Vector2I.Zero, state.Size), DirMask.Down, ctx);
-            },
-            Priority = int.MinValue + 2,
-            Turn = turn + 1,
-        });
     }
 
     public override async GDTask Turn(TurnManager turnManager, int turn)

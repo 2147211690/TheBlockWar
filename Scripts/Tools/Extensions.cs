@@ -58,18 +58,18 @@ public static class Extensions
         }
     }
 
-    extension(IGameState state)
+    extension(SimObject obj)
     {
         public (Vector2I coords, bool isHit) MoveHit(in Vector2I start, DirMask dir, float damage, int length, bool checkGround,
-            SimulationContext context)
+            SimContext context)
         {
             if (!dir.IsOneVec()) return (start, false);
-            var (aim, isHit) = state.CastRayToUnit(start, dir.ToVec2I(), length, checkGround);
-            state.ApplyMoveUnitPath(start, CoordsRegion.GetPathRegion(Vector2I.Zero, aim - dir.ToVec2I() - start).ToList(), context);
+            var (aim, isHit) = obj.State.CastRayToUnit(start, dir.ToVec2I(), length, checkGround);
+            obj.ApplyMoveUnitPath(start, CoordsRegion.GetPathRegion(Vector2I.Zero, aim - dir.ToVec2I() - start).ToList());
             if (isHit)
             {
-                state.ApplyDamage(aim, damage, context);
-                state.ApplyDamage(aim - dir.ToVec2I(), damage, context);
+                obj.ApplyDamage(aim, damage);
+                obj.ApplyDamage(aim - dir.ToVec2I(), damage);
             }
             return (aim, isHit);
         }
@@ -398,7 +398,7 @@ public static class Extensions
     {
         public bool TryPlay(StringName animation)
         {
-            if (sprite2D.SpriteFrames?.HasAnimation(animation) == false) return false;
+            if (!(sprite2D.SpriteFrames?.HasAnimation(animation) ?? false)) return false;
             sprite2D.Play(animation);
             return true;
         }

@@ -5,9 +5,10 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyDamage(Vector2I coords, float damage, SimulationContext context)
+        //TODO:可能使用事件优化
+        public void ApplyDamage(Vector2I coords, float damage)
         {
             EnterSimulation();
             Main();
@@ -15,66 +16,66 @@ partial class Simulator
 
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, 0, 0));
+                    obj.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, 0, 0));
                     return;
                 }
 
-                var unit = state.UnitMapState.GetUnit(coords);
+                var unit = obj.State.UnitMapState.GetUnit(coords);
                 float validDamage = 0;
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    context.Steps?.AddStep(
+                    obj.Steps?.AddStep(
                         new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
                 var originDamage = damage;
                 var rawDamage = damage;
 
-                if (ComplexSimulationRegion(context, 0))
+                if (obj.ComplexSimulationRegion(0))
                 {
                     //应用来源单位伤害前事件
-                    var source = state.UnitMapState.GetUnit(context.SourceUnitId);
-                    state.NotifyUnitBuffs(source,
-                        b => b.OnBeforeDamageToUnit(state, source, unit, originDamage, ref rawDamage, context));
+                    var source = obj.State.UnitMapState.GetUnit(CurrentContext.SourceUnitId);
+                    obj.NotifyUnitBuffs(source,
+                        b => b.OnBeforeDamageToUnit(obj, source, unit, originDamage, ref rawDamage));
                     //应用单位伤害前事件
-                    state.NotifyUnitBuffs(unit,
-                        b => b.OnUnitBeforeGetDamage(state, unit, originDamage, ref rawDamage, context));
-                    unit = state.UnitMapState.GetUnit(unit.Id);
+                    obj.NotifyUnitBuffs(unit,
+                        b => b.OnUnitBeforeGetDamage(obj, unit, originDamage, ref rawDamage));
+                    unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
 
                 if (unit.IsNull())
                 {
-                    context.Steps?.AddStep(
+                    obj.Steps?.AddStep(
                         new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
                 validDamage = Mathf.Min(rawDamage, unit.Health);
-                state.UnitMapState.ModifyUnit(unit.Id, u => u.Health -= validDamage);
-                unit = state.UnitMapState.GetUnit(unit.Id);
+                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health -= validDamage);
+                unit = obj.State.UnitMapState.GetUnit(unit.Id);
 
                 if (unit.IsNull())
                 {
-                    context.Steps?.AddStep(
+                    obj.Steps?.AddStep(
                         new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
-                context.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
+                obj.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
 
                 // 触发受伤后事件, 仅在运行层触发
-                if (validDamage > 0 && ComplexSimulationRegion(context, 0))
+                if (validDamage > 0 && obj.ComplexSimulationRegion(0))
                 {
                     // 触发受伤后事件
-                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterGetDamage(state, unit, validDamage, context));
-                    unit = state.UnitMapState.GetUnit(unit.Id);
+                    obj.NotifyUnitBuffs(unit, b => b.OnUnitAfterGetDamage(obj, unit, validDamage));
+                    unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
 
-                if (!unit.IsNull() && unit.Health <= 0)
+                if (!unit.IsNull() && validDamage > 0 && unit.Health <= 0)
                 {
-                    ApplyDeath(state, coords, context);
+                    obj.ApplyDeath(coords);
                 }
             }
         }

@@ -35,30 +35,30 @@ public class Test1Skill() : Skill(SkillNames.Test1, 3)
         return [];
     }
 
-    protected override void Core(IGameState gameState, SimulationContext context, IReadOnlyUnitState unit, Vector2I useCoords,
+    protected override void Core(SimObject obj, IReadOnlyUnitState unit, Vector2I useCoords,
         Vector2I?[] args, string skillName)
     {
         if (args.TryGetArgs(0, out var v1))
         {
             
-            var (path, cost) = GameNavigator.FindShortestPath(gameState, unit, useCoords, v1 + unit.Coords);
-            if (cost <= 4) gameState.ApplyMoveUnitPath(Vector2I.Zero, path, context);
+            var (path, cost) = GameNavigator.FindShortestPath(obj.State, unit, useCoords, v1 + unit.Coords);
+            if (cost <= 4) obj.ApplyMoveUnitPath(Vector2I.Zero, path);
         }
-        if (args.TryGetArgs(1, out var v2) && context.PeekStep is MoveUnitPathStep moveStep)
+        if (args.TryGetArgs(1, out var v2) && obj.Steps?.PeekStep is MoveUnitPathStep moveStep)
         {
             var coords = v2 + useCoords;
-            gameState.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
+            obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
             for (int i = 0; i < 4; i++)
             {
                 var vec = (DirMask)(1 << i);
-                gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, context);
+                obj.ApplyPushUnit(coords + vec.ToVec2I(), vec);
             }
-            gameState.EndSteps(context);
+            obj.EndSteps();
         }
         if (args.TryGetArgs(2, out var v3))
         {
             var coords = v3 + useCoords;
-            gameState.ApplyDamage(coords, 10, context);
+            obj.ApplyDamage(coords, 10);
         }
     }
 }

@@ -5,9 +5,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyRectWind(Rect2I rect, DirMask dir, SimulationContext context)
+        public void ApplyRectWind(Rect2I rect, DirMask dir)
         {
             EnterSimulation();
             Main();
@@ -15,9 +15,9 @@ partial class Simulator
 
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new RectWindStep(CurrentDeep, rect, dir));
+                    obj.Steps?.AddStep(new RectWindStep(CurrentDeep, rect, dir));
                     return;
                 }
                 Vector2I start = dir switch
@@ -53,7 +53,7 @@ partial class Simulator
                     DirMask.Right => rect.Size.X,
                     _ => 0,
                 };
-                context.Steps?.AddStep(new RectWindStep(CurrentDeep, rect, dir));
+                obj.Steps?.AddStep(new RectWindStep(CurrentDeep, rect, dir));
                 var aims = new Queue<Queue<Vector2I>>();
                 var currentLine = new Queue<Vector2I>();
                 for (var j = 0; j < secondOffsetCount; j++)
@@ -61,7 +61,7 @@ partial class Simulator
                     for (var i = 0; i < firstOffsetCount; i++)
                     {
                         var coords = start + firstOffset * i + secondOffset * j;
-                        if (state.UnitMapState.HasUnit(coords))
+                        if (obj.State.UnitMapState.HasUnit(coords))
                         {
                             currentLine.Enqueue(coords);
                         }
@@ -76,13 +76,13 @@ partial class Simulator
                 while (aims.Count > 0)
                 {
                     var line = aims.Dequeue();
-                    state.BeginSteps(0, 0 , StepsRunningMode.ParallelWaitAll, context);
+                    obj.BeginSteps(0, 60, StepsRunningMode.ParallelWithoutWait);
                     while (line.Count > 0)
                     {
                         var coord = line.Dequeue();
-                        state.ApplyPushUnit(coord, dir, context);
+                        obj.ApplyPushUnit(coord, dir);
                     }
-                    state.EndSteps(context);
+                    obj.EndSteps();
                 }
             }
         }

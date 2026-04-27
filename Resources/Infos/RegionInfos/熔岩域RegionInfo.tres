@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://ccjjrf25ocs1j"]
+
+[ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_iwgau"]
+
+[resource]
+script = ExtResource("1_iwgau")
+Name = "熔岩域"
+RegionBuffs = PackedStringArray("熔岩域")

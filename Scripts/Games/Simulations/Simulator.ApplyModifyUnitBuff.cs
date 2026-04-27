@@ -6,10 +6,10 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
         public void ApplyModifyUnitBuff(Vector2I coords, string buffName, BuffOperation operation, 
-            int duration, SimulationContext context)
+            int duration)
         {
             EnterSimulation();
             Main();
@@ -17,48 +17,62 @@ partial class Simulator
             
             void Main()
             {
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
+                    obj.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
                         duration, 0, operation, duration));
                     return;
                 }
 
-                var unit = state.UnitMapState.GetUnit(coords);
+                var unit = obj.State.UnitMapState.GetUnit(coords);
                 var oldDuration = unit.GetBuffDuration(buffName);
                 var resultOperation = BuffOperation.None;
                 var resultDuration = duration;
                 var resultOldDuration = 0;
-
                 if (!unit.IsNull())
                 {
                     (resultOperation, resultDuration, resultOldDuration) = operation switch
                     {
-                        BuffOperation.AddBuff => state.HandleAddOrChangeBuff(unit, buffName, duration, true),
-                        BuffOperation.RemoveBuff => state.HandleRemoveBuff(unit, buffName),
+                        BuffOperation.AddBuff => obj.HandleAddOrChangeBuff(unit, buffName, duration, true),
+                        BuffOperation.RemoveBuff => obj.HandleRemoveBuff(unit, buffName),
                         BuffOperation.ChangeDuration =>
-                            state.HandleAddOrChangeBuff(unit, buffName, oldDuration + duration, false),
-                        BuffOperation.SetDuration => state.HandleSetDurationBuff(unit, buffName, duration),
+                            obj.HandleAddOrChangeBuff(unit, buffName, oldDuration + duration, false),
+                        BuffOperation.SetDuration => obj.HandleSetDurationBuff(unit, buffName, duration),
                         _ => (BuffOperation.None, duration, 0)
                     };
                 }
 
-                context.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
+                if (resultOperation == BuffOperation.RemoveBuff) 
+                {
+                    var tile = obj.State.TileMapState.GetTile(unit.Coords);
+                    foreach (var region in tile.GetInfoAndCurrentRegions())
+                    {
+                        var rbs = region.GetRegionInfo().RegionBuffs;
+                        // 如果结果为移除buff,但是当前所在区域是具有这个buff的区域,则无法移除
+                        if (rbs.IndexOf(buffName) == -1) continue;
+                        
+                        obj.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
+                            duration, 0, operation, duration));
+                        return;
+                    }
+                }
+
+                obj.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
                     duration, unit.Id, resultOperation, resultDuration));
 
-                if (ComplexSimulationRegion(context, 1))
+                if (obj.ComplexSimulationRegion(1))
                 {
                     switch (resultOperation)
                     {
                         case BuffOperation.AddBuff:
-                            state.NotifyUnitBuffs(unit, b => b.OnAddToUnit(state, unit, context));
+                            obj.NotifyUnitBuffs(unit, b => b.OnAddToUnit(obj, unit));
                             break;
                         case BuffOperation.RemoveBuff:
-                            NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(state, unit, context));
+                            NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(obj, unit));
                             break;
                         case BuffOperation.ChangeDuration:
-                            NotifyUnitBuff(unit, buffName, b => b.OnDurationChanged(state, unit,
-                                resultOldDuration, resultOldDuration + resultDuration, context));
+                            NotifyUnitBuff(unit, buffName, b => b.OnDurationChanged(obj, unit,
+                                resultOldDuration, resultOldDuration + resultDuration));
                             break;
                     }
                 }
@@ -84,15 +98,15 @@ partial class Simulator
                 
                 if (finalDuration == 0)
                 {
-                    state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
+                    obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
                     return (BuffOperation.RemoveBuff, 0, oldDuration);
                 }
                 
-                state.UnitMapState.ModifyUnit(unit.Id, u => u.ModifyBuff(index, finalDuration));
+                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.ModifyBuff(index, finalDuration));
                 return (BuffOperation.ChangeDuration, finalDuration - oldDuration, oldDuration);
             }
             
-            state.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffName, newDuration));
+            obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffName, newDuration));
             return (BuffOperation.AddBuff, newDuration, 0);
         }
 
@@ -101,7 +115,7 @@ partial class Simulator
         {
             if (unit.TryFindBuff(buffName, out var index))
             {
-                state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
+                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
                 return (BuffOperation.RemoveBuff, 0, 0);
             }
             return (BuffOperation.None, 0, 0);
@@ -117,15 +131,15 @@ partial class Simulator
                 
                 if (finalDuration == 0)
                 {
-                    state.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
+                    obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.RemoveBuff(index));
                     return (BuffOperation.RemoveBuff, 0, oldDuration);
                 }
                 
-                state.UnitMapState.ModifyUnit(unit.Id, u => u.ModifyBuff(index, finalDuration));
+                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.ModifyBuff(index, finalDuration));
                 return (BuffOperation.ChangeDuration, finalDuration - oldDuration, oldDuration);
             }
             
-            state.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffName, newDuration));
+            obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffName, newDuration));
             return (BuffOperation.AddBuff, newDuration, 0);
         }
     }

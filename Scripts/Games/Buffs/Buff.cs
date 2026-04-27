@@ -11,56 +11,55 @@ public abstract class Buff(string name) : IBuff
 
     public string Name { get; } = name;
 
-    public virtual void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
+    public virtual void OnAddToUnit(SimObject obj, IReadOnlyUnitState unit)
     {
     }
-    public virtual void OnUnitBeforeSkill(IGameState state, IReadOnlyUnitState unit, string skillName, 
-        ref bool canUseSkill,
-        SimulationContext context)
+    public virtual void OnUnitBeforeSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, string skillName,
+        ref bool canUseSkill)
     {
     }
     
-    public virtual void OnUnitBeforeGetDamage(IGameState state, IReadOnlyUnitState unit, float originDamage,
-        ref float resultDamage,
-        SimulationContext context)
+    public virtual void OnUnitBeforeGetDamage(SimObject obj, IReadOnlyUnitState unit, float originDamage,
+        ref float resultDamage)
     {
     }
 
-    public virtual void OnBeforeDamageToUnit(IGameState state, IReadOnlyUnitState unit, IReadOnlyUnitState target, float originDamage, ref float resultDamage,
-        SimulationContext context)
+    public virtual void OnBeforeDamageToUnit(SimObject obj, IReadOnlyUnitState unit, IReadOnlyUnitState target,
+        float originDamage, ref float resultDamage)
     {
     }
 
-    public virtual void OnUnitAfterGetDamage(IGameState state, IReadOnlyUnitState unit, float getDamage,
-        SimulationContext context)
+    public virtual void OnUnitAfterGetDamage(SimObject obj, IReadOnlyUnitState unit, float getDamage)
     {
     }
 
-    public virtual void OnUnitBeforeGetCure(IGameState state, IReadOnlyUnitState unit, float originCure, ref float resultCure,
-        SimulationContext context)
+    public virtual void OnUnitBeforeGetCure(SimObject obj, IReadOnlyUnitState unit, float originCure,
+        ref float resultCure)
     {
     }
 
-    public virtual void OnBeforeCureToUnit(IGameState state, IReadOnlyUnitState unit, IReadOnlyUnitState target, float originCure, ref float resultCure,
-        SimulationContext context)
+    public virtual void OnBeforeCureToUnit(SimObject obj, IReadOnlyUnitState unit, IReadOnlyUnitState target,
+        float originCure, ref float resultCure)
     {
     }
 
-    public virtual void OnUnitAfterGetCure(IGameState state, IReadOnlyUnitState unit, float getCure,
-        SimulationContext context)
+    public virtual void OnUnitAfterGetCure(SimObject obj, IReadOnlyUnitState unit, float getCure)
     {
     }
 
-    public virtual void OnRemoveFromUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
+    public virtual void OnRemoveFromUnit(SimObject obj, IReadOnlyUnitState unit)
     {
     }
 
-    public virtual void OnDurationChanged(IGameState state, IReadOnlyUnitState unit, int oldDuration, int newDuration,
-        SimulationContext context)
+    public virtual void OnUnitDeath(SimObject obj, IReadOnlyUnitState unit)
     {
     }
 
-    public virtual void OnEnterTurn(IGameState state, IReadOnlyUnitState unit, int turn, SimulationContext context)
+    public virtual void OnDurationChanged(SimObject obj, IReadOnlyUnitState unit, int oldDuration, int newDuration)
+    {
+    }
+
+    public virtual void OnEnterTurn(SimObject obj, IReadOnlyUnitState unit, int turn)
     {
     }
 }

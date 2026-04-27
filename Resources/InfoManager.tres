@@ -2,10 +2,14 @@
 
 [ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_4ogc0"]
 [ext_resource type="Script" uid="uid://d2dhj7an0hqay" path="res://Scripts/Resources/InfoManager.cs" id="2_4s57m"]
-[ext_resource type="Resource" uid="uid://bu8qwr2us7204" path="res://Resources/Infos/BuffInfos/浸润BuffInfo.tres" id="2_lsjiv"]
+[ext_resource type="Resource" uid="uid://bu8qwr2us7204" path="res://Resources/Infos/BuffInfos/水域BuffInfo.tres" id="2_mjrgt"]
 [ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="2_rc7cr"]
 [ext_resource type="Resource" uid="uid://dfjdhy48bbbgk" path="res://Resources/Infos/BuffInfos/力量1BuffInfo.tres" id="3_fu7tl"]
 [ext_resource type="Resource" uid="uid://l2uf5t4sej1l" path="res://Resources/Infos/RegionInfos/水域RegionInfo.tres" id="4_u2eed"]
+[ext_resource type="Resource" uid="uid://65d8untvel2g" path="res://Resources/Infos/BuffInfos/荆棘1BuffInfo.tres" id="4_yw7y4"]
+[ext_resource type="Resource" uid="uid://cdkjb2nqtfpl4" path="res://Resources/Infos/BuffInfos/不稳定BuffInfo.tres" id="5_in3he"]
+[ext_resource type="Resource" uid="uid://by3lu2j5wyt5x" path="res://Resources/Infos/BuffInfos/熔岩域BuffInfo.tres" id="6_cgp2c"]
+[ext_resource type="Resource" uid="uid://ccjjrf25ocs1j" path="res://Resources/Infos/RegionInfos/熔岩域RegionInfo.tres" id="8_cgp2c"]
 [ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="9_imjp5"]
 [ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="9_yw7y4"]
 [ext_resource type="Resource" uid="uid://bdxyoor75ofks" path="res://Resources/Infos/TileInfos/AirTileInfo.tres" id="10_fu7tl"]
@@ -14,15 +18,20 @@
 [ext_resource type="Resource" uid="uid://bccsk3gsy0yr4" path="res://Resources/Infos/SkillInfos/Test1SkillInfo.tres" id="11_11wvo"]
 [ext_resource type="Resource" uid="uid://cdpppapttf5to" path="res://Resources/Infos/UnitInfos/Unit0UnitInfo.tres" id="11_lsjiv"]
 [ext_resource type="Resource" uid="uid://doiuaok7flt55" path="res://Resources/Infos/TileInfos/Soil0TileInfo.tres" id="11_yw7y4"]
+[ext_resource type="Resource" uid="uid://doy53t4jua3e0" path="res://Resources/Infos/TileInfos/熔岩块TileInfo.tres" id="16_ps5i8"]
 
 [resource]
 script = ExtResource("2_4s57m")
 BuffInfos = Dictionary[String, ExtResource("1_4ogc0")]({
+"不稳定": ExtResource("5_in3he"),
 "力量1": ExtResource("3_fu7tl"),
-"浸润": ExtResource("2_lsjiv")
+"水域": ExtResource("2_mjrgt"),
+"熔岩域": ExtResource("6_cgp2c"),
+"荆棘1": ExtResource("4_yw7y4")
 })
 RegionInfos = Dictionary[String, ExtResource("2_rc7cr")]({
-"水域": ExtResource("4_u2eed")
+"水域": ExtResource("4_u2eed"),
+"熔岩域": ExtResource("8_cgp2c")
 })
 UnitInfos = Dictionary[String, ExtResource("10_lsjiv")]({
 "Unit0": ExtResource("11_lsjiv")
@@ -30,7 +39,8 @@ UnitInfos = Dictionary[String, ExtResource("10_lsjiv")]({
 TileInfos = Dictionary[String, ExtResource("9_imjp5")]({
 "Air": ExtResource("10_fu7tl"),
 "Soil0": ExtResource("11_yw7y4"),
-"水块": ExtResource("10_u2eed")
+"水块": ExtResource("10_u2eed"),
+"熔岩块": ExtResource("16_ps5i8")
 })
 SkillInfos = Dictionary[String, ExtResource("9_yw7y4")]({
 "Test1": ExtResource("11_11wvo")

@@ -5,9 +5,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path, SimulationContext context)
+        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path)
         {
             EnterSimulation();
             Main();
@@ -16,10 +16,10 @@ partial class Simulator
             void Main()
             {
                 if (path is not {Count: > 1}) return;
-                var unit = state.UnitMapState.GetUnit(coords + path[0]);
+                var unit = obj.State.UnitMapState.GetUnit(coords + path[0]);
                 if (unit.IsNull())
                 {
-                    context.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, 0,
+                    obj.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, 0,
                         false));
                     return;
                 }
@@ -27,24 +27,24 @@ partial class Simulator
                 var targetIndex = 1;
 
                 for (; targetIndex < path.Count - 1; targetIndex++)
-                    if (!unit.IsCanPass(state, coords + path[targetIndex]))
+                    if (!unit.IsCanPass(obj.State, coords + path[targetIndex]))
                         break;
 
                 for (; targetIndex >= 0; targetIndex--)
-                    if (unit.IsCanBeDestination(state, coords + path[targetIndex]))
+                    if (unit.IsCanBeDestination(obj.State, coords + path[targetIndex]))
                         break;
 
 
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id,
+                    obj.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id,
                         targetIndex, true));
                     return;
                 }
 
-                context.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, targetIndex,
+                obj.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, targetIndex,
                     true));
-                if (targetIndex > 0) state.ApplyMoveUnit(coords + path[0], coords + path[targetIndex], context);
+                if (targetIndex > 0) obj.ApplyMoveUnit(coords + path[0], coords + path[targetIndex]);
             }
         }
     }

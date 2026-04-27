@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://65d8untvel2g"]
+
+[ext_resource type="Texture2D" uid="uid://bpeconfhhnvsc" path="res://Art/Img/combat/arrow_hit.png" id="1_25ghr"]
+[ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_tdg3k"]
+
+[resource]
+script = ExtResource("1_tdg3k")
+Name = "荆棘1"
+Icon = ExtResource("1_25ghr")
+Description = "单位对直接造成伤害的对象进行反击1点伤害"

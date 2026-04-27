@@ -4,9 +4,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyDropUnit(Vector2I coords, SimulationContext context)
+        public void ApplyDropUnit(Vector2I coords)
         {
             EnterSimulation();
             Main();
@@ -15,15 +15,15 @@ partial class Simulator
             void Main()
             {
 
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new DropUnitStep(CurrentDeep, coords, 0, false));
+                    obj.Steps?.AddStep(new DropUnitStep(CurrentDeep, coords, 0, false));
                     return;
                 }
 
-                var unit = state.UnitMapState.GetUnit(coords);
-                state.UnitMapState.RemoveUnit(unit.Id);
-                context.Steps?.AddStep(new DropUnitStep(CurrentDeep, coords, unit.Id, true));
+                var unit = obj.State.UnitMapState.GetUnit(coords);
+                obj.State.UnitMapState.RemoveUnit(unit.Id);
+                obj.Steps?.AddStep(new DropUnitStep(CurrentDeep, coords, unit.Id, true));
             }
         }
     }

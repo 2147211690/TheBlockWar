@@ -5,9 +5,9 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 partial class Simulator
 {
-    extension(IGameState state)
+    extension(SimObject obj)
     {
-        public void ApplyMoveUnit(Vector2I coords, Vector2I to, SimulationContext context)
+        public void ApplyMoveUnit(Vector2I coords, Vector2I to)
         {
             EnterSimulation();
             Main();
@@ -17,21 +17,21 @@ partial class Simulator
             {
 
                 bool isValid = true;
-                if (context.Layer == SimulationLayer.Waiting)
+                if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, 0, isValid));
+                    obj.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, 0, isValid));
                     return;
                 }
 
-                var unit = state.UnitMapState.GetUnit(coords);
+                var unit = obj.State.UnitMapState.GetUnit(coords);
                 if (!unit.IsNull())
                 {
-                    state.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
-                    context.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, unit.Id, isValid));
-                    state.ApplyUnitRemoveFromCoords(unit, coords, context);
-                    state.ApplyUnitSetInCoords(unit, context);
+                    obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
+                    obj.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, unit.Id, isValid));
+                    obj.ApplyUnitRemoveFromCoords(unit, coords);
+                    obj.ApplyUnitSetInCoords(unit);
                 }
-                else context.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, unit.Id, isValid));
+                else obj.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, unit.Id, isValid));
             }
         }
     }

@@ -7,10 +7,10 @@ namespace TheBlockWar.Scripts.Games.Events;
 public sealed class ActionEvent(long id) : SchedulerEvent(id)
 {
     [JsonIgnore]
-    public Action<SchedulerEvent, IGameState, SimulationContext>? ActionCore { get; set => SetField(ref field, value); }
-    public override void OnApply(SchedulerEvent root, IGameState state, SimulationContext context)
+    public Action<SchedulerEvent, SimObject>? ActionCore { get; set => SetField(ref field, value); }
+    public override void OnApply(SchedulerEvent root, SimObject obj)
     {
-        ActionCore?.Invoke(this, state, context);
+        ActionCore?.Invoke(this, obj);
     }
 
     public override string ToString()

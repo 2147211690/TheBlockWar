@@ -1,28 +1,12 @@
 [gd_scene format=3 uid="uid://cas0m3vshvj1g"]
 
 [ext_resource type="Script" uid="uid://b1mhflxm0nels" path="res://Scripts/Views/TileView.cs" id="1_v2aou"]
-[ext_resource type="Texture2D" uid="uid://daw3l3cmxlgqd" path="res://Art/Img/combat/tiles_sand/ground_0.png" id="2_v2aou"]
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_v2aou"]
-animations = [{
-"frames": [],
-"loop": true,
-"name": &"Empty",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("2_v2aou")
-}],
-"loop": true,
-"name": &"Soil",
-"speed": 5.0
-}]
+[sub_resource type="SpriteFrames" id="SpriteFrames_cborc"]
 
 [node name="TileView" type="Node2D" unique_id=537943028 node_paths=PackedStringArray("MainSprite")]
 script = ExtResource("1_v2aou")
 MainSprite = NodePath("AnimatedSprite2D")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1473144361]
-sprite_frames = SubResource("SpriteFrames_v2aou")
-animation = &"Empty"
+sprite_frames = SubResource("SpriteFrames_cborc")

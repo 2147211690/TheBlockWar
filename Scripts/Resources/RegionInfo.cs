@@ -10,8 +10,7 @@ public partial class RegionInfo : Resource, IInfo
         Description = "空占位区域"
     };
     [Export] public string Name { get; set; } = "None";
-    [Export] public string[]? EnterAddBuffs { get; set; }
-    [Export] public string[]? ExitRemoveBuffs { get; set; }
+    [Export] public string[]? RegionBuffs { get; set; }
     [Export] public Texture2D? Icon { get; set; }
     [Export] public bool IsOnece { get; set; }
     [Export] public int DefaultDuration { get; set; }

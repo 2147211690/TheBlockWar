@@ -5,11 +5,12 @@ using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
 
-public class 浸润Buff() : Buff(BuffNames.浸润)
+public class 水域Buff() : Buff(BuffNames.水域)
 {
-    public override void OnUnitBeforeSkill(IGameState state, IReadOnlyUnitState unit, string skillName, ref bool canUseSkill,
-        SimulationContext context)
+    public override void OnUnitBeforeSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, string skillName,
+        ref bool canUseSkill)
     {
+        if (skillName == SkillNames.Test1) return;
         canUseSkill = false;
     }
 }

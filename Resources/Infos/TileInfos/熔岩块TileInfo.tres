@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="TileInfo" format=3 uid="uid://doy53t4jua3e0"]
+
+[ext_resource type="Texture2D" uid="uid://cf5mn0lvbo4o7" path="res://Art/Img/combat/tiles_grass/lava_0.png" id="1_kgkuw"]
+[ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="1_y8bno"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_y8bno"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_kgkuw")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[resource]
+script = ExtResource("1_y8bno")
+Name = "熔岩块"
+Regions = PackedStringArray("熔岩域")
+ViewHeight = 25.0
+ViewFrames = SubResource("SpriteFrames_y8bno")
