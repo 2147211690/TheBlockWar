@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
@@ -8,13 +9,20 @@ public interface IBuff
 {
     string Name { get; }
     void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context);
-    void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
+
+    void OnUnitBeforeSkill(IGameState state, IReadOnlyUnitState unit, string skillName,
+        ref bool canUseSkill, SimulationContext context);
+    void OnUnitBeforeGetDamage(IGameState state, IReadOnlyUnitState unit, float originDamage,
         ref float resultDamage, SimulationContext context);
-    void OnUnitAfterDamage(IGameState state, IReadOnlyUnitState unit, float getDamage, 
+    void OnBeforeDamageToUnit(IGameState state, IReadOnlyUnitState unit, IReadOnlyUnitState target, float originDamage,
+        ref float resultDamage, SimulationContext context);
+    void OnUnitAfterGetDamage(IGameState state, IReadOnlyUnitState unit, float getDamage, 
         SimulationContext context);
-    void OnUnitBeforeCure(IGameState state, IReadOnlyUnitState unit, float rawCure,
+    void OnUnitBeforeGetCure(IGameState state, IReadOnlyUnitState unit, float originCure,
         ref float resultCure, SimulationContext context);
-    void OnUnitAfterCure(IGameState state, IReadOnlyUnitState unit, float getCure,
+    void OnBeforeCureToUnit(IGameState state, IReadOnlyUnitState unit, IReadOnlyUnitState target, float originCure,
+        ref float resultCure, SimulationContext context);
+    void OnUnitAfterGetCure(IGameState state, IReadOnlyUnitState unit, float getCure,
         SimulationContext context);
     void OnRemoveFromUnit(IGameState state, IReadOnlyUnitState unit,
         SimulationContext context);

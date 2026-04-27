@@ -1,6 +1,0 @@
-[gd_resource type="Resource" script_class="TileInfo" format=3 uid="uid://butmthc4wh23q"]
-
-[ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="1_j3r4j"]
-
-[resource]
-script = ExtResource("1_j3r4j")

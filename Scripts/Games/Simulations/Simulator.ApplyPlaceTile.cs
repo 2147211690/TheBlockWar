@@ -8,7 +8,7 @@ partial class Simulator
     extension(IGameState state)
     {
         //TODO:tile改为枚举
-        public void ApplyPlaceTile(Vector2I coords, TileState tile, SimulationContext context)
+        public void ApplyPlaceTile(Vector2I coords, string tileName, SimulationContext context)
         {
             EnterSimulation();
             Main();
@@ -18,18 +18,20 @@ partial class Simulator
             {
                 if (context.Layer == SimulationLayer.Waiting)
                 {
-                    context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tile));
+                    context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
                     return;
                 }
 
                 state.TileMapState.ModifyTile(coords, t =>
                 {
-                    t.Name = tile.Name;
-                    t.Tag = tile.Tag;
+                    t.Name = tileName;
                 });
-                context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tile));
-                var unit = state.UnitMapState.GetUnit(coords);
-                if (!unit.IsNull()) state.ApplyUnitSetInCoords(unit, context);
+                context.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
+                if (ComplexSimulationRegion(context, 2))
+                {
+                    var unit = state.UnitMapState.GetUnit(coords);
+                    if (!unit.IsNull()) state.ApplyUnitSetInCoords(unit, context);
+                }
             }
         }
     }

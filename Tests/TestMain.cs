@@ -3,6 +3,7 @@ using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Tests;
@@ -22,22 +23,6 @@ public partial class TestMain : Node2D
     {
         base._Process(delta);
         ImGui.Begin("测试");
-        if (ImGui.Button("添加Buff1"))
-        {
-            _.BuffView.ChangeBuffChange(BuffNames.Test, 1);
-        }
-        if (ImGui.Button("移除Buff1"))
-        {
-            _.BuffView.ChangeBuffChange(BuffNames.Test, -1);
-        }
-        if (ImGui.Button("添加Buff2"))
-        {
-            _.BuffView.ChangeBuffChange(BuffNames.None, 1);
-        }
-        if (ImGui.Button("移除Buff2"))
-        {
-            _.BuffView.ChangeBuffChange(BuffNames.None, -1);
-        }
 
         if (ImGui.Button("切换ItemBoxIsSelected"))
         {

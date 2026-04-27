@@ -57,9 +57,9 @@ public partial class CombatUi : Control
             {
                 var unit = _eventScheduler.GameState.UnitMapState.GetUnit(player.SelectedUnitId);
                 ClearBuffItem();
-                foreach (var buff in unit.Buffs)
+                foreach (var buff in unit.GetInfoAndCurrentBuffs())
                 {
-                    AddBuffItem(buff.BuffName);
+                    AddBuffItem(buff);
                 }
             }
         }

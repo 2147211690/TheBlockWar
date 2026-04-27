@@ -1,22 +1,31 @@
+using TheBlockWar.Scripts.Resources;
+using TheBlockWar.Scripts.Tools;
+
 namespace TheBlockWar.Scripts.Views;
 
 public partial class TileView : Node2D
 {
     [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
-    [Export] private Godot.Collections.Dictionary<string, float> _tilesHeights = new();
-    [Export,ExportGroup("PlaceDown")] public float DropHeight { get; set; } = 30f;
-    [Export,ExportGroup("PlaceDown")] public float DropDuration { get; set; } = 0.03f;
+    [ExportGroup("PlaceDown")]
+    [Export] public float DropHeight { get; set; } = 30f;
+    [Export] public float DropDuration { get; set; } = 0.03f;
     public string TileName
     {
-        get => MainSprite.Animation;
+        get => _tileName;
         set
         {
-            MainSprite.Animation = value;
-            MainSprite.Play(value);
-            MainSprite.Offset = new Vector2(0, -Height / 2);
+            _tileName = value;
+            
+            _tileInfo = _tileName.GetTileInfo();
+            MainSprite.SpriteFrames = _tileInfo.ViewFrames;
+            MainSprite.Offset = _tileInfo.ViewOffset;
+            MainSprite.TryPlay("idle");
         }
     }
-    public float Height => _tilesHeights.GetValueOrDefault(TileName, 0);
+    private string _tileName = string.Empty;
+    private TileInfo _tileInfo = TileInfo.Null;
+    
+    public float Height => _tileInfo.ViewHeight;
     public GDTask PlayPlaceDownAnim()
     {
         var tween = CreateTween();

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://l2uf5t4sej1l"]
+
+[ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_f5oac"]
+
+[resource]
+script = ExtResource("1_f5oac")
+Name = "水域"
+EnterAddBuffs = PackedStringArray("浸润")
+ExitRemoveBuffs = PackedStringArray("浸润")
+DefaultDuration = 10000000

@@ -1,5 +1,5 @@
 #if TOOLS
-using Godot;
+namespace TheBlockWar.addons.extendable_inspector_for_cs.core;
 
 [Tool]
 public partial class ExtendableInspector : EditorInspectorPlugin {

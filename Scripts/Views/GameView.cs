@@ -184,7 +184,7 @@ public partial class GameView : Node2D
         switch (step)
         {
             case PlaceTileStep placeStep:
-                await TilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
+                await TilesView.PlaceTile(placeStep.Coords, placeStep.TileName);
                 UnitsView.UpdateUnitPosition(placeStep.Coords);
                 break;
             case DropTileStep dropStep:

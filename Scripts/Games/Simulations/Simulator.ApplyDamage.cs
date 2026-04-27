@@ -29,14 +29,18 @@ partial class Simulator
                         new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
-
+                var originDamage = damage;
                 var rawDamage = damage;
 
-                //应用单位伤害前事件
                 if (ComplexSimulationRegion(context, 0))
                 {
+                    //应用来源单位伤害前事件
+                    var source = state.UnitMapState.GetUnit(context.SourceUnitId);
+                    state.NotifyUnitBuffs(source,
+                        b => b.OnBeforeDamageToUnit(state, source, unit, originDamage, ref rawDamage, context));
+                    //应用单位伤害前事件
                     state.NotifyUnitBuffs(unit,
-                        b => b.OnUnitBeforeDamage(state, unit, rawDamage, ref rawDamage, context));
+                        b => b.OnUnitBeforeGetDamage(state, unit, originDamage, ref rawDamage, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
 
@@ -64,7 +68,7 @@ partial class Simulator
                 if (validDamage > 0 && ComplexSimulationRegion(context, 0))
                 {
                     // 触发受伤后事件
-                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterDamage(state, unit, validDamage, context));
+                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterGetDamage(state, unit, validDamage, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
 

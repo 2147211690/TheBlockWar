@@ -1,12 +1,12 @@
 #if TOOLS
-using Godot;
+namespace TheBlockWar.addons.extendable_inspector_for_cs;
 
 [Tool]
 public partial class ExtendableInspectorPlugin : EditorPlugin {
-	private ExtendableInspector instance;
+	private core.ExtendableInspector instance;
 
 	public override void _EnterTree() {
-		instance = new ExtendableInspector();
+		instance = new core.ExtendableInspector();
 		AddInspectorPlugin(instance);
 	}
 

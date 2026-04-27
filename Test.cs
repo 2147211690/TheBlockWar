@@ -77,7 +77,7 @@ public partial class Test : Node2D
             new Vector2I(10, 10),
             new Dictionary<string, ISkill[]>() 
             {
-                [UnitNames.Unit_0] = [SkillNames.Test1.GetSkillInstance()!],
+                [UnitNames.Unit0] = [SkillNames.Test1.GetSkillInstance()!],
             },
             new int[,] 
             {
@@ -138,7 +138,7 @@ public partial class Test : Node2D
             if (ImGui.Button("添加单位"))
             {
                 var coords = new Vector2I(x, y);
-                var unit = UnitFactory.CreateUnit(UnitNames.Unit_0, 0, _gameState.IdGenerator.NewLong(), coords);
+                var unit = UnitFactory.CreateUnit(UnitNames.Unit0, 0, _gameState.IdGenerator.NewLong(), coords);
                 _currentGameState.UnitMapState.AddUnit(unit);
             }
             
@@ -270,7 +270,7 @@ public partial class Test : Node2D
                     {
                         for (int j = 0; j < 9; j++)
                         {
-                            state.ApplyPlaceUnit(new(i, j), UnitNames.Unit_0, 1, context);
+                            state.ApplyPlaceUnit(new(i, j), UnitNames.Unit0, 1, context);
                         }
                     }
                     state.EndSteps(context);
@@ -291,15 +291,61 @@ public partial class Test : Node2D
                         for (int j = 0; j < 10; j++)
                         {
                             var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
-                            state.ApplyPlaceTile(new(i, j), new TileState()
-                                {
-                                    Tag = empty ? TileTag.Empty : TileTag.Ground
-                                },
-                                context);
+                            state.ApplyPlaceTile(new(i, j), empty ? TileNames.水块 : TileNames.Soil0 ,context);
                         }
                         state.EndSteps(context);
                     }
-                    state.ApplyPlaceUnit(new(2, 2), UnitNames.Unit_0, 0, context);
+                    state.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0, context);
+                },
+                Layer = SimulationLayer.Running,
+            });
+        }
+        if (ImGui.Button("测试掉落"))
+        {
+
+            _eventScheduler.CreateEvent(id => new ActionEvent(id)
+            {
+                ActionCore = (e, state, context) =>
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        state.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll, context);
+                        for (int j = 0; j < 10; j++)
+                        {
+                            state.ApplyDropTile(new (i, j), context);
+                        }
+                        state.EndSteps(context);
+                    }
+                    state.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0, context);
+                },
+                Layer = SimulationLayer.Running,
+            });
+        }
+
+        if (ImGui.Button("添加力量1"))
+        {
+            _eventScheduler.CreateEvent(id => new ActionEvent(id)
+            {
+                ActionCore = (e, state, context) =>
+                {
+                    foreach (var unit in state.UnitMapState.GetAllUnits())
+                    {
+                        state.ApplyModifyUnitBuff(unit.Coords, BuffNames.力量1, BuffOperation.AddBuff, 1, context);
+                    }
+                },
+                Layer = SimulationLayer.Running,
+            });
+        }
+        if (ImGui.Button("移除力量1"))
+        {
+            _eventScheduler.CreateEvent(id => new ActionEvent(id)
+            {
+                ActionCore = (e, state, context) =>
+                {
+                    foreach (var unit in state.UnitMapState.GetAllUnits())
+                    {
+                        state.ApplyModifyUnitBuff(unit.Coords, BuffNames.力量1, BuffOperation.RemoveBuff, 1, context);
+                    }
                 },
                 Layer = SimulationLayer.Running,
             });
@@ -311,10 +357,10 @@ public partial class Test : Node2D
             {
                 ActionCore = (e, state, context) =>
                 {
-                    state.ApplyPlaceUnit(new(3,2), UnitNames.Unit_0, 0, context);
-                    state.ApplyPlaceUnit(new(2,3), UnitNames.Unit_0, 0, context);
-                    state.ApplyPlaceUnit(new(1,2), UnitNames.Unit_0, 0, context);
-                    state.ApplyPlaceUnit(new(2,1), UnitNames.Unit_0, 0, context);
+                    state.ApplyPlaceUnit(new(3,2), UnitNames.Unit0, 0, context);
+                    state.ApplyPlaceUnit(new(2,3), UnitNames.Unit0, 0, context);
+                    state.ApplyPlaceUnit(new(1,2), UnitNames.Unit0, 0, context);
+                    state.ApplyPlaceUnit(new(2,1), UnitNames.Unit0, 0, context);
                 },
                 Layer = SimulationLayer.Running,
             });

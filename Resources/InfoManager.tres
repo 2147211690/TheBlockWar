@@ -2,43 +2,37 @@
 
 [ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_4ogc0"]
 [ext_resource type="Script" uid="uid://d2dhj7an0hqay" path="res://Scripts/Resources/InfoManager.cs" id="2_4s57m"]
-[ext_resource type="Resource" uid="uid://dv1irnlqw0s2k" path="res://Resources/Infos/BuffInfos/NoneBuffInfo.tres" id="2_mjrgt"]
+[ext_resource type="Resource" uid="uid://bu8qwr2us7204" path="res://Resources/Infos/BuffInfos/浸润BuffInfo.tres" id="2_lsjiv"]
 [ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="2_rc7cr"]
-[ext_resource type="Resource" uid="uid://c3c1emrn6oha2" path="res://Resources/Infos/BuffInfos/TestBuffInfo.tres" id="3_cgp2c"]
-[ext_resource type="Resource" uid="uid://bqado288rgrh1" path="res://Resources/Infos/BuffInfos/Test2BuffInfo.tres" id="4_ps5i8"]
-[ext_resource type="Resource" uid="uid://dcp2upfoa63pu" path="res://Resources/Infos/RegionInfos/NoneRegionInfo.tres" id="6_cwtjy"]
-[ext_resource type="Resource" uid="uid://b3advneh6ti84" path="res://Resources/Infos/RegionInfos/Test1RegionInfo.tres" id="7_y0dw1"]
-[ext_resource type="Resource" uid="uid://dakcohimqfcnn" path="res://Resources/Infos/RegionInfos/Test2RegionInfo.tres" id="8_wydmg"]
+[ext_resource type="Resource" uid="uid://dfjdhy48bbbgk" path="res://Resources/Infos/BuffInfos/力量1BuffInfo.tres" id="3_fu7tl"]
+[ext_resource type="Resource" uid="uid://l2uf5t4sej1l" path="res://Resources/Infos/RegionInfos/水域RegionInfo.tres" id="4_u2eed"]
 [ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="9_imjp5"]
 [ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="9_yw7y4"]
+[ext_resource type="Resource" uid="uid://bdxyoor75ofks" path="res://Resources/Infos/TileInfos/AirTileInfo.tres" id="10_fu7tl"]
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="10_lsjiv"]
-[ext_resource type="Resource" uid="uid://pfjlqp4ac3uo" path="res://Resources/Infos/SkillInfos/NoneSkillInfo.tres" id="10_x1kfi"]
-[ext_resource type="Resource" uid="uid://biw3ess4prfnh" path="res://Resources/Infos/SkillInfos/Test1SkillInfo.tres" id="11_11wvo"]
-[ext_resource type="Resource" uid="uid://butmthc4wh23q" path="res://Resources/Infos/TileInfos/NoneTileInfo.tres" id="13_1fdqu"]
-[ext_resource type="Resource" uid="uid://6sf2fdur4vsy" path="res://Resources/Infos/UnitInfos/NoneUnitInfo.tres" id="15_vrjis"]
-[ext_resource type="Resource" uid="uid://cdpppapttf5to" path="res://Resources/Infos/UnitInfos/Unit_0UnitInfo.tres" id="16_t22tk"]
+[ext_resource type="Resource" uid="uid://bdnl6xfj384br" path="res://Resources/Infos/TileInfos/水块TileInfo.tres" id="10_u2eed"]
+[ext_resource type="Resource" uid="uid://bccsk3gsy0yr4" path="res://Resources/Infos/SkillInfos/Test1SkillInfo.tres" id="11_11wvo"]
+[ext_resource type="Resource" uid="uid://cdpppapttf5to" path="res://Resources/Infos/UnitInfos/Unit0UnitInfo.tres" id="11_lsjiv"]
+[ext_resource type="Resource" uid="uid://doiuaok7flt55" path="res://Resources/Infos/TileInfos/Soil0TileInfo.tres" id="11_yw7y4"]
 
 [resource]
 script = ExtResource("2_4s57m")
 BuffInfos = Dictionary[String, ExtResource("1_4ogc0")]({
-"None": ExtResource("2_mjrgt"),
-"Test": ExtResource("3_cgp2c"),
-"Test2": ExtResource("4_ps5i8")
+"力量1": ExtResource("3_fu7tl"),
+"浸润": ExtResource("2_lsjiv")
 })
 RegionInfos = Dictionary[String, ExtResource("2_rc7cr")]({
-"None": ExtResource("6_cwtjy"),
-"Test1": ExtResource("7_y0dw1"),
-"Test2": ExtResource("8_wydmg")
+"水域": ExtResource("4_u2eed")
 })
 UnitInfos = Dictionary[String, ExtResource("10_lsjiv")]({
-"None": ExtResource("15_vrjis"),
-"Unit_0": ExtResource("16_t22tk")
+"Unit0": ExtResource("11_lsjiv")
 })
 TileInfos = Dictionary[String, ExtResource("9_imjp5")]({
-"None": ExtResource("13_1fdqu")
+"Air": ExtResource("10_fu7tl"),
+"Soil0": ExtResource("11_yw7y4"),
+"水块": ExtResource("10_u2eed")
 })
 SkillInfos = Dictionary[String, ExtResource("9_yw7y4")]({
-"None": ExtResource("10_x1kfi"),
 "Test1": ExtResource("11_11wvo")
 })
 BuffInfoPath = "res://Resources/Infos/BuffInfos"

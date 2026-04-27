@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://dfjdhy48bbbgk"]
+
+[ext_resource type="Texture2D" uid="uid://bc0rv0tg0wvqo" path="res://Art/Img/ui/power.png" id="1_8g3dh"]
+[ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_nko7o"]
+
+[resource]
+script = ExtResource("1_nko7o")
+Name = "力量1"
+Icon = ExtResource("1_8g3dh")
+Description = "单位造成的伤害将增加一点"

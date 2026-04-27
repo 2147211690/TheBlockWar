@@ -22,18 +22,18 @@ partial class Simulator
                 }
 
                 var unit = state.UnitMapState.GetUnit(coords);
-                state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
+                
                 context.Steps?.AddStep(new DropTileStep(CurrentDeep, coords));
                 if (!unit.IsNull())
                 {
-                    state.ApplyDropUnit(coords, context);
+                    if (unit.IsWillDrop(state, coords))
+                        state.ApplyDropUnit(coords, context);
+                    else
+                    {
+                        state.ApplyUnitRemoveFromCoords(unit, coords, context);
+                    }
                 }
-                var tile = state.TileMapState.GetTile(coords);
-                /*for (var i = tile.Regions.Count - 1; tile.Regions.Count > 0; i = tile.Regions.Count - 1)
-                {
-                    state.ApplyModifyTileRegion(coords, tile.Regions[i].RegionType, RegionOperation.RemoveRegion, 0, result);
-                }*/
-                
+                state.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
             }
         }
     }

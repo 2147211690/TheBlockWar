@@ -30,12 +30,18 @@ partial class Simulator
                     return;
                 }
 
+                var originCure = cure;
                 var rawCure = cure;
 
                 if (ComplexSimulationRegion(context, 0))
                 {
+                    //应用来源单位治疗前事件
+                    var source = state.UnitMapState.GetUnit(context.SourceUnitId);
+                    state.NotifyUnitBuffs(source,
+                        b => b.OnBeforeCureToUnit(state, source, unit, originCure, ref rawCure, context));
+                    //应用单位治疗前事件
                     state.NotifyUnitBuffs(unit,
-                        b => b.OnUnitBeforeCure(state, unit, rawCure, ref rawCure, context));
+                        b => b.OnUnitBeforeGetCure(state, unit, rawCure, ref rawCure, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
 
@@ -61,7 +67,7 @@ partial class Simulator
 
                 if (validCure > 0 && ComplexSimulationRegion(context, 0))
                 {
-                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterCure(state, unit, validCure, context));
+                    state.NotifyUnitBuffs(unit, b => b.OnUnitAfterGetCure(state, unit, validCure, context));
                     unit = state.UnitMapState.GetUnit(unit.Id);
                 }
             }

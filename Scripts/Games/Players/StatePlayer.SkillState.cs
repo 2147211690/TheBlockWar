@@ -4,6 +4,7 @@ using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Games.Players;
 

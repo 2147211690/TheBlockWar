@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
@@ -8,7 +9,6 @@ partial class Simulator
 {
     extension(IGameState state)
     {
-        //TODO:prefabUnit改为枚举
         public void ApplyPlaceUnit(Vector2I coords, string unitName, int team, SimulationContext context)
         {
             EnterSimulation();
@@ -39,6 +39,14 @@ partial class Simulator
                         isValid));
                     //应用单位放置到坐标的额外操作
                     state.ApplyUnitSetInCoords(state.UnitMapState.GetUnit(unitState.Id), context);
+                    //单位buff初始化
+                    var info = unitName.GetUnitInfo();
+                    var newUnit = state.UnitMapState.GetUnit(unitState.Id);
+                    if (info.Buffs is { Length: > 0 })
+                    {
+                        foreach (var buffName in info.Buffs)
+                            buffName.GetBuffInstance().OnAddToUnit(state, newUnit, context);
+                    }
                 }
                 else
                 {

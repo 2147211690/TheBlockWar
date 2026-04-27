@@ -1,15 +1,12 @@
 using TheBlockWar.Scripts.Games.GameStates.Datas;
-using TheBlockWar.Scripts.Games.Regions;
-using TheBlockWar.Scripts.Games.Tiles;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 
 public class TileState : IReadOnlyTileState
 {
-    public static readonly TileState Empty = new() { Tag = TileTag.Empty };
-    public TileTag Tag { get; set; }
-    public TileNameEnum Name { get; set; }
+    public static readonly TileState Empty = new() {};
+    public string Name { get; set; } = "Air";
     public IReadOnlyList<RegionState> Regions => _regions ?? [];
     private List<RegionState>? _regions;
     
@@ -17,7 +14,6 @@ public class TileState : IReadOnlyTileState
     {
         return new TileStateData
         {
-            Tag = Tag,
             Name = Name,
             Regions = _regions.CloneToListOrNullWhenCountZero(),
         };
@@ -25,7 +21,6 @@ public class TileState : IReadOnlyTileState
     public TileState(){}
     public TileState(TileStateData data)
     {
-        Tag = data.Tag;
         Name = data.Name;
         _regions = data.Regions.CloneToListOrNullWhenCountZero();
     }
@@ -83,7 +78,6 @@ public class TileState : IReadOnlyTileState
     }
     public TileState CopyTo(TileState tile)
     {
-        tile.Tag = Tag;
         tile.Name = Name;
         if (tile._regions is { Count: > 0 } && _regions is { Count: > 0 } && _regions.Count == tile._regions.Count)
         {

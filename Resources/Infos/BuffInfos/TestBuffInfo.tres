@@ -1,7 +1,0 @@
-[gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://c3c1emrn6oha2"]
-
-[ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_ad1xj"]
-
-[resource]
-script = ExtResource("1_ad1xj")
-BuffType = 1

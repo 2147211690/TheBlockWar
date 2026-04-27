@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="TileInfo" format=3 uid="uid://bdxyoor75ofks"]
+
+[ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="1_yueva"]
+
+[resource]
+script = ExtResource("1_yueva")
+Name = "Air"
+ViewHeight = 0.0

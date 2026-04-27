@@ -1,6 +1,0 @@
-[gd_resource type="Resource" script_class="SkillInfo" format=3 uid="uid://pfjlqp4ac3uo"]
-
-[ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="1_7by2c"]
-
-[resource]
-script = ExtResource("1_7by2c")

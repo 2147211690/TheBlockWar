@@ -43,6 +43,7 @@ public static partial class Simulator
             {
                 return;
             }
+            EnterSimulation();
 
             var coords = unit.Coords;
             if (unit.IsWillDrop(state, coords)) // 单位会掉落
@@ -63,48 +64,45 @@ public static partial class Simulator
                     state.TileMapState.ModifyTile(coords, u => u.RemoveRegion(i));
                 }
             }
+            ExitSimulation();
         }
 
         private void ApplyUnitRemoveFromCoords(IReadOnlyUnitState unit, Vector2I coords, SimulationContext context)
         {
+            EnterSimulation();
             var fromTile = state.TileMapState.GetTile(coords);
             if (!fromTile.IsNull())
             {
                 state.NotifyTileRegions(fromTile, r => r.OnUnitLeave(state, coords, unit, coords, false, context));
             }
+            ExitSimulation();
         }
 
         private void NotifyUnitBuffs(IReadOnlyUnitState unit, Action<IBuff> action)
         {
-            if (unit.Buffs.Count == 0) return;
-            foreach (var buffType in unit.Buffs.ToArray())
-            {
-                action(buffType.BuffName.GetBuffInstance());
-            }
-        }
-
-        private void NotifyUnitBuff(IReadOnlyUnitState unit, string buffName, Action<IBuff> action)
-        {
             if (unit.IsNull()) return;
-            if (!unit.TryFindBuff(buffName, out var index)) return;
-            action(unit.Buffs[index].BuffName.GetBuffInstance());
+            if (unit.Name.GetUnitInfo().Buffs is not {Length: > 0} && unit.Buffs.Count == 0) return;
+            EnterSimulation();
+            foreach (var name in unit.GetInfoAndCurrentBuffs().ToArray())
+            {
+                action(name.GetBuffInstance());
+            }
+            ExitSimulation();
         }
+        
 
         private void NotifyTileRegions(IReadOnlyTileState tile, Action<IRegion> action)
         {
-            if (tile.Regions.Count == 0) return;
-            foreach (var regionType in tile.Regions.ToArray())
+            if (tile.IsNull()) return;
+            if (tile.Name.GetTileInfo().Regions is not {Length: > 0} && tile.Regions.Count == 0) return;
+            EnterSimulation();
+            foreach (var name in tile.GetInfoAndCurrentRegions().ToArray())
             {
-                action(regionType.RegionName.GetRegionInstance());
+                action(name.GetRegionInstance());
             }
+            ExitSimulation();
         }
         
-        private void NotifyTileRegion(IReadOnlyTileState tile, string regionName, Action<IRegion> action)
-        {
-            if (tile == TileState.Empty) return;
-            if (!tile.TryFindRegion(regionName, out var index)) return;
-            action(tile.Regions[index].RegionName.GetRegionInstance());
-        }
         /// <summary>
         /// 开始封装一系列步骤, 请记住调用EndSteps结束
         /// </summary>

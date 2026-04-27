@@ -133,8 +133,9 @@ public static class Extensions
             // 返回绘制区域的边界矩形 
             return new Rect2(startPos, totalWidth, style.ItemSize.Y);
         }
-        public void DrawTextureRadioRect(Texture2D texture, in Rect2 rect, Color? modulate = null)
+        public void DrawTextureRadioRect(Texture2D? texture, in Rect2 rect, Color? modulate = null)
         {
+            if (texture == null) return;
             Vector2 textureSize = texture.GetSize();
             float texWidth = textureSize.X;
             float texHeight = textureSize.Y;
@@ -235,6 +236,17 @@ public static class Extensions
             index = -1;
             return false;
         }
+        public int GetBuffDuration(string buffName)
+        {
+            if (!unit.TryFindBuff(buffName, out var index)) return 0;
+            return unit.Buffs[index].Duration;
+        }
+        public IEnumerable<string> GetInfoAndCurrentBuffs()
+        {
+            var infoBuff = unit.Name.GetUnitInfo().Buffs;
+            if (infoBuff is not null) foreach (var b in infoBuff) yield return b;
+            foreach (var b in unit.Buffs) yield return b.BuffName;
+        }
         public bool IsNull() => unit.Id == 0;
     }
 
@@ -251,7 +263,18 @@ public static class Extensions
             index = -1;
             return false;
         }
-        public bool IsNull() => (tile.Tag & TileTag.Empty) != 0;
+        public int GetRegionDuration(string regionName)
+        {
+            if (!tile.TryFindRegion(regionName, out var index)) return 0;
+            return tile.Regions[index].Duration;
+        }
+        public IEnumerable<string> GetInfoAndCurrentRegions()
+        {
+            var infoRegion = tile.Name.GetTileInfo().Regions;
+            if (infoRegion is not null) foreach (var b in infoRegion) yield return b;
+            foreach (var b in tile.Regions) yield return b.RegionName;
+        }
+        public bool IsNull() => tile.Name == "Air" || tile.Name.IsWhiteSpace();
     }
     
 
@@ -369,6 +392,15 @@ public static class Extensions
         public TeamTypeEnum GetTeamTypeRelativeToPlayer(EventScheduler eventScheduler)
         {
             return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, team) ?? TeamTypeEnum.Neutral;
+        }
+    }
+    extension(AnimatedSprite2D sprite2D)
+    {
+        public bool TryPlay(StringName animation)
+        {
+            if (sprite2D.SpriteFrames?.HasAnimation(animation) == false) return false;
+            sprite2D.Play(animation);
+            return true;
         }
     }
 }

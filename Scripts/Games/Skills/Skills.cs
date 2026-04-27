@@ -27,7 +27,7 @@ public class EmptySkill(string skillName) : Skill(skillName, 0)
         Vector2I useCoords, int argsIndex,
         Vector2I?[] args) => [];
 
-    public override void SkillCore(IGameState gameState, SimulationContext context, IReadOnlyUnitState unit,
+    protected override void Core(IGameState gameState, SimulationContext context, IReadOnlyUnitState unit,
         Vector2I useCoords,
-        Vector2I?[] args){}
+        Vector2I?[] args, string skillName){}
 }

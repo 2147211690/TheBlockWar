@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Views;
@@ -58,7 +59,7 @@ public partial class TilesView : TileMapLayer
         local.Y += NormalGroundHeight;
         return LocalToMap(local);
     }
-    public async GDTask PlaceTile(Vector2I coords, TileState tile)
+    public async GDTask PlaceTile(Vector2I coords, string tileName)
     {
         //GD.Print("PlaceTile");
         if (!_tileViews.TryGetValue(coords, out var render))
@@ -68,15 +69,8 @@ public partial class TilesView : TileMapLayer
         }
         render.Position = MapToLocal(coords);
         render.Visible = true;
-        if ((tile.Tag & TileTag.Empty) != 0)
-        {
-            render.TileName = "Empty";
-        }
-        else
-        {
-            render.TileName = "Soil";
-            await render.PlayPlaceDownAnim();
-        }
+        render.TileName = tileName;
+        if (tileName != TileNames.Air) await render.PlayPlaceDownAnim();
         GameView.UnitsView.UpdateUnitPosition(coords);
     }
     public async GDTask DropTile(Vector2I coords)
@@ -95,7 +89,7 @@ public partial class TilesView : TileMapLayer
         tween.Finished += () =>
         {
             render.Visible = false;
-            render.TileName = "Empty";
+            render.TileName = "Air";
         };
         await tween.WaitForTween();
         GameView.UnitsView.UpdateUnitPosition(coords);

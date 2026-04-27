@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="TileInfo" format=3 uid="uid://doiuaok7flt55"]
+
+[ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="1_dnecr"]
+[ext_resource type="Texture2D" uid="uid://bn5nqpxievijm" path="res://Art/Img/combat/tiles_grass/ground_0.png" id="1_pwt0t"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dnecr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_pwt0t")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[resource]
+script = ExtResource("1_dnecr")
+Name = "Soil0"
+ViewOffset = Vector2(0, -17)
+ViewFrames = SubResource("SpriteFrames_dnecr")

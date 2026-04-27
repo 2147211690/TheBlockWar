@@ -1,8 +1,3 @@
-using TheBlockWar.Scripts.Games.Buffs;
-using TheBlockWar.Scripts.Games.Regions;
-using TheBlockWar.Scripts.Games.Skills;
-using TheBlockWar.Scripts.Games.Tiles;
-using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Tools;

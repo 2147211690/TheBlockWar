@@ -3,6 +3,7 @@ using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Events;
 
@@ -14,7 +15,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
     {
         if (TurnType == TypeEnum.Region)
         {
-            var regionPairs = new List<(Vector2I coords, IRegion[] regions)>();
+            var regionPairs = new List<(Vector2I coords, List<string> regions)>();
             var size = state.TileMapState.Size;
             for (var i = 0; i < size.X; i++)
             {
@@ -22,10 +23,9 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
                 {
                     var coords = new Vector2I(i, j);
                     var tile = state.TileMapState.GetTile(coords);
-                    if (tile.Regions.Count > 0)
+                    if (tile.Name.GetTileInfo().Regions is {Length: > 0} && tile.Regions.Count > 0)
                         regionPairs.Add(
-                            new(coords,
-                                tile.Regions.Select(r => r.RegionName.GetRegionInstance()).ToArray()));
+                            new(coords, tile.GetInfoAndCurrentRegions().ToList()));
                 }
             }
 
@@ -33,22 +33,42 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
             {
                 foreach (var region in pair.regions)
                 {
-                    region.OnEnterTurn(state, pair.coords, Turn, context);
+                    region.GetRegionInstance().OnEnterTurn(state, pair.coords, Turn, context);
+                }
+            }
+
+            foreach (var pair in regionPairs)
+            {
+                foreach (var region in pair.regions)
+                {
+                    var tile = state.TileMapState.GetTile(pair.coords);
+                    if (tile.GetRegionDuration(region) is 0 or int.MaxValue) continue;
+                    state.ApplyModifyTileRegion(pair.coords, region, RegionOperation.ChangeDuration, -1, context);
                 }
             }
         }
         else if (TurnType == TypeEnum.Buff)
         {
-            List<(IReadOnlyUnitState unit, IBuff[] buffs)> buffPairs =
-                state.UnitMapState.GetAllUnits()
-                    .Where(a => a.Buffs.Count > 0)
-                    .Select(a => (a, a.Buffs.Select(u => u.BuffName.GetBuffInstance()).ToArray()))
-                    .ToList();
+            List<(IReadOnlyUnitState unit, List<string> buffs)> buffPairs =
+                state.UnitMapState.GetAllUnits().Where(
+                        u => u.Name.GetUnitInfo().Buffs is {Length: > 0} && u.Buffs.Count > 0
+                        )
+                    .Select(
+                        u => (u, u.GetInfoAndCurrentBuffs().ToList())
+                            ).ToList();
             foreach (var pair in buffPairs)
             {
                 foreach (var buff in pair.buffs)
                 {
-                    buff.OnEnterTurn(state, pair.unit, Turn, context);
+                    buff.GetBuffInstance().OnEnterTurn(state, pair.unit, Turn, context);
+                }
+            }
+            foreach (var pair in buffPairs)
+            {
+                foreach (var buff in pair.buffs)
+                {
+                    if (pair.unit.GetBuffDuration(buff) is 0 or int.MaxValue) continue;
+                    state.ApplyModifyUnitBuff(pair.unit.Coords, buff, BuffOperation.ChangeDuration, -1, context);
                 }
             }
         }

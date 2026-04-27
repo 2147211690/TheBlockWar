@@ -116,11 +116,11 @@ public record ApplyMoveUnitPathStep(Vector2I Coords, List<Vector2I>? Path) : App
     }
 }
 
-public record ApplyPlaceTileStep(Vector2I Coords, TileState Tile) : ApplyStep
+public record ApplyPlaceTileStep(Vector2I Coords, string TileName) : ApplyStep
 {
     public override void Apply(IGameState state, SimulationContext context)
     {
-        state.ApplyPlaceTile(Coords, Tile, context);
+        state.ApplyPlaceTile(Coords, TileName, context);
     }
 }
 

@@ -1,8 +1,3 @@
-using TheBlockWar.Scripts.Games.Buffs;
-using TheBlockWar.Scripts.Games.Regions;
-using TheBlockWar.Scripts.Games.Skills;
-using TheBlockWar.Scripts.Games.Tiles;
-using TheBlockWar.Scripts.Games.Units;
 using System.Linq;
 
 namespace TheBlockWar.Scripts.Resources;
@@ -19,23 +14,22 @@ public partial class InfoManager : Resource
     #if TOOLS
     [ExportGroup("Tools")]
     [Export(PropertyHint.Dir)] public string BuffInfoPath { get; set; } = string.Empty;
-    [ExportToolButton("读取创建BuffInfos")]
-    public Callable AutoCreateBuffInfosButton => Callable.From(OnAutoCreateBuffInfos);
+    /*[ExportToolButton("读取创建BuffInfos")]
+    private Callable AutoCreateBuffInfosButton => Callable.From(OnAutoCreateBuffInfos);*/
     [Export(PropertyHint.Dir)] public string RegionInfoPath { get; set; } = string.Empty;
-    [ExportToolButton("读取创建RegionInfos")]
-    public Callable AutoCreateRegionInfosButton => Callable.From(OnAutoCreateRegionInfos);
+    /*[ExportToolButton("读取创建RegionInfos")]
+    private Callable AutoCreateRegionInfosButton => Callable.From(OnAutoCreateRegionInfos);*/
     [Export(PropertyHint.Dir)] public string UnitInfoPath { get; set; } = string.Empty;
-    [ExportToolButton("读取创建UnitInfos")]
-    public Callable AutoCreateUnitInfosButton => Callable.From(OnAutoCreateUnitInfos);
+    /*[ExportToolButton("读取创建UnitInfos")]
+    private Callable AutoCreateUnitInfosButton => Callable.From(OnAutoCreateUnitInfos);*/
     [Export(PropertyHint.Dir)] public string TileInfoPath { get; set; } = string.Empty;
-    [ExportToolButton("读取创建TileInfos")]
-    public Callable AutoCreateTileInfosButton => Callable.From(OnAutoCreateTileInfos);
+    /*[ExportToolButton("读取创建TileInfos")]
+    private Callable AutoCreateTileInfosButton => Callable.From(OnAutoCreateTileInfos);*/
     [Export(PropertyHint.Dir)] public string SkillInfoPath { get; set; } = string.Empty;
-    [ExportToolButton("读取创建SkillInfos")]
-    public Callable AutoCreateSkillInfosButton => Callable.From(OnAutoCreateSkillInfos);
+    /*[ExportToolButton("读取创建SkillInfos")]
+    private Callable AutoCreateSkillInfosButton => Callable.From(OnAutoCreateSkillInfos);*/
     [ExportToolButton("读取创建所有Infos")]
-    public Callable AutoCreateAllInfosButton => Callable.From(OnAutoCreateAllInfos);
-    
+    private Callable AutoCreateAllInfosButton => Callable.From(OnAutoCreateAllInfos);
     private void OnAutoCreateBuffInfos()
     {
         AutoCreateInfos(
@@ -125,15 +119,19 @@ public partial class InfoManager : Resource
                 GD.PushWarning($"发现重复类型{type} {path}");
             }
         }
-        var isRenamed = false;
+        var isChanged = false;
         foreach (var name in names)
         {
             var path = $"{infoDir}/{name}{namedSuffix}.tres";
-            if (hasCreated.TryGetValue(name, out var oldPath) && oldPath != path)
+            if (hasCreated.TryGetValue(name, out var oldPath))
             {
-                DirAccess.RenameAbsolute(oldPath, path);
-                isRenamed = true;
-                GD.Print($"重命名{oldPath}为{path}");
+                if (oldPath != path)
+                {
+                    DirAccess.RenameAbsolute(oldPath, path);
+                    isChanged = true;
+                    GD.Print($"重命名{oldPath}为{path}");
+                }
+                hasCreated.Remove(name);
             }
             if (!FileAccess.FileExists(path))
             {
@@ -149,7 +147,14 @@ public partial class InfoManager : Resource
                 info.Name = name;
             }
         }
-        if (isRenamed)
+
+        foreach (var a in hasCreated)
+        {
+            GD.Print($"发现无效类型{a.Key}-{a.Value}");
+            DirAccess.RemoveAbsolute(a.Value);
+            isChanged = true;
+        }
+        if (isChanged)
         {
             var fs = EditorInterface.Singleton.GetResourceFilesystem();
             fs.Scan();

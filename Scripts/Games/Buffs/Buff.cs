@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
@@ -13,24 +14,39 @@ public abstract class Buff(string name) : IBuff
     public virtual void OnAddToUnit(IGameState state, IReadOnlyUnitState unit, SimulationContext context)
     {
     }
-
-    public virtual void OnUnitBeforeDamage(IGameState state, IReadOnlyUnitState unit, float rawDamage,
+    public virtual void OnUnitBeforeSkill(IGameState state, IReadOnlyUnitState unit, string skillName, 
+        ref bool canUseSkill,
+        SimulationContext context)
+    {
+    }
+    
+    public virtual void OnUnitBeforeGetDamage(IGameState state, IReadOnlyUnitState unit, float originDamage,
         ref float resultDamage,
         SimulationContext context)
     {
     }
 
-    public virtual void OnUnitAfterDamage(IGameState state, IReadOnlyUnitState unit, float getDamage,
+    public virtual void OnBeforeDamageToUnit(IGameState state, IReadOnlyUnitState unit, IReadOnlyUnitState target, float originDamage, ref float resultDamage,
         SimulationContext context)
     {
     }
 
-    public virtual void OnUnitBeforeCure(IGameState state, IReadOnlyUnitState unit, float rawCure, ref float resultCure,
+    public virtual void OnUnitAfterGetDamage(IGameState state, IReadOnlyUnitState unit, float getDamage,
         SimulationContext context)
     {
     }
 
-    public virtual void OnUnitAfterCure(IGameState state, IReadOnlyUnitState unit, float getCure,
+    public virtual void OnUnitBeforeGetCure(IGameState state, IReadOnlyUnitState unit, float originCure, ref float resultCure,
+        SimulationContext context)
+    {
+    }
+
+    public virtual void OnBeforeCureToUnit(IGameState state, IReadOnlyUnitState unit, IReadOnlyUnitState target, float originCure, ref float resultCure,
+        SimulationContext context)
+    {
+    }
+
+    public virtual void OnUnitAfterGetCure(IGameState state, IReadOnlyUnitState unit, float getCure,
         SimulationContext context)
     {
     }

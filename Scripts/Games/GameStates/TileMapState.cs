@@ -60,7 +60,7 @@ public class TileMapState : ITileMapState
 
     public bool IsEmpty(Vector2I coords)
     {
-        return (GetTile(coords).Tag & TileTag.Empty) != 0;
+        return GetTile(coords).Name == "Air";
     }
 
     public void ModifyTile(Vector2I coords, Action<TileState> modifier)
@@ -134,7 +134,7 @@ public class TileMapState : ITileMapState
         public bool IsEmpty(Vector2I coords)
         {
             // 内部调用GetTile，保证走本地克隆
-            return (GetTile(coords).Tag & TileTag.Empty) != 0;
+            return GetTile(coords).Name == "Air";
         }
 
         /// <summary>

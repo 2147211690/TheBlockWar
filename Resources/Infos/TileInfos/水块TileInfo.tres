@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="TileInfo" format=3 uid="uid://bdnl6xfj384br"]
+
+[ext_resource type="Texture2D" uid="uid://cpvn3fmy0wg1y" path="res://Art/Img/combat/tiles_acid/water_0.png" id="1_7famj"]
+[ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="1_fqtcj"]
+[ext_resource type="Texture2D" uid="uid://d22vpurl2ib20" path="res://Art/Img/combat/tiles_acid/water_1.png" id="2_tyfrs"]
+[ext_resource type="Texture2D" uid="uid://cn5d1crcudc2h" path="res://Art/Img/combat/tiles_acid/water_2.png" id="3_qc4h3"]
+[ext_resource type="Texture2D" uid="uid://cvpuwwxtlpiw6" path="res://Art/Img/combat/tiles_acid/water_3.png" id="4_q750i"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fqtcj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_7famj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_tyfrs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_qc4h3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_q750i")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[resource]
+script = ExtResource("1_fqtcj")
+Name = "水块"
+Regions = PackedStringArray("水域")
+ViewHeight = 18.0
+ViewOffset = Vector2(0, -9)
+ViewFrames = SubResource("SpriteFrames_fqtcj")

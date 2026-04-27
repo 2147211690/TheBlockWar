@@ -25,6 +25,7 @@ partial class Simulator
                 }
 
                 var unit = state.UnitMapState.GetUnit(coords);
+                var oldDuration = unit.GetBuffDuration(buffName);
                 var resultOperation = BuffOperation.None;
                 var resultDuration = duration;
                 var resultOldDuration = 0;
@@ -36,7 +37,7 @@ partial class Simulator
                         BuffOperation.AddBuff => state.HandleAddOrChangeBuff(unit, buffName, duration, true),
                         BuffOperation.RemoveBuff => state.HandleRemoveBuff(unit, buffName),
                         BuffOperation.ChangeDuration =>
-                            state.HandleAddOrChangeBuff(unit, buffName, duration * 2, false),
+                            state.HandleAddOrChangeBuff(unit, buffName, oldDuration + duration, false),
                         BuffOperation.SetDuration => state.HandleSetDurationBuff(unit, buffName, duration),
                         _ => (BuffOperation.None, duration, 0)
                     };
@@ -53,14 +54,23 @@ partial class Simulator
                             state.NotifyUnitBuffs(unit, b => b.OnAddToUnit(state, unit, context));
                             break;
                         case BuffOperation.RemoveBuff:
-                            state.NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(state, unit, context));
+                            NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(state, unit, context));
                             break;
                         case BuffOperation.ChangeDuration:
-                            state.NotifyUnitBuff(unit, buffName, b => b.OnDurationChanged(state, unit,
+                            NotifyUnitBuff(unit, buffName, b => b.OnDurationChanged(state, unit,
                                 resultOldDuration, resultOldDuration + resultDuration, context));
                             break;
                     }
                 }
+            }
+            
+            void NotifyUnitBuff(IReadOnlyUnitState unit, string buffName, Action<IBuff> action)
+            {
+                if (unit.IsNull()) return;
+                if (!unit.TryFindBuff(buffName, out var index)) return;
+                EnterSimulation();
+                action(unit.Buffs[index].BuffName.GetBuffInstance());
+                ExitSimulation();
             }
         }
 

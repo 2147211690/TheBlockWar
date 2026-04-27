@@ -1,11 +1,12 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Skills;
 
-public class Test1Skill() : Skill(SkillNames.Test1, 2)
+public class Test1Skill() : Skill(SkillNames.Test1, 3)
 {
     public override IEnumerable<Vector2I> GetSkillArgs(IReadOnlyGameState state, IReadOnlyUnitState caster, Vector2I useCoords, int argsIndex,
         Vector2I?[] args)
@@ -34,8 +35,8 @@ public class Test1Skill() : Skill(SkillNames.Test1, 2)
         return [];
     }
 
-    public override void SkillCore(IGameState gameState, SimulationContext context, IReadOnlyUnitState unit, Vector2I useCoords,
-        Vector2I?[] args)
+    protected override void Core(IGameState gameState, SimulationContext context, IReadOnlyUnitState unit, Vector2I useCoords,
+        Vector2I?[] args, string skillName)
     {
         if (args.TryGetArgs(0, out var v1))
         {
@@ -53,6 +54,11 @@ public class Test1Skill() : Skill(SkillNames.Test1, 2)
                 gameState.ApplyPushUnit(coords + vec.ToVec2I(), vec, context);
             }
             gameState.EndSteps(context);
+        }
+        if (args.TryGetArgs(2, out var v3))
+        {
+            var coords = v3 + useCoords;
+            gameState.ApplyDamage(coords, 10, context);
         }
     }
 }

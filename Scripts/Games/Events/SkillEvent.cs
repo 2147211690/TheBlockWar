@@ -44,7 +44,7 @@ public sealed class SkillEvent(long id) : SchedulerEvent(id)
         var unit = state.UnitMapState.GetUnit(SkillBindUnitId);
         if (unit.IsNull()) return;
         var useCoords = unit.Coords;
-        SkillName.GetSkillInstance().SkillCore(state, context, unit, useCoords, SkillArgs ?? []);
+        SkillName.GetSkillInstance().SkillCore(state, context, unit, useCoords, SkillArgs ?? [], SkillName);
     }
     public override string ToString()
     {

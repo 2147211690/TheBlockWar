@@ -25,10 +25,11 @@ partial class Simulator
                 }
 
                 var tile = state.TileMapState.GetTile(coords);
+                var oldDuration = tile.GetRegionDuration(regionName);
                 var resultOperation = RegionOperation.None;
                 var resultDuration = duration;
 
-                if (tile != TileState.Empty)
+                if (!tile.IsNull())
                 {
                     (resultOperation, resultDuration) = operation switch
                     {
@@ -36,7 +37,7 @@ partial class Simulator
                             true),
                         RegionOperation.RemoveRegion => state.HandleRemoveRegion(tile, coords, regionName),
                         RegionOperation.ChangeDuration => state.HandleAddOrChangeRegion(tile, coords, regionName,
-                            duration * 2, false),
+                            oldDuration + duration, false),
                         RegionOperation.SetDuration =>
                             state.HandleSetDurationRegion(tile, coords, regionName, duration),
                         _ => (RegionOperation.None, duration)
@@ -53,16 +54,24 @@ partial class Simulator
                     {
                         if (resultOperation == RegionOperation.AddRegion)
                         {
-                            state.NotifyTileRegion(tile, regionName,
+                            NotifyTileRegion(tile, regionName,
                                 r => r.OnUnitEnter(state, coords, unit, coords, true, context));
                         }
                         else if (resultOperation == RegionOperation.RemoveRegion)
                         {
-                            state.NotifyTileRegion(tile, regionName,
+                            NotifyTileRegion(tile, regionName,
                                 r => r.OnUnitLeave(state, coords, unit, coords, true, context));
                         }
                     }
                 }
+            }
+            void NotifyTileRegion(IReadOnlyTileState tile, string regionName, Action<IRegion> action)
+            {
+                if (tile == TileState.Empty) return;
+                if (!tile.TryFindRegion(regionName, out var index)) return;
+                EnterSimulation();
+                action(tile.Regions[index].RegionName.GetRegionInstance());
+                ExitSimulation();
             }
         }
 

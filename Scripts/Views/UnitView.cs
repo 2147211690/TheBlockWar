@@ -29,6 +29,8 @@ public partial class UnitView : Node2D
     private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
     private ShaderMaterial? _shaderMaterial = null!;
     private UnitInfo? _unitInfo;
+    private string _unitName = string.Empty;
+
     public Color OutlineColor
     {
         get => _shaderMaterial?.GetShaderParameter("outline1_color").AsColor() ?? Colors.White;
@@ -37,14 +39,14 @@ public partial class UnitView : Node2D
 
     public string UnitName
     {
-        get;
+        get => _unitName;
         set
         {
             _unitInfo = value.GetUnitInfo();
             MainSprite.SpriteFrames = _unitInfo.ViewFrames;
             MainSprite.Play("idle");
             MainSprite.Offset = _unitInfo.ViewOffset;
-            field = value;
+            _unitName = value;
         }
     }
 
