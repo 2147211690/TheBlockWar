@@ -17,5 +17,5 @@ animations = [{
 [resource]
 script = ExtResource("1_dnecr")
 Name = "Soil0"
-ViewOffset = Vector2(0, -17)
+ViewHeight = 32.0
 ViewFrames = SubResource("SpriteFrames_dnecr")

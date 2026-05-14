@@ -8,6 +8,7 @@ partial class Simulator
     extension(SimObject obj)
     {
         //TODO:可能使用事件优化
+        //result:UnitId:long ValidDamage:float
         public void ApplyDamage(Vector2I coords, float damage)
         {
             EnterSimulation();
@@ -63,7 +64,8 @@ partial class Simulator
                     return;
                 }
 
-                obj.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
+                obj.Steps?.AddStep(
+                    new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
 
                 // 触发受伤后事件, 仅在运行层触发
                 if (validDamage > 0 && obj.ComplexSimulationRegion(0))

@@ -40,7 +40,7 @@ public class BlockDraw
     private BlockEventDrawNode GetBlockEventDrawNode(Vector2I coords)
     {
         if (_nodes.TryGetValue(coords, out var node)) return node;
-        node = Pool.Pop();
+        node = Pool.Get();
         node.ZIndex = 2;
         _nodes.Add(coords, node);
         node.Position = _eventsView.GameView.TilesView.GetRealPosition(coords, Layer.Sky);
@@ -53,7 +53,7 @@ public class BlockDraw
         foreach (var node in _nodes.Values)
         {
             node.Clear();
-            Pool.Push(node);
+            Pool.Return(node);
         }
         _nodes.Clear();
     }

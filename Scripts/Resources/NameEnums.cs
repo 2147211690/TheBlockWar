@@ -2,6 +2,7 @@ namespace TheBlockWar.Scripts.Resources;
 [NameEnum]
 public enum SkillNameEnum
 {
+    一般移动,
     Test1,
 }
 [NameEnum]

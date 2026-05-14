@@ -9,6 +9,7 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
+        //result:UnitState:UnitState Valid:bool
         public void ApplyPlaceUnit(Vector2I coords, string unitName, int team)
         {
             EnterSimulation();
@@ -29,8 +30,7 @@ partial class Simulator
                     //如果在等待层,或者此处有单位,则放置失败
                     if (!isValid)
                     {
-                        obj.Steps?.AddStep(
-                            new PlaceUnitStep(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
+                        obj.Steps?.AddStep(new PlaceUnitStep(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
                         return;
                     }
                     var unitState = UnitFactory.CreateUnit(unitName, team, obj.State.IdGenerator.NewLong(), coords);
@@ -50,8 +50,7 @@ partial class Simulator
                 }
                 else
                 {
-                    obj.Steps?.AddStep(
-                        new PlaceUnitStep(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
+                    obj.Steps?.AddStep(new PlaceUnitStep(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
                 }
             }
         }

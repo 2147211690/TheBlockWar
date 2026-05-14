@@ -73,12 +73,12 @@ public partial class AnimationView : Node2D
         sprite.Offset = Vector2.Zero; 
         sprite.Scale = Vector2.One;
         sprite.Rotation = 0;
-        GameView.ViewPools.Sprite2DPool.Push(sprite);
+        GameView.ViewPools.Sprite2DPool.Return(sprite);
     }
 
     private Sprite2D PopSomething(Vector2I coords, Texture2D texture)
     {
-        var sprite = GameView.ViewPools.Sprite2DPool.Pop(); 
+        var sprite = GameView.ViewPools.Sprite2DPool.Get(); 
         sprite.Texture = texture; 
         sprite.Position = GameView.TilesView.GetRenderPosition(coords, Layer. Underground , 1); 
         sprite.Offset = GameView.TilesView.GetRenderOffset(coords, Layer. Underground , 1);

@@ -7,6 +7,7 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
+        //result:UnitId:long Valid:bool
         public void ApplyMoveUnit(Vector2I coords, Vector2I to)
         {
             EnterSimulation();

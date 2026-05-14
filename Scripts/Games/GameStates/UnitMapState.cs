@@ -205,7 +205,7 @@ public class UnitMapState : IUnitMapState
                 return IReadOnlyUnitState.Null;
 
             // 克隆并加入本地修改表（读时COW）
-            var clone = ownerUnit.CopyTo(UnitPool.Pop());
+            var clone = ownerUnit.CopyTo(UnitPool.Get());
             GetPooledUnits().Add(clone);
             modifiedUnits[id] = clone;
             _isModified = true; // 读取也算作状态变更（因为产生了本地副本）
@@ -352,7 +352,7 @@ public class UnitMapState : IUnitMapState
         {
             if (_pooledUnits != null)
             {
-                foreach (var u in _pooledUnits) UnitPool.Push(u);
+                foreach (var u in _pooledUnits) UnitPool.Return(u);
                 _pooledUnits.Clear();
             }
 

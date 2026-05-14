@@ -25,7 +25,6 @@ public partial class GameView : Node2D
     public bool IsRunning { get; private set; }
 
     private Dictionary<long, SimObject> _runningSimulations = new();
-    private List<SimObject> _lastSimulations = new();
     private List<SimObject> _prepareSimulations = new();
     private EventScheduler? _eventScheduler;
     private Queue<(IReadOnlyList<SimObject> simulations, int? delay)> _simulationCache = new();
@@ -121,11 +120,6 @@ public partial class GameView : Node2D
             _simulationCache.Enqueue((simulations, delay));
             return;
         }
-
-        (_lastSimulations, _prepareSimulations) = (_prepareSimulations, _lastSimulations);
-
-        _prepareSimulations.Clear();
-        _runningSimulations.Clear();
         foreach (var simulation in simulations)
         {
             if (simulation.Layer == SimulationLayer.Running)
@@ -147,6 +141,10 @@ public partial class GameView : Node2D
     private void RunCompleted()
     {
         IsRunning = false;
+        //回收
+        _prepareSimulations.Clear();
+        _runningSimulations.Clear();
+        
         if (_simulationCache.TryDequeue(out var simulations))
         {
             _currentDelay = simulations.delay;
@@ -184,64 +182,64 @@ public partial class GameView : Node2D
         switch (step)
         {
             case PlaceTileStep placeStep:
-                await TilesView.PlaceTile(placeStep.Coords, placeStep.TileName);
-                UnitsView.UpdateUnitPosition(placeStep.Coords);
+                await TilesView.PlaceTile(placeStep.Apply.Coords, placeStep.Apply.TileName);
+                UnitsView.UpdateUnitPosition(placeStep.Apply.Coords);
                 break;
             case DropTileStep dropStep:
-                await TilesView.DropTile(dropStep.Coords);
-                UnitsView.UpdateUnitPosition(dropStep.Coords);
+                await TilesView.DropTile(dropStep.Apply.Coords);
+                UnitsView.UpdateUnitPosition(dropStep.Apply.Coords);
                 break;
             case PlaceUnitStep placeStep:
-                if (placeStep.ResultIsValid)
+                if (placeStep.Valid)
                 {
-                    var u = UnitFactory.CreateUnit(placeStep.UnitName, placeStep.Team, 
-                        placeStep.ResultUnit.Id, placeStep.Coords);
+                    var u = UnitFactory.CreateUnit(placeStep.Apply.UnitName, placeStep.Apply.Team, 
+                        placeStep.UnitState.Id, placeStep.Apply.Coords);
                     await UnitsView.PlaceUnit(
-                        placeStep.Coords,
+                        placeStep.Apply.Coords,
                         u,
-                        placeStep.Team.GetTeamTypeRelativeToPlayer(_eventScheduler!));
+                        placeStep.Apply.Team.GetTeamTypeRelativeToPlayer(_eventScheduler!));
                 }
 
                 break;
             case MoveUnitStep moveStep:
-                if (moveStep.ResultIsValid) UnitsView.MoveUnit(moveStep.ResultUnitId, moveStep.To);
-                UnitsView.UpdateUnitPosition(moveStep.To);
+                if (moveStep.Valid) UnitsView.MoveUnit(moveStep.UnitId, moveStep.Apply.To);
+                UnitsView.UpdateUnitPosition(moveStep.Apply.To);
                 break;
             case DamageStep damageStep:
-                UnitsView.GetUnitView(damageStep.ResultUnitId)?.HealthBar.CurrentHealth -= damageStep.ResultValidDamage;
+                UnitsView.GetUnitView(damageStep.UnitId)?.HealthBar.CurrentHealth -= damageStep.ValidDamage;
                 break;
             case CureStep cureStep:
-                UnitsView.GetUnitView(cureStep.ResultUnitId)?.HealthBar.CurrentHealth += cureStep.ResultValidCure;
+                UnitsView.GetUnitView(cureStep.UnitId)?.HealthBar.CurrentHealth += cureStep.ValidCure;
                 break;
             case MoveUnitPathStep movePathStep:
-                if (movePathStep.ResultIsValid)
-                    await UnitsView.MovePathUnit(movePathStep.ResultUnitId, movePathStep.Coords, movePathStep.Path,
-                        movePathStep.ResultTargetIndex);
+                if (movePathStep.Valid)
+                    await UnitsView.MovePathUnit(movePathStep.UnitId, movePathStep.Apply.Coords, movePathStep.Apply.Path,
+                        movePathStep.TargetIndex);
                 break;
             case DropUnitStep dropStep:
-                await UnitsView.DropUnit(dropStep.ResultUnitId);
+                await UnitsView.DropUnit(dropStep.UnitId);
                 break;
             case PushUnitStep pushStep:
-                await UnitsView.PushUnit(pushStep.ResultUnitId, pushStep.PushDir, pushStep.ResultPush);
+                await UnitsView.PushUnit(pushStep.UnitId, pushStep.Apply.Dir, pushStep.Valid);
                 break;
             case ModifyUnitBuffStep modifyUnitBuffStep:
                 if (modifyUnitBuffStep.Operation == BuffOperation.AddBuff)
                 {
-                    UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView
-                        .AddVisibleBuff(modifyUnitBuffStep.BuffName);
+                    UnitsView.GetUnitView(modifyUnitBuffStep.UnitId)?.BuffView
+                        .AddVisibleBuff(modifyUnitBuffStep.Apply.BuffName);
                 }
                 else if (modifyUnitBuffStep.Operation == BuffOperation.RemoveBuff)
                 {
-                    UnitsView.GetUnitView(modifyUnitBuffStep.ResultUnitId)?.BuffView
-                        .RemoveVisibleBuff(modifyUnitBuffStep.BuffName);
+                    UnitsView.GetUnitView(modifyUnitBuffStep.UnitId)?.BuffView
+                        .RemoveVisibleBuff(modifyUnitBuffStep.Apply.BuffName);
                 }
 
                 break;
             case AnimationStep animationStep:
-                await AnimationView.Play(animationStep.Animation);
+                await AnimationView.Play(animationStep.Apply.Animation);
                 break;
             case DelayStep delayStep:
-                await GDTask.Delay(delayStep.Delay);
+                await GDTask.Delay(delayStep.Apply.Delay);
                 break;
             case null:
                 break;

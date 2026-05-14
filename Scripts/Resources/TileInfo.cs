@@ -10,7 +10,7 @@ public partial class TileInfo : Resource, IInfo
     [Export] public string[]? Regions { get; set; }
     [ExportGroup("View")]
     [Export] public float ViewHeight { get; set; } = 34;
-    [Export] public Vector2 ViewOffset { get; set; }
+    [Export] public Vector2 ViewOffset { get; set; } = new (0, -16);
     [Export] public SpriteFrames? ViewFrames { get; set; }
     
     #if TOOLS

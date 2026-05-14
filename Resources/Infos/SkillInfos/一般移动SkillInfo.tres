@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="SkillInfo" format=3 uid="uid://87qrmh2vl6el"]
+
+[ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="1_58fnk"]
+
+[resource]
+script = ExtResource("1_58fnk")
+Name = "一般移动"

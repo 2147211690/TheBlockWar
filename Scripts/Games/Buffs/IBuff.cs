@@ -1,6 +1,7 @@
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
@@ -9,9 +10,8 @@ public interface IBuff
 {
     string Name { get; }
     void OnAddToUnit(SimObject obj, IReadOnlyUnitState unit);
-
-    void OnUnitBeforeSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, string skillName,
-        ref bool canUseSkill);
+    void OnUnitGetMovePower(IReadOnlyGameState state, IReadOnlyUnitState unit,
+        int defaultValue, ref int value);
     void OnUnitBeforeGetDamage(SimObject obj, IReadOnlyUnitState unit, float originDamage,
         ref float resultDamage);
     void OnBeforeDamageToUnit(SimObject obj, IReadOnlyUnitState unit, IReadOnlyUnitState target, float originDamage,
@@ -27,4 +27,5 @@ public interface IBuff
         int oldDuration, int newDuration);
     void OnUnitDeath(SimObject obj, IReadOnlyUnitState unit);
     void OnEnterTurn(SimObject obj, IReadOnlyUnitState unit, int turn);
+    void OnShouldUseSkill(IReadOnlyUnitState unit, ISkill skill, ref bool shouldUseSkill);
 }

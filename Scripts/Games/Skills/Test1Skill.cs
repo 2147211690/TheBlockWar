@@ -36,13 +36,11 @@ public class Test1Skill() : Skill(SkillNames.Test1, 3)
     }
 
     protected override void Core(SimObject obj, IReadOnlyUnitState unit, Vector2I useCoords,
-        Vector2I?[] args, string skillName)
+        Vector2I?[] args)
     {
         if (args.TryGetArgs(0, out var v1))
         {
-            
-            var (path, cost) = GameNavigator.FindShortestPath(obj.State, unit, useCoords, v1 + unit.Coords);
-            if (cost <= 4) obj.ApplyMoveUnitPath(Vector2I.Zero, path);
+            obj.ApplyDamage(unit.Coords, 10);
         }
         if (args.TryGetArgs(1, out var v2) && obj.Steps?.PeekStep is MoveUnitPathStep moveStep)
         {

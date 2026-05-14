@@ -8,7 +8,7 @@ public static class SimStepsAnalyzer
 {
     public static TreeNode ToTree(this IEnumerable<SimStep> steps)
     {
-        var root = new TreeNode(new SimStep(-1));
+        var root = new TreeNode(new SimStep(null, -1));
         var stack = new Stack<TreeNode>();
         stack.Push(root);
 

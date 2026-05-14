@@ -4,20 +4,20 @@ public class RecordTypedPool<T> : TypedPool<T>
 {
     public IReadOnlyList<T> PopedItems => _popedItems;
     private List<T> _popedItems = new();
-    public RecordTypedPool(Func<T> createFunc, int initCount, Action<T>? beforePop = null, Action<T>? afterPush = null) : base(createFunc, initCount, beforePop, afterPush)
+    public RecordTypedPool(Func<T> createFunc, int initCount, Action<T>? beforeGet = null, Action<T>? afterReturn = null) : base(createFunc, initCount, beforeGet, afterReturn)
     {
     }
 
-    public override T Pop()
+    public override T Get()
     {
-        var item = base.Pop();
+        var item = base.Get();
         _popedItems.Add(item);
         return item;
     }
 
-    public override void Push(T item)
+    public override void Return(T item)
     {
-        base.Push(item);
+        base.Return(item);
         _popedItems.Remove(item);
     }
 
@@ -25,7 +25,7 @@ public class RecordTypedPool<T> : TypedPool<T>
     {
         foreach (var item in _popedItems)
         {
-            base.Push(item);
+            base.Return(item);
         }
         _popedItems.Clear();
     }

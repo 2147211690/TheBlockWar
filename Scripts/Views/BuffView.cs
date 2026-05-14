@@ -11,7 +11,6 @@ public partial class BuffView : Node2D
 {
     [Export] public GameViewStyle Style { get; set; } = null!;
     [Export] public TeamTypeEnum TeamType { get; set; }
-    [Export] public SpriteFrames BuffEffectSpriteFrames { get; set; } = null!;
     [Export] public Godot.Collections.Dictionary<string, Vector2> BuffEffectOffsets { get; set; } = null!;
     [Export] public UnitView UnitView { get; set; } = null!;
     // 【元素外框尺寸】默认值匹配截图
@@ -97,33 +96,36 @@ public partial class BuffView : Node2D
     public void AddVisibleBuff(string buffName)
     {
         if (_visibleBuffs.ContainsKey(buffName)) return;
-        var s = GameView.ViewPools.AnimatedSprite2DPool.Pop();
+        var s = GameView.ViewPools.AnimatedSprite2DPool.Get();
         s.GetParent().RemoveChild(s);
         UnitView.Center.AddChild(s);
         s.Position = Vector2.Zero;
         _visibleBuffs.Add(buffName, s);
         if (BuffEffectOffsets.TryGetValue(buffName, out var offset)) s.Offset = offset;
         
-        s.SpriteFrames = BuffEffectSpriteFrames;
-        var addName = $"{buffName}_Add";
-        var idleName = $"{buffName}_Idle";
-        if (BuffEffectSpriteFrames.HasAnimation(addName))
+        s.Offset = buffName.GetBuffInfo().ViewOffset;
+        s.SpriteFrames = buffName.GetBuffInfo().ViewFrames;
+        if (s.SpriteFrames == null) return;
+        var addName = $"add";
+        var idleName = $"idle";
+        if (s.SpriteFrames.HasAnimation(addName))
         {
             s.Play(addName);
-            if (BuffEffectSpriteFrames.HasAnimation(idleName))
+            if (s.SpriteFrames.HasAnimation(idleName))
             {
                 s.ContinueFinishedOneShot(() => s.Play(idleName));
             }
         }
-        else if (BuffEffectSpriteFrames.HasAnimation(idleName)) s.Play(idleName);
+        else if (s.SpriteFrames.HasAnimation(idleName)) s.Play(idleName);
         
     }
     public void RemoveVisibleBuff(string buffName)
     {
         if (!_visibleBuffs.Remove(buffName, out var s)) return;
 
-        var animName = $"{buffName}_Remove";
-        if (BuffEffectSpriteFrames.HasAnimation(animName))
+        var animName = $"remove";
+        if (s.SpriteFrames == null) return;
+        if (s.SpriteFrames.HasAnimation(animName))
         {
             s.Play(animName);
             s.ContinueFinishedOneShot(() => AfterAnim(s));
@@ -136,7 +138,7 @@ public partial class BuffView : Node2D
             GameView.DrawContainer.AddChild(animatedSprite2D);
             animatedSprite2D.SpriteFrames = null;
             animatedSprite2D.Offset = Vector2.Zero;
-            GameView.ViewPools.AnimatedSprite2DPool.Push(animatedSprite2D);
+            GameView.ViewPools.AnimatedSprite2DPool.Return(animatedSprite2D);
         }
     }
     public override void _Draw()

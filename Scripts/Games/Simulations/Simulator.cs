@@ -104,7 +104,7 @@ public static partial class Simulator
             if (unit.IsNull()) return;
             if (unit.Name.GetUnitInfo().Buffs is not {Length: > 0} && unit.Buffs.Count == 0) return;
             EnterSimulation();
-            foreach (var name in unit.GetInfoAndCurrentBuffs().ToArray())
+            foreach (var name in unit.GetInfoAndCurrentBuffs(obj.State).ToArray())
             {
                 action(name.GetBuffInstance());
             }
@@ -131,7 +131,7 @@ public static partial class Simulator
         {
             if (obj.Layer != SimulationLayer.Running) return;
             EnterSimulation();
-            obj.Steps?.AddStep(new StepsStep(CurrentDeep, startDelay, endDelay, runningMode));
+            obj.Steps?.AddStep(new StepsStep(CurrentDeep, [], startDelay, endDelay, runningMode));
         }
         /// <summary>
         /// 结束封装一系列步骤

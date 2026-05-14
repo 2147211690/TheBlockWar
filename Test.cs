@@ -77,7 +77,7 @@ public partial class Test : Node2D
             new Vector2I(10, 10),
             new Dictionary<string, ISkill[]>() 
             {
-                [UnitNames.Unit0] = [SkillNames.Test1.GetSkillInstance()!],
+                [UnitNames.Unit0] = [SkillNames.一般移动.GetSkillInstance(), SkillNames.Test1.GetSkillInstance()],
             },
             new int[,] 
             {
@@ -324,7 +324,6 @@ public partial class Test : Node2D
                 Layer = SimulationLayer.Running,
             });
         }
-
         ImGui.InputText("BuffName", ref _buffName, 100);
         if (ImGui.Button("添加力Buff"))
         {
@@ -376,7 +375,6 @@ public partial class Test : Node2D
             {
                 Steps = [
                 new ApplyDamageStep(new (2,2), 10),
-                new ApplyPushUnitStep(new (3,3), DirMask.Down)
                 ],
                 Layer = SimulationLayer.Waiting,
             });
@@ -445,5 +443,7 @@ public partial class Test : Node2D
             GD.Print(json);
         }
         ImGui.End();
+        
     }
+    
 }

@@ -8,6 +8,7 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
+        //result:UnitId:long Operation:BuffOperation Duration:int
         public void ApplyModifyUnitBuff(Vector2I coords, string buffName, BuffOperation operation, 
             int duration)
         {

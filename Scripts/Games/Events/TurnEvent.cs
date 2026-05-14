@@ -54,7 +54,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
                         u => u.Name.GetUnitInfo().Buffs is {Length: > 0} && u.Buffs.Count > 0
                         )
                     .Select(
-                        u => (u, u.GetInfoAndCurrentBuffs().ToList())
+                        u => (u, u.GetInfoAndCurrentBuffs(obj.State).ToList())
                             ).ToList();
             foreach (var pair in buffPairs)
             {

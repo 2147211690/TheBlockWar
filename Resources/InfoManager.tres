@@ -16,6 +16,7 @@
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="10_lsjiv"]
 [ext_resource type="Resource" uid="uid://bdnl6xfj384br" path="res://Resources/Infos/TileInfos/水块TileInfo.tres" id="10_u2eed"]
 [ext_resource type="Resource" uid="uid://bccsk3gsy0yr4" path="res://Resources/Infos/SkillInfos/Test1SkillInfo.tres" id="11_11wvo"]
+[ext_resource type="Resource" uid="uid://87qrmh2vl6el" path="res://Resources/Infos/SkillInfos/一般移动SkillInfo.tres" id="11_cwtjy"]
 [ext_resource type="Resource" uid="uid://cdpppapttf5to" path="res://Resources/Infos/UnitInfos/Unit0UnitInfo.tres" id="11_lsjiv"]
 [ext_resource type="Resource" uid="uid://doiuaok7flt55" path="res://Resources/Infos/TileInfos/Soil0TileInfo.tres" id="11_yw7y4"]
 [ext_resource type="Resource" uid="uid://doy53t4jua3e0" path="res://Resources/Infos/TileInfos/熔岩块TileInfo.tres" id="16_ps5i8"]
@@ -43,7 +44,8 @@ TileInfos = Dictionary[String, ExtResource("9_imjp5")]({
 "熔岩块": ExtResource("16_ps5i8")
 })
 SkillInfos = Dictionary[String, ExtResource("9_yw7y4")]({
-"Test1": ExtResource("11_11wvo")
+"Test1": ExtResource("11_11wvo"),
+"一般移动": ExtResource("11_cwtjy")
 })
 BuffInfoPath = "res://Resources/Infos/BuffInfos"
 RegionInfoPath = "res://Resources/Infos/RegionInfos"

@@ -16,7 +16,7 @@ public partial class BlockNumberView : Node2D
         {
             block = new Block
             {
-                Sprite = ViewPools.Sprite2DPool.Pop(),
+                Sprite = ViewPools.Sprite2DPool.Get(),
                 ValidNumber = 0,
                 HasAim = 0,
                 UseCount = 1,
@@ -86,7 +86,7 @@ public partial class BlockNumberView : Node2D
             block.Sprite.Scale = Vector2.One;
             block.Sprite.Modulate = Colors.White;
             block.Sprite.ZIndex = 0;
-            ViewPools.Sprite2DPool.Push(block.Sprite);
+            ViewPools.Sprite2DPool.Return(block.Sprite);
             _blockNumberSprites.Remove(coords);
         }
     }

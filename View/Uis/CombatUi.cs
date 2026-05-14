@@ -57,7 +57,7 @@ public partial class CombatUi : Control
             {
                 var unit = _eventScheduler.GameState.UnitMapState.GetUnit(player.SelectedUnitId);
                 ClearBuffItem();
-                foreach (var buff in unit.GetInfoAndCurrentBuffs())
+                foreach (var buff in unit.GetInfoAndCurrentBuffs(_eventScheduler.GameState))
                 {
                     AddBuffItem(buff);
                 }
@@ -78,6 +78,15 @@ public partial class CombatUi : Control
         {
             if (GameView.IsRunning) return;
             _player.OnInput(new PlayerInputStopTurn(PlayerSotpTurnEnum.HoverEnter));
+        }
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventKey key && key.Pressed)
+        {
+            int num = (int)((long)key.Keycode - (long)Key.Key1);
+            _player.OnInput(new PlayerInputSkill(num));
         }
     }
 

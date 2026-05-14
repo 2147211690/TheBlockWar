@@ -23,22 +23,12 @@ public abstract class Skill(string skillName, int argCount) : ISkill
     /// 会传入快照状态，需要在快照状态下进行操作
     /// </summary>
     public void SkillCore(SimObject obj, IReadOnlyUnitState unit,
-        Vector2I useCoords, Vector2I?[] args, string skillName)
+        Vector2I useCoords, Vector2I?[] args)
     {
-        if (!CheckCanUseSkill(obj.State, unit, skillName)) return;
-        Core(obj, unit, useCoords, args, skillName);
+        if (!unit.GetShouldUseSkill(obj.State, this)) return;
+        Core(obj, unit, useCoords, args);
     }
     
     protected abstract void Core(SimObject obj, IReadOnlyUnitState unit, 
-        Vector2I useCoords, Vector2I?[] args, string skillName);
-
-    public bool CheckCanUseSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, string skillName)
-    {
-        bool canUseSkill = true;
-        foreach (var buffName in unit.GetInfoAndCurrentBuffs())
-        {
-            buffName.GetBuffInstance().OnUnitBeforeSkill(state, unit, skillName, ref canUseSkill);
-        }
-        return canUseSkill;
-    }
+        Vector2I useCoords, Vector2I?[] args);
 }

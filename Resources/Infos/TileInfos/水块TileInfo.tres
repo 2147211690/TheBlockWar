@@ -30,6 +30,5 @@ animations = [{
 script = ExtResource("1_fqtcj")
 Name = "水块"
 Regions = PackedStringArray("水域")
-ViewHeight = 18.0
-ViewOffset = Vector2(0, -9)
+ViewHeight = 25.0
 ViewFrames = SubResource("SpriteFrames_fqtcj")

@@ -30,11 +30,11 @@ public partial class TilesView : TileMapLayer
             return s;
         }, 0)
         {
-            AfterPush = s =>
+            AfterReturn = s =>
             {
                 s.Visible = false;
             },
-            BeforePop = s =>
+            BeforeGet = s =>
             {
                 s.Visible = true;
             }
@@ -102,7 +102,7 @@ public partial class TilesView : TileMapLayer
             foreach (var coord in coords)
             {
                 if (!coord.IsInSize(mapSize)) continue;
-                var s = _regionSpritePool.Pop();
+                var s = _regionSpritePool.Get();
                 s.Position = GetRenderPosition(coord, Layer.Underground, -2);
                 s.Offset = GetRenderOffset(coord, Layer.Underground, -2);
                 s.Modulate = new(0, 1, 0, 0.2f);

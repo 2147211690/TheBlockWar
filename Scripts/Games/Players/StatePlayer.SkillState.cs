@@ -5,6 +5,7 @@ using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Resources;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Players;
 
@@ -12,6 +13,7 @@ public partial class StatePlayer
 {
     private class SkillingState(StatePlayer player) : State(player)
     {
+        public int CurrentSkillIndex { get; set; } = 0;
         private SkillEvent? _currentSkillEvent;
         private IReadOnlyList<ISkill> _validSkills = [];
         private ISkill _currentSkill = null!;
@@ -25,7 +27,7 @@ public partial class StatePlayer
             _unitState = GameState?.UnitMapState.GetUnit(FocusedUnitId) ?? UnitState.Null;
             _validSkills = GameState?.GetUnitValidSkills(_unitState.Name) ?? [];
             //从这里面通知SkillStates改变
-            TryBeginNewSkill(0);
+            TryBeginNewSkill(CurrentSkillIndex);
         }
 
         public override void OnExit()
@@ -56,6 +58,15 @@ public partial class StatePlayer
                 case PlayerInputMouseCoords coords:
                     SetCurrentIndexArgGlobal(coords.Coords);
                     break;
+                case PlayerInputSkill skill:
+                    if (skill.Index < 0 || skill.Index >= _validSkills.Count ||
+                        !_unitState.GetShouldUseSkill(GameState, _validSkills[skill.Index])) return;
+                    Logger.Info("选择技能{skill}", skill.Index);
+                    EventScheduler!.DeleteEvent(_currentSkillEvent!);
+                    EventScheduler.RemoveCoordsRegion(_validRegionId);
+                    CurrentSkillIndex = skill.Index;
+                    Player._stateMachine.ResetState();
+                    break;
             }
         }
 
@@ -63,7 +74,7 @@ public partial class StatePlayer
         {
             if (index < 0 || index >= _validSkills.Count) return;
             _currentSkill = _validSkills[index];
-            if (_currentSkill.ArgCount == 0)
+            if (_currentSkill.ArgCount == 0 || !_unitState.GetShouldUseSkill(GameState, _currentSkill))
             {
                 StateMachine.ChangeState(Player._freeState);
                 return;
@@ -83,7 +94,7 @@ public partial class StatePlayer
                 _currentSkillEvent = EventScheduler!.CreateEvent(id => new SkillEvent(id)
                 {
                     SkillBindUnitId = Player.SelectedUnitId,
-                    SkillName = SkillNames.Test1,
+                    SkillName = _currentSkill.SkillName,
                     Team = _unitState.Team,
                 });
 
@@ -100,7 +111,7 @@ public partial class StatePlayer
                 if (!IsCurrentValidArg()) return;
                 //所有参数完成
                 EventScheduler!.RemoveCoordsRegion(_validRegionId);
-                _currentSkillEvent!.Turn = Player.TurnManager.CurrentTurn + 1;
+                _currentSkillEvent!.Layer = SimulationLayer.Running;
                 StateMachine.ChangeState(Player._freeState);
             }
             else //进入下一个参数

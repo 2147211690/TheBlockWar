@@ -18,12 +18,12 @@ public class ViewPools
             return node;
         }, 0)
         {
-            AfterPush = u =>
+            AfterReturn = u =>
             {
                 u.Visible = false;
                 u.ProcessMode = Node.ProcessModeEnum.Disabled;
             },
-            BeforePop = u =>
+            BeforeGet = u =>
             {
                 u.Visible = true;
                 u.ProcessMode = Node.ProcessModeEnum.Inherit;
@@ -36,12 +36,12 @@ public class ViewPools
             return node;
         }, 0)
         {
-            AfterPush = u =>
+            AfterReturn = u =>
             {
                 u.Visible = false;
                 u.ProcessMode = Node.ProcessModeEnum.Disabled;
             },
-            BeforePop = u =>
+            BeforeGet = u =>
             {
                 u.Visible = true;
                 u.ProcessMode = Node.ProcessModeEnum.Inherit;
@@ -54,7 +54,7 @@ public class ViewPools
             return node;
         }, 20)
         {
-            AfterPush = a =>
+            AfterReturn = a =>
             {
                 a.Visible = false;
                 a.DrawAction = null;
@@ -63,7 +63,7 @@ public class ViewPools
                 a.Reset();
                 a.ProcessMode = Node.ProcessModeEnum.Disabled;
             },
-            BeforePop = a =>
+            BeforeGet = a =>
             {
                 a.Visible = true;
                 a.ProcessMode = Node.ProcessModeEnum.Inherit;
@@ -78,12 +78,12 @@ public class ViewPools
             return node;
         }, 10)
         {
-            AfterPush = a =>
+            AfterReturn = a =>
             {
                 a.Visible = false;
                 a.ProcessMode = Node.ProcessModeEnum.Disabled;
             },
-            BeforePop = a =>
+            BeforeGet = a =>
             {
                 a.Visible = true;
                 a.ProcessMode = Node.ProcessModeEnum.Inherit;

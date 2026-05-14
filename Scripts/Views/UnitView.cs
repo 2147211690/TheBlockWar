@@ -77,7 +77,7 @@ public partial class UnitView : Node2D
     {
         _fakes ??= new();
         
-        var fake = GameView.ViewPools.Sprite2DPool.Pop();
+        var fake = GameView.ViewPools.Sprite2DPool.Get();
         fake.Texture = MainSprite.SpriteFrames.GetFrameTexture(MainSprite.Animation, MainSprite.Frame);
         fake.Offset = tilesView.GetRenderOffset(coords, Layer.Underground, 0) + 
                       _unitInfo?.ViewOffset ?? Vector2.Zero;
@@ -114,7 +114,7 @@ public partial class UnitView : Node2D
         sprite.Texture = null;
         sprite.Offset = Vector2.Zero;
         sprite.Modulate = Colors.White;
-        GameView.ViewPools.Sprite2DPool.Push(sprite);
+        GameView.ViewPools.Sprite2DPool.Return(sprite);
     }
     
     public GDTask PlayPlaceDownAnim()

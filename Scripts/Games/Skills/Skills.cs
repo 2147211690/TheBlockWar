@@ -29,5 +29,5 @@ public class EmptySkill(string skillName) : Skill(skillName, 0)
 
     protected override void Core(SimObject obj, IReadOnlyUnitState unit,
         Vector2I useCoords,
-        Vector2I?[] args, string skillName){}
+        Vector2I?[] args){}
 }

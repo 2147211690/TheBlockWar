@@ -1,6 +1,7 @@
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Resources;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
@@ -14,11 +15,11 @@ public abstract class Buff(string name) : IBuff
     public virtual void OnAddToUnit(SimObject obj, IReadOnlyUnitState unit)
     {
     }
-    public virtual void OnUnitBeforeSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, string skillName,
-        ref bool canUseSkill)
+
+    public virtual void OnUnitGetMovePower(IReadOnlyGameState state, IReadOnlyUnitState unit, int defaultValue, ref int value)
     {
     }
-    
+
     public virtual void OnUnitBeforeGetDamage(SimObject obj, IReadOnlyUnitState unit, float originDamage,
         ref float resultDamage)
     {
@@ -60,6 +61,10 @@ public abstract class Buff(string name) : IBuff
     }
 
     public virtual void OnEnterTurn(SimObject obj, IReadOnlyUnitState unit, int turn)
+    {
+    }
+
+    public virtual void OnShouldUseSkill(IReadOnlyUnitState unit, ISkill skill, ref bool shouldUseSkill)
     {
     }
 }

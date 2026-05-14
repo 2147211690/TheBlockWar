@@ -7,6 +7,7 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
+        //result:UnitId:long ValidCure:float
         public void ApplyCure(Vector2I coords, float cure)
         {
             EnterSimulation();

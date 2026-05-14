@@ -45,5 +45,6 @@ Name = "Unit0"
 MaxHealth = 50.0
 MaxShield = 50.0
 Buffs = PackedStringArray("不稳定")
+Skills = PackedStringArray("一般移动", "Test1")
 ViewOffset = Vector2(7, -6)
 ViewFrames = SubResource("SpriteFrames_cqclv")

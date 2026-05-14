@@ -40,10 +40,10 @@ public class SimStepHandler
     private async GDTask ProcessStepsStep(StepsStep stepsStep, List<SimStepsAnalyzer.TreeNode> children)
     {
         // 前置延迟
-        if (stepsStep.StartDelay > 0) await GDTask.Delay(stepsStep.StartDelay);
+        if (stepsStep.Apply.StartDelay > 0) await GDTask.Delay(stepsStep.Apply.StartDelay);
 
         // 根据运行模式执行子节点
-        switch (stepsStep.RunningMode)
+        switch (stepsStep.Apply.RunningMode)
         {
             case StepsRunningMode.QueueWaitAll:
                 // 顺序执行，每个等待完成
@@ -77,6 +77,6 @@ public class SimStepHandler
                 break;
         }
         // 后置延迟
-        if (stepsStep.EndDelay > 0) await GDTask.Delay(stepsStep.EndDelay);
+        if (stepsStep.Apply.EndDelay > 0) await GDTask.Delay(stepsStep.Apply.EndDelay);
     }
 }
