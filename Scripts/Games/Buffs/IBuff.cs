@@ -3,6 +3,7 @@ using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Resources;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
 
@@ -27,5 +28,7 @@ public interface IBuff
         int oldDuration, int newDuration);
     void OnUnitDeath(SimObject obj, IReadOnlyUnitState unit);
     void OnEnterTurn(SimObject obj, IReadOnlyUnitState unit, int turn);
-    void OnShouldUseSkill(IReadOnlyUnitState unit, ISkill skill, ref bool shouldUseSkill);
+    void OnUnitBeforePush(SimObject obj, IReadOnlyUnitState unit, DirMask dir, ref bool shouldPush);
+    void OnUnitShouldUseSkill(IReadOnlyUnitState unit, ISkill skill, ref bool shouldUseSkill);
+
 }

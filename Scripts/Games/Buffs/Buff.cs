@@ -3,6 +3,7 @@ using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Resources;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
 [RegisterChildClass(typeof(Buffs))]
@@ -64,7 +65,11 @@ public abstract class Buff(string name) : IBuff
     {
     }
 
-    public virtual void OnShouldUseSkill(IReadOnlyUnitState unit, ISkill skill, ref bool shouldUseSkill)
+    public virtual void OnUnitBeforePush(SimObject obj, IReadOnlyUnitState unit, DirMask dir, ref bool shouldPush)
+    {
+    }
+
+    public virtual void OnUnitShouldUseSkill(IReadOnlyUnitState unit, ISkill skill, ref bool shouldUseSkill)
     {
     }
 }

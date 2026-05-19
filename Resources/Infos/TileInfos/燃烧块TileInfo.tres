@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="TileInfo" format=3 uid="uid://ce4ukf471gwmg"]
+
+[ext_resource type="Texture2D" uid="uid://qtpx4mfm2r5i" path="res://Art/Img/combat/tiles_grass/lava_1.png" id="1_52i7v"]
+[ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="1_kccq1"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_71coo"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_52i7v")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[resource]
+script = ExtResource("1_kccq1")
+Name = "燃烧块"
+Regions = PackedStringArray("火域")
+ViewFrames = SubResource("SpriteFrames_71coo")

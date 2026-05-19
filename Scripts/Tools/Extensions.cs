@@ -275,7 +275,7 @@ public static class Extensions
             var shouldUseSkill = true;
             foreach (var buff in unit.GetInfoAndCurrentBuffs(state))
             {
-                buff.GetBuffInstance().OnShouldUseSkill(unit, skill, ref shouldUseSkill);
+                buff.GetBuffInstance().OnUnitShouldUseSkill(unit, skill, ref shouldUseSkill);
             }
             return shouldUseSkill;
         }

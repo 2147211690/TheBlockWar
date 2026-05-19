@@ -11,6 +11,8 @@ public partial class BuffInfo : Resource, IInfo
     };
     [Export] public string Name { get; set; } = "None";
     [Export] public Texture2D? Icon { get; set; }
+    [Export] public BuffMode Mode { get; set; } = BuffMode.Single;
+    [Export] public int TurnRemoveCount { get; set; }
     /// <summary>
     /// 优先级，越低越先执行
     /// </summary>
@@ -19,4 +21,10 @@ public partial class BuffInfo : Resource, IInfo
     [Export] public SpriteFrames? ViewFrames { get; set; }
     [Export] public string Description { get; set; } = string.Empty;
 
+}
+
+public enum BuffMode
+{
+    Single,
+    Counter,
 }

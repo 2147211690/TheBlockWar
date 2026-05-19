@@ -13,12 +13,15 @@ public enum BuffNameEnum
     荆棘1,
     不稳定,
     熔岩域,
+    屹立,
+    火域,
 }
 [NameEnum]
 public enum RegionNameEnum
 {
     水域,
     熔岩域,
+    火域,
 }
 [NameEnum]
 public enum UnitNameEnum
@@ -32,4 +35,5 @@ public enum TileNameEnum
     Soil0,
     水块,
     熔岩块,
+    燃烧块,
 }

@@ -281,7 +281,7 @@ public partial class Test : Node2D
         if (ImGui.Button("测试放置"))
         {
 
-            string[] names = [TileNames.Soil0, TileNames.水块, TileNames.熔岩块];
+            string[] names = [TileNames.Soil0, TileNames.水块, TileNames.熔岩块, TileNames.燃烧块];
             _eventScheduler.CreateEvent(id => new ActionEvent(id)
             {
                 ActionCore = (e, obj) =>

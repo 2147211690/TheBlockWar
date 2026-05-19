@@ -9,6 +9,6 @@ public class 熔岩域Buff() : Buff(BuffNames.熔岩域)
 {
     public override void OnEnterTurn(SimObject obj, IReadOnlyUnitState unit, int turn)
     {
-        obj.ApplyDamage(unit.Coords, 10);
+        obj.ApplyDamage(unit.Coords, unit.Health);
     }
 }
