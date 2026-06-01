@@ -284,7 +284,7 @@ namespace TheBlockWar.Scripts.Games.Simulations
         {
             foreach (var buffState in unit.BuffsStatic)
             {
-                buffState.BuffName.GetBuffInstance()
+                buffState.BuffName.GetBuffInfo().Hook
                     .{{method.InterfaceMethodName}}({{args}});
             }
         }
@@ -298,7 +298,7 @@ namespace TheBlockWar.Scripts.Games.Simulations
             var tile = simObj.State.TileMapState.GetTile(tileCoords);
             foreach (var regionState in tile.RegionsStatic)
             {
-                regionState.RegionName.GetRegionInstance()
+                regionState.RegionName.GetRegionInfo().Hook
                     .{{method.InterfaceMethodName}}({{args}});
             }
         }

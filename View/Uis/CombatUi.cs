@@ -129,7 +129,7 @@ public partial class CombatUi : Control
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _buffContainer.AddChild(itemBox);
         itemBox.Texture = buffNameEnum.GetBuffInfo().Icon!;
-        itemBox.MetaData = buffNameEnum.GetBuffInstance();
+        itemBox.MetaData = buffNameEnum.GetBuffInfo().Hook;
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
     }

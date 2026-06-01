@@ -5,11 +5,11 @@ namespace TheBlockWar.Scripts.Resources;
 [GlobalClass, Tool]
 public partial class InfoManager : Resource
 {
-    [Export] public Godot.Collections.Dictionary<string, BuffInfo?> BuffInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<string, RegionInfo?> RegionInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<string, UnitInfo?> UnitInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<string, TileInfo?> TileInfos { get; set; } = new();
-    [Export] public Godot.Collections.Dictionary<string, SkillInfo?> SkillInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, BuffInfo> BuffInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, RegionInfo> RegionInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, UnitInfo> UnitInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, TileInfo> TileInfos { get; set; } = new();
+    [Export] public Godot.Collections.Dictionary<string, SkillInfo> SkillInfos { get; set; } = new();
     
     #if TOOLS
     [ExportGroup("Tools")]
@@ -92,7 +92,7 @@ public partial class InfoManager : Resource
         OnAutoCreateSkillInfos();
     }
     private void AutoCreateInfos<TValue>(
-        IDictionary<string, TValue?> dict,
+        IDictionary<string, TValue> dict,
         Func<TValue> resourceFactory,
         string infoDir,
         string namedSuffix,

@@ -85,7 +85,7 @@ partial class Simulator
                 if (unit.IsNull()) return;
                 if (!unit.TryFindBuff(buffName, out var index)) return;
                 EnterSimulation();
-                action(unit.Buffs[index].BuffName.GetBuffInstance());
+                action(unit.Buffs[index].BuffName.GetBuffInfo().Hook);
                 ExitSimulation();
             }
         }

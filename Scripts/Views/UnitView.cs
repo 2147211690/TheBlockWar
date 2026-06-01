@@ -1,5 +1,4 @@
 using TheBlockWar.Scripts.Games;
-using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 

@@ -72,7 +72,7 @@ partial class Simulator
                 if (tile.IsNull()) return;
                 if (!tile.TryFindRegion(regionName, out var index)) return;
                 EnterSimulation();
-                action(tile.Regions[index].RegionName.GetRegionInstance());
+                action(tile.Regions[index].RegionName.GetRegionInfo().Hook);
                 ExitSimulation();
             }
         }

@@ -1,4 +1,3 @@
-using TheBlockWar.Scripts.Games.Units;
 
 namespace TheBlockWar.Scripts.Resources;
 

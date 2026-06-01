@@ -1,5 +1,4 @@
 using TheBlockWar.Scripts.Games.GameStates.Datas;
-using TheBlockWar.Scripts.Games.Units;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 

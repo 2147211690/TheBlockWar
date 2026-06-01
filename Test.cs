@@ -9,7 +9,6 @@ using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Games.Turns;
-using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Tools.Jsons;
@@ -50,7 +49,7 @@ public partial class Test : Node2D
     public override void _Ready()
     {
         InfoExtensions.InfoManager = ResourceLoader.Load<InfoManager>("uid://cidx5e6oa1bc8");
-        Registerer.Register();
+        Registerer.Register(InfoExtensions.InfoManager);
         
         //配置Yitter.IdGenerator.IdHelper
         var options = new IdGeneratorOptions
@@ -77,7 +76,7 @@ public partial class Test : Node2D
             new Vector2I(10, 10),
             new Dictionary<string, ISkill[]>() 
             {
-                [UnitNames.Unit0] = [SkillNames.一般移动.GetSkillInstance(), SkillNames.Test1.GetSkillInstance()],
+                [UnitNames.Unit0] = [SkillNames.一般移动.GetSkillInfo().Instance, SkillNames.Test1.GetSkillInfo().Instance],
             },
             new int[,] 
             {

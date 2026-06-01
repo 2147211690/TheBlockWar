@@ -15,4 +15,5 @@ public partial class RegionInfo : Resource, IInfo
     [Export] public bool IsOnece { get; set; }
     [Export] public int DefaultDuration { get; set; }
     [Export] public string Description { get; set; } = string.Empty;
+    public IRegion Hook { get => field ??= new EmptyRegion(Name); set => field ??= value; }
 }

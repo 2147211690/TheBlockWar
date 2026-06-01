@@ -116,8 +116,10 @@ public class EventScheduler
         _coordsRegions.Remove(id);
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
     }
-
-    private void UpdateSimulation()
+    /// <summary>
+    /// 更新模拟
+    /// </summary>
+    public void UpdateSimulation()
     {
         if (_isRunning) return;
         _isRunning = true;

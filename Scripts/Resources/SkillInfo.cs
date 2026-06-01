@@ -7,4 +7,5 @@ public partial class SkillInfo : Resource, IInfo
 {
     public static readonly SkillInfo Null = new();
     [Export] public string Name { get; set; } = "None";
+    public ISkill Instance { get => field ??= new EmptySkill(Name); set => field ??= value; }
 }

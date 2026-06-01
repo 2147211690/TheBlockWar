@@ -1,5 +1,3 @@
-using TheBlockWar.Scripts.Games.Units;
-
 namespace TheBlockWar.Scripts.Games.GameStates.Datas;
 
 public class UnitStateData

@@ -20,7 +20,7 @@ public partial class BuffInfo : Resource, IInfo
     [Export] public Vector2 ViewOffset { get; set; } = Vector2.Zero;
     [Export] public SpriteFrames? ViewFrames { get; set; }
     [Export] public string Description { get; set; } = string.Empty;
-
+    public IBuff Hook { get => field ??= new EmptyBuff(Name); set => field ??= value; }
 }
 
 public enum BuffMode

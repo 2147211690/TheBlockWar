@@ -4,7 +4,7 @@ using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Regions;
-[RegisterChildClass(typeof(Regions))]
+[RegisterChildClass]
 public abstract class Region(string name) : IRegion
 {
     protected Logger Logger = NLog.LogManager.GetCurrentClassLogger();

@@ -1,7 +1,6 @@
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Skills;
-using TheBlockWar.Scripts.Games.Units;
 using Yitter.IdGenerator;
 
 namespace TheBlockWar.Scripts.Games.GameStates;

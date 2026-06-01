@@ -2,7 +2,6 @@ using System.Linq;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Skills;
-using TheBlockWar.Scripts.Games.Units;
 using TheBlockWar.Scripts.Tools;
 using Yitter.IdGenerator;
 
@@ -30,7 +29,7 @@ public class GameState : IGameState
     public IReadOnlyList<ISkill> GetUnitValidSkills(string unitName)
     {
         //TODO: 根据单位名称获取有效技能
-        return unitName.GetUnitInfo().Skills?.Select(a => a.GetSkillInstance()).ToList() ?? [];
+        return unitName.GetUnitInfo().Skills?.Select(a => a.GetSkillInfo().Instance).ToList() ?? [];
     }
 
     public IGameState GetSnapshot() => new GameStateSnapshot(this);

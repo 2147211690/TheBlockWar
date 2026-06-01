@@ -6,7 +6,7 @@ using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Buffs;
-[RegisterChildClass(typeof(Buffs))]
+[RegisterChildClass]
 public abstract class Buff(string name) : IBuff
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();

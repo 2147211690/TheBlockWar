@@ -5,7 +5,7 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Skills;
-[RegisterChildClass(typeof(Skills))]
+[RegisterChildClass]
 public abstract class Skill(string skillName, int argCount) : ISkill
 {
     
