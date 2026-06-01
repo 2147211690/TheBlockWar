@@ -38,11 +38,10 @@ partial class Simulator
                 {
                     //应用来源单位伤害前事件
                     var source = obj.State.UnitMapState.GetUnit(CurrentContext.SourceUnitId);
-                    obj.NotifyUnitBuffs(source,
-                        b => b.OnBeforeDamageToUnit(obj, source, unit, originDamage, ref rawDamage));
+                    Hook.BuffBeforeDamageToUnit(source, obj, unit, originDamage, ref rawDamage);
                     //应用单位伤害前事件
-                    obj.NotifyUnitBuffs(unit,
-                        b => b.OnUnitBeforeGetDamage(obj, unit, originDamage, ref rawDamage));
+                    var origin = rawDamage;
+                    Hook.BuffUnitBeforeGetDamage(unit, obj, origin, ref rawDamage);
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
 
@@ -71,7 +70,7 @@ partial class Simulator
                 if (validDamage > 0 && obj.ComplexSimulationRegion(0))
                 {
                     // 触发受伤后事件
-                    obj.NotifyUnitBuffs(unit, b => b.OnUnitAfterGetDamage(obj, unit, validDamage));
+                    Hook.BuffUnitAfterGetDamage(unit, obj, validDamage);
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
 

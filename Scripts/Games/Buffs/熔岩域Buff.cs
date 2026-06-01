@@ -7,8 +7,10 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 
 public class 熔岩域Buff() : Buff(BuffNames.熔岩域)
 {
-    public override void OnEnterTurn(SimObject obj, IReadOnlyUnitState unit, int turn)
+    public override void OnAddToUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount)
     {
-        obj.ApplyDamage(unit.Coords, unit.Health);
+        Simulator.PushContext(new SimContext(0));
+        obj.ApplyDeath(unit.Coords);
+        Simulator.PopContext();
     }
 }

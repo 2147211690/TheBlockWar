@@ -26,7 +26,7 @@ partial class Simulator
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                var oldDuration = unit.GetBuffDuration(buffName);
+                var oldDuration = unit.GetBuffCount(buffName);
                 var resultOperation = BuffOperation.None;
                 var resultDuration = duration;
                 var resultOldDuration = 0;
@@ -46,9 +46,9 @@ partial class Simulator
                 if (resultOperation == BuffOperation.RemoveBuff) 
                 {
                     var tile = obj.State.TileMapState.GetTile(unit.Coords);
-                    foreach (var region in tile.GetInfoAndCurrentRegions())
+                    foreach (var region in tile.Regions)
                     {
-                        var rbs = region.GetRegionInfo().RegionBuffs;
+                        var rbs = region.RegionName.GetRegionInfo().RegionBuffs;
                         // 如果结果为移除buff,但是当前所在区域是具有这个buff的区域,则无法移除
                         if (rbs.IndexOf(buffName) == -1) continue;
                         
@@ -66,13 +66,14 @@ partial class Simulator
                     switch (resultOperation)
                     {
                         case BuffOperation.AddBuff:
-                            obj.NotifyUnitBuffs(unit, b => b.OnAddToUnit(obj, unit));
+                            NotifyUnitBuff(unit, buffName, b => b.OnAddToUnit(obj, unit, resultDuration));
                             break;
                         case BuffOperation.RemoveBuff:
-                            NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(obj, unit));
+                            NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(obj, unit, resultDuration));
                             break;
                         case BuffOperation.ChangeDuration:
-                            NotifyUnitBuff(unit, buffName, b => b.OnDurationChanged(obj, unit,
+                            NotifyUnitBuff(unit, buffName, b => b.OnBuffCountChanged(obj, unit,
+                                resultOldDuration + resultDuration,
                                 resultOldDuration, resultOldDuration + resultDuration));
                             break;
                     }
@@ -94,7 +95,7 @@ partial class Simulator
         {
             if (unit.TryFindBuff(buffName, out var index))
             {
-                var oldDuration = unit.Buffs[index].Duration;
+                var oldDuration = unit.Buffs[index].Count;
                 var finalDuration = isAdd ? Mathf.Max(newDuration, oldDuration) : Mathf.Max(newDuration, 0);
                 
                 if (finalDuration == 0)
@@ -127,7 +128,7 @@ partial class Simulator
         {
             if (unit.TryFindBuff(buffName, out var index))
             {
-                var oldDuration = unit.Buffs[index].Duration;
+                var oldDuration = unit.Buffs[index].Count;
                 var finalDuration = Mathf.Max(newDuration, 0);
                 
                 if (finalDuration == 0)

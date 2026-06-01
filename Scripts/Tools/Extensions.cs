@@ -237,46 +237,22 @@ public static class Extensions
             index = -1;
             return false;
         }
-        public int GetBuffDuration(string buffName)
+        public int GetBuffCount(string buffName)
         {
             if (!unit.TryFindBuff(buffName, out var index)) return 0;
-            return unit.Buffs[index].Duration;
-        }
-        public List<string> GetInfoAndCurrentBuffs(IReadOnlyGameState state)
-        {
-            var infoBuff = unit.Name.GetUnitInfo().Buffs;
-            var list = new List<string>(infoBuff?.Length ?? 0);
-            foreach (var region in state.TileMapState.GetTile(unit.Coords).Regions)
-            {
-                var regionInfo = region.RegionName.GetRegionInfo();
-                if (regionInfo.RegionBuffs is {Length: > 0})
-                    foreach (var rName in regionInfo.RegionBuffs)
-                        list.Add(rName);
-            }
-            if (infoBuff is {Length: > 0})
-                foreach (var bName in infoBuff)
-                    list.Add(bName);
-            foreach (var b in unit.Buffs) list.Add(b.BuffName);
-            list.Sort((a, b) => a.GetBuffInfo().Priority.CompareTo(b.GetBuffInfo().Priority));
-            return list;
+            return unit.Buffs[index].Count;
         }
         public int GetMovePower(IReadOnlyGameState state)
         {
             var defaultValue = unit.Name.GetUnitInfo().MovePower;
             var value = defaultValue;
-            foreach (var buff in unit.GetInfoAndCurrentBuffs(state))
-            {
-                buff.GetBuffInstance().OnUnitGetMovePower(state, unit, defaultValue, ref value);
-            }
+            Hook.BuffUnitGetMovePower(unit, state, defaultValue, ref value);
             return value;
         }
         public bool GetShouldUseSkill(IReadOnlyGameState state, ISkill skill)
         {
             var shouldUseSkill = true;
-            foreach (var buff in unit.GetInfoAndCurrentBuffs(state))
-            {
-                buff.GetBuffInstance().OnUnitShouldUseSkill(unit, skill, ref shouldUseSkill);
-            }
+            Hook.BuffUnitShouldUseSkill(unit, state, skill, ref shouldUseSkill);
             return shouldUseSkill;
         }
         public bool IsNull() => unit.Id == 0;
@@ -299,14 +275,6 @@ public static class Extensions
         {
             if (!tile.TryFindRegion(regionName, out var index)) return 0;
             return tile.Regions[index].Duration;
-        }
-        public List<string> GetInfoAndCurrentRegions()
-        {
-            var list = new List<string>();
-            var infoRegion = tile.Name.GetTileInfo().Regions;
-            if (infoRegion is not null) foreach (var b in infoRegion) list.Add(b);
-            foreach (var b in tile.Regions) list.Add(b.RegionName);
-            return list;
         }
         public bool IsNull() => tile.Name == "Air" || tile.Name.IsWhiteSpace();
     }
@@ -374,18 +342,6 @@ public static class Extensions
         public uint WithDuration(int duration)
         {
             return (uint)operation | (uint)duration;
-        }
-    }
-
-    extension(uint num)
-    {
-        public BuffOperation GetOperation()
-        {
-            return (BuffOperation)(num & (0b_111 << 29));
-        }
-        public int GetDuration()
-        {
-            return (int)(num & ~(0b_011 << 29));
         }
     }
 

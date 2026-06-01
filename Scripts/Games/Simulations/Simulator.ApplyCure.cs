@@ -38,11 +38,10 @@ partial class Simulator
                 {
                     //应用来源单位治疗前事件
                     var source = obj.State.UnitMapState.GetUnit(CurrentContext.SourceUnitId);
-                    obj.NotifyUnitBuffs(source,
-                        b => b.OnBeforeCureToUnit(obj, source, unit, originCure, ref rawCure));
+                    Hook.BuffBeforeCureToUnit(source, obj, unit, originCure, ref rawCure);
                     //应用单位治疗前事件
-                    obj.NotifyUnitBuffs(unit,
-                        b => b.OnUnitBeforeGetCure(obj, unit, rawCure, ref rawCure));
+                    var origin = rawCure;
+                    Hook.BuffUnitBeforeGetCure(unit, obj, origin, ref rawCure);
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
 
@@ -68,7 +67,7 @@ partial class Simulator
 
                 if (validCure > 0 && obj.ComplexSimulationRegion(0))
                 {
-                    obj.NotifyUnitBuffs(unit, b => b.OnUnitAfterGetCure(obj, unit, validCure));
+                    Hook.BuffUnitAfterGetCure(unit, obj, validCure);
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
             }

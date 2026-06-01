@@ -241,6 +241,9 @@ public partial class GameView : Node2D
             case DelayStep delayStep:
                 await GDTask.Delay(delayStep.Apply.Delay);
                 break;
+            case DeathStep deathStep:
+                UnitsView.GetUnitView(deathStep.UnitId)?.HealthBar.CurrentHealth = 0;
+                break;
             case null:
                 break;
         }
@@ -296,6 +299,9 @@ public partial class GameView : Node2D
                         break;
                     case AnimationStep animationStep:
                         view.Animation(animationStep);
+                        break;
+                    case DeathStep deathStep:
+                        view.Death(deathStep);
                         break;
                     case null:
                         break;

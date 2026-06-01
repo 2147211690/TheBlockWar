@@ -19,8 +19,22 @@ public class UnitState : IReadOnlyUnitState
     public bool IsDead { get; set; }
     public bool IsFlying { get; set; } = false;
     public IReadOnlyList<BuffState> Buffs => _buffs ?? [];
-    private List<BuffState>? _buffs;
 
+    public IReadOnlyList<BuffState> BuffsStatic
+    {
+        get
+        {
+            if (_isBuffStaticDirty)
+            {
+                _buffsStatic = _buffs.CloneToListOrNullWhenCountZero();
+                _isBuffStaticDirty = false;
+            }
+            return _buffsStatic ?? [];
+        }
+    }
+    private List<BuffState>? _buffs;
+    private List<BuffState>? _buffsStatic;
+    private bool _isBuffStaticDirty = true;
     public UnitState(){}
 
     public UnitState(UnitStateData data)
@@ -57,7 +71,7 @@ public class UnitState : IReadOnlyUnitState
     /// <summary>
     /// 添加一个buff,不做检查
     /// </summary>
-    public void AddBuff(string buffName, int duration)
+    public void AddBuff(string buffName, int count)
     {
         var list = GetBuffList();
         for (var i = 0; i < list.Count; i++)
@@ -66,45 +80,55 @@ public class UnitState : IReadOnlyUnitState
             list.Insert(i, new BuffState
             {
                 BuffName = buffName,
-                Duration = duration
+                Count = count
             });
+            _isBuffStaticDirty = true;
             return;
         }
         list.Add(new BuffState
         {
             BuffName = buffName,
-            Duration = duration
+            Count = count
         });
+        _isBuffStaticDirty = true;
     }
 
     public void RemoveBuff(string buffName)
     {
         if (!this.TryFindBuff(buffName, out var index)) return;
-        GetBuffList().RemoveAt(index);
+        var list = GetBuffList();
+        list.RemoveAt(index);
+        _isBuffStaticDirty = true;
     }
     public void RemoveBuff(int index)
     {
         if (index < 0 || index >= Buffs.Count) return;
-        GetBuffList().RemoveAt(index);
+        var list = GetBuffList();
+        list.RemoveAt(index);
+        _isBuffStaticDirty = true;
     }
 
     public void ModifyBuff(string buffName, int modifyDuration)
     {
         if (!this.TryFindBuff(buffName, out var index)) return;
-        GetBuffList()[index] = new BuffState
+        var list = GetBuffList();
+        list[index] = new BuffState
         {
             BuffName = buffName,
-            Duration =  modifyDuration
+            Count =  modifyDuration
         };
+        _isBuffStaticDirty = true;
     }
-    public void ModifyBuff(int index, int modifyDuration)
+    public void ModifyBuff(int index, int modifyCount)
     {
         if (index < 0 || index >= Buffs.Count) return;
-        GetBuffList()[index] = new BuffState
+        var list = GetBuffList();
+        list[index] = new BuffState
         {
             BuffName = Buffs[index].BuffName,
-            Duration =  modifyDuration
+            Count =  modifyCount
         };
+        _isBuffStaticDirty = true;
     }
     
     private List<BuffState> GetBuffList() =>  _buffs ??= [];
@@ -125,6 +149,8 @@ public class UnitState : IReadOnlyUnitState
         unit.IsDead = IsDead;
         unit.IsFlying = IsFlying;
         unit._buffs = _buffs.CloneToListOrNullWhenCountZero();
+        unit._isBuffStaticDirty = _isBuffStaticDirty;
+        unit._buffsStatic = _isBuffStaticDirty ? null : _buffsStatic;
         return unit;
     }
 

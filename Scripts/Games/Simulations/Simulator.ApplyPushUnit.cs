@@ -27,7 +27,7 @@ partial class Simulator
                 var targetUnit = obj.State.UnitMapState.GetUnit(target);
                 var validPush = !unit.IsNull() && targetUnit.IsNull() && obj.State.IsInMap(target);
                 var shouldPush = true;
-                obj.NotifyUnitBuffs(unit, b => b.OnUnitBeforePush(obj, unit, dir, ref shouldPush));
+                Hook.BuffUnitBeforePush(unit, obj, dir, ref shouldPush);
                 obj.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, unit.Id, validPush && shouldPush));
                 if (unit.IsNull() || !shouldPush) return;
                 if (validPush)

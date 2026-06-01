@@ -9,6 +9,7 @@ public partial class GameViewTeamStyle : Resource
     [Export] public Texture2D[] PathTextures { get; set; } = null!;
     [Export] public Texture2D[] PushTextures { get; set; } = null!;
     [Export] public Texture2D[] BlockNumberTextures { get; set; } = null!;
+    [Export] public Texture2D DeathTexture { get; set; } = null!;
     [ExportGroup("Units")]
     [Export] public Color HealthCurrentColor { get; set; } = new Color("#e74c3c");      // 鲜红 - 当前生命
     [Export] public Color ShieldCurrentColor { get; set; } = new Color("#3498db");     // 亮蓝 - 当前护盾

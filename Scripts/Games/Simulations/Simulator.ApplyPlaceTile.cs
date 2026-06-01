@@ -29,6 +29,17 @@ partial class Simulator
                 obj.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
                 if (obj.ComplexSimulationRegion(2))
                 {
+                    //初始化区域
+                    var info = tileName.GetTileInfo();
+                    var newTile = obj.State.TileMapState.GetTile(coords);
+                    if (info.Regions is { Length: > 0 })
+                    {
+                        obj.State.TileMapState.ModifyTile(coords, t =>
+                        {
+                            foreach (var regionName in info.Regions) t.AddRegion(regionName, int.MaxValue);
+                        });
+                    }
+                    //更新单位位置
                     var unit = obj.State.UnitMapState.GetUnit(coords);
                     if (!unit.IsNull()) obj.ApplyUnitSetInCoords(unit);
                 }

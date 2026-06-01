@@ -42,7 +42,7 @@ public class Test1Skill() : Skill(SkillNames.Test1, 3)
         {
             obj.ApplyDamage(unit.Coords, 10);
         }
-        if (args.TryGetArgs(1, out var v2) && obj.Steps?.PeekStep is MoveUnitPathStep moveStep)
+        if (args.TryGetArgs(1, out var v2))
         {
             var coords = v2 + useCoords;
             obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);

@@ -32,7 +32,7 @@ partial class Simulator
 
                 obj.Steps?.AddStep(new DeathStep(CurrentDeep, coords, unit.Id, true));
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
-                obj.NotifyUnitBuffs(unit, b => b.OnUnitDeath(obj, unit));
+                Hook.BuffUnitDeath(unit, obj);
                 //TODO:可能引入区域相关事件
             }
         }

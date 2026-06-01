@@ -52,6 +52,25 @@ public class EventView
     {
         ChangeUnitHealth(step.Apply.Coords, step.UnitId, step.ValidCure, step.ValidCure, step.UnitId != 0);
     }
+
+    public void Death(DeathStep step)
+    {
+        if (IsFocused)
+        {
+            var bar = UnitsView.GetUnitView(step.UnitId)?.HealthBar;
+            if (bar == null) return;
+            bar.HealthChange -= bar.CurrentHealth;
+            NeedClearUnit(step.UnitId);
+        }
+        Draw((u, v) =>
+        {
+            if (v)
+            {
+                u.DrawTextureCentered(Style[TeamType].DeathTexture, 
+                    TilesView.GetRenderOffset(step.Apply.Coords, Layer.Sky, 0));
+            }
+        },TilesView.GetRenderPosition(step.Apply.Coords, Layer.Sky, 0));
+    }
     
     private void ChangeUnitHealth(Vector2I coords, long unitId, float originChange, float healthChange, bool hasAim)
     {

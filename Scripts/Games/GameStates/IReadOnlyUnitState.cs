@@ -22,6 +22,10 @@ public interface IReadOnlyUnitState
     bool IsDead { get; }
     bool IsFlying { get; }
     IReadOnlyList<BuffState> Buffs { get; }
+    /// <summary>
+    /// 获取buff的静态列表,更新buff时不会改变列表中的元素
+    /// </summary>
+    IReadOnlyList<BuffState> BuffsStatic { get; }
     UnitState Clone();
     UnitState CopyTo(UnitState unit);
     UnitStateData ToData();

@@ -7,7 +7,7 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 
 public class 荆棘1Buff() : Buff(BuffNames.荆棘1)
 {
-    public override void OnUnitAfterGetDamage(SimObject obj, IReadOnlyUnitState unit, float getDamage)
+    public override void OnUnitAfterGetDamage(SimObject obj, IReadOnlyUnitState unit, int buffCount, float getDamage)
     {
         var caster = obj.State.UnitMapState.GetUnit(Simulator.CurrentContext.SourceUnitId);
         if (caster.IsNull() || getDamage == 0) return;

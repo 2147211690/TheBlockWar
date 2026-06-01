@@ -37,16 +37,19 @@ partial class Simulator
                     obj.State.UnitMapState.AddUnit(unitState);
                     obj.Steps?.AddStep(new PlaceUnitStep(CurrentDeep, coords, unitName, team, unitState,
                         isValid));
-                    //应用单位放置到坐标的额外操作
-                    obj.ApplyUnitSetInCoords(obj.State.UnitMapState.GetUnit(unitState.Id));
                     //单位buff初始化
                     var info = unitName.GetUnitInfo();
                     var newUnit = obj.State.UnitMapState.GetUnit(unitState.Id);
                     if (info.Buffs is { Length: > 0 })
                     {
-                        foreach (var buffName in info.Buffs)
-                            buffName.GetBuffInstance().OnAddToUnit(obj, newUnit);
+                        obj.State.UnitMapState.ModifyUnit(newUnit.Id, u =>
+                        {
+                            foreach (var buffName in info.Buffs) u.AddBuff(buffName, 1);
+                        });
+                        Hook.BuffAddToUnit(newUnit, obj);
                     }
+                    //应用单位放置到坐标的额外操作
+                    obj.ApplyUnitSetInCoords(obj.State.UnitMapState.GetUnit(unitState.Id));
                 }
                 else
                 {

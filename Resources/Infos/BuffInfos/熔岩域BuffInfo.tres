@@ -7,4 +7,4 @@
 script = ExtResource("1_1p8vp")
 Name = "熔岩域"
 Icon = ExtResource("1_5iftk")
-Description = "单位处于熔岩域,每回合受到一点伤害"
+Description = "单位处于熔岩域,进入立刻死亡"

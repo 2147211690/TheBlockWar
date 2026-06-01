@@ -58,21 +58,11 @@ partial class Simulator
                         {
                             NotifyTileRegion(tile, regionName,
                                 r => r.OnUnitEnter(obj, coords, unit, coords, true));
-                            //触发区域buff
-                            foreach (var buff in regionName.GetRegionInfo().RegionBuffs ?? [])
-                            {
-                                buff.GetBuffInstance().OnAddToUnit(obj, unit);
-                            }
                         }
                         else if (resultOperation == RegionOperation.RemoveRegion)
                         {
                             NotifyTileRegion(tile, regionName,
                                 r => r.OnUnitLeave(obj, coords, unit, coords, true));
-                            //触发区域buff
-                            foreach (var buff in regionName.GetRegionInfo().RegionBuffs ?? [])
-                            {
-                                buff.GetBuffInstance().OnRemoveFromUnit(obj, unit);
-                            }
                         }
                     }
                 }

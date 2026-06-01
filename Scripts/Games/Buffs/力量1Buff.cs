@@ -7,7 +7,8 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 
 public class 力量1Buff() : Buff(BuffNames.力量1)
 {
-    public override void OnBeforeDamageToUnit(SimObject obj, IReadOnlyUnitState unit, IReadOnlyUnitState target,
+    public override void OnBeforeDamageToUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount,
+        IReadOnlyUnitState target,
         float originDamage,
         ref float resultDamage)
     {

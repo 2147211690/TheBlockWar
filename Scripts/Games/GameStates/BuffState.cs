@@ -9,5 +9,5 @@ public struct
     /// <summary>
     /// 回合为单位
     /// </summary>
-    public int Duration { get; set; }
+    public int Count { get; set; }
 }

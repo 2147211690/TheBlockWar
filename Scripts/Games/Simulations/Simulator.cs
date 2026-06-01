@@ -58,17 +58,12 @@ public static partial class Simulator
                 var toTile = obj.State.TileMapState.GetTile(coords);
                 if (!toTile.IsNull())
                 {
-                    obj.NotifyTileRegions(toTile, r => r.OnUnitEnter(obj, coords, unit, coords, false));
-                    obj.NotifyTileRegions(toTile, r =>
-                    {
-                        var info = r.Name.GetRegionInfo();
-                        if (info.RegionBuffs != null)
-                        {
-                            foreach (var buff in info.RegionBuffs)
-                                obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.AddBuff, int.MaxValue);
-                        }
-                    });
+                    Hook.RegionUnitEnter(coords, obj, unit, coords, false);
+                    foreach (var region in toTile.Regions)
+                    foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs ?? [])
+                        obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.AddBuff, 1);
                 }
+
                 // 移除所有一次性区域
                 for (var i = toTile.Regions.Count - 1; i >= 0; i--)
                 {
@@ -85,42 +80,12 @@ public static partial class Simulator
             var fromTile = obj.State.TileMapState.GetTile(coords);
             if (!fromTile.IsNull())
             {
-                obj.NotifyTileRegions(fromTile, r => r.OnUnitLeave(obj, coords, unit, coords, false));
-                obj.NotifyTileRegions(fromTile, r =>
-                {
-                    var info = r.Name.GetRegionInfo();
-                    if (info.RegionBuffs != null)
-                    {
-                        foreach (var buff in info.RegionBuffs)
-                            obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.RemoveBuff, int.MaxValue);
-                    }
-                });
+                foreach (var region in fromTile.Regions)
+                foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs ?? [])
+                    obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.RemoveBuff, 1);
+                Hook.RegionUnitLeave(coords, obj, unit, coords, false);
             }
-            ExitSimulation();
-        }
 
-        private void NotifyUnitBuffs(IReadOnlyUnitState unit, Action<IBuff> action)
-        {
-            if (unit.IsNull()) return;
-            if (unit.Name.GetUnitInfo().Buffs is not {Length: > 0} && unit.Buffs.Count == 0) return;
-            EnterSimulation();
-            foreach (var name in unit.GetInfoAndCurrentBuffs(obj.State).ToArray())
-            {
-                action(name.GetBuffInstance());
-            }
-            ExitSimulation();
-        }
-        
-
-        private void NotifyTileRegions(IReadOnlyTileState tile, Action<IRegion> action)
-        {
-            if (tile.IsNull()) return;
-            if (tile.Name.GetTileInfo().Regions is not {Length: > 0} && tile.Regions.Count == 0) return;
-            EnterSimulation();
-            foreach (var name in tile.GetInfoAndCurrentRegions().ToArray())
-            {
-                action(name.GetRegionInstance());
-            }
             ExitSimulation();
         }
         

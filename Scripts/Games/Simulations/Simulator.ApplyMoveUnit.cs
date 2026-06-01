@@ -29,6 +29,8 @@ partial class Simulator
                 {
                     obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
                     obj.Steps?.AddStep(new MoveUnitStep(CurrentDeep, coords, to, unit.Id, isValid));
+                    var toTile = obj.State.TileMapState.GetTile(to);
+                    var fromTile = obj.State.TileMapState.GetTile(coords);
                     obj.ApplyUnitRemoveFromCoords(unit, coords);
                     obj.ApplyUnitSetInCoords(unit);
                 }

@@ -40,6 +40,7 @@
 [ext_resource type="Texture2D" uid="uid://cs6xgxg3oqsm1" path="res://Art/Img/combat/icons/damage_17.png" id="18_y5lfu"]
 [ext_resource type="Texture2D" uid="uid://bx570llafahem" path="res://Art/Img/combat/icons/damage_18.png" id="19_5oc40"]
 [ext_resource type="Texture2D" uid="uid://bm0hdspgfujef" path="res://Art/Img/combat/arrow_right.png" id="19_k627b"]
+[ext_resource type="Texture2D" uid="uid://c1vagxy78nxeo" path="res://Art/Img/mouse/crosshair.png" id="20_2gooa"]
 
 [sub_resource type="SystemFont" id="SystemFont_dlqdj"]
 
@@ -50,6 +51,7 @@ PlaceDownTexture = ExtResource("15_0vsqr")
 PathTextures = Array[Texture2D]([null, ExtResource("1_lsp26"), ExtResource("2_0vsqr"), ExtResource("3_dlqdj"), ExtResource("4_efcai"), ExtResource("5_wjxha"), ExtResource("6_ukqsd"), ExtResource("7_pgxfe"), ExtResource("8_0j2ph"), ExtResource("9_4ygc1"), ExtResource("10_k627b"), ExtResource("11_4k6dv"), ExtResource("12_yawfy"), ExtResource("13_mjyf2"), ExtResource("14_ablfk")])
 PushTextures = Array[Texture2D]([ExtResource("16_pgxfe"), ExtResource("17_0j2ph"), ExtResource("18_4ygc1"), ExtResource("19_k627b")])
 BlockNumberTextures = Array[Texture2D]([ExtResource("1_tfmgi"), ExtResource("2_2gooa"), ExtResource("3_nkmv0"), ExtResource("4_glk73"), ExtResource("5_ces84"), ExtResource("6_h3nw7"), ExtResource("7_wpn7l"), ExtResource("8_jmr4i"), ExtResource("9_q6it5"), ExtResource("10_f4on7"), ExtResource("11_vjq2w"), ExtResource("12_obv57"), ExtResource("13_cd8mn"), ExtResource("14_8na3h"), ExtResource("15_xqmr6"), ExtResource("16_xkrnc"), ExtResource("17_5c6xc"), ExtResource("18_y5lfu"), ExtResource("19_5oc40")])
+DeathTexture = ExtResource("20_2gooa")
 HealthCurrentColor = Color(0.2027216, 0.6880478, 0.4521318, 1)
 ShieldCurrentColor = Color(0.7857211, 0.5788141, 0.45463789, 1)
 HealthBarColor = Color(0.06401862, 0.10175585, 0.13946006, 1)
@@ -62,6 +64,7 @@ PlaceDownTexture = ExtResource("15_0vsqr")
 PathTextures = Array[Texture2D]([null, ExtResource("1_lsp26"), ExtResource("2_0vsqr"), ExtResource("3_dlqdj"), ExtResource("4_efcai"), ExtResource("5_wjxha"), ExtResource("6_ukqsd"), ExtResource("7_pgxfe"), ExtResource("8_0j2ph"), ExtResource("9_4ygc1"), ExtResource("10_k627b"), ExtResource("11_4k6dv"), ExtResource("12_yawfy"), ExtResource("13_mjyf2"), ExtResource("14_ablfk")])
 PushTextures = Array[Texture2D]([ExtResource("16_pgxfe"), ExtResource("17_0j2ph"), ExtResource("18_4ygc1"), ExtResource("19_k627b")])
 BlockNumberTextures = null
+DeathTexture = ExtResource("20_2gooa")
 ShieldCurrentColor = Color(0.81648004, 0.0870079, 0.4975397, 1)
 HealthBarColor = Color(0.06401862, 0.10175585, 0.13946006, 1)
 SplitColor = Color(0.06401862, 0.10175585, 0.13946006, 1)

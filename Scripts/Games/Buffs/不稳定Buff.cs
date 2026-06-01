@@ -7,7 +7,7 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 
 public class 不稳定Buff() : Buff(BuffNames.不稳定)
 {
-    public override void OnUnitDeath(SimObject obj, IReadOnlyUnitState unit)
+    public override void OnUnitDeath(SimObject obj, IReadOnlyUnitState unit, int buffCount)
     {
         Simulator.PushContext(new SimContext(unit.Id));
         var coords = unit.Coords;

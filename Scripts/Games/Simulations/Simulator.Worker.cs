@@ -5,6 +5,7 @@ using TheBlockWar.Scripts.Tools;
 namespace TheBlockWar.Scripts.Games.Simulations;
 
 [JsonDerivedType(typeof(ApplyAnimationStep), nameof(ApplyAnimationStep))]
+[JsonDerivedType(typeof(ApplyBuffTurnStep), nameof(ApplyBuffTurnStep))]
 [JsonDerivedType(typeof(ApplyCureStep), nameof(ApplyCureStep))]
 [JsonDerivedType(typeof(ApplyDamageStep), nameof(ApplyDamageStep))]
 [JsonDerivedType(typeof(ApplyDeathStep), nameof(ApplyDeathStep))]
@@ -19,6 +20,7 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 [JsonDerivedType(typeof(ApplyPlaceUnitStep), nameof(ApplyPlaceUnitStep))]
 [JsonDerivedType(typeof(ApplyPushUnitStep), nameof(ApplyPushUnitStep))]
 [JsonDerivedType(typeof(ApplyRectWindStep), nameof(ApplyRectWindStep))]
+[JsonDerivedType(typeof(ApplyRegionTurnStep), nameof(ApplyRegionTurnStep))]
 [JsonDerivedType(typeof(ApplyStepsStep), nameof(ApplyStepsStep))]
 public abstract class ApplyStep
 {
@@ -26,6 +28,7 @@ public abstract class ApplyStep
 }
 
 [JsonDerivedType(typeof(AnimationStep), nameof(AnimationStep))]
+[JsonDerivedType(typeof(BuffTurnStep), nameof(BuffTurnStep))]
 [JsonDerivedType(typeof(CureStep), nameof(CureStep))]
 [JsonDerivedType(typeof(DamageStep), nameof(DamageStep))]
 [JsonDerivedType(typeof(DeathStep), nameof(DeathStep))]
@@ -40,6 +43,7 @@ public abstract class ApplyStep
 [JsonDerivedType(typeof(PlaceUnitStep), nameof(PlaceUnitStep))]
 [JsonDerivedType(typeof(PushUnitStep), nameof(PushUnitStep))]
 [JsonDerivedType(typeof(RectWindStep), nameof(RectWindStep))]
+[JsonDerivedType(typeof(RegionTurnStep), nameof(RegionTurnStep))]
 [JsonDerivedType(typeof(StepsStep), nameof(StepsStep))]
 public class SimStep
 {
@@ -64,6 +68,21 @@ public class ApplyAnimationStep : ApplyStep
     public override void Apply(SimObject obj)
     {
         obj.ApplyAnimation(Animation);
+    }
+}
+
+public class ApplyBuffTurnStep : ApplyStep
+{
+    public int Turn { get; set; }
+
+    public ApplyBuffTurnStep(int turn)
+    {
+        Turn = turn;
+    }
+
+    public override void Apply(SimObject obj)
+    {
+        obj.ApplyBuffTurn(Turn);
     }
 }
 
@@ -307,6 +326,21 @@ public class ApplyRectWindStep : ApplyStep
     }
 }
 
+public class ApplyRegionTurnStep : ApplyStep
+{
+    public int Turn { get; set; }
+
+    public ApplyRegionTurnStep(int turn)
+    {
+        Turn = turn;
+    }
+
+    public override void Apply(SimObject obj)
+    {
+        obj.ApplyRegionTurn(Turn);
+    }
+}
+
 public class ApplyStepsStep : ApplyStep
 {
     public ApplyStep[] Applys { get; set; }
@@ -333,6 +367,15 @@ public class AnimationStep : SimStep
     public ApplyAnimationStep Apply => (ApplyAnimationStep)base.Apply;
     public AnimationStep(int deep, AnimationType applyAnimation)
         : base(new ApplyAnimationStep(applyAnimation), deep)
+    {
+    }
+}
+
+public class BuffTurnStep : SimStep
+{
+    public ApplyBuffTurnStep Apply => (ApplyBuffTurnStep)base.Apply;
+    public BuffTurnStep(int deep, int applyTurn)
+        : base(new ApplyBuffTurnStep(applyTurn), deep)
     {
     }
 }
@@ -513,6 +556,15 @@ public class RectWindStep : SimStep
     public ApplyRectWindStep Apply => (ApplyRectWindStep)base.Apply;
     public RectWindStep(int deep, Rect2I applyRect, DirMask applyDir)
         : base(new ApplyRectWindStep(applyRect, applyDir), deep)
+    {
+    }
+}
+
+public class RegionTurnStep : SimStep
+{
+    public ApplyRegionTurnStep Apply => (ApplyRegionTurnStep)base.Apply;
+    public RegionTurnStep(int deep, int applyTurn)
+        : base(new ApplyRegionTurnStep(applyTurn), deep)
     {
     }
 }
