@@ -9,23 +9,23 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([], [])]
-        public void ApplyDropTile(Vector2I coords)
+        public ApplyDropTileResult ApplyDropTile(Vector2I coords)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyDropTileResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyDropTileResult(CurrentDeep, coords));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyDropTileResult(CurrentDeep, coords));
-                    return;
+                    return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
                 
-                obj.Steps?.AddResult(new ApplyDropTileResult(CurrentDeep, coords));
                 obj.State.TileMapState.ModifyTile(coords, t => TileState.Empty.CopyTo(t));
                 if (!unit.IsNull())
                 {
@@ -36,6 +36,7 @@ partial class Simulator
                         obj.ApplyUnitRemoveFromCoords(unit, coords);
                     }
                 }
+                return r;
             }
         }
     }

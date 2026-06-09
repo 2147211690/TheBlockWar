@@ -4,13 +4,12 @@ namespace TheBlockWar.Scripts.Games.Simulations;
 
 public class SimResultList : IReadOnlyList<StepResult>
 {
-    public StepResult? PeekStep { get; private set; }
     private readonly List<StepResult> _steps = [];
     
-    public void AddResult(StepResult step)
+    public T AddResult<T>(T step) where T : StepResult
     {
         _steps.Add(step);
-        if (step.Deep == 0) PeekStep = step;
+        return step;
     }
     
     public IEnumerator<StepResult> GetEnumerator()

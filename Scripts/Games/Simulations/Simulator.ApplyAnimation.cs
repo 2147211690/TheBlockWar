@@ -8,11 +8,12 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([],[])]
-        public void ApplyAnimation(AnimationType animation)
+        public ApplyAnimationResult ApplyAnimation(AnimationType animation)
         {
             EnterSimulation();
-            obj.Steps?.AddResult(new ApplyAnimationResult(CurrentDeep, animation));
+            var r = obj.Steps.AddResult(new ApplyAnimationResult(CurrentDeep, animation));
             ExitSimulation();
+            return r;
         }
     }
 

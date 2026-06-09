@@ -8,11 +8,12 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([],[])]
-        public void ApplyRaiseContextChanged(SimContext context)
+        public ApplyRaiseContextChangedResult ApplyRaiseContextChanged(SimContext context)
         {
             EnterSimulation();
-            obj.Steps?.AddResult(new ApplyRaiseContextChangedResult(CurrentDeep, context));
+            var r = obj.Steps.AddResult(new ApplyRaiseContextChangedResult(CurrentDeep, context));
             ExitSimulation();
+            return r;
         }
     }
     public static partial void ApplyRaiseContextChangedViewDraw(GameView view, ReadOnlySimObject sim, ApplyRaiseContextChangedResult result)

@@ -349,9 +349,9 @@ namespace StepGenerator
                 sb.AppendLine($"{indent}[global::System.Text.Json.Serialization.JsonDerivedType(typeof({method.StepClassName}), \"{method.StepClassName}\")]");
             }
 
-            sb.AppendLine($"{indent}public class ApplyStep");
+            sb.AppendLine($"{indent}public abstract class ApplyStep");
             sb.AppendLine($"{indent}{{");
-            sb.AppendLine($"{indent}    public virtual void Apply(global::TheBlockWar.Scripts.Games.Simulations.SimObject obj) {{ }}");
+            sb.AppendLine($"{indent}    public abstract StepResult Apply(global::TheBlockWar.Scripts.Games.Simulations.SimObject obj);");
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();
         }
@@ -421,9 +421,9 @@ namespace StepGenerator
             }
 
             sb.AppendLine();
-            sb.AppendLine($"{indent}    public override void Apply(global::TheBlockWar.Scripts.Games.Simulations.SimObject obj)");
+            sb.AppendLine($"{indent}    public override {method.ResultClassName} Apply(global::TheBlockWar.Scripts.Games.Simulations.SimObject obj)");
             sb.AppendLine($"{indent}    {{");
-            sb.AppendLine($"{indent}        obj.{method.MethodName}({callArgs});");
+            sb.AppendLine($"{indent}        return obj.{method.MethodName}({callArgs});");
             sb.AppendLine($"{indent}    }}");
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();

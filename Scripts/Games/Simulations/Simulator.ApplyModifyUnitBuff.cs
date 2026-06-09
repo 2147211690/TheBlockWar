@@ -11,23 +11,25 @@ partial class Simulator
     {
         //result:UnitId:long Operation:BuffOperation Duration:int
         [Step(["UnitId", "Operation", "Duration"], [typeof(long), typeof(BuffOperation), typeof(int)])]
-        public void ApplyModifyUnitBuff(Vector2I coords, string buffName, BuffOperation operation, 
+        public ApplyModifyUnitBuffResult ApplyModifyUnitBuff(Vector2I coords, string buffName, BuffOperation operation, 
             int duration)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
             
-            void Main()
+            ApplyModifyUnitBuffResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
+                    duration, 0, operation, duration));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
-                        duration, 0, operation, duration));
-                    return;
+                    return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
+                r.UnitId = unit.Id;
                 var oldDuration = unit.GetBuffCount(buffName);
                 var resultOperation = BuffOperation.None;
                 var resultDuration = duration;
@@ -44,7 +46,9 @@ partial class Simulator
                         _ => (BuffOperation.None, duration, 0)
                     };
                 }
-
+                r.Operation = resultOperation;
+                r.Duration = resultDuration;
+                
                 if (resultOperation == BuffOperation.RemoveBuff) 
                 {
                     var tile = obj.State.TileMapState.GetTile(unit.Coords);
@@ -54,14 +58,12 @@ partial class Simulator
                         // 如果结果为移除buff,但是当前所在区域是具有这个buff的区域,则无法移除
                         if (rbs.IndexOf(buffName) == -1) continue;
                         
-                        obj.Steps?.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
-                            duration, 0, operation, duration));
-                        return;
+                        r.UnitId = 0;
+                        r.Operation = operation;
+                        r.Duration = duration;
+                        return r;
                     }
                 }
-
-                obj.Steps?.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
-                    duration, unit.Id, resultOperation, resultDuration));
 
                 if (obj.ComplexSimulationRegion(1))
                 {
@@ -80,6 +82,8 @@ partial class Simulator
                             break;
                     }
                 }
+                
+                return r;
             }
             
             void NotifyUnitBuff(IReadOnlyUnitState unit, string buffName, Action<IBuff> action)

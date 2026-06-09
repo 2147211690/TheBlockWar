@@ -8,19 +8,21 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([], [])]
-        public void ApplySteps(List<ApplyStep>? applys, int startDelay, int endDelay, StepsRunningMode runningMode)
+        public ApplyStepsResult ApplySteps(List<ApplyStep>? applys, int startDelay, int endDelay, StepsRunningMode runningMode)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyStepsResult Main()
             {
-                obj.Steps?.AddResult(new ApplyStepsResult(CurrentDeep, applys, startDelay, endDelay, runningMode));
+                var r = obj.Steps.AddResult(new ApplyStepsResult(CurrentDeep, applys, startDelay, endDelay, runningMode));
                 foreach (var apply in applys ?? [])
                 {
                     apply.Apply(obj);
                 }
+                return r;
             }
         }
     }

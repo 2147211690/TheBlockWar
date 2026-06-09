@@ -10,35 +10,39 @@ partial class Simulator
     {
         //result:UnitId:long Valid:bool
         [Step(["UnitId1", "UnitId2", "Valid"], [typeof(long), typeof(long), typeof(bool)])]
-        public void ApplySwapUnit(Vector2I coords1, Vector2I coords2)
+        public ApplySwapUnitResult ApplySwapUnit(Vector2I coords1, Vector2I coords2)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplySwapUnitResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplySwapUnitResult(CurrentDeep, coords1, coords2, 0, 0, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplySwapUnitResult(CurrentDeep, coords1, coords2, 0, 0, false));
-                    return;
+                    return r;
                 }
 
                 var unit1 = obj.State.UnitMapState.GetUnit(coords1);
                 var unit2 = obj.State.UnitMapState.GetUnit(coords2);
+                r.UnitId1 = unit1.Id;
+                r.UnitId2 = unit2.Id;
                 
                 if (!unit1.IsNull() && !unit2.IsNull())
                 {
+                    r.Valid = true;
                     obj.State.UnitMapState.ModifyUnit(unit1.Id, u => u.Coords = coords2);
                     obj.State.UnitMapState.ModifyUnit(unit2.Id, u => u.Coords = coords1);
                     
-                    obj.Steps?.AddResult(new ApplySwapUnitResult(CurrentDeep, coords1, coords2, unit1.Id, unit2.Id, true));
                     obj.ApplyUnitRemoveFromCoords(unit1, coords1);
                     obj.ApplyUnitSetInCoords(unit1);
                     obj.ApplyUnitRemoveFromCoords(unit2, coords2);
                     obj.ApplyUnitSetInCoords(unit2);
                 }
-                else obj.Steps?.AddResult(new ApplySwapUnitResult(CurrentDeep, coords1, coords2, unit1.Id, unit2.Id, false));
+                else r.Valid = false;
+                return r;
             }
         }
     }

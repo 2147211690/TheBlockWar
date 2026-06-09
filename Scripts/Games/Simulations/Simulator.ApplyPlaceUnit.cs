@@ -10,33 +10,32 @@ partial class Simulator
     {
         //result:UnitState:UnitState Valid:bool
         [Step(["UnitState", "Valid"], [typeof(UnitState), typeof(bool)])]
-        public void ApplyPlaceUnit(Vector2I coords, string unitName, int team)
+        public ApplyPlaceUnitResult ApplyPlaceUnit(Vector2I coords, string unitName, int team)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyPlaceUnitResult Main()
             {
-                bool isValid = !obj.State.UnitMapState.HasUnit(coords);
+                var r = obj.Steps.AddResult(new ApplyPlaceUnitResult(CurrentDeep, coords, unitName, team, UnitState.Null, false));
+                r.Valid = !obj.State.UnitMapState.HasUnit(coords);
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyPlaceUnitResult(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
-                    return;
+                    return r;
                 }
                 
                 if (obj.ComplexSimulationRegion( 2))
                 {
                     //如果在等待层,或者此处有单位,则放置失败
-                    if (!isValid)
+                    if (!r.Valid)
                     {
-                        obj.Steps?.AddResult(new ApplyPlaceUnitResult(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
-                        return;
+                        return r;
                     }
                     var unitState = UnitFactory.CreateUnit(unitName, team, obj.State.IdGenerator.NewLong(), coords);
                     obj.State.UnitMapState.AddUnit(unitState);
-                    obj.Steps?.AddResult(new ApplyPlaceUnitResult(CurrentDeep, coords, unitName, team, unitState.Clone(),
-                        isValid));
+                    r.UnitState = unitState.Clone();
                     //单位buff初始化
                     var info = unitName.GetUnitInfo();
                     var newUnit = obj.State.UnitMapState.GetUnit(unitState.Id);
@@ -51,10 +50,7 @@ partial class Simulator
                     //应用单位放置到坐标的额外操作
                     obj.ApplyUnitSetInCoords(obj.State.UnitMapState.GetUnit(unitState.Id));
                 }
-                else
-                {
-                    obj.Steps?.AddResult(new ApplyPlaceUnitResult(CurrentDeep, coords, unitName, team, UnitState.Null, isValid));
-                }
+                return r;
             }
         }
     }

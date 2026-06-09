@@ -12,20 +12,21 @@ partial class Simulator
     {
         //result:Operation:RegionOperation Duration:int
         [Step(["Operation", "Duration"], [typeof(RegionOperation), typeof(int)])]
-        public void ApplyModifyTileRegion(Vector2I coords, string regionName, RegionOperation operation, 
+        public ApplyModifyTileRegionResult ApplyModifyTileRegion(Vector2I coords, string regionName, RegionOperation operation, 
             int duration)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
             
-            void Main()
+            ApplyModifyTileRegionResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyModifyTileRegionResult(CurrentDeep, coords, regionName,
+                    operation, duration, operation, duration));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyModifyTileRegionResult(CurrentDeep, coords, regionName,
-                        operation, duration, operation, duration));
-                    return;
+                    return r;
                 }
 
                 var tile = obj.State.TileMapState.GetTile(coords);
@@ -48,8 +49,8 @@ partial class Simulator
                     };
                 }
 
-                obj.Steps?.AddResult(new ApplyModifyTileRegionResult(CurrentDeep, coords, regionName, operation,
-                    duration, resultOperation, resultDuration));
+                r.Operation = resultOperation;
+                r.Duration = resultDuration;
 
                 if (obj.ComplexSimulationRegion(1))
                 {
@@ -68,6 +69,7 @@ partial class Simulator
                         }
                     }
                 }
+                return r;
             }
             void NotifyTileRegion(IReadOnlyTileState tile, string regionName, Action<IRegion> action)
             {

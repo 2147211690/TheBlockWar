@@ -10,27 +10,26 @@ partial class Simulator
     {
         //result:UnitId:long ValidCure:float
         [Step(["UnitId", "ValidCure"],[typeof(long), typeof(float)])]
-        public void ApplyCure(Vector2I coords, float cure)
+        public ApplyCureResult ApplyCure(Vector2I coords, float cure)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyCureResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyCureResult(CurrentDeep, coords, cure, 0, 0));;
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyCureResult(CurrentDeep, coords, cure, 0, 0));
-                    return;
+                    return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                float validCure = 0;
+                r.UnitId = unit.Id;
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    obj.Steps?.AddResult(
-                        new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
-                    return;
+                    return r;
                 }
 
                 var originCure = cure;
@@ -46,32 +45,23 @@ partial class Simulator
                     Hook.BuffUnitBeforeGetCure(unit, obj, origin, ref rawCure);
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
-
-                if (unit.IsNull())
+                
+                if (unit.IsDead)
                 {
-                    obj.Steps?.AddResult(
-                        new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
-                    return;
+                    return r;
                 }
-
-                validCure = Mathf.Min(rawCure, unit.MaxHealth - unit.Health);
+                
+                var validCure = Mathf.Min(rawCure, unit.MaxHealth - unit.Health);
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health += validCure);
                 unit = obj.State.UnitMapState.GetUnit(unit.Id);
-
-                if (unit.IsNull())
-                {
-                    obj.Steps?.AddResult(
-                        new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
-                    return;
-                }
-
-                obj.Steps?.AddResult(new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
+                r.ValidCure = validCure;
 
                 if (validCure > 0 && obj.ComplexSimulationRegion(0))
                 {
                     Hook.BuffUnitAfterGetCure(unit, obj, validCure);
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
+                return r;
             }
         }
     }

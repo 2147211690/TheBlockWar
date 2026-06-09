@@ -11,27 +11,27 @@ partial class Simulator
         //TODO:可能使用事件优化
         //result:UnitId:long ValidDamage:float
         [Step(["UnitId", "ValidDamage"],[typeof(long), typeof(float)])]
-        public void ApplyDamage(Vector2I coords, float damage)
+        public ApplyDamageResult ApplyDamage(Vector2I coords, float damage)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyDamageResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyDamageResult(CurrentDeep, coords, damage, 0, 0));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyDamageResult(CurrentDeep, coords, damage, 0, 0));
-                    return;
+                    return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                float validDamage = 0;
+                r.UnitId = unit.Id;
+                
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    obj.Steps?.AddResult(
-                        new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
-                    return;
+                    return r;
                 }
                 var originDamage = damage;
                 var rawDamage = damage;
@@ -47,26 +47,15 @@ partial class Simulator
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
 
-                if (unit.IsNull())
+                if (unit.IsDead)
                 {
-                    obj.Steps?.AddResult(
-                        new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
-                    return;
+                    return r;
                 }
 
-                validDamage = Mathf.Min(rawDamage, unit.Health);
+                var validDamage = Mathf.Min(rawDamage, unit.Health);
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health -= validDamage);
                 unit = obj.State.UnitMapState.GetUnit(unit.Id);
-
-                if (unit.IsNull())
-                {
-                    obj.Steps?.AddResult(
-                        new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
-                    return;
-                }
-
-                obj.Steps?.AddResult(
-                    new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
+                r.ValidDamage = validDamage;
 
                 // 触发受伤后事件, 仅在运行层触发
                 if (validDamage > 0 && obj.ComplexSimulationRegion(0))
@@ -76,10 +65,11 @@ partial class Simulator
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
 
-                if (!unit.IsNull() && validDamage > 0 && unit.Health <= 0)
+                if (!unit.IsDead && validDamage > 0 && unit.Health <= 0)
                 {
                     obj.ApplyDeath(coords);
                 }
+                return r;
             }
         }
     }

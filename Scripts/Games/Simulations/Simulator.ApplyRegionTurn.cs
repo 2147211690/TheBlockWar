@@ -10,16 +10,17 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([], [])]
-        public void ApplyRegionTurn(int turn)
+        public ApplyRegionTurnResult ApplyRegionTurn(int turn)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyRegionTurnResult Main()
             {
-                obj.Steps?.AddResult(new ApplyRegionTurnResult(CurrentDeep, turn));
-                if (obj.Layer == SimulationLayer.Waiting) return;
+                var r = obj.Steps.AddResult(new ApplyRegionTurnResult(CurrentDeep, turn));
+                if (obj.Layer == SimulationLayer.Waiting) return r;
                 var regionPairs = new List<(Vector2I coords, IReadOnlyList<RegionState> regions)>();
                 var size = obj.State.TileMapState.Size;
                 for (var i = 0; i < size.X; i++)
@@ -48,6 +49,7 @@ partial class Simulator
                     }
                 }
                 obj.EndSteps();
+                return r;
             }
         }
     }

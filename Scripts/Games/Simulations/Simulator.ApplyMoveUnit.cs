@@ -10,29 +10,33 @@ partial class Simulator
     {
         //result:UnitId:long Valid:bool
         [Step(["UnitId", "Valid"], [typeof(long), typeof(bool)])]
-        public void ApplyMoveUnit(Vector2I coords, Vector2I to)
+        public ApplyMoveUnitResult ApplyMoveUnit(Vector2I coords, Vector2I to)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyMoveUnitResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyMoveUnitResult(CurrentDeep, coords, to, 0, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyMoveUnitResult(CurrentDeep, coords, to, 0, false));
-                    return;
+                    return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                if (!unit.IsNull())
+                var toUnit = obj.State.UnitMapState.GetUnit(to);
+                r.UnitId = unit.Id;
+                if (!unit.IsNull() && toUnit.IsNull())
                 {
                     obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
-                    obj.Steps?.AddResult(new ApplyMoveUnitResult(CurrentDeep, coords, to, unit.Id, true));
+                    r.Valid = true;
                     obj.ApplyUnitRemoveFromCoords(unit, coords);
                     obj.ApplyUnitSetInCoords(unit);
                 }
-                else obj.Steps?.AddResult(new ApplyMoveUnitResult(CurrentDeep, coords, to, unit.Id, false));
+                else r.Valid = false;
+                return r;
             }
         }
     }

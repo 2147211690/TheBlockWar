@@ -8,27 +8,26 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
-        //TODO:tile改为枚举
         [Step([], [])]
-        public void ApplyPlaceTile(Vector2I coords, string tileName)
+        public ApplyPlaceTileResult ApplyPlaceTile(Vector2I coords, string tileName)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyPlaceTileResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName));
-                    return;
+                    return r;
                 }
 
                 obj.State.TileMapState.ModifyTile(coords, t =>
                 {
                     t.Name = tileName;
                 });
-                obj.Steps?.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName));
                 if (obj.ComplexSimulationRegion(2))
                 {
                     //初始化区域
@@ -45,6 +44,7 @@ partial class Simulator
                     var unit = obj.State.UnitMapState.GetUnit(coords);
                     if (!unit.IsNull()) obj.ApplyUnitSetInCoords(unit);
                 }
+                return r;
             }
         }
     }

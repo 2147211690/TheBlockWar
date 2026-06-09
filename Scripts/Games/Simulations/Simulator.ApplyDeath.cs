@@ -10,33 +10,34 @@ partial class Simulator
     {
         //result:UnitId:long Valid:bool
         [Step(["UnitId", "Valid"], [typeof(long), typeof(bool)])]
-        public void ApplyDeath(Vector2I coords)
+        public ApplyDeathResult ApplyDeath(Vector2I coords)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyDeathResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyDeathResult(CurrentDeep, coords, 0, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyDeathResult(CurrentDeep, coords, 0, false));
-                    return;
+                    return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
+                r.UnitId = unit.Id;
 
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    obj.Steps?.AddResult(new ApplyDeathResult(CurrentDeep, coords, unit.Id, false));
-                    return;
+                    return r;
                 }
-
-                obj.Steps?.AddResult(new ApplyDeathResult(CurrentDeep, coords, unit.Id, true));
+                r.Valid = true;
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health = 0);
                 Hook.BuffUnitDeath(unit, obj);
                 //TODO:可能引入区域相关事件
+                return r;
             }
         }
     }

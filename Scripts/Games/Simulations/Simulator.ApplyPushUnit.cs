@@ -10,28 +10,30 @@ partial class Simulator
     {
         //result:UnitId:long Valid:bool
         [Step(["UnitId", "Valid"], [typeof(long), typeof(bool)])]
-        public void ApplyPushUnit(Vector2I coords, DirMask dir)
+        public ApplyPushUnitResult ApplyPushUnit(Vector2I coords, DirMask dir)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyPushUnitResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyPushUnitResult(CurrentDeep, coords, dir, 0, true));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyPushUnitResult(CurrentDeep, coords, dir, 0, true));
-                    return;
+                    return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
+                r.UnitId = unit.Id;
                 var target = coords + dir.ToVec2I();
                 var targetUnit = obj.State.UnitMapState.GetUnit(target);
                 var validPush = !unit.IsNull() && targetUnit.IsNull() && obj.State.IsInMap(target);
                 var shouldPush = true;
                 Hook.BuffUnitBeforePush(unit, obj, dir, ref shouldPush);
-                obj.Steps?.AddResult(new ApplyPushUnitResult(CurrentDeep, coords, dir, unit.Id, validPush && shouldPush));
-                if (unit.IsNull() || !shouldPush) return;
+                r.Valid = validPush && shouldPush;
+                if (unit.IsNull() || !shouldPush) return r;
                 if (validPush)
                 {
                     obj.ApplyMoveUnit(coords, target);
@@ -46,6 +48,7 @@ partial class Simulator
                     if (!targetUnit.IsNull()) obj.ApplyDamage(target, 10);
                     obj.PopContext();
                 }
+                return r;
             }
         }
     }

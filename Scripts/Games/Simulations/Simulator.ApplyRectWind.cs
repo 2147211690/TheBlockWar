@@ -9,18 +9,19 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([], [])]
-        public void ApplyRectWind(Rect2I rect, DirMask dir)
+        public ApplyRectWindResult ApplyRectWind(Rect2I rect, DirMask dir)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyRectWindResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyRectWindResult(CurrentDeep, rect, dir));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyRectWindResult(CurrentDeep, rect, dir));
-                    return;
+                    return r;
                 }
                 Vector2I start = dir switch
                 {
@@ -86,6 +87,7 @@ partial class Simulator
                     }
                     obj.EndSteps();
                 }
+                return r;
             }
         }
     }

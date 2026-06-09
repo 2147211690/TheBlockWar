@@ -9,22 +9,23 @@ partial class Simulator
     extension(SimObject obj)
     {
         //result:UnitId:long TargetIndex:int  Valid:bool
-        [Step(["UnitId", "TargetIndex", "Valid"], [typeof(long), typeof(int), typeof(bool)])]
-        public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path)
+        [Step(["UnitId", "TargetIndex"], [typeof(long), typeof(int)])]
+        public ApplyMoveUnitPathResult ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyMoveUnitPathResult Main()
             {
-                if (path is not {Count: > 1}) return;
+                var r = obj.Steps.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, 0, 0));
+                if (path is not {Count: > 1}) return r;
                 var unit = obj.State.UnitMapState.GetUnit(coords + path[0]);
+                r.UnitId = unit.Id;
                 if (unit.IsNull())
                 {
-                    obj.Steps?.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, unit.Id, 0,
-                        false));
-                    return;
+                    return r;
                 }
 
                 var targetIndex = 1;
@@ -37,17 +38,15 @@ partial class Simulator
                     if (unit.IsCanBeDestination(obj.State, coords + path[targetIndex]))
                         break;
 
-
+                r.TargetIndex = targetIndex;
+                
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, unit.Id,
-                        targetIndex, true));
-                    return;
+                    return r;
                 }
-
-                obj.Steps?.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, unit.Id, targetIndex,
-                    true));
+                
                 if (targetIndex > 0) obj.ApplyMoveUnit(coords + path[0], coords + path[targetIndex]);
+                return r;
             }
         }
     }
@@ -93,9 +92,7 @@ partial class Simulator
 
     public static partial GDTask ApplyMoveUnitPathViewRun(GameView view, ReadOnlySimObject sim, ApplyMoveUnitPathResult result)
     {
-        return result.Valid
-            ? view.UnitsView.MovePathUnit(result.UnitId, result.Step.Coords, result.Step.Path,
-                result.TargetIndex)
-            : GDTask.CompletedTask;
+        return view.UnitsView.MovePathUnit(result.UnitId, result.Step.Coords, result.Step.Path,
+                result.TargetIndex);
     }
 }

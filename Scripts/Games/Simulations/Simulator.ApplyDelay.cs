@@ -8,12 +8,12 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([], [])]
-        public void ApplyDelay(int delay)
+        public ApplyDelayResult ApplyDelay(int delay)
         {
-            EnterSimulation();
-            if (obj.Layer == SimulationLayer.Running)
-                obj.Steps?.AddResult(new ApplyDelayResult(CurrentDeep, delay));
+            EnterSimulation(); 
+            var r = obj.Steps.AddResult(new ApplyDelayResult(CurrentDeep, delay));
             ExitSimulation();
+            return r;
         }
     }
     public static partial void ApplyDelayViewDraw(GameView view, ReadOnlySimObject sim, ApplyDelayResult result)

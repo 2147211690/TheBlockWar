@@ -10,16 +10,17 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step([],[])]
-        public void ApplyBuffTurn(int turn)
+        public ApplyBuffTurnResult ApplyBuffTurn(int turn)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
+            return r;
 
-            void Main()
+            ApplyBuffTurnResult Main()
             {
-                obj.Steps?.AddResult(new ApplyBuffTurnResult(CurrentDeep, turn));
-                if (obj.Layer == SimulationLayer.Waiting) return;
+                ApplyBuffTurnResult r = obj.Steps.AddResult(new ApplyBuffTurnResult(CurrentDeep, turn));
+                if (obj.Layer == SimulationLayer.Waiting) return r;
                 List<(long id, IReadOnlyList<BuffState> buffs)> buffPairs =
                     obj.State.UnitMapState.GetAllUnits().Where(u => u is { IsDead: false, Buffs.Count: > 0 }
                         )
@@ -45,6 +46,7 @@ partial class Simulator
                     }
                 }
                 obj.EndSteps();
+                return r;
             }
         }
     }
