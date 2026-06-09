@@ -4,6 +4,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IReadOnlyTileState
 {
+    public static readonly float MaxTileHeight = 34;
     string Name { get; }
     IReadOnlyList<RegionState> Regions { get; }
     IReadOnlyList<RegionState> RegionsStatic { get; }

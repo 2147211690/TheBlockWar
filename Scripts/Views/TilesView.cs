@@ -1,6 +1,7 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
@@ -8,7 +9,7 @@ public partial class TilesView : TileMapLayer
 {
     private readonly Dictionary<Vector2I, TileView> _tileViews = new();
     [Export] public GameView GameView { get; set; } = null!;
-    [Export] private Node2D _nodeContainer = null!;
+    [Export] private GameViewNodeContainer _nodeContainer = null!;
     [Export] private PackedScene _tileScene = null!;
     [Export] public float NormalGroundHeight = 32f;
     [Export] public Texture2D? RegionTexture { get; set; }
@@ -16,15 +17,15 @@ public partial class TilesView : TileMapLayer
     public Vector2 LocalUp { get; private set; }
     public Vector2 LocalRightDown{ get; private set; }
     
-    private RecordTypedPool<Sprite2D> _regionSpritePool = null!;
+    private RecordTypedPool<ViewSprite2D> _regionSpritePool = null!;
     public override void _Ready()
     {
         LocalLeft = MapToLocal(Vector2I.Left) - MapToLocal(Vector2I.Zero);
         LocalUp = MapToLocal(Vector2I.Up) - MapToLocal(Vector2I.Zero);
         LocalRightDown = MapToLocal(Vector2I.One) - MapToLocal(Vector2I.Zero);
-        _regionSpritePool = new RecordTypedPool<Sprite2D>(() =>
+        _regionSpritePool = new RecordTypedPool<ViewSprite2D>(() =>
         {
-            var s = new Sprite2D();
+            var s = new ViewSprite2D();
             _nodeContainer.AddChild(s);
             s.Texture = RegionTexture;
             return s;
@@ -41,6 +42,14 @@ public partial class TilesView : TileMapLayer
         };
     }
 
+    public void ClearAllTile()
+    {
+        foreach (var render in _tileViews.Values)
+        {
+            render.QueueFree();
+        }
+        _tileViews.Clear();
+    }
     public Vector2 GetLocalVec(DirMask dirMask)
     {
         return dirMask switch
@@ -67,7 +76,7 @@ public partial class TilesView : TileMapLayer
             render = _tileViews[coords] = _tileScene.Instantiate<TileView>();
             _nodeContainer.AddChild(render);
         }
-        render.Position = MapToLocal(coords);
+        render.GamePosition = GetGamePosition(coords);
         render.Visible = true;
         render.TileName = tileName;
         if (tileName != TileNames.Air) await render.PlayPlaceDownAnim();
@@ -103,8 +112,8 @@ public partial class TilesView : TileMapLayer
             {
                 if (!coord.IsInSize(mapSize)) continue;
                 var s = _regionSpritePool.Get();
-                s.Position = GetRenderPosition(coord, Layer.Underground, -2);
-                s.Offset = GetRenderOffset(coord, Layer.Underground, -2);
+                s.GamePosition = GetGamePositionOnGround(coord);
+                s.GameZIndex = -2;
                 s.Modulate = new(0, 1, 0, 0.2f);
             }
         }
@@ -117,7 +126,27 @@ public partial class TilesView : TileMapLayer
         Layer.Sky => LocalRightDown.Y * 2,
         _ => 0,
     };
-    
+
+    public Vector2 GamePlanePositionToNodePosition(in Vector2 coords)
+    {
+        var lx = Mathf.FloorToInt(coords.X);
+        var ly = Mathf.FloorToInt(coords.Y);
+        var p00 = MapToLocal(new Vector2I(lx, ly));
+        var tx = coords.X - lx;
+        var ty = coords.Y - ly;
+
+        return p00 + -LocalLeft * tx + -LocalUp * ty;
+    }
+    public Vector3 GetGamePosition(in Vector2 coords, float height = 0)
+    {
+        return new(coords.X, coords.Y, height);
+    }
+    public Vector3 GetGamePositionOnGround(in Vector2 coords, float heightOffset = 0)
+    {
+        var cInt = new Vector2I(Mathf.RoundToInt(coords.X), Mathf.RoundToInt(coords.Y));
+        return GetGamePosition(coords, GetTileHeight(cInt) + heightOffset);
+    }
+
     public Vector2 GetRealPosition(in Vector2I coords, Layer layer, float? defineHeight = null)
     {
         var pos = MapToLocal(coords);
@@ -129,29 +158,7 @@ public partial class TilesView : TileMapLayer
         {
             pos.Y -= defineHeight.Value;
         }
-        return pos;
-    }
-    
-    public Vector2 GetRenderPosition(in Vector2I coords, Layer layer, int renderOffset)
-    {
-        var maxOffset = GetLayerOffset(layer);
-        var pos = MapToLocal(coords);
-        pos.Y += maxOffset + renderOffset / 100f * maxOffset;
-        return pos;
-    }
 
-    public Vector2 GetRenderOffset(in Vector2I coords, Layer layer, int renderOffset, float? defineHeight = null)
-    {
-        var maxOffset = GetLayerOffset(layer);
-        var pos = new Vector2(0, -maxOffset - renderOffset / 100f * maxOffset);
-        if (defineHeight == null)
-        {
-            if ((layer & Layer.Underground) != 0 || (layer & Layer.Sky) != 0) pos.Y -= GetTileHeight(coords);
-        }
-        else
-        {
-            pos.Y -= defineHeight.Value;
-        }
         return pos;
     }
 }

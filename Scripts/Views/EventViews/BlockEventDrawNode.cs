@@ -4,11 +4,12 @@ using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views.EventViews;
 
 [GlobalClass]
-public partial class BlockEventDrawNode : Node2D
+public partial class BlockEventDrawNode : ViewNode2D
 {
     public GameViewStyle Style { get; set; } = null!;
     public Vector2I Coords { get; set; }

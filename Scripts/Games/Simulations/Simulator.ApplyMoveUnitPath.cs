@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -8,6 +9,7 @@ partial class Simulator
     extension(SimObject obj)
     {
         //result:UnitId:long TargetIndex:int  Valid:bool
+        [Step(["UnitId", "TargetIndex", "Valid"], [typeof(long), typeof(int), typeof(bool)])]
         public void ApplyMoveUnitPath(Vector2I coords, List<Vector2I>? path)
         {
             EnterSimulation();
@@ -20,7 +22,7 @@ partial class Simulator
                 var unit = obj.State.UnitMapState.GetUnit(coords + path[0]);
                 if (unit.IsNull())
                 {
-                    obj.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, 0,
+                    obj.Steps?.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, unit.Id, 0,
                         false));
                     return;
                 }
@@ -38,15 +40,62 @@ partial class Simulator
 
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id,
+                    obj.Steps?.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, unit.Id,
                         targetIndex, true));
                     return;
                 }
 
-                obj.Steps?.AddStep(new MoveUnitPathStep(CurrentDeep, coords, path, unit.Id, targetIndex,
+                obj.Steps?.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, unit.Id, targetIndex,
                     true));
                 if (targetIndex > 0) obj.ApplyMoveUnit(coords + path[0], coords + path[targetIndex]);
             }
         }
+    }
+
+    public static partial void ApplyMoveUnitPathViewDraw(GameView view, ReadOnlySimObject sim,
+        ApplyMoveUnitPathResult result)
+    {
+        var path = result.Step.Path;
+        if (path is not {Count: >= 2}) return;
+        var maxTileHeight = 0f;
+        foreach (var coord in path) 
+            maxTileHeight = Mathf.Max(maxTileHeight, view.TilesView.GetTileHeight(coord + result.Step.Coords));
+        var tex = view.Style[TeamTypeEnum.Player].PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
+        SetSprite(result.Step.Coords + path[0], tex, 0);
+        for (int i = 1; i < path.Count - 1; i++)
+        {
+            tex = view.Style[TeamTypeEnum.Player]
+                .PathTextures[
+                    (int)(path[i - 1] - path[i]).ToVecDirMask() |
+                    (int)(path[i + 1] - path[i]).ToVecDirMask()];
+            SetSprite(result.Step.Coords + path[i], tex, i);
+        }
+
+        tex = view.Style[TeamTypeEnum.Player].PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
+        SetSprite(result.Step.Coords + path[^1], tex, path.Count - 1);
+        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        if (uv != null)
+        {
+            uv.AddFack(uv.WishCoords);
+            view.UnitsView.SetUnitAimCoords(result.UnitId, result.Step.Path[result.TargetIndex]);
+            view.EventsView.SetUnitNeedClear(result.UnitId);
+        }
+
+        void SetSprite(in Vector2I coords, Texture2D tex, int index)
+        {
+            var sprite = view.EventsView.GetGameTexture();
+            sprite.GamePosition = view.TilesView.GetGamePosition(coords, maxTileHeight);
+            sprite.Texture = tex;
+            sprite.Modulate = Colors.White with { A = sim.IsFocused ? 1 : 0.6f };
+            sprite.GameZIndex = -1;
+        }
+    }
+
+    public static partial GDTask ApplyMoveUnitPathViewRun(GameView view, ReadOnlySimObject sim, ApplyMoveUnitPathResult result)
+    {
+        return result.Valid
+            ? view.UnitsView.MovePathUnit(result.UnitId, result.Step.Coords, result.Step.Path,
+                result.TargetIndex)
+            : GDTask.CompletedTask;
     }
 }

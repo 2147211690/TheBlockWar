@@ -2,6 +2,7 @@ using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.ViewNodes;
 using Autoload = TheBlockWar.Scripts.Tools.Autoload;
 
 namespace TheBlockWar.Scripts.Views;
@@ -43,7 +44,7 @@ public partial class BuffView : Node2D
     
     // Buff数据
     private readonly Dictionary<string, int> _buffChanges = new();
-    private readonly Dictionary<string, AnimatedSprite2D> _visibleBuffs = new();
+    private readonly Dictionary<string, ViewAnimatedSprite2D> _visibleBuffs = new();
     private bool _refreshBuffListsDirty = true;
     private ItemTabStyle _gainItemTabStyle = new()
     {
@@ -132,7 +133,7 @@ public partial class BuffView : Node2D
         }
         else AfterAnim(s);
 
-        void AfterAnim(AnimatedSprite2D animatedSprite2D)
+        void AfterAnim(ViewAnimatedSprite2D animatedSprite2D)
         {
             animatedSprite2D.GetParent().RemoveChild(animatedSprite2D);
             GameView.DrawContainer.AddChild(animatedSprite2D);

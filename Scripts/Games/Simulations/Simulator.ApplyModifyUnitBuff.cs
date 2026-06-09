@@ -1,6 +1,7 @@
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -9,6 +10,7 @@ partial class Simulator
     extension(SimObject obj)
     {
         //result:UnitId:long Operation:BuffOperation Duration:int
+        [Step(["UnitId", "Operation", "Duration"], [typeof(long), typeof(BuffOperation), typeof(int)])]
         public void ApplyModifyUnitBuff(Vector2I coords, string buffName, BuffOperation operation, 
             int duration)
         {
@@ -20,7 +22,7 @@ partial class Simulator
             {
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
+                    obj.Steps?.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
                         duration, 0, operation, duration));
                     return;
                 }
@@ -52,13 +54,13 @@ partial class Simulator
                         // 如果结果为移除buff,但是当前所在区域是具有这个buff的区域,则无法移除
                         if (rbs.IndexOf(buffName) == -1) continue;
                         
-                        obj.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
+                        obj.Steps?.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
                             duration, 0, operation, duration));
                         return;
                     }
                 }
 
-                obj.Steps?.AddStep(new ModifyUnitBuffStep(CurrentDeep, coords, buffName, operation,
+                obj.Steps?.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
                     duration, unit.Id, resultOperation, resultDuration));
 
                 if (obj.ComplexSimulationRegion(1))
@@ -144,5 +146,23 @@ partial class Simulator
             obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.AddBuff(buffName, newDuration));
             return (BuffOperation.AddBuff, newDuration, 0);
         }
+    }
+    public static partial void ApplyModifyUnitBuffViewDraw(GameView view, ReadOnlySimObject sim, ApplyModifyUnitBuffResult result)
+    {
+    }
+    
+    public static partial GDTask ApplyModifyUnitBuffViewRun(GameView view, ReadOnlySimObject sim, ApplyModifyUnitBuffResult result)
+    {
+        if (result.Operation == BuffOperation.AddBuff)
+        {
+            view.UnitsView.GetUnitView(result.UnitId)?.BuffView
+                .AddVisibleBuff(result.Step.BuffName);
+        }
+        else if (result.Operation == BuffOperation.RemoveBuff)
+        {
+            view.UnitsView.GetUnitView(result.UnitId)?.BuffView
+                .RemoveVisibleBuff(result.Step.BuffName);
+        }
+        return GDTask.CompletedTask;
     }
 }

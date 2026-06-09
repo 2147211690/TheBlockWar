@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -8,6 +9,7 @@ partial class Simulator
     extension(SimObject obj)
     {
         //TODO:tile改为枚举
+        [Step([], [])]
         public void ApplyPlaceTile(Vector2I coords, string tileName)
         {
             EnterSimulation();
@@ -18,7 +20,7 @@ partial class Simulator
             {
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
+                    obj.Steps?.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName));
                     return;
                 }
 
@@ -26,7 +28,7 @@ partial class Simulator
                 {
                     t.Name = tileName;
                 });
-                obj.Steps?.AddStep(new PlaceTileStep(CurrentDeep, coords, tileName));
+                obj.Steps?.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName));
                 if (obj.ComplexSimulationRegion(2))
                 {
                     //初始化区域
@@ -45,5 +47,13 @@ partial class Simulator
                 }
             }
         }
+    }
+    public static partial void ApplyPlaceTileViewDraw(GameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
+    {
+    }
+    
+    public static partial GDTask ApplyPlaceTileViewRun(GameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
+    {
+        return view.TilesView.PlaceTile(result.Step.Coords, result.Step.TileName);
     }
 }

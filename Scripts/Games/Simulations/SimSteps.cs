@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+namespace TheBlockWar.Scripts.Games.Simulations;
+
 [JsonDerivedType(typeof(ShotSomethingAnim), typeDiscriminator: nameof(ShotSomethingAnim))]
 [JsonDerivedType(typeof(ThrowSomethingAnim), typeDiscriminator: nameof(ThrowSomethingAnim))]
 [JsonDerivedType(typeof(UnitJumpToAnim), typeDiscriminator: nameof(UnitJumpToAnim))]

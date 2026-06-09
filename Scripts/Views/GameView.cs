@@ -1,10 +1,12 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.EventViews;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views;
 
@@ -12,7 +14,7 @@ namespace TheBlockWar.Scripts.Views;
 public partial class GameView : Node2D
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    [Export] public Node2D DrawContainer { get; private set; } = null!;
+    [Export] public GameViewNodeContainer DrawContainer { get; private set; } = null!;
     [Export] public GameViewStyle Style { get; set; } = null!;
     [Export] public TilesView TilesView { get; set; } = null!;
     [Export] public UnitsView UnitsView { get; set; } = null!;
@@ -24,20 +26,20 @@ public partial class GameView : Node2D
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
 
-    private Dictionary<long, SimObject> _runningSimulations = new();
-    private List<SimObject> _prepareSimulations = new();
+    private Dictionary<long, ReadOnlySimObject> _runningSimulations = new();
+    private List<ReadOnlySimObject> _prepareSimulations = new();
     private EventScheduler? _eventScheduler;
-    private Queue<(IReadOnlyList<SimObject> simulations, int? delay)> _simulationCache = new();
+    private Queue<(IReadOnlyList<ReadOnlySimObject> simulations, int? delay)> _simulationCache = new();
     private Vector2I? _previousMouseCoords = null;
     private Vector2I _currentCoords;
     private bool _refocus = false;
     private Queue<int> _nextDelays = new();
     private int? _currentDelay;
-    private SimStepHandler _simStepHandler;
+    private SimResultHandler _simResultHandler;
 
     public GameView()
     {
-        _simStepHandler = new(HandleSimStep);
+        _simResultHandler = new(HandleSimStep);
     }
 
     public override void _Ready()
@@ -53,6 +55,7 @@ public partial class GameView : Node2D
         _eventScheduler.SimulationUpdated += EventSchedulerOnSimulationUpdated;
         _eventScheduler.OtherStateUpdated += EventSchedulerOnOtherStateUpdated;
         _eventScheduler.NextDelay += EventSchedulerOnNextDelay;
+        _eventScheduler.GameStateReload += EventSchedulerOnGameStateReload;
 
 
         TreeExiting += () =>
@@ -61,6 +64,31 @@ public partial class GameView : Node2D
             _eventScheduler.OtherStateUpdated -= EventSchedulerOnOtherStateUpdated;
             _eventScheduler.NextDelay -= EventSchedulerOnNextDelay;
         };
+    }
+    
+    private void EventSchedulerOnGameStateReload(object? sender, IReadOnlyGameState e)
+    {
+        TilesView.ClearAllTile();
+        UnitsView.ClearAllUnit();
+        var size = e.Size;
+        for (int i = 0; i < size.X; i++)
+        {
+            for(int j = 0; j < size.Y; j++)
+            {
+                var tile = e.TileMapState.GetTile(new Vector2I(i, j));
+                TilesView.PlaceTile(new(i, j), tile.Name).Forget();
+                foreach (var region in tile.Regions)
+                {
+                    //TODO: 绘制区域
+                }
+            }
+        }
+
+        foreach (var unit in e.UnitMapState.GetAllUnits())
+        {
+            var view = UnitsView.CreateOrGetUnit(unit.Coords, unit, GetTeamType(unit.Team))!;
+            view.PlayPlaceDownAnim().Forget();
+        }
     }
 
     private void EventSchedulerOnNextDelay(object? sender, int e)
@@ -88,6 +116,10 @@ public partial class GameView : Node2D
         }
     }
 
+    public TeamTypeEnum GetTeamType(int team)
+    {
+        return team.GetTeamTypeRelativeToPlayer(_eventScheduler);
+    }
     private void EventSchedulerOnOtherStateUpdated(object? sender, EventScheduler.OtherStateUpdateTypeEnum e)
     {
         switch (e)
@@ -105,14 +137,14 @@ public partial class GameView : Node2D
         }
     }
 
-    private void EventSchedulerOnSimulationUpdated(object? sender, List<SimObject> e)
+    private void EventSchedulerOnSimulationUpdated(object? sender, List<ReadOnlySimObject> e)
     {
         var hasDelay = _nextDelays.TryDequeue(out var delay);
         SetSimulations(e, hasDelay ? delay : null);
     }
 
     /// <param name="simulations">确保传入有序的模拟结果</param>
-    private void SetSimulations(IReadOnlyList<SimObject> simulations, int? delay = null)
+    private void SetSimulations(IReadOnlyList<ReadOnlySimObject> simulations, int? delay = null)
     {
         if (IsRunning)
         {
@@ -163,23 +195,22 @@ public partial class GameView : Node2D
 
     private async GDTask StartSimulations(int? delay = null)
     {
-        //await _simStepHandler.Handle(_runningSimulations.Values);
-        //绘制运行前的事件 TODO: 可能优化
+        ClearDraw();
         DrawEvents(_prepareSimulations);
         if (_runningSimulations.Count > 0)
         {
             _refocus = true;
-            //DrawEvents(_lastSimulations.Where(a => !_runningSimulations.ContainsKey(a.SourceId)));
             await RunSimulations(_runningSimulations.Values);
         }
         if (delay != null) await GDTask.Delay(delay.Value);
     }
 
-    private async GDTask HandleSimStep(SimStep step)
+    private GDTask HandleSimStep(ReadOnlySimObject sim, StepResult step)
     {
         var id = step.GetHashCode();
         Logger.Debug("处理事件开始->id:{0}-type:{1}-time:{2}", id, step.GetType(), Time.GetTicksMsec() / 100);
-        switch (step)
+        return step.ViewRun(this, sim);
+        /*switch (step)
         {
             case PlaceTileStep placeStep:
                 await TilesView.PlaceTile(placeStep.Apply.Coords, placeStep.Apply.TileName);
@@ -246,18 +277,29 @@ public partial class GameView : Node2D
                 break;
             case null:
                 break;
-        }
+        }*/
     }
 
-    private GDTask RunSimulations(IEnumerable<SimObject> simulations)
+    private GDTask RunSimulations(IEnumerable<ReadOnlySimObject> sims)
     {
-        return _simStepHandler.Handle(simulations.SelectMany(a => a.Steps ?? []));
+        return _simResultHandler.Handle(sims);
     }
 
-    private void DrawEvents(IEnumerable<SimObject> s)
+    private void ClearDraw()
     {
         EventsView.ClearAll();
-        foreach (var simulation in s)
+    }
+    private void DrawEvents(IEnumerable<ReadOnlySimObject> sims)
+    {
+        foreach (var sim in sims)
+        {
+            foreach (var step in sim.Steps ?? [])
+            {
+                step.ViewDraw(this, sim);
+            }
+        }
+        /*EventsView.ClearAll();
+        foreach (var simulation in sims)
         {
             var isFocused = simulation.Layer == SimulationLayer.Focused;
             var teamType = TeamTypeEnum.Player; //TODO:每一步都不一样
@@ -309,6 +351,6 @@ public partial class GameView : Node2D
             }
 
             EventsView.EndAddEventView();
-        }
+        }*/
     }
 }

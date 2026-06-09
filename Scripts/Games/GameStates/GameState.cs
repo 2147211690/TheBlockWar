@@ -13,13 +13,13 @@ public class GameState : IGameState
     
     public IDictionary<long, SchedulerEvent> Events => _events;
     IReadOnlyDictionary<long, SchedulerEvent> IReadOnlyGameState.Events => _events;
-    public Vector2I Size { get; }
-    public DefaultIdGenerator IdGenerator { get; }
-    public DateTime BaseTime { get; }
+    public Vector2I Size { get; private set; }
+    public DefaultIdGenerator IdGenerator { get; private set; }
+    public DateTime BaseTime { get; private set; }
     public IReadOnlyGameState? Owner => null;
-    public ITileMapState TileMapState { get; }
-    public IUnitMapState UnitMapState { get; }
-    public TeamState TeamState { get; }
+    public ITileMapState TileMapState { get; private set; }
+    public IUnitMapState UnitMapState { get; private set; }
+    public TeamState TeamState { get; private set; }
     
     IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
@@ -35,6 +35,27 @@ public class GameState : IGameState
     public IGameState GetSnapshot() => new GameStateSnapshot(this);
 
     public GameState(GameStateData data)
+    {
+        LoadGameData(data);
+    }
+    public GameState() : this(new (0,0), [], new int[0,0]){}
+    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations)
+    {
+        _unitSkillMap = unitSkillMap;
+        _events = new();
+        Size = mapSize;
+        BaseTime = DateTime.UtcNow;
+        IdGenerator = new DefaultIdGenerator(new IdGeneratorOptions()
+        {
+            WorkerId = IdGeneratorConfig.WorkerId,
+            BaseTime = BaseTime,
+        });
+        TileMapState = new TileMapState(mapSize);
+        UnitMapState = new UnitMapState(mapSize);
+        TeamState = new TeamState(teamRelations);
+    }
+
+    public void LoadGameData(GameStateData data)
     {
         _unitSkillMap = new Dictionary<string, ISkill[]>();
         _events = new();
@@ -54,21 +75,6 @@ public class GameState : IGameState
         TeamState = new TeamState(data.TeamState);
     }
 
-    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations)
-    {
-        _unitSkillMap = unitSkillMap;
-        _events = new();
-        Size = mapSize;
-        BaseTime = DateTime.UtcNow;
-        IdGenerator = new DefaultIdGenerator(new IdGeneratorOptions()
-        {
-            WorkerId = IdGeneratorConfig.WorkerId,
-            BaseTime = BaseTime,
-        });
-        TileMapState = new TileMapState(mapSize);
-        UnitMapState = new UnitMapState(mapSize);
-        TeamState = new TeamState(teamRelations);
-    }
     public void ClearIfSnapshot(){}
     public GameStateData ToData()
     {
@@ -124,6 +130,8 @@ public class GameState : IGameState
         }
 
         public IReadOnlyList<ISkill> GetUnitValidSkills(string unitName) => Owner.GetUnitValidSkills(unitName);
+        public void LoadGameData(GameStateData data) => Logger.Warn("快照不应该加载数据");
+
         public void ClearIfSnapshot()
         {
             TileMapState.ClearIfSnapshot();

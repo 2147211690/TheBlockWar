@@ -11,9 +11,9 @@ public class 荆棘1Buff() : Buff(BuffNames.荆棘1)
     {
         var caster = obj.State.UnitMapState.GetUnit(Simulator.CurrentContext.SourceUnitId);
         if (caster.IsNull() || getDamage == 0) return;
-        Simulator.PushContext(new SimContext(unit.Id));
+        obj.PushContext(new SimContext(unit.Id));
         obj.ApplyModifyUnitBuff(unit.Coords, BuffNames.荆棘1, BuffOperation.RemoveBuff, 1);
         obj.ApplyDamage(caster.Coords, 10);
-        Simulator.PopContext();
+        obj.PopContext();
     }
 }

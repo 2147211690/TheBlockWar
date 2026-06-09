@@ -39,8 +39,9 @@ public class EventScheduler
     private long _coordsRegionsId;
     private IGameState? _snapshotChache;
 
-    public event EventHandler<List<SimObject>>? SimulationUpdated;
+    public event EventHandler<List<ReadOnlySimObject>>? SimulationUpdated;
     public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
+    public event EventHandler<IReadOnlyGameState>? GameStateReload;
     public event EventHandler<int>? NextDelay;
 
     private bool _isRunning = false;
@@ -65,6 +66,11 @@ public class EventScheduler
         OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.FocusedUnitId);
     }
 
+    public void ReloadGameState()
+    {
+        GameStateReload?.Invoke(this, _gameState);
+        _eventManager.ReloadStateEvents();
+    }
     public void SetNextCompleteDelay(int delay)
     {
         NextDelay?.Invoke(this, delay);
@@ -124,17 +130,17 @@ public class EventScheduler
         if (_isRunning) return;
         _isRunning = true;
         Logger.Info("触发更新");
-        var simObjects = new List<SimObject>();
+        var simObjects = new List<ReadOnlySimObject>();
         _runningSchedulers.Push(this);
 
         // 运行层直接执行
         foreach (var ev in _eventManager.RunningEvents)
         {
-            Simulator.PushContext(CreateSimulationContext(ev));
             var obj = new SimObject(_gameState, ev.Layer, new(), ev.Id);
+            obj.PushContext(CreateSimulationContext(ev));
             simObjects.Add(obj);
             ev.OnApply(ev, obj);
-            Simulator.PopContext();
+            obj.PopContext();
         }
         // 创建快照，用于焦点层和等待层事件执行
         var snapshot = _snapshotChache =
@@ -145,23 +151,15 @@ public class EventScheduler
         // 焦点层和等待层事件执行
         foreach (var ev in _eventManager.FocusedEvents.Concat(_eventManager.WaitingEvents))
         {
-            Simulator.PushContext(CreateSimulationContext(ev));
             var obj = new SimObject(_snapshotChache, ev.Layer, new(), ev.Id);
+            obj.PushContext(CreateSimulationContext(ev));
             simObjects.Add(obj);
             ev.OnApply(ev, obj);
-            Simulator.PopContext();
+            obj.PopContext();
         }
         
         var sb = new StringBuilder();
-        foreach (var ev in simObjects)
-        {
-            sb.AppendLine("==========");
-            if (_gameState.Events!.TryGetValue(ev.SourceEventId, out var value)) sb.AppendLine(value.ToString());
-            sb.AppendLine("---");
-            sb.AppendLine(ev.ToString());
-            Logger.Debug("结构树:\n{tree}", (ev.Steps ?? []).ToTree());
-            sb.AppendLine("==========");
-        }
+        Logger.Debug("结构树:\n{tree}", simObjects.ToTree());
         // 运行层事件执行完毕后，清空运行层
         _eventManager.ClearLayerEvent(SimulationLayer.Running);
         
@@ -205,7 +203,7 @@ public class EventScheduler
         private readonly ICollection<SchedulerEvent>[] _eventsList;
         private int _blockingCount = 0;
         private bool _needUpdate = false;
-        private EventScheduler _eventScheduler;
+        private readonly EventScheduler _eventScheduler;
         public event EventHandler? EnabledListUpdated;
 
         public SchedulerEventManager(EventScheduler eventScheduler)
@@ -227,6 +225,23 @@ public class EventScheduler
             return r;
         }
 
+        public void ReloadStateEvents()
+        {
+            _runningEvents.Clear();
+            _waitingEvents.Clear();
+            _focusedEvents.Clear();
+            _disabledEvents.Clear();
+            _turnEvents.Clear();
+            _skillEvents.Clear();
+            
+            foreach (var ev in StateEvents.Values)
+            {
+                AddToList(ev);
+                ev.PropertyChange += EvOnPropertyChange;
+            }
+            OnEnableListUpdate();
+        }
+        
         public void ClearTurnEvents(int turn = -1)
         {
             if (turn == -1) _turnEvents.Clear();

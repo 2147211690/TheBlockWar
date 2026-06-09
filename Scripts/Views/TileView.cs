@@ -1,9 +1,10 @@
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views;
 
-public partial class TileView : Node2D
+public partial class TileView : ViewNode2D
 {
     [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
     [ExportGroup("PlaceDown")]

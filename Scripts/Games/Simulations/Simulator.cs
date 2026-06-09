@@ -29,12 +29,33 @@ public static partial class Simulator
     private static void ExitSimulation() => _simulationStack--;
     private static int CurrentComplexSimulationMaxLevel { get; set; }
 
-    public static void PushContext(SimContext context) => _contexts.Push(context);
-    public static SimContext PopContext() => _contexts.Pop();
+
     public static SimContext CurrentContext => _contexts.Peek();
-    private static Stack<SimContext> _contexts = [];
+    private static Stack<SimContext> _contexts = new([new SimContext(0)]);
     extension(SimObject obj)
     {
+        public void PushContext(SimContext context)
+        {
+            var previous = CurrentContext;
+            _contexts.Push(context);
+            if (_contexts.Count == 2)
+                obj.ApplyRaiseContextChanged(context);
+            else 
+                obj.TryRaiseContextChanged(context, previous);
+        }
+
+        public SimContext PopContext()
+        {
+            if (_contexts.Count == 1) return CurrentContext;
+            var previous = _contexts.Pop();
+            var current = _contexts.Peek();
+            obj.TryRaiseContextChanged(current, previous);
+            return previous;
+        }
+        private void TryRaiseContextChanged(in SimContext current, in SimContext previous)
+        {
+            if (current != previous) obj.ApplyRaiseContextChanged(current);
+        }
         private bool ComplexSimulationRegion(int level) 
             => CurrentComplexSimulationMaxLevel >= level || obj.Layer == SimulationLayer.Running;
         /// <summary>
@@ -96,7 +117,7 @@ public static partial class Simulator
         {
             if (obj.Layer != SimulationLayer.Running) return;
             EnterSimulation();
-            obj.Steps?.AddStep(new StepsStep(CurrentDeep, [], startDelay, endDelay, runningMode));
+            obj.Steps?.AddResult(new ApplyStepsResult(CurrentDeep, [], startDelay, endDelay, runningMode));
         }
         /// <summary>
         /// 结束封装一系列步骤

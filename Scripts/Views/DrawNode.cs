@@ -1,6 +1,8 @@
+using TheBlockWar.Scripts.Views.ViewNodes;
+
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
-public partial class DrawNode : Node2D
+public partial class DrawNode : ViewNode2D
 {
     public Action<DrawNode, bool>? DrawAction
     {

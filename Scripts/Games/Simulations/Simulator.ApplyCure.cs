@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -8,6 +9,7 @@ partial class Simulator
     extension(SimObject obj)
     {
         //result:UnitId:long ValidCure:float
+        [Step(["UnitId", "ValidCure"],[typeof(long), typeof(float)])]
         public void ApplyCure(Vector2I coords, float cure)
         {
             EnterSimulation();
@@ -18,7 +20,7 @@ partial class Simulator
             {
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new CureStep(CurrentDeep, coords, cure, 0, 0));
+                    obj.Steps?.AddResult(new ApplyCureResult(CurrentDeep, coords, cure, 0, 0));
                     return;
                 }
 
@@ -26,8 +28,8 @@ partial class Simulator
                 float validCure = 0;
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    obj.Steps?.AddStep(
-                        new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
+                    obj.Steps?.AddResult(
+                        new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
                     return;
                 }
 
@@ -47,8 +49,8 @@ partial class Simulator
 
                 if (unit.IsNull())
                 {
-                    obj.Steps?.AddStep(
-                        new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
+                    obj.Steps?.AddResult(
+                        new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
                     return;
                 }
 
@@ -58,12 +60,12 @@ partial class Simulator
 
                 if (unit.IsNull())
                 {
-                    obj.Steps?.AddStep(
-                        new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
+                    obj.Steps?.AddResult(
+                        new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
                     return;
                 }
 
-                obj.Steps?.AddStep(new CureStep(CurrentDeep, coords, cure, unit.Id, validCure));
+                obj.Steps?.AddResult(new ApplyCureResult(CurrentDeep, coords, cure, unit.Id, validCure));
 
                 if (validCure > 0 && obj.ComplexSimulationRegion(0))
                 {
@@ -72,5 +74,15 @@ partial class Simulator
                 }
             }
         }
+    }
+
+    public static partial void ApplyCureViewDraw(GameView view, ReadOnlySimObject sim, ApplyCureResult result)
+    {
+    }
+
+    public static partial GDTask ApplyCureViewRun(GameView view, ReadOnlySimObject sim, ApplyCureResult result)
+    {
+        view.UnitsView.GetUnitView(result.UnitId)?.HealthBar.CurrentHealth += result.ValidCure;
+        return GDTask.CompletedTask;
     }
 }

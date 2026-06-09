@@ -9,11 +9,9 @@
 [ext_resource type="Texture2D" uid="uid://b4gfqejk75oob" path="res://Art/Img/region_block.png" id="5_vwb7u"]
 [ext_resource type="PackedScene" uid="uid://bccdls2vsjite" path="res://View/UnitView.tscn" id="6_ivycn"]
 [ext_resource type="Script" uid="uid://dk12ehg31xf4o" path="res://Scripts/Views/EventViews/EventsView.cs" id="7_q1uvj"]
-[ext_resource type="Script" uid="uid://boli430ctw28m" path="res://Scripts/Views/EventViews/BlockNumberView.cs" id="9_vwb7u"]
 [ext_resource type="Script" uid="uid://c2bb8fdqy4ca4" path="res://Scripts/Views/AnimationView.cs" id="11_cqdos"]
-[ext_resource type="Script" uid="uid://d1jjn6pd0t1w8" path="res://Scripts/Views/EventViews/BlockBuffView.cs" id="11_rc7cs"]
-[ext_resource type="Script" uid="uid://ckyskgma4rbc0" path="res://Scripts/Views/EventViews/BlockRegionView.cs" id="12_d1b21"]
 [ext_resource type="Texture2D" uid="uid://bc0rv0tg0wvqo" path="res://Art/Img/ui/power.png" id="12_r6p7k"]
+[ext_resource type="Script" uid="uid://ble1upceejr4q" path="res://Scripts/Views/ViewNodes/GameViewNodeContainer.cs" id="12_rc7cs"]
 [ext_resource type="PackedScene" uid="uid://clbp4km484ly4" path="res://View/Uis/CombatUi.tscn" id="15_ilduj"]
 
 [sub_resource type="TileSet" id="TileSet_8tn2x"]
@@ -21,7 +19,7 @@ tile_shape = 1
 tile_layout = 5
 tile_size = Vector2i(56, 42)
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_ilduj"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_d1b21"]
 viewport_path = NodePath("../../../../../../../../../../SubViewport")
 
 [node name="Node2D" type="Node2D" unique_id=1155941121 node_paths=PackedStringArray("_view", "_combatUi")]
@@ -55,31 +53,9 @@ DrawContainer = NodePath("../DrawContainer")
 _unitScene = ExtResource("6_ivycn")
 metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
 
-[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("GameView", "_drawContainer", "BlockNumberView", "BlockBuffView", "BlockRegionView")]
+[node name="EventsView" type="Node2D" parent="GameView" unique_id=436007648 node_paths=PackedStringArray("GameView")]
 script = ExtResource("7_q1uvj")
 GameView = NodePath("..")
-_drawContainer = NodePath("../DrawContainer")
-BlockNumberView = NodePath("BlockNumberView")
-BlockBuffView = NodePath("BlockBuffView")
-BlockRegionView = NodePath("BlockRegionView")
-
-[node name="BlockNumberView" type="Node2D" parent="GameView/EventsView" unique_id=101820365 node_paths=PackedStringArray("EventsView")]
-script = ExtResource("9_vwb7u")
-EventsView = NodePath("..")
-metadata/_custom_type_script = "uid://boli430ctw28m"
-
-[node name="BlockBuffView" type="Node2D" parent="GameView/EventsView" unique_id=1068886859 node_paths=PackedStringArray("EventsView")]
-z_index = 1
-script = ExtResource("11_rc7cs")
-EventsView = NodePath("..")
-IconSize = Vector2(18, 18)
-SymbolBoxSize = Vector2(0, 0)
-ElementSpacing = 1.0
-RowSpacing = -2.0
-
-[node name="BlockRegionView" type="Node2D" parent="GameView/EventsView" unique_id=296024160 node_paths=PackedStringArray("EventsView")]
-script = ExtResource("12_d1b21")
-EventsView = NodePath("..")
 
 [node name="AnimationView" type="Node2D" parent="GameView" unique_id=2146921144 node_paths=PackedStringArray("GameView")]
 script = ExtResource("11_cqdos")
@@ -89,12 +65,16 @@ Somethings = Dictionary[String, Texture2D]({
 })
 metadata/_custom_type_script = "uid://c2bb8fdqy4ca4"
 
-[node name="DrawContainer" type="Node2D" parent="GameView" unique_id=1071978760]
+[node name="DrawContainer" type="Node2D" parent="GameView" unique_id=1521349995 node_paths=PackedStringArray("GameView")]
 y_sort_enabled = true
+rotation = -3.1415927
+script = ExtResource("12_rc7cs")
+GameView = NodePath("..")
+metadata/_custom_type_script = "uid://ble1upceejr4q"
 
 [node name="Camera2D" type="Camera2D" parent="GameView" unique_id=1503643200]
 position = Vector2(0, 112)
-zoom = Vector2(2.14, 2.14)
+zoom = Vector2(2.825, 2.825)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=892010729]
 
@@ -102,7 +82,7 @@ zoom = Vector2(2.14, 2.14)
 GameView = NodePath("../../GameView")
 
 [node name="TextureRect" parent="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer/AspectRatioContainer" parent_id_path=PackedInt32Array(100001026, 1163128792, 1775412479) index="0" unique_id=408846773]
-texture = SubResource("ViewportTexture_ilduj")
+texture = SubResource("ViewportTexture_d1b21")
 
 [node name="SubViewport" type="SubViewport" parent="." unique_id=1510478228]
 disable_3d = true

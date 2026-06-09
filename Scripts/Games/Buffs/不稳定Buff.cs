@@ -9,7 +9,7 @@ public class 不稳定Buff() : Buff(BuffNames.不稳定)
 {
     public override void OnUnitDeath(SimObject obj, IReadOnlyUnitState unit, int buffCount)
     {
-        Simulator.PushContext(new SimContext(unit.Id));
+        obj.PushContext(new SimContext(unit.Id));
         var coords = unit.Coords;
         obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
         for (var i = 0; i < 4; i++)
@@ -18,6 +18,6 @@ public class 不稳定Buff() : Buff(BuffNames.不稳定)
             obj.ApplyPushUnit(coords + dir.ToVec2I(), dir);
         }
         obj.EndSteps();
-        Simulator.PopContext();
+        obj.PopContext();
     }
 }

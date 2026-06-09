@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -9,6 +10,7 @@ partial class Simulator
     {
         //TODO:可能使用事件优化
         //result:UnitId:long ValidDamage:float
+        [Step(["UnitId", "ValidDamage"],[typeof(long), typeof(float)])]
         public void ApplyDamage(Vector2I coords, float damage)
         {
             EnterSimulation();
@@ -19,7 +21,7 @@ partial class Simulator
             {
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new DamageStep(CurrentDeep, coords, damage, 0, 0));
+                    obj.Steps?.AddResult(new ApplyDamageResult(CurrentDeep, coords, damage, 0, 0));
                     return;
                 }
 
@@ -27,8 +29,8 @@ partial class Simulator
                 float validDamage = 0;
                 if (unit.IsNull() || unit.IsDead)
                 {
-                    obj.Steps?.AddStep(
-                        new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
+                    obj.Steps?.AddResult(
+                        new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
                 var originDamage = damage;
@@ -47,8 +49,8 @@ partial class Simulator
 
                 if (unit.IsNull())
                 {
-                    obj.Steps?.AddStep(
-                        new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
+                    obj.Steps?.AddResult(
+                        new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
@@ -58,13 +60,13 @@ partial class Simulator
 
                 if (unit.IsNull())
                 {
-                    obj.Steps?.AddStep(
-                        new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
+                    obj.Steps?.AddResult(
+                        new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
                     return;
                 }
 
-                obj.Steps?.AddStep(
-                    new DamageStep(CurrentDeep, coords, damage, unit.Id, validDamage));
+                obj.Steps?.AddResult(
+                    new ApplyDamageResult(CurrentDeep, coords, damage, unit.Id, validDamage));
 
                 // 触发受伤后事件, 仅在运行层触发
                 if (validDamage > 0 && obj.ComplexSimulationRegion(0))
@@ -80,5 +82,15 @@ partial class Simulator
                 }
             }
         }
+    }
+    
+    public static partial void ApplyDamageViewDraw(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
+    {
+    }
+    
+    public static partial GDTask ApplyDamageViewRun(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
+    {
+        view.UnitsView.GetUnitView(result.UnitId)?.HealthBar.CurrentHealth -= result.ValidDamage;
+        return GDTask.CompletedTask;
     }
 }

@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -7,6 +8,7 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
+        [Step([], [])]
         public void ApplyRectWind(Rect2I rect, DirMask dir)
         {
             EnterSimulation();
@@ -17,7 +19,7 @@ partial class Simulator
             {
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new RectWindStep(CurrentDeep, rect, dir));
+                    obj.Steps?.AddResult(new ApplyRectWindResult(CurrentDeep, rect, dir));
                     return;
                 }
                 Vector2I start = dir switch
@@ -53,7 +55,7 @@ partial class Simulator
                     DirMask.Right => rect.Size.X,
                     _ => 0,
                 };
-                obj.Steps?.AddStep(new RectWindStep(CurrentDeep, rect, dir));
+                obj.Steps?.AddResult(new ApplyRectWindResult(CurrentDeep, rect, dir));
                 var aims = new Queue<Queue<Vector2I>>();
                 var currentLine = new Queue<Vector2I>();
                 for (var j = 0; j < secondOffsetCount; j++)
@@ -86,5 +88,13 @@ partial class Simulator
                 }
             }
         }
+    }
+    public static partial void ApplyRectWindViewDraw(GameView view, ReadOnlySimObject sim, ApplyRectWindResult result)
+    {
+    }
+    
+    public static partial GDTask ApplyRectWindViewRun(GameView view, ReadOnlySimObject sim, ApplyRectWindResult result)
+    {
+        return GDTask.CompletedTask;
     }
 }

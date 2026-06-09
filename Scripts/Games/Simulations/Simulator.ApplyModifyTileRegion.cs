@@ -2,6 +2,7 @@ using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -10,6 +11,7 @@ partial class Simulator
     extension(SimObject obj)
     {
         //result:Operation:RegionOperation Duration:int
+        [Step(["Operation", "Duration"], [typeof(RegionOperation), typeof(int)])]
         public void ApplyModifyTileRegion(Vector2I coords, string regionName, RegionOperation operation, 
             int duration)
         {
@@ -21,7 +23,7 @@ partial class Simulator
             {
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName,
+                    obj.Steps?.AddResult(new ApplyModifyTileRegionResult(CurrentDeep, coords, regionName,
                         operation, duration, operation, duration));
                     return;
                 }
@@ -46,7 +48,7 @@ partial class Simulator
                     };
                 }
 
-                obj.Steps?.AddStep(new ModifyTileRegionStep(CurrentDeep, coords, regionName, operation,
+                obj.Steps?.AddResult(new ApplyModifyTileRegionResult(CurrentDeep, coords, regionName, operation,
                     duration, resultOperation, resultDuration));
 
                 if (obj.ComplexSimulationRegion(1))
@@ -131,5 +133,13 @@ partial class Simulator
             obj.State.TileMapState.ModifyTile(coords, t => t.AddRegion(regionName, newDuration));
             return (RegionOperation.AddRegion, newDuration);
         }
+    }
+    public static partial void ApplyModifyTileRegionViewDraw(GameView view, ReadOnlySimObject sim, ApplyModifyTileRegionResult result)
+    {
+    }
+    
+    public static partial GDTask ApplyModifyTileRegionViewRun(GameView view, ReadOnlySimObject sim, ApplyModifyTileRegionResult result)
+    {
+        return GDTask.CompletedTask;
     }
 }

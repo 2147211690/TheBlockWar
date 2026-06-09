@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views;
 [GlobalClass]
@@ -26,8 +27,8 @@ public partial class AnimationView : Node2D
         if (!Somethings.TryGetValue(anim.ThingName, out var texture)) return; 
         var sprite = PopSomething(anim.Coords, texture);
         var startPos = sprite.Position;
-        
-        var endPos = GameView.TilesView.GetRenderPosition(anim.To, Layer. Underground , 1); 
+
+        var endPos = Vector2.Zero;//TODO
 
         var throwStart = GameView.TilesView.GetRealPosition(anim.Coords, Layer.Underground);
         var throwEnd = GameView.TilesView.GetRealPosition(anim.To, Layer.Underground);
@@ -53,8 +54,8 @@ public partial class AnimationView : Node2D
     { 
         if (!Somethings.TryGetValue(anim.ThingName, out var texture)) return; 
         var sprite = PopSomething(anim.Coords, texture);
-        var endPos = GameView.TilesView.GetRenderPosition(anim.To, Layer. Underground , 1); 
-        var endOffset = GameView.TilesView.GetRenderOffset(anim.To, Layer. Underground , 1); 
+        var endPos = Vector3.Zero;//TODO: 计算目标位置
+        var endOffset = Vector2.Zero;//TODO: 计算目标偏移
         
         var tween = sprite.CreateTween();
         tween.SetTrans(Tween.TransitionType.Cubic);
@@ -67,7 +68,7 @@ public partial class AnimationView : Node2D
         PushSomething(sprite);
     }
 
-    private void PushSomething(Sprite2D sprite)
+    private void PushSomething(ViewSprite2D sprite)
     {
         sprite.Texture = null; 
         sprite.Offset = Vector2.Zero; 
@@ -76,12 +77,12 @@ public partial class AnimationView : Node2D
         GameView.ViewPools.Sprite2DPool.Return(sprite);
     }
 
-    private Sprite2D PopSomething(Vector2I coords, Texture2D texture)
+    private ViewSprite2D PopSomething(Vector2I coords, Texture2D texture)
     {
         var sprite = GameView.ViewPools.Sprite2DPool.Get(); 
         sprite.Texture = texture; 
-        sprite.Position = GameView.TilesView.GetRenderPosition(coords, Layer. Underground , 1); 
-        sprite.Offset = GameView.TilesView.GetRenderOffset(coords, Layer. Underground , 1);
+        sprite.Position = Vector2.Zero;//TODO: 计算目标位置
+        sprite.Offset = Vector2.Zero;//TODO: 计算偏移
         return sprite;
     }
 }

@@ -1,6 +1,7 @@
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.EventViews;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views;
 
@@ -11,9 +12,9 @@ public class ViewPools
     {
         DrawContainer = drawContainer;
         Style = styleStyle;
-        AnimatedSprite2DPool = new TypedPool<AnimatedSprite2D>(() =>
+        AnimatedSprite2DPool = new TypedPool<ViewAnimatedSprite2D>(() =>
         {
-            var node = new AnimatedSprite2D();
+            var node = new ViewAnimatedSprite2D();
             DrawContainer.AddChild(node);
             return node;
         }, 0)
@@ -22,6 +23,11 @@ public class ViewPools
             {
                 u.Visible = false;
                 u.ProcessMode = Node.ProcessModeEnum.Disabled;
+                u.GameZIndex = 0;
+                u.NodeZIndexOffset = 0;
+                u.Offset = Vector2.Zero;
+                u.Scale = Vector2.One;
+                u.GameRotationDegrees = 0;
             },
             BeforeGet = u =>
             {
@@ -29,9 +35,9 @@ public class ViewPools
                 u.ProcessMode = Node.ProcessModeEnum.Inherit;
             }
         };
-        Sprite2DPool = new TypedPool<Sprite2D>(() =>
+        Sprite2DPool = new TypedPool<ViewSprite2D>(() =>
         {
-            var node = new Sprite2D();
+            var node = new ViewSprite2D();
             DrawContainer.AddChild(node);
             return node;
         }, 0)
@@ -40,6 +46,11 @@ public class ViewPools
             {
                 u.Visible = false;
                 u.ProcessMode = Node.ProcessModeEnum.Disabled;
+                u.GameZIndex = 0;
+                u.NodeZIndexOffset = 0;
+                u.Offset = Vector2.Zero;
+                u.Scale = Vector2.One;
+                u.GameRotationDegrees = 0;
             },
             BeforeGet = u =>
             {
@@ -62,6 +73,8 @@ public class ViewPools
                 a.Args = null;
                 a.Reset();
                 a.ProcessMode = Node.ProcessModeEnum.Disabled;
+                a.GameZIndex = 0;
+                a.NodeZIndexOffset = 0;
             },
             BeforeGet = a =>
             {
@@ -82,6 +95,8 @@ public class ViewPools
             {
                 a.Visible = false;
                 a.ProcessMode = Node.ProcessModeEnum.Disabled;
+                a.GameZIndex = 0;
+                a.NodeZIndexOffset = 0;
             },
             BeforeGet = a =>
             {
@@ -91,8 +106,8 @@ public class ViewPools
         };
     }
     public Node2D DrawContainer { get; }
-    public TypedPool<AnimatedSprite2D> AnimatedSprite2DPool { get; private set; }
-    public TypedPool<Sprite2D> Sprite2DPool { get; private set; }
+    public TypedPool<ViewAnimatedSprite2D> AnimatedSprite2DPool { get; private set; }
+    public TypedPool<ViewSprite2D> Sprite2DPool { get; private set; }
     public TypedPool<DrawNode> DrawNodePool { get; private set; }
     public TypedPool<BlockEventDrawNode> BlockEventDrawNodePool { get; private set; }
 }

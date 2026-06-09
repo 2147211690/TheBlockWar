@@ -1,6 +1,7 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -8,6 +9,7 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
+        [Step([], [])]
         public void ApplyRegionTurn(int turn)
         {
             EnterSimulation();
@@ -16,7 +18,7 @@ partial class Simulator
 
             void Main()
             {
-                obj.Steps?.AddStep(new RegionTurnStep(CurrentDeep, turn));
+                obj.Steps?.AddResult(new ApplyRegionTurnResult(CurrentDeep, turn));
                 if (obj.Layer == SimulationLayer.Waiting) return;
                 var regionPairs = new List<(Vector2I coords, IReadOnlyList<RegionState> regions)>();
                 var size = obj.State.TileMapState.Size;
@@ -48,5 +50,13 @@ partial class Simulator
                 obj.EndSteps();
             }
         }
+    }
+    public static partial void ApplyRegionTurnViewDraw(GameView view, ReadOnlySimObject sim, ApplyRegionTurnResult result)
+    {
+    }
+    
+    public static partial GDTask ApplyRegionTurnViewRun(GameView view, ReadOnlySimObject sim, ApplyRegionTurnResult result)
+    {
+        return GDTask.CompletedTask;
     }
 }

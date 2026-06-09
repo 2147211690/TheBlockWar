@@ -3,18 +3,18 @@ using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Tools;
 
-public class SimStepHandler
+public class SimResultHandler
 {
-    private Func<SimStep, GDTask> _handleAction;
+    private Func<ReadOnlySimObject, StepResult, GDTask> _handleAction;
 
-    public SimStepHandler(Func<SimStep, GDTask> handleAction)
+    public SimResultHandler(Func<ReadOnlySimObject, StepResult, GDTask> handleAction)
     {
         _handleAction = handleAction;
     }
 
-    public async GDTask Handle(IEnumerable<SimStep> steps)
+    public async GDTask Handle(IEnumerable<ReadOnlySimObject> sims)
     {
-        var tree = steps.ToTree();   // 根节点 Deep = -1
+        var tree = sims.ToTree();   // 根节点 Deep = -1
         await ProcessNode(tree);
     }
 
@@ -22,13 +22,13 @@ public class SimStepHandler
     {
         var step = node.Step;
 
-        if (step is StepsStep stepsStep)
+        if (step is ApplyStepsResult stepsStep)
         {
             await ProcessStepsStep(stepsStep, node.Children);
             return;
         }
 
-        await _handleAction(step);
+        await _handleAction(node.SimObject!, step);
 
         foreach (var child in node.Children)
             await ProcessNode(child);
@@ -37,13 +37,13 @@ public class SimStepHandler
     /// <summary>
     /// 处理 StepsStep：先 StartDelay，再按模式执行所有子节点，最后 EndDelay
     /// </summary>
-    private async GDTask ProcessStepsStep(StepsStep stepsStep, List<SimStepsAnalyzer.TreeNode> children)
+    private async GDTask ProcessStepsStep(ApplyStepsResult stepsStep, List<SimStepsAnalyzer.TreeNode> children)
     {
         // 前置延迟
-        if (stepsStep.Apply.StartDelay > 0) await GDTask.Delay(stepsStep.Apply.StartDelay);
+        if (stepsStep.Step.StartDelay > 0) await GDTask.Delay(stepsStep.Step.StartDelay);
 
         // 根据运行模式执行子节点
-        switch (stepsStep.Apply.RunningMode)
+        switch (stepsStep.Step.RunningMode)
         {
             case StepsRunningMode.QueueWaitAll:
                 // 顺序执行，每个等待完成
@@ -77,6 +77,6 @@ public class SimStepHandler
                 break;
         }
         // 后置延迟
-        if (stepsStep.Apply.EndDelay > 0) await GDTask.Delay(stepsStep.Apply.EndDelay);
+        if (stepsStep.Step.EndDelay > 0) await GDTask.Delay(stepsStep.Step.EndDelay);
     }
 }

@@ -6,7 +6,6 @@
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PublishAOT>true</PublishAOT>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GDTask" Version="3.0.0" />
@@ -27,7 +26,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\Games\Simulations\StepRecordGenerator.py" />
     <Content Include="开发规范\添加新模拟操作步骤的规范流程.md" />
   </ItemGroup>
   <ItemGroup>

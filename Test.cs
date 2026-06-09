@@ -1,9 +1,11 @@
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using ImGuiNET;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Modes;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
@@ -11,7 +13,6 @@ using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
-using TheBlockWar.Scripts.Tools.Jsons;
 using TheBlockWar.Scripts.Views;
 using TheBlockWar.View.Uis;
 using Yitter.IdGenerator;
@@ -46,6 +47,11 @@ public partial class Test : Node2D
     private TurnManager _turnManager;
     private bool _checkNextTurn;
     private string _buffName = string.Empty;
+    private JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        WriteIndented = true,
+        IncludeFields = true,
+    };
     public override void _Ready()
     {
         InfoExtensions.InfoManager = ResourceLoader.Load<InfoManager>("uid://cidx5e6oa1bc8");
@@ -101,6 +107,8 @@ public partial class Test : Node2D
         _player.TurnManager = _turnManager;
         _combatUi.Bind(_eventScheduler, _player);
         _turnManager.Start().Forget();
+
+        TestPlace();
     }
 
 
@@ -264,7 +272,7 @@ public partial class Test : Node2D
             {
                 ActionCore = (e, obj) =>
                 {
-                    obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
+                    obj.BeginSteps(0, 0, StepsRunningMode.QueueWaitAll);
                     for (int i = 0; i < 10; i++)
                     {
                         for (int j = 0; j < 9; j++)
@@ -279,28 +287,7 @@ public partial class Test : Node2D
         }
         if (ImGui.Button("测试放置"))
         {
-
-            string[] names = [TileNames.Soil0, TileNames.水块, TileNames.熔岩块, TileNames.燃烧块];
-            _eventScheduler.CreateEvent(id => new ActionEvent(id)
-            {
-                ActionCore = (e, obj) =>
-                {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
-                        
-                        for (int j = 0; j < 10; j++)
-                        {
-                            var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
-                            obj.ApplyPlaceTile(new(i, j), empty ? TileNames.水块 : 
-                                (names[Random.Shared.Next(names.Length)]));
-                        }
-                        obj.EndSteps();
-                    }
-                    obj.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0);
-                },
-                Layer = SimulationLayer.Running,
-            });
+            TestPlace();
         }
         if (ImGui.Button("测试掉落"))
         {
@@ -423,26 +410,85 @@ public partial class Test : Node2D
 
         if (ImGui.Button("序列化TileState"))
         {
-            var json = JsonSerializer.Serialize(_gameState.TileMapState.ToData(), GameJsonSerializerContext.Default.TileMapStateData);
+            var json = JsonSerializer.Serialize(_gameState.TileMapState.ToData(), _jsonSerializerOptions);
             GD.Print(json);
         }
         if (ImGui.Button("序列化UnitState"))
         {
-            var json = JsonSerializer.Serialize(_gameState.UnitMapState.ToData(), GameJsonSerializerContext.Default.UnitMapStateData);
+            var json = JsonSerializer.Serialize(_gameState.UnitMapState.ToData(), _jsonSerializerOptions);
             GD.Print(json);
         }
         if (ImGui.Button("序列化TeamState"))
         {
-            var json = JsonSerializer.Serialize(_gameState.TeamState.ToData(), GameJsonSerializerContext.Default.TeamStateData);
+            var json = JsonSerializer.Serialize(_gameState.TeamState.ToData(), _jsonSerializerOptions);
             GD.Print(json);
         }
         if (ImGui.Button("序列化GameState"))
         {
-            var json = JsonSerializer.Serialize(_gameState.ToData(), GameJsonSerializerContext.Default.GameStateData);
+            var json = JsonSerializer.Serialize(_gameState.ToData(), _jsonSerializerOptions);
             GD.Print(json);
+        }
+        if (ImGui.Button("测试序列化Apply"))
+        {
+            var apply = new ApplyStepsStep(
+                [
+                    new ApplyPlaceUnitStep(new(1,1), UnitNames.Unit0, 0),
+                    
+                ], 
+                0, 0, StepsRunningMode.QueueWaitAll);
+            var json = JsonSerializer.Serialize(apply, _jsonSerializerOptions);
+            GD.Print(json);
+        }
+        if (ImGui.Button("保存GameState到数据"))
+        {
+            var json = JsonSerializer.Serialize(_gameState.ToData(), _jsonSerializerOptions);
+            GD.Print(json);
+            using var file = FileAccess.Open("res://testData.json", FileAccess.ModeFlags.Write);
+            file.StoreString(json);
+        }
+        if (ImGui.Button("从数据加载GameState"))
+        {
+            var data = LoadJsonFromRes<GameStateData>("res://testData.json");
+            SaveManager.LoadCurrentGameState(data, _gameState, _eventScheduler);
         }
         ImGui.End();
         
     }
-    
+
+    private void TestPlace()
+    {
+        string[] names = [TileNames.Soil0, TileNames.水块, TileNames.熔岩块, TileNames.燃烧块];
+        _eventScheduler.CreateEvent(id => new ActionEvent(id)
+        {
+            ActionCore = (e, obj) =>
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
+                        
+                    for (int j = 0; j < 10; j++)
+                    {
+                        var empty = false || i is > 2 and < 7 && j is > 2 and < 7;
+                        obj.ApplyPlaceTile(new(i, j), empty ? TileNames.水块 : 
+                            (names[Random.Shared.Next(names.Length)]));
+                    }
+                    obj.EndSteps();
+                }
+                obj.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0);
+            },
+            Layer = SimulationLayer.Running,
+        });
+    }
+
+    private T LoadJsonFromRes<T>(string path) where T : class
+    {
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+        if (file == null)
+        {
+            GD.PrintErr($"无法打开文件: {path}");
+            return null;
+        }
+        string json = file.GetAsText();
+        return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions);
+    }
 }

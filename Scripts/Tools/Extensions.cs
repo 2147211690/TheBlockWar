@@ -189,6 +189,11 @@ public static class Extensions
             result = args[index]!.Value;
             return true;
         }
+
+        public bool IsEndValidArgs(int index, out Vector2I result)
+        {
+            return args.TryGetArgs(index, out result) && !args.TryGetArgs(index + 1, out _);
+        }
     }
 
     extension(in Vector2I coords)

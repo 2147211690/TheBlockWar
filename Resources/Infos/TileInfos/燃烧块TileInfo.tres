@@ -18,4 +18,5 @@ animations = [{
 script = ExtResource("1_kccq1")
 Name = "燃烧块"
 Regions = PackedStringArray("火域")
+ViewHeight = 32.0
 ViewFrames = SubResource("SpriteFrames_71coo")

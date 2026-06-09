@@ -1,10 +1,11 @@
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views;
 
-public partial class UnitView : Node2D
+public partial class UnitView : ViewNode2D
 {
     [Export] public Node2D Center { get; set; } = null!;
     [Export] public HealthBar HealthBar { get; set; } = null!;
@@ -17,7 +18,7 @@ public partial class UnitView : Node2D
     [Export] public float ImpactStretchX { get; set; } = 0.25f;
     [Export] public float RecoveryDuration { get; set; } = 0.04f;
     public Vector2 Offset { get => Center.Position; set => Center.Position = value; }
-    public IReadOnlyList<(Vector2I coords, Sprite2D sprite)> Fakes => _fakes ?? [];
+    public IReadOnlyList<(Vector2I coords, ViewSprite2D sprite)> Fakes => _fakes ?? [];
     public Vector2I? AimCoords { get; set; }
     public Vector2I RealCoords { get; set; }
     public TeamTypeEnum TeamType { get; set; }
@@ -25,7 +26,7 @@ public partial class UnitView : Node2D
     public uint Id { get; set; }
     public Vector2I WishCoords => AimCoords ?? RealCoords;
     public GameView GameView { get; set; } = null!;
-    private List<(Vector2I coords, Sprite2D sprite)>? _fakes;
+    private List<(Vector2I coords, ViewSprite2D sprite)>? _fakes;
     private ShaderMaterial? _shaderMaterial = null!;
     private UnitInfo? _unitInfo;
     private string _unitName = string.Empty;
@@ -72,17 +73,15 @@ public partial class UnitView : Node2D
         }
     }
 
-    public Sprite2D AddFack(Vector2I coords, TilesView tilesView)
+    public Sprite2D AddFack(Vector2I coords)
     {
         _fakes ??= new();
         
         var fake = GameView.ViewPools.Sprite2DPool.Get();
         fake.Texture = MainSprite.SpriteFrames.GetFrameTexture(MainSprite.Animation, MainSprite.Frame);
-        fake.Offset = tilesView.GetRenderOffset(coords, Layer.Underground, 0) + 
-                      _unitInfo?.ViewOffset ?? Vector2.Zero;
+        fake.Offset = _unitInfo?.ViewOffset ?? Vector2.Zero;
         fake.Modulate = new Color(1, 1, 1, 0.3f);
-        fake.Position = tilesView.GetRenderPosition(coords, Layer.Underground, 0);
-        
+        fake.GamePosition = GameView.TilesView.GetGamePositionOnGround(coords);
         _fakes.Add((coords, fake));
         return fake;
     }
@@ -107,7 +106,7 @@ public partial class UnitView : Node2D
         PushFackSprite(fake);
     }
     
-    private void PushFackSprite(in (Vector2I coords, Sprite2D sprite) fakePair)
+    private void PushFackSprite(in (Vector2I coords, ViewSprite2D sprite) fakePair)
     {
         var sprite = fakePair.sprite;
         sprite.Texture = null;

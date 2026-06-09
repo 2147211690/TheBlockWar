@@ -41,9 +41,9 @@ public class BlockDraw
     {
         if (_nodes.TryGetValue(coords, out var node)) return node;
         node = Pool.Get();
-        node.ZIndex = 2;
+        node.NodeZIndexOffset = 2;
         _nodes.Add(coords, node);
-        node.Position = _eventsView.GameView.TilesView.GetRealPosition(coords, Layer.Sky);
+        node.GamePosition = _eventsView.GameView.TilesView.GetGamePositionOnGround(coords);
 
         return node;
     }

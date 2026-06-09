@@ -1,4 +1,4 @@
-using TheBlockWar.Scripts.Games;
+/*using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
@@ -12,9 +12,6 @@ public class EventView
     private List<DrawNode> _nodes = new();
     private TypedPool<DrawNode> DrawNodePool => _pool.EventsView.GameView.ViewPools.DrawNodePool;
     private TypedPool<Sprite2D> SpritePool => _pool.EventsView.GameView.ViewPools.Sprite2DPool;
-    private BlockNumberView BlockNumberView => _pool.EventsView.BlockNumberView;
-    private BlockBuffView BlockBuffView => _pool.EventsView.BlockBuffView;
-    private BlockRegionView BlockRegionView => _pool.EventsView.BlockRegionView;
     private TilesView TilesView => _pool.EventsView.GameView.TilesView;
     private GameViewStyle Style => _pool.EventsView.GameView.Style;
     private UnitsView UnitsView => _pool.EventsView.GameView.UnitsView;
@@ -29,7 +26,7 @@ public class EventView
     {
         _pool.EventsView.NeedClearUnit(id);
     }
-    public void PlaceUnit(PlaceUnitStep step)
+    /*public void PlaceUnit(PlaceUnitStep step)
     {
         Draw((u, v) =>
             {
@@ -304,5 +301,5 @@ public class EventView
             _eventViewPool.Push(view);
             view.Clear();
         }
-    }
-}
+    }#1#
+}*/

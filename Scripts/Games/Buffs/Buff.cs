@@ -9,7 +9,7 @@ namespace TheBlockWar.Scripts.Games.Buffs;
 [RegisterChildClass]
 public abstract class Buff(string name) : IBuff
 {
-    private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    protected static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
     public string Name { get; } = name;
 

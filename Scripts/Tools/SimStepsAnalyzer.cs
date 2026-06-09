@@ -6,28 +6,46 @@ namespace TheBlockWar.Scripts.Tools;
 
 public static class SimStepsAnalyzer
 {
-    public static TreeNode ToTree(this IEnumerable<SimStep> steps)
+    public static TreeNode ToTree(this IEnumerable<ReadOnlySimObject> sims)
     {
-        var root = new TreeNode(new SimStep(null, -1));
+        var root = new TreeNode(null, new StepResult(null, -1));
         var stack = new Stack<TreeNode>();
         stack.Push(root);
 
+        foreach (var sim in sims)
+        {
+            foreach (var step in sim.Steps ?? [])
+            {
+                var node = new TreeNode(sim, step);
+                while (stack.Peek().Deep >= step.Deep) stack.Pop();
+                stack.Peek().Children.Add(node);
+                stack.Push(node);
+            }
+        }
+        return root;
+    }
+
+    public static TreeNode ToTree(this IEnumerable<StepResult> steps)
+    {
+        var root = new TreeNode(null, new StepResult(null, -1));
+        var stack = new Stack<TreeNode>();
+        stack.Push(root);
         foreach (var step in steps)
         {
-            var node = new TreeNode(step);
+            var node = new TreeNode(null, step);
             while (stack.Peek().Deep >= step.Deep) stack.Pop();
             stack.Peek().Children.Add(node);
             stack.Push(node);
         }
         return root;
     }
-    
-    
-    
-    public struct TreeNode(SimStep step)
+
+
+    public class TreeNode(ReadOnlySimObject? sim, StepResult step)
     {
-        public SimStep Step { get; set; } = step;
-        public List<TreeNode> Children { get; set; } = [];
+        public ReadOnlySimObject? SimObject { get; set; } = sim;
+        public StepResult Step { get; set; } = step;
+        public List<TreeNode> Children { get => field ??= []; set; }
         public int Deep => Step.Deep;
         /// <summary>
         /// 可视化树形图

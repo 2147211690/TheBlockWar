@@ -1,5 +1,6 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
@@ -8,6 +9,7 @@ partial class Simulator
     extension(SimObject obj)
     {
         //result:UnitId:long Valid:bool
+        [Step(["UnitId", "Valid"], [typeof(long), typeof(bool)])]
         public void ApplyPushUnit(Vector2I coords, DirMask dir)
         {
             EnterSimulation();
@@ -18,7 +20,7 @@ partial class Simulator
             {
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
-                    obj.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, 0, true));
+                    obj.Steps?.AddResult(new ApplyPushUnitResult(CurrentDeep, coords, dir, 0, true));
                     return;
                 }
 
@@ -28,7 +30,7 @@ partial class Simulator
                 var validPush = !unit.IsNull() && targetUnit.IsNull() && obj.State.IsInMap(target);
                 var shouldPush = true;
                 Hook.BuffUnitBeforePush(unit, obj, dir, ref shouldPush);
-                obj.Steps?.AddStep(new PushUnitStep(CurrentDeep, coords, dir, unit.Id, validPush && shouldPush));
+                obj.Steps?.AddResult(new ApplyPushUnitResult(CurrentDeep, coords, dir, unit.Id, validPush && shouldPush));
                 if (unit.IsNull() || !shouldPush) return;
                 if (validPush)
                 {
@@ -37,14 +39,23 @@ partial class Simulator
                 else
                 {
                     //推动碰撞伤害是互相给予的
-                    PushContext(new SimContext(targetUnit.Id));
+                    obj.PushContext(new SimContext(targetUnit.Id));
                     obj.ApplyDamage(coords, 10); 
-                    PopContext();
-                    PushContext(new SimContext(unit.Id));
+                    obj.PopContext();
+                    obj.PushContext(new SimContext(unit.Id));
                     if (!targetUnit.IsNull()) obj.ApplyDamage(target, 10);
-                    PopContext();
+                    obj.PopContext();
                 }
             }
         }
+    }
+    public static partial void ApplyPushUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
+    {
+        
+    }
+
+    public static partial GDTask ApplyPushUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
+    {
+        return view.UnitsView.PushUnit(result.UnitId, result.Step.Dir, result.Valid);
     }
 }
