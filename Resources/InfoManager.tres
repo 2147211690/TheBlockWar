@@ -24,6 +24,7 @@
 [ext_resource type="Resource" uid="uid://jj5iiqei77o7" path="res://Resources/Infos/RegionInfos/火域RegionInfo.tres" id="12_11wvo"]
 [ext_resource type="Resource" uid="uid://doy53t4jua3e0" path="res://Resources/Infos/TileInfos/熔岩块TileInfo.tres" id="16_ps5i8"]
 [ext_resource type="Resource" uid="uid://ce4ukf471gwmg" path="res://Resources/Infos/TileInfos/燃烧块TileInfo.tres" id="21_11wvo"]
+[ext_resource type="Resource" uid="uid://d2mmc8ch7i1m" path="res://Resources/Infos/UnitInfos/Unit1UnitInfo.tres" id="24_1fdqu"]
 
 [resource]
 script = ExtResource("2_4s57m")
@@ -42,7 +43,8 @@ RegionInfos = Dictionary[String, ExtResource("2_rc7cr")]({
 "熔岩域": ExtResource("8_cgp2c")
 })
 UnitInfos = Dictionary[String, ExtResource("10_lsjiv")]({
-"Unit0": ExtResource("11_lsjiv")
+"Unit0": ExtResource("11_lsjiv"),
+"Unit1": ExtResource("24_1fdqu")
 })
 TileInfos = Dictionary[String, ExtResource("9_imjp5")]({
 "Air": ExtResource("10_fu7tl"),

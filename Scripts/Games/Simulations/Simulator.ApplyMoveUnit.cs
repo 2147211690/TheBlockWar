@@ -28,20 +28,24 @@ partial class Simulator
                 var unit = obj.State.UnitMapState.GetUnit(coords);
                 var toUnit = obj.State.UnitMapState.GetUnit(to);
                 r.UnitId = unit.Id;
-                if (!unit.IsNull() && toUnit.IsNull())
-                {
-                    obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
-                    r.Valid = true;
-                    obj.ApplyUnitRemoveFromCoords(unit, coords);
-                    obj.ApplyUnitSetInCoords(unit);
-                }
-                else r.Valid = false;
+                if (unit.IsNull() || !toUnit.IsNull()) return r;
+                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
+                r.Valid = true;
+                obj.ApplyUnitRemoveFromCoords(unit, coords);
+                obj.ApplyUnitSetInCoords(unit);
                 return r;
             }
         }
     }
     public static partial void ApplyMoveUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)
     {
+        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        if (uv != null && result.Valid)
+        {
+            uv.AddFack(uv.WishCoords);
+            view.UnitsView.SetUnitAimCoords(result.UnitId, result.Step.To);
+            view.EventsView.SetUnitNeedClear(result.UnitId);
+        }
     }
     
     public static partial GDTask ApplyMoveUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)

@@ -27,6 +27,7 @@ public enum RegionNameEnum
 public enum UnitNameEnum
 {
     Unit0,
+    Unit1
 }
 [NameEnum]
 public enum TileNameEnum

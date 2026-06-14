@@ -19,6 +19,8 @@ resources_spreadsheet_view/context_menu_on_leftclick=false
 resources_spreadsheet_view/fold_docks=true
 resources_spreadsheet_view/resource_cell_label_mode=1
 resources_spreadsheet_view/freeze_first_column=true
+resources_spreadsheet_view/array_color_tint=100.0
+resources_spreadsheet_view/color_rows=true
 
 [application]
 
@@ -37,7 +39,6 @@ ImGuiRoot="*uid://dugmpnsxaagba"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="viewport"
-window/stretch/aspect="expand"
 mouse_cursor/custom_image="uid://cx1goiv4roxax"
 
 [dotnet]

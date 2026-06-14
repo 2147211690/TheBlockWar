@@ -20,3 +20,5 @@ Name = "熔岩块"
 Regions = PackedStringArray("熔岩域")
 ViewHeight = 25.0
 ViewFrames = SubResource("SpriteFrames_y8bno")
+DominantColor = Color(0.99215686, 0.73333335, 0.24705882, 1)
+WaterHeight = 4.0

@@ -8,7 +8,7 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
-        [Step([], [])]
+        [Step(["Valid"], [typeof(bool)])]
         public ApplyPlaceTileResult ApplyPlaceTile(Vector2I coords, string tileName)
         {
             EnterSimulation();
@@ -18,12 +18,14 @@ partial class Simulator
 
             ApplyPlaceTileResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName));
+                var r = obj.Steps.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
                 }
 
+                if (!obj.State.TileMapState.IsEmpty(coords)) return r;
+                r.Valid = true;
                 obj.State.TileMapState.ModifyTile(coords, t =>
                 {
                     t.Name = tileName;
@@ -54,6 +56,7 @@ partial class Simulator
     
     public static partial GDTask ApplyPlaceTileViewRun(GameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
     {
+        if (!result.Valid) return GDTask.CompletedTask;
         return view.TilesView.PlaceTile(result.Step.Coords, result.Step.TileName);
     }
 }

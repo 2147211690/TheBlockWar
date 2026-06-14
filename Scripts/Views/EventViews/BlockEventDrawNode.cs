@@ -35,7 +35,7 @@ public partial class BlockEventDrawNode : ViewNode2D
         Layout = 0,
         Modulate = Colors.White
     };
-    private static readonly Vector2[] TabSizes = [new(12,12), new(11,11), new(8,8), new(6,6)];
+    private static readonly Vector2[] TabSizes = [new(15,15), new(13,13), new(10,10), new(8,8)];
     
     public TeamTypeEnum FocusedTeam { get; set; }
     public bool IsFocused { get; private set; }
@@ -81,6 +81,7 @@ public partial class BlockEventDrawNode : ViewNode2D
     {
         _healthOriginChange = 0;
         _healthValidChange = 0;
+        _healthHasAim = false;
         _addBuffs.Clear();
         _removeBuffs.Clear();
         _addRegions.Clear();

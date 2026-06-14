@@ -6,8 +6,12 @@ public interface IGameViewNode<out T> where T : Node2D
     T Node { get; }
     Vector3 GamePosition { get; set; }
     float GameRotationDegrees { get; set; }
+    float NodeRotation { get; set; }
     int GameZIndex { get; set; }
     int NodeZIndexOffset { get; set; }
+    Vector2 GameToNodePosition(Vector3 gamePosition, int zIndex);
+    void SetGameRotation(float xyAngle, float xzAngle);
+    void SetGameRotation(Vector3 direction);
 }
 
 public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
@@ -28,11 +32,20 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
 
     public float GameRotationDegrees
     {
+        get => Mathf.RadToDeg(NodeRotation);
+        set => NodeRotation = Mathf.DegToRad(value);
+    }
+    /// <summary>
+    /// 节点旋转角度,非游戏角度
+    /// </summary>
+    public float NodeRotation
+    {
         get;
         set
         { 
+            if (Math.Abs(field - value) < float.Epsilon) return;
             field = value;
-            Node.RotationDegrees =  180 + value; 
+            UpdateRotation();
         }
     }
 
@@ -49,7 +62,7 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
 
     public int NodeZIndexOffset
     {
-        get => field;
+        get;
         set
         {
             if (field == value) return;
@@ -57,7 +70,13 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
             UpdateNodeZIndex();
         }
     }
-    
+
+    public Vector2 GameToNodePosition(Vector3 gamePosition, int zIndex)
+    {
+        var s = new Vector2(gamePosition.X, gamePosition.Y);
+        return -((Container?.GetNodePosition(s) ?? s) + new Vector2(0, -(gamePosition.Z + zIndex * 0.01f)));
+    }
+
     public GameViewNode(T node)
     {
         Node = node;
@@ -65,7 +84,39 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
         Node.TreeEntered += OnTreeEntered;
         Node.TreeExited += OnTreeExited;
     }
+    /// <summary>
+    /// 使用游戏坐标设置节点旋转
+    /// </summary>
+    public void SetGameRotation(float xyAngle, float xzAngle)
+    {
+        if (Container == null) return;
+        var xzv = Mathf.Cos(xzAngle);
+        var xzvh = Mathf.Sin(xzAngle);
+        var xv = xzv * Mathf.Cos(xyAngle);
+        var yv = xzv * Mathf.Sin(xyAngle);
+        var viewVec =
+            -Container.GameView.TilesView.LocalLeft * xv + 
+            -Container.GameView.TilesView.LocalUp * yv +
+            new Vector2(0, -Container.GameView.TilesView.NormalGroundHeight) * xzvh;
+        
+        NodeRotation = Vector2.Right.AngleTo(viewVec);
+    }
 
+    public void SetGameRotation(Vector3 direction)
+    {
+        if (Container == null) return;
+        var normal = direction.Normalized();
+        var viewVec =
+            -Container.GameView.TilesView.LocalLeft * normal.X + 
+            -Container.GameView.TilesView.LocalUp * normal.Y +
+            Vector2.Up * normal.Z;
+        
+        NodeRotation = Vector2.Right.AngleTo(viewVec);
+    }
+    private void UpdateRotation()
+    {
+        Node.Rotation =  NodeRotation - Mathf.Pi;
+    }
     private void UpdateNodeZIndex()
     {
         Node.ZIndex = Mathf.CeilToInt(GamePosition.X + GamePosition.Y - 0.1f) + NodeZIndexOffset;
@@ -73,10 +124,8 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
     
     private void UpdateNodePosition()
     {
-        var s = new Vector2(GamePosition.X, GamePosition.Y);
-        Node.Position = -((Container?.GetNodePosition(s) ?? s) + new Vector2(0, -(GamePosition.Z + GameZIndex * 0.01f)));
+        Node.Position = GameToNodePosition(GamePosition, GameZIndex);
     }
-    
     private void OnTreeExited()
     {
         Container = null;
@@ -85,5 +134,8 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
     private void OnTreeEntered()
     {
         Container = Node.GetParentOrNull<GameViewNodeContainer>();
+        UpdateRotation();
+        UpdateNodePosition();
+        UpdateNodeZIndex();
     }
 }

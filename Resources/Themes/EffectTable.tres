@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EffectTable" format=3 uid="uid://d2t2lgb1rumg7"]
+
+[ext_resource type="PackedScene" uid="uid://bgr1gb1ysfkiv" path="res://Resources/Themes/Effects/TestEffect.tscn" id="1_k20c4"]
+[ext_resource type="Script" uid="uid://bgwmiy1l8bfwn" path="res://Scripts/Resources/EffectTable.cs" id="1_w4r8j"]
+
+[resource]
+script = ExtResource("1_w4r8j")
+EffectScenes = Dictionary[String, PackedScene]({
+"Test": ExtResource("1_k20c4")
+})
+metadata/_custom_type_script = "uid://bgwmiy1l8bfwn"

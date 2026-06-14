@@ -6,16 +6,14 @@ using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Skills;
 
-public class Test1Skill() : Skill(SkillNames.Test1, 3)
+public class Test1Skill() : Skill(SkillNames.Test1, 1)
 {
     public override IEnumerable<Vector2I> GetSkillArgs(IReadOnlyGameState state, IReadOnlyUnitState caster, Vector2I useCoords, int argsIndex,
         Vector2I?[] args)
     {
         if (argsIndex == 0)
         {
-            return GameNavigator
-                .FindValidDestinationsWithinCost(state, caster, caster.Coords, 4)
-                .Select(a => a - caster.Coords);
+            return CoordsRegion.GetRingRegion(Vector2I.Zero, 3, 10);
         }
         else if(argsIndex == 1)
         {
@@ -41,10 +39,9 @@ public class Test1Skill() : Skill(SkillNames.Test1, 3)
         if (args.TryGetArgs(0, out var v1))
         {
             obj.ApplyDamage(unit.Coords, 10);
-        }
-        if (args.TryGetArgs(1, out var v2))
-        {
-            var coords = v2 + useCoords;
+            obj.ApplyAnimation(new ThrowSomethingAnim(unit.Coords, useCoords + v1, "Test", 200, 1f));
+            obj.ApplyDamage(v1 + useCoords, 20);
+            var coords = v1 + useCoords;
             obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
             for (int i = 0; i < 4; i++)
             {
@@ -52,6 +49,10 @@ public class Test1Skill() : Skill(SkillNames.Test1, 3)
                 obj.ApplyPushUnit(coords + vec.ToVec2I(), vec);
             }
             obj.EndSteps();
+        }
+        if (args.TryGetArgs(1, out var v2))
+        {
+
         }
         if (args.TryGetArgs(2, out var v3))
         {

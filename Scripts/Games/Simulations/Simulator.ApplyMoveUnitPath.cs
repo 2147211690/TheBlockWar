@@ -72,13 +72,6 @@ partial class Simulator
 
         tex = view.Style[TeamTypeEnum.Player].PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
         SetSprite(result.Step.Coords + path[^1], tex, path.Count - 1);
-        var uv = view.UnitsView.GetUnitView(result.UnitId);
-        if (uv != null)
-        {
-            uv.AddFack(uv.WishCoords);
-            view.UnitsView.SetUnitAimCoords(result.UnitId, result.Step.Path[result.TargetIndex]);
-            view.EventsView.SetUnitNeedClear(result.UnitId);
-        }
 
         void SetSprite(in Vector2I coords, Texture2D tex, int index)
         {

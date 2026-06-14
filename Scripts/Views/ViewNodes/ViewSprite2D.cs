@@ -23,6 +23,12 @@ public partial class ViewSprite2D : Sprite2D, IGameViewNode<Sprite2D>
         set => _gameViewNode.GameRotationDegrees = value;
     }
 
+    public float NodeRotation
+    {
+        get => _gameViewNode.NodeRotation;
+        set => _gameViewNode.NodeRotation = value;
+    }
+
     public int GameZIndex
     {
         get => _gameViewNode.GameZIndex;
@@ -33,5 +39,20 @@ public partial class ViewSprite2D : Sprite2D, IGameViewNode<Sprite2D>
     {
         get => _gameViewNode.NodeZIndexOffset;
         set => _gameViewNode.NodeZIndexOffset = value;
+    }
+
+    public Vector2 GameToNodePosition(Vector3 gamePosition, int zIndex)
+    {
+        return _gameViewNode.GameToNodePosition(gamePosition, zIndex);
+    }
+
+    public void SetGameRotation(float xyAngle, float xzAngle)
+    {
+        _gameViewNode.SetGameRotation(xyAngle, xzAngle);
+    }
+
+    public void SetGameRotation(Vector3 direction)
+    {
+        _gameViewNode.SetGameRotation(direction);
     }
 }

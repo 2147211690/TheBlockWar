@@ -18,10 +18,14 @@ partial class Simulator
     }
     public static partial void ApplyRaiseContextChangedViewDraw(GameView view, ReadOnlySimObject sim, ApplyRaiseContextChangedResult result)
     {
+        var team = sim.State.UnitMapState.GetUnit(result.Step.Context.SourceUnitId).Team;
+        view.SetCurrentTheme(view.GetTeamType(team));
     }
     
     public static partial GDTask ApplyRaiseContextChangedViewRun(GameView view, ReadOnlySimObject sim, ApplyRaiseContextChangedResult result)
     {
+        var team = sim.State.UnitMapState.GetUnit(result.Step.Context.SourceUnitId).Team;
+        view.SetCurrentTheme(view.GetTeamType(team));
         return GDTask.CompletedTask;
     }
 }

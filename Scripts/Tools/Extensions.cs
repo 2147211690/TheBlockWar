@@ -215,6 +215,7 @@ public static class Extensions
                 _ => DirMask.None
             };
         }
+        public Vector2 ToVec2() => new(coords.X, coords.Y);
         public bool IsInSize(in Vector2I size, Vector2I offset = default)
         {
             return coords.X >= 0 + offset.X && coords.X < size.X + offset.X && coords.Y >= 0 + offset.Y && coords.Y < size.Y + offset.Y;
@@ -229,7 +230,7 @@ public static class Extensions
         }
         public TeamTypeEnum GetTeamTypeRelativeToPlayer(EventScheduler eventScheduler)
         {
-            return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Neutral;
+            return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Enemy;
         }
         public bool TryFindBuff(string buffName, out int index)
         {
@@ -256,6 +257,7 @@ public static class Extensions
         }
         public bool GetShouldUseSkill(IReadOnlyGameState state, ISkill skill)
         {
+            if (unit.IsDead) return false;
             var shouldUseSkill = true;
             Hook.BuffUnitShouldUseSkill(unit, state, skill, ref shouldUseSkill);
             return shouldUseSkill;
@@ -317,6 +319,17 @@ public static class Extensions
                 _ => Vector2I.Zero,
             };
         }
+        public Vector2 ToVec2()
+        {
+            return dirMask switch
+            {
+                DirMask.Up => new Vector2(0, -1),
+                DirMask.Down => new Vector2(0, 1),
+                DirMask.Left => new Vector2(-1, 0),
+                DirMask.Right => new Vector2(1, 0),
+                _ => Vector2.Zero,
+            };
+        }
         public int ToIndex()
         {
             return dirMask switch
@@ -340,6 +353,16 @@ public static class Extensions
         public GDTask WaitForTween()
         {
             return tween.ToSignal(tween, Tween.SignalName.Finished).AsGDTask();
+        }
+        public GDTask WaitForTween(Action<Tween> action)
+        {
+            var complete = new GDTaskCompletionSource();
+            tween.Finished += () =>
+            {
+                action.Invoke(tween);
+                complete.TrySetResult();
+            };
+            return complete.Task;
         }
     }
     extension(BuffOperation operation)
@@ -386,7 +409,7 @@ public static class Extensions
         }
         public TeamTypeEnum GetTeamTypeRelativeToPlayer(EventScheduler eventScheduler)
         {
-            return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, team) ?? TeamTypeEnum.Neutral;
+            return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, team) ?? TeamTypeEnum.Enemy;
         }
     }
     extension(AnimatedSprite2D sprite2D)

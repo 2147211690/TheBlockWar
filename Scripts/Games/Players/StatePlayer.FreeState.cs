@@ -61,6 +61,7 @@ public partial class StatePlayer
                     if (skill is null)
                     {
                         //单位没有等待中的技能
+                        Player._skillingState.CurrentSkillIndex = 0;
                         StateMachine.ChangeState(Player._skillingState);
                     }
                     break;

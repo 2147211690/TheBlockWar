@@ -49,22 +49,11 @@ public class TeamState
     {
         return TryGetRelation(team1, team2) == (int)TeamTypeEnum.Enemy;
     }
-    public bool IsFriend(int team1, int team2)
-    {
-        return TryGetRelation(team1, team2) == (int)TeamTypeEnum.Friend;
-    }
     public bool IsPlayer(int team1, int team2)
     {
         return team1 == team2;
     }
-    public bool IsPlayerOrFriend(int team1, int team2)
-    {
-        return IsPlayer(team1, team2) || IsFriend(team1, team2);
-    }
-    public bool IsNeutral(int team1, int team2)
-    {
-        return TryGetRelation(team1, team2) == (int)TeamTypeEnum.Neutral;
-    }
+    
     public TeamTypeEnum GetTeamTypeRelativeToPlayer(int playerTeam, int team)
     {
         if (IsPlayer(playerTeam, team)) return TeamTypeEnum.Player;

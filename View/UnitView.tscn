@@ -7,17 +7,20 @@
 [ext_resource type="Texture2D" uid="uid://dm7188puqyhc8" path="res://Art/Img/ui/strategy/plus.png" id="5_5mqhy"]
 [ext_resource type="Script" uid="uid://dmemr0krwh881" path="res://Scripts/Views/BuffView.cs" id="5_r4ymd"]
 [ext_resource type="Texture2D" uid="uid://bll45ntridu3t" path="res://Art/Img/ui/x.png" id="6_b2pj8"]
+[ext_resource type="Texture2D" uid="uid://crq6cvsnggqiu" path="res://Art/Img/water_mask.png" id="7_5mqhy"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xcu2x"]
 resource_local_to_scene = true
 shader = ExtResource("4_r4ymd")
-shader_parameter/alpha_threshold = 0.5
-shader_parameter/outline1_color = Color(0.22745098, 0.63529414, 0, 0.23529412)
-shader_parameter/outline1_width = 1.0000000475
-shader_parameter/outline2_color = Color(0, 1, 0, 1)
-shader_parameter/outline2_width = 0.0
-shader_parameter/water = 0
+shader_parameter/water_height = 0.0
+shader_parameter/water_mask = ExtResource("7_5mqhy")
 shader_parameter/water_color = Color(0.2, 0.6, 1, 0.9)
+shader_parameter/water_a_ignore = 0.5
+shader_parameter/enable_outline = true
+shader_parameter/outline_color = Color(0, 0.6274166, 0.49306184, 1)
+shader_parameter/outline_width = 1.0
+shader_parameter/outline_alpha_threshold = 0.5
+shader_parameter/outline_ignore_alpha = 0.5
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_r4ymd"]
 atlas = ExtResource("4_vsdra")

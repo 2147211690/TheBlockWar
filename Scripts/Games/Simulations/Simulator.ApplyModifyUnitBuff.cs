@@ -12,7 +12,7 @@ partial class Simulator
         //result:UnitId:long Operation:BuffOperation Duration:int
         [Step(["UnitId", "Operation", "Duration"], [typeof(long), typeof(BuffOperation), typeof(int)])]
         public ApplyModifyUnitBuffResult ApplyModifyUnitBuff(Vector2I coords, string buffName, BuffOperation operation, 
-            int duration)
+            int duration, bool draw = true)
         {
             EnterSimulation();
             var r = Main();
@@ -22,7 +22,7 @@ partial class Simulator
             ApplyModifyUnitBuffResult Main()
             {
                 var r = obj.Steps.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
-                    duration, 0, operation, duration));
+                    duration, draw ,0, operation, duration));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
@@ -153,6 +153,15 @@ partial class Simulator
     }
     public static partial void ApplyModifyUnitBuffViewDraw(GameView view, ReadOnlySimObject sim, ApplyModifyUnitBuffResult result)
     {
+        if (result.Step.Draw)
+        {
+            if (result.Operation != BuffOperation.AddBuff && result.Operation != BuffOperation.RemoveBuff) return;
+            view.EventsView.BlockDraw.AddBuffChange(result.Step.Coords, result.Step.BuffName,
+                result.Operation == BuffOperation.AddBuff, sim.IsFocused);
+        }
+        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        if (uv == null) return;
+        uv.BuffView.ChangeBuffChange(result.Step.BuffName, result.Operation == BuffOperation.AddBuff ? 1 : -1);
     }
     
     public static partial GDTask ApplyModifyUnitBuffViewRun(GameView view, ReadOnlySimObject sim, ApplyModifyUnitBuffResult result)

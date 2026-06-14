@@ -57,10 +57,9 @@ partial class Simulator
                 unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 r.ValidDamage = validDamage;
 
-                // 触发受伤后事件, 仅在运行层触发
+                // 触发受伤后事件
                 if (validDamage > 0 && obj.ComplexSimulationRegion(0))
                 {
-                    // 触发受伤后事件
                     Hook.BuffUnitAfterGetDamage(unit, obj, validDamage);
                     unit = obj.State.UnitMapState.GetUnit(unit.Id);
                 }
@@ -76,11 +75,20 @@ partial class Simulator
     
     public static partial void ApplyDamageViewDraw(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
     {
+        view.EventsView.BlockDraw.AddHealthChange(result.Step.Coords, -result.Step.Damage, -result.ValidDamage, 
+            result.UnitId != 0 ,sim.IsFocused);
+        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        if (uv == null) return;
+        uv.HealthBar.HealthChange -= result.ValidDamage;
+        view.EventsView.NeedClearUnit(result.UnitId);
     }
     
     public static partial GDTask ApplyDamageViewRun(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
     {
-        view.UnitsView.GetUnitView(result.UnitId)?.HealthBar.CurrentHealth -= result.ValidDamage;
+        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        if (uv == null) return GDTask.CompletedTask;
+        uv.PlayHurtAnim();
+        uv.HealthBar.CurrentHealth -= result.ValidDamage;
         return GDTask.CompletedTask;
     }
 }

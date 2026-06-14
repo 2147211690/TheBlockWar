@@ -82,7 +82,7 @@ public static partial class Simulator
                     Hook.RegionUnitEnter(coords, obj, unit, coords, false);
                     foreach (var region in toTile.Regions)
                     foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs ?? [])
-                        obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.AddBuff, 1);
+                        obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.AddBuff, 1, false);
                 }
 
                 // 移除所有一次性区域
@@ -103,7 +103,7 @@ public static partial class Simulator
             {
                 foreach (var region in fromTile.Regions)
                 foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs ?? [])
-                    obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.RemoveBuff, 1);
+                    obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.RemoveBuff, 1, false);
                 Hook.RegionUnitLeave(coords, obj, unit, coords, false);
             }
 

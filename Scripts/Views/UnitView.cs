@@ -11,6 +11,7 @@ public partial class UnitView : ViewNode2D
     [Export] public HealthBar HealthBar { get; set; } = null!;
     [Export] public BuffView BuffView { get; set; } = null!;
     [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
+    [Export] public bool DrawDebug { get; set; }
     [ExportGroup("PlaceDown")]
     [Export] public float DropHeight { get; set; } = 50f;
     [Export] public float DropDuration { get; set; } = 0.1f;
@@ -23,9 +24,33 @@ public partial class UnitView : ViewNode2D
     public Vector2I RealCoords { get; set; }
     public TeamTypeEnum TeamType { get; set; }
     public UnitsView UnitsView { get; set; } = null!;
-    public uint Id { get; set; }
+    public long Id { get; set; }
     public Vector2I WishCoords => AimCoords ?? RealCoords;
     public GameView GameView { get; set; } = null!;
+
+    public bool IsFocused
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            _shaderMaterial?.SetShaderParameter("outline_color", OutlineColor with { A = IsFocused ? 1f : 0.5f });
+        }
+    }
+
+    public bool IsDead
+    {
+        get;
+        set
+        {
+            if (!value) return;
+            MainSprite.Play("dead");
+            HealthBar.IsDead = true;
+            MainSprite.Modulate = new Color(0.5f, 0.5f, 0.5f);
+        }
+    }
+
     private List<(Vector2I coords, ViewSprite2D sprite)>? _fakes;
     private ShaderMaterial? _shaderMaterial = null!;
     private UnitInfo? _unitInfo;
@@ -33,10 +58,24 @@ public partial class UnitView : ViewNode2D
 
     public Color OutlineColor
     {
-        get => _shaderMaterial?.GetShaderParameter("outline1_color").AsColor() ?? Colors.White;
-        set => _shaderMaterial?.SetShaderParameter("outline1_color", value);
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            _shaderMaterial?.SetShaderParameter("outline_color", value with { A = IsFocused ? 1f : 0.5f });
+        }
     }
-
+    public Color WaterColor
+    {
+        get => _shaderMaterial?.GetShaderParameter("water_color").AsColor() ?? Colors.White;
+        set => _shaderMaterial?.SetShaderParameter("water_color", value);
+    }
+    public float WaterHeight
+    {
+        get => (float)(_shaderMaterial?.GetShaderParameter("water_height").AsDouble() ?? 0);
+        set => _shaderMaterial?.SetShaderParameter("water_height", value);
+    }
     public string UnitName
     {
         get => _unitName;
@@ -50,8 +89,9 @@ public partial class UnitView : ViewNode2D
         }
     }
 
-    public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType, UnitsView unitsView)
+    public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType, long id, UnitsView unitsView)
     {
+        Id = id;
         GameView = gameView;
         UnitsView = unitsView;
         TeamType = teamType;
@@ -62,6 +102,44 @@ public partial class UnitView : ViewNode2D
     {
         _shaderMaterial = MainSprite.Material as ShaderMaterial;
         MainSprite.FrameChanged += MainSpriteOnFrameChanged;
+        if (DrawDebug)
+        {
+            var l = new Label()
+            {
+                Name = "DebugLabel",
+                Text = Id.ToString(),
+                ZIndex = 100,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Scale = new Vector2(0.5f, 0.5f),
+                Modulate = Colors.DarkMagenta,
+            };
+            l.LabelSettings = new LabelSettings()
+            {
+                LineSpacing = -18,
+                FontSize = 18,
+            };
+            Center.AddChild(l);
+        }
+        
+    }
+    private void UpdateDebugLabel()
+    {
+        if (DrawDebug)
+        {
+            var l = Center.GetNode<Label>("DebugLabel");
+            l.Text =
+                $"""
+                 Name:{UnitName}
+                 Id:{Id}
+                 Coords:{WishCoords}
+                 """;
+        }
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        UpdateDebugLabel();
     }
 
     private void MainSpriteOnFrameChanged()
@@ -114,7 +192,39 @@ public partial class UnitView : ViewNode2D
         sprite.Modulate = Colors.White;
         GameView.ViewPools.Sprite2DPool.Return(sprite);
     }
-    
+
+    public GDTask PlayHurtAnim()
+    {
+        var tween = CreateTween();
+        var originPos = Position;
+        var originColor = Modulate;
+        tween.SetParallel();
+        for (int i = 0; i < 4; i++)
+        {
+            var r = GD.Randf() * Mathf.Pi * 2;
+            var p = originPos + Vector2.Right.Rotated(r) * 5;
+            tween.TweenProperty(this, "position", p, 0)
+                .SetTrans(Tween.TransitionType.Linear)
+                .SetDelay(i * 0.03f);
+        }
+        // 闪白 x3
+        for (int i = 0; i < 3; i++)
+        {
+            tween.TweenProperty(this, "modulate", new Color(3f, 3f, 3f, 1f), 0.02f)
+                .SetTrans(Tween.TransitionType.Linear)
+                .SetDelay(i * 0.03f);
+            tween.TweenProperty(this, "modulate", originColor, 0.02f)
+                .SetTrans(Tween.TransitionType.Linear);
+        }
+
+        // 结束恢复
+        return tween.WaitForTween(t =>
+        {
+            Position = originPos;
+            Modulate = originColor;
+        });
+    }
+
     public GDTask PlayPlaceDownAnim()
     {
         var tween = CreateTween();
@@ -145,5 +255,4 @@ public partial class UnitView : ViewNode2D
 
         return tween.WaitForTween();
     }
-    
 }

@@ -32,3 +32,5 @@ Name = "水块"
 Regions = PackedStringArray("水域")
 ViewHeight = 25.0
 ViewFrames = SubResource("SpriteFrames_fqtcj")
+DominantColor = Color(0.39215687, 0.61960787, 0.7921569, 1)
+WaterHeight = 10.0

@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="UnitInfo" format=3 uid="uid://cdpppapttf5to"]
 
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_cqclv"]
+[ext_resource type="Texture2D" uid="uid://gf7mc7a37h3a" path="res://Art/Img/units/player/mech_artillery_broken.png" id="1_jg4oj"]
 [ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="1_oc4v6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0q3gl"]
@@ -21,6 +22,14 @@ region = Rect2(132, 0, 44, 34)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_cqclv"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_jg4oj")
+}],
+"loop": false,
+"name": &"dead",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_0q3gl")

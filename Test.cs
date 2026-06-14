@@ -319,7 +319,7 @@ public partial class Test : Node2D
                 {
                     foreach (var unit in obj.State.UnitMapState.GetAllUnits())
                     {
-                        obj.ApplyModifyUnitBuff(unit.Coords, _buffName, BuffOperation.AddBuff, 1);
+                        obj.ApplyModifyUnitBuff(unit.Coords, _buffName, BuffOperation.AddBuff, 1, false);
                     }
                 },
                 Layer = SimulationLayer.Running,
@@ -333,7 +333,7 @@ public partial class Test : Node2D
                 {
                     foreach (var unit in obj.State.UnitMapState.GetAllUnits())
                     {
-                        obj.ApplyModifyUnitBuff(unit.Coords, _buffName, BuffOperation.RemoveBuff, 1);
+                        obj.ApplyModifyUnitBuff(unit.Coords, _buffName, BuffOperation.RemoveBuff, 1, false);
                     }
                 },
                 Layer = SimulationLayer.Running,
@@ -475,6 +475,7 @@ public partial class Test : Node2D
                     obj.EndSteps();
                 }
                 obj.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0);
+                obj.ApplyPlaceUnit(new(3, 3), UnitNames.Unit1, 1);
             },
             Layer = SimulationLayer.Running,
         });

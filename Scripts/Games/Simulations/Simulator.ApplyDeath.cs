@@ -43,11 +43,16 @@ partial class Simulator
     }
     public static partial void ApplyDeathViewDraw(GameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
+        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        if (uv == null) return;
+        uv.HealthBar.WillDie = true;
+        view.EventsView.NeedClearUnit(result.UnitId);
     }
     
     public static partial GDTask ApplyDeathViewRun(GameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
         view.UnitsView.GetUnitView(result.UnitId)?.HealthBar.CurrentHealth = 0;
+        view.UnitsView.GetUnitView(result.UnitId)?.IsDead = true;
         return GDTask.CompletedTask;
     }
 }

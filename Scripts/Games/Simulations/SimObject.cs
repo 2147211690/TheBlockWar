@@ -3,7 +3,7 @@ using TheBlockWar.Scripts.Games.GameStates;
 namespace TheBlockWar.Scripts.Games.Simulations;
 public class ReadOnlySimObject(IReadOnlyGameState state, SimulationLayer layer, SimResultList steps, long sourceEventId)
 {
-    public IReadOnlyGameState State { get; } = state;
+    public virtual IReadOnlyGameState State { get; } = state;
     public SimulationLayer Layer { get; } = layer;
     public SimResultList Steps { get; } = steps;
     public long SourceEventId { get; } = sourceEventId;
@@ -13,7 +13,7 @@ public class ReadOnlySimObject(IReadOnlyGameState state, SimulationLayer layer, 
 public class SimObject(IGameState state, SimulationLayer layer, SimResultList steps, long sourceEventId)
     : ReadOnlySimObject(state, layer, steps, sourceEventId)
 {
-    public new IGameState State => (IGameState)base.State;
+    public override IGameState State { get; } = state;
 }
 
 public enum SimulationLayer

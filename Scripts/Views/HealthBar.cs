@@ -20,17 +20,15 @@ public partial class HealthBar : Node2D
     
     public float FlashTimer => Time.GetTicksMsec() / 1000f;
 
-    public float MaxHealth { get; set => SetFloatViewValue(ref field, value); }
-    public float CurrentHealth { get; set => SetFloatViewValue(ref field, value); }
-    public float HealthChange { get; set => SetFloatViewValue(ref field, value); }
-    public float CurrentShield { get; set => SetFloatViewValue(ref field, value); }
-    public float ShieldChange { get; set => SetFloatViewValue(ref field, value); }
+    public float MaxHealth { get; set; }
+    public float CurrentHealth { get; set; }
+    public float HealthChange { get; set; }
+    public float CurrentShield { get; set; }
+    public float ShieldChange { get; set; }
+    public bool WillDie { get; set; }
+    public bool IsDead { get; set; }
+    
     public GameView GameView { get; set; } = null!;
-    private void SetFloatViewValue(ref float field, float value)
-    {
-        if (Math.Abs(value - field) < float.Epsilon) return;
-        field = value;
-    }
 
     public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType)
     {
@@ -46,7 +44,7 @@ public partial class HealthBar : Node2D
 
     public override void _Draw()
     {
-        if (MaxHealth <= 0)
+        if (MaxHealth <= 0 || IsDead)
             return;
         // 颜色根据是否本地玩家选择来切换
         var style = Style;
@@ -59,7 +57,7 @@ public partial class HealthBar : Node2D
         // === 绘制血条 ===
         DrawBarRect(HealthOffset, Height + 4, totalWidth + 4, 1, style[TeamType].HealthBarColor);
 
-        float targetHealth = Mathf.Clamp(CurrentHealth + HealthChange, 0, MaxHealth);
+        float targetHealth = Mathf.Clamp(WillDie ? 0 : CurrentHealth + HealthChange, 0, MaxHealth);
         DrawHealthBar(HealthOffset, Height, totalWidth, CurrentHealth, targetHealth, MaxHealth, flashValue, style);
 
         DrawSplitLine(HealthOffset, Height, totalWidth, blockCount, style);
@@ -80,7 +78,7 @@ public partial class HealthBar : Node2D
     {
         HealthChange = 0;
         ShieldChange = 0;
-        QueueRedraw();
+        WillDie = false;
     }
 
     private Color GetLighterColor(in Color color, float change)

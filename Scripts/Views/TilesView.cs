@@ -11,6 +11,9 @@ public partial class TilesView : TileMapLayer
     [Export] public GameView GameView { get; set; } = null!;
     [Export] private GameViewNodeContainer _nodeContainer = null!;
     [Export] private PackedScene _tileScene = null!;
+    /// <summary>
+    /// 描述抽象高度到实际高度的映射关系
+    /// </summary>
     [Export] public float NormalGroundHeight = 32f;
     [Export] public Texture2D? RegionTexture { get; set; }
     public Vector2 LocalLeft { get; private set; }
@@ -161,6 +164,8 @@ public partial class TilesView : TileMapLayer
 
         return pos;
     }
+    public TileInfo GetTileInfo(in Vector2I coords) 
+        => _tileViews!.GetValueOrDefault(coords, null)?.TileName.GetTileInfo() ?? TileInfo.Null;
 }
 [Flags]
 public enum Layer

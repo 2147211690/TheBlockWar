@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="UnitInfo" format=3 uid="uid://d2mmc8ch7i1m"]
+
+[ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_2tv20"]
+[ext_resource type="Texture2D" uid="uid://61431cbqm4te" path="res://Art/Img/units/player/mech_charge_broken.png" id="1_wltvs"]
+[ext_resource type="Texture2D" uid="uid://b65sbi1rljx4p" path="res://Art/Img/units/player/mech_charge_a.png" id="2_xh5ri"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pm0y8"]
+atlas = ExtResource("2_xh5ri")
+region = Rect2(0, 0, 38, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6s1je"]
+atlas = ExtResource("2_xh5ri")
+region = Rect2(38, 0, 38, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ppvu0"]
+atlas = ExtResource("2_xh5ri")
+region = Rect2(76, 0, 38, 29)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nst0y"]
+atlas = ExtResource("2_xh5ri")
+region = Rect2(114, 0, 38, 29)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wltvs"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_wltvs")
+}],
+"loop": false,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pm0y8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6s1je")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ppvu0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nst0y")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[resource]
+script = ExtResource("1_2tv20")
+Name = "Unit1"
+MovePower = 3
+MaxHealth = 40.0
+MaxShield = 40.0
+Skills = PackedStringArray("一般移动")
+ViewOffset = Vector2(0, -3)
+ViewFrames = SubResource("SpriteFrames_wltvs")

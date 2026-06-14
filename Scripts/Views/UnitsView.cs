@@ -12,7 +12,6 @@ public partial class UnitsView : Node2D
     [Export] private PackedScene _unitScene = null!;
     private readonly Dictionary<long, UnitView> _unitViews = new();
     private readonly Dictionary<Vector2I, long> _unitMaps = new();
-    private bool _queueUpdateUnitPosition = false;
     private UnitView? _focusedUnitView;
     
     public void ClearAllUnit()
@@ -29,15 +28,15 @@ public partial class UnitsView : Node2D
     {
         if (!_unitViews.TryGetValue(unitId, out var view)) return;
         view.AimCoords = aimCoords;
-        SetUnitMapPosition(view.WishCoords, view);
+        UpdateUnitAboutCoords(view.WishCoords, view);
     }
     public UnitView? GetUnitView(long unitId) => _unitViews.GetValueOrDefault(unitId);
     public void FocusUnit(long unitId)
     {
-        _focusedUnitView?.OutlineColor = new Color("#3aa2003c");
+        _focusedUnitView?.IsFocused = false;
         if (!_unitViews.TryGetValue(unitId, out var render)) return;
         _focusedUnitView = render;
-        _focusedUnitView.OutlineColor = new Color("#3aa200");
+        _focusedUnitView.IsFocused = true;
     }
 
     public UnitView? CreateOrGetUnit(Vector2I coords, IReadOnlyUnitState unit, TeamTypeEnum teamType)
@@ -46,19 +45,20 @@ public partial class UnitsView : Node2D
         if (!_unitViews.TryGetValue(unit.Id, out var render))
         {
             render = _unitViews[unit.Id] = _unitScene.Instantiate<UnitView>();
-            render.Init(GameView, GameView.Style, teamType, this);
             DrawContainer.AddChild(render);
+            render.Init(GameView, GameView.Style, teamType, unit.Id, this);
             _unitMaps.Add(coords, unit.Id);
         }
         //设置单位位置和动画
         render.RealCoords = coords;
-        SetUnitMapPosition(render.WishCoords, render);
         render.UnitName = unit.Name;
         //血条
         render.HealthBar.MaxHealth = unit.MaxHealth;
         render.HealthBar.CurrentHealth = unit.Health;
         //护盾条
         render.HealthBar.CurrentShield = unit.Shield;
+        render.OutlineColor = GameView.Style[teamType].OutlineColor;
+        UpdateUnitAboutCoords(render.WishCoords, render);
         //Buff
         foreach (var buff in unit.Buffs)
         {
@@ -99,8 +99,8 @@ public partial class UnitsView : Node2D
         _unitMaps.Remove(view1.RealCoords);
         _unitMaps.Remove(view2.RealCoords);
         (view1.RealCoords, view2.RealCoords) = (view2.RealCoords, view1.RealCoords);
-        SetUnitMapPosition(view1.WishCoords, view1);
-        SetUnitMapPosition(view2.WishCoords, view2);
+        UpdateUnitAboutCoords(view1.WishCoords, view1);
+        UpdateUnitAboutCoords(view2.WishCoords, view2);
         _unitMaps.Add(view1.RealCoords, u1);
         _unitMaps.Add(view2.RealCoords, u2);
     }
@@ -123,7 +123,7 @@ public partial class UnitsView : Node2D
         //await GDTask.Delay(1000);
         _unitMaps.Remove(view.RealCoords);
         view.RealCoords = to;
-        SetUnitMapPosition(view.WishCoords, view);
+        UpdateUnitAboutCoords(view.WishCoords, view);
         _unitMaps.Add(to, unitId);
     }
 
@@ -131,15 +131,15 @@ public partial class UnitsView : Node2D
     {
         if (!_unitViews.TryGetValue(unitId, out var view)) return;
         _unitMaps.Remove(view.RealCoords);
-        SetUnitMapPosition(coords + path[0], view);
+        UpdateUnitAboutCoords(coords + path[0], view);
         for (int i = 1; i <= targetIndex; i++)
         {
             await GDTask.Delay(100);
-            SetUnitMapPosition(coords + path[i], view);
+            UpdateUnitAboutCoords(coords + path[i], view);
         }
         view.RealCoords = coords + path[targetIndex];
         _unitMaps.Add(coords + path[targetIndex], unitId);
-        SetUnitMapPosition(view.WishCoords, view);
+        UpdateUnitAboutCoords(view.WishCoords, view);
         await GDTask.Delay(100);
     }
 
@@ -183,35 +183,16 @@ public partial class UnitsView : Node2D
         }
     }
     
-    /// <summary>
-    /// 对于会影响瓦片高度的操作，需要调用此方法更新单位位置
-    /// </summary>
-    public void QueueUpdateUnitPosition()
-    {
-        _queueUpdateUnitPosition = true;
-    }
-
     public void UpdateUnitPosition(Vector2I coords)
     {
         if (!_unitMaps.TryGetValue(coords, out var unitId)) return;
-        SetUnitMapPosition(coords, _unitViews[unitId]);
+        UpdateUnitAboutCoords(coords, _unitViews[unitId]);
     }
-    private void SetUnitMapPosition(Vector2I coords, UnitView render)
+    private void UpdateUnitAboutCoords(Vector2I coords, UnitView render)
     {
         render.GamePosition = GameView.TilesView.GetGamePositionOnGround(coords);
+        var tInfo = GameView.TilesView.GetTileInfo(coords);
+        render.WaterColor = tInfo.DominantColor;
+        render.WaterHeight = tInfo.WaterHeight;
     }
-
-    public override void _Process(double delta)
-    {
-        base._Process(delta);
-        if (_queueUpdateUnitPosition)
-        {
-            _queueUpdateUnitPosition = false;
-            foreach (var unit in _unitMaps)
-            {
-                SetUnitMapPosition(unit.Key, _unitViews[unit.Value]);
-            }
-        }
-    }
-
 }

@@ -68,6 +68,12 @@ partial class Simulator
 
     public static partial void ApplyCureViewDraw(GameView view, ReadOnlySimObject sim, ApplyCureResult result)
     {
+        view.EventsView.BlockDraw.AddHealthChange(result.Step.Coords, result.Step.Cure, result.ValidCure, 
+                result.UnitId != 0 ,sim.IsFocused);
+        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        if (uv == null) return;
+        uv.HealthBar.HealthChange += result.ValidCure;
+        view.EventsView.NeedClearUnit(result.UnitId);
     }
 
     public static partial GDTask ApplyCureViewRun(GameView view, ReadOnlySimObject sim, ApplyCureResult result)

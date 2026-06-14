@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://bgr1gb1ysfkiv"]
+
+[ext_resource type="Script" uid="uid://cg31hgaj1kum3" path="res://Scripts/Views/ViewNodes/ViewNode2D.cs" id="1_3kxj2"]
+[ext_resource type="Texture2D" uid="uid://cjwdet66t5x24" path="res://Art/Img/effects/shotup_fireball.png" id="2_87oeq"]
+[ext_resource type="Texture2D" uid="uid://xjjxjak1cim7" path="res://Art/Img/effects/smoke/art_smoke.png" id="3_qtsf7"]
+
+[sub_resource type="Curve" id="Curve_sg5gm"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.646905, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_utqfi"]
+curve = SubResource("Curve_sg5gm")
+
+[sub_resource type="Curve" id="Curve_qtsf7"]
+_limits = [0.0, 2.5, 0.0, 1.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 2.5), 0.23811261, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_sg5gm"]
+curve = SubResource("Curve_qtsf7")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_q0gtu"]
+lifetime_randomness = 0.24
+particle_flag_disable_z = true
+angle_min = -179.99998
+angle_max = 180.00002
+initial_velocity_max = 0.5
+radial_velocity_min = -2.2351742e-05
+radial_velocity_max = -2.2351742e-05
+gravity = Vector3(0, 0, 0)
+scale_min = 0.5
+scale_max = 1.5
+scale_curve = SubResource("CurveTexture_sg5gm")
+color = Color(1, 1, 1, 0.5529412)
+alpha_curve = SubResource("CurveTexture_utqfi")
+
+[node name="TestEffect" type="Node2D" unique_id=804629370]
+script = ExtResource("1_3kxj2")
+metadata/_custom_type_script = "uid://cg31hgaj1kum3"
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1165814295]
+rotation = 1.5707964
+texture = ExtResource("2_87oeq")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=1924209012]
+amount = 16
+texture = ExtResource("3_qtsf7")
+lifetime = 0.3
+process_material = SubResource("ParticleProcessMaterial_q0gtu")

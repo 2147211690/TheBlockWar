@@ -22,10 +22,13 @@ public partial class GameView : Node2D
     [Export] public AnimationView AnimationView { get; set; } = null!;
     [Export] public Camera2D SubCamera { get; set; } = null!;
     [Export] public SubViewport SubViewport { get; set; } = null!;
+    [Export] public float NormalHeight { get; set; } = 35;
     public IPlayer? Player { get; set; }
     public ViewPools ViewPools { get; private set; } = null!;
     public bool IsRunning { get; private set; }
-
+    public GameViewTeamStyle CurrentStyle { get; private set; } = null!;
+    public TeamTypeEnum CurrentTeamType { get; private set; } = TeamTypeEnum.Player;
+    
     private Dictionary<long, ReadOnlySimObject> _runningSimulations = new();
     private List<ReadOnlySimObject> _prepareSimulations = new();
     private EventScheduler? _eventScheduler;
@@ -47,6 +50,7 @@ public partial class GameView : Node2D
         base._Ready();
         ViewPools = new ViewPools(DrawContainer, Style);
         SubViewport.World2D = GetTree().Root.World2D;
+        CurrentStyle = Style[TeamTypeEnum.Player];
     }
 
     public void Bind(EventScheduler eventScheduler)
@@ -88,6 +92,7 @@ public partial class GameView : Node2D
         {
             var view = UnitsView.CreateOrGetUnit(unit.Coords, unit, GetTeamType(unit.Team))!;
             view.PlayPlaceDownAnim().Forget();
+            view.IsDead = unit.IsDead;
         }
     }
 
@@ -137,10 +142,10 @@ public partial class GameView : Node2D
         }
     }
 
-    private void EventSchedulerOnSimulationUpdated(object? sender, List<ReadOnlySimObject> e)
+    private void EventSchedulerOnSimulationUpdated(object? sender, SchedulerResult e)
     {
         var hasDelay = _nextDelays.TryDequeue(out var delay);
-        SetSimulations(e, hasDelay ? delay : null);
+        SetSimulations(e.Sims, hasDelay ? delay : null);
     }
 
     /// <param name="simulations">确保传入有序的模拟结果</param>
@@ -191,7 +196,18 @@ public partial class GameView : Node2D
             }
         }
     }
-
+    public Vector3 GetGamePosition(in Vector2 coords, float? height = null)
+    {
+        return height != null
+            ? TilesView.GetGamePosition(coords, height.Value)
+            : TilesView.GetGamePosition(coords, 
+                TilesView.GetTileHeight(new (Mathf.RoundToInt(coords.X), Mathf.RoundToInt(coords.Y))));
+    }
+    public void SetCurrentTheme(TeamTypeEnum team)
+    {
+        CurrentTeamType = team;
+        CurrentStyle = Style[team];
+    }
 
     private async GDTask StartSimulations(int? delay = null)
     {

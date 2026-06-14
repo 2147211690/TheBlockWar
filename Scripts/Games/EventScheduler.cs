@@ -39,7 +39,7 @@ public class EventScheduler
     private long _coordsRegionsId;
     private IGameState? _snapshotChache;
 
-    public event EventHandler<List<ReadOnlySimObject>>? SimulationUpdated;
+    public event EventHandler<SchedulerResult>? SimulationUpdated;
     public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
     public event EventHandler<IReadOnlyGameState>? GameStateReload;
     public event EventHandler<int>? NextDelay;
@@ -70,6 +70,7 @@ public class EventScheduler
     {
         GameStateReload?.Invoke(this, _gameState);
         _eventManager.ReloadStateEvents();
+        _snapshotChache = null;
     }
     public void SetNextCompleteDelay(int delay)
     {
@@ -130,7 +131,7 @@ public class EventScheduler
         if (_isRunning) return;
         _isRunning = true;
         Logger.Info("触发更新");
-        var simObjects = new List<ReadOnlySimObject>();
+        var result = new SchedulerResult();
         _runningSchedulers.Push(this);
 
         // 运行层直接执行
@@ -138,7 +139,7 @@ public class EventScheduler
         {
             var obj = new SimObject(_gameState, ev.Layer, new(), ev.Id);
             obj.PushContext(CreateSimulationContext(ev));
-            simObjects.Add(obj);
+            result.Sims.Add(obj);
             ev.OnApply(ev, obj);
             obj.PopContext();
         }
@@ -153,19 +154,19 @@ public class EventScheduler
         {
             var obj = new SimObject(_snapshotChache, ev.Layer, new(), ev.Id);
             obj.PushContext(CreateSimulationContext(ev));
-            simObjects.Add(obj);
+            result.Sims.Add(obj);
             ev.OnApply(ev, obj);
             obj.PopContext();
         }
         
         var sb = new StringBuilder();
-        Logger.Debug("结构树:\n{tree}", simObjects.ToTree());
+        Logger.Debug("结构树:\n{tree}", result.Steps.ToTree());
         // 运行层事件执行完毕后，清空运行层
         _eventManager.ClearLayerEvent(SimulationLayer.Running);
         
         _runningSchedulers.Pop();
         _isRunning = false;
-        SimulationUpdated?.Invoke(this, simObjects);
+        SimulationUpdated?.Invoke(this, result);
     }
 
     private SimContext CreateSimulationContext(SchedulerEvent ev)

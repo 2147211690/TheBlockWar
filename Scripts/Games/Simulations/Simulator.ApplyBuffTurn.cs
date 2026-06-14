@@ -42,7 +42,7 @@ partial class Simulator
                         if (unit.GetBuffCount(buff.BuffName) is 0 or int.MaxValue || info.TurnRemoveCount <= 0)
                             continue;
                         obj.ApplyModifyUnitBuff(unit.Coords, buff.BuffName, BuffOperation.ChangeDuration,
-                            -info.TurnRemoveCount);
+                            -info.TurnRemoveCount, false);
                     }
                 }
                 obj.EndSteps();

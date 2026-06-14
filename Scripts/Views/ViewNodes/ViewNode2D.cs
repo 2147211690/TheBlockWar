@@ -24,6 +24,12 @@ public partial class ViewNode2D : Node2D, IGameViewNode<Node2D>
         set => _gameViewNode.GameRotationDegrees = value;
     }
 
+    public float NodeRotation
+    {
+        get => _gameViewNode.NodeRotation;
+        set => _gameViewNode.NodeRotation = value;
+    }
+
     public int GameZIndex
     {
         get => _gameViewNode.GameZIndex;
@@ -34,5 +40,24 @@ public partial class ViewNode2D : Node2D, IGameViewNode<Node2D>
     {
         get => _gameViewNode.NodeZIndexOffset;
         set => _gameViewNode.NodeZIndexOffset = value;
+    }
+
+    public Vector2 GameToNodePosition(Vector3 gamePosition, int zIndex)
+    {
+        return _gameViewNode.GameToNodePosition(gamePosition, zIndex);
+    }
+    /// <summary>
+    /// 使用游戏坐标设置节点旋转
+    /// </summary>
+    /// <param name="xyAngle">XY平面旋转角度,关于X正方向</param>
+    /// <param name="xzAngle">高度平面旋转角度,XY平面</param>
+    public void SetGameRotation(float xyAngle, float xzAngle)
+    {
+        _gameViewNode.SetGameRotation(xyAngle, xzAngle);
+    }
+
+    public void SetGameRotation(Vector3 direction)
+    {
+        _gameViewNode.SetGameRotation(direction);
     }
 }

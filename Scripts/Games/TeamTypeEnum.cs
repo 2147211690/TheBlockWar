@@ -4,6 +4,4 @@ public enum TeamTypeEnum
 {
     Player,
     Enemy,
-    Neutral,
-    Friend
 }

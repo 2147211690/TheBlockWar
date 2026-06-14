@@ -54,7 +54,16 @@ partial class Simulator
     }
     public static partial void ApplyPushUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
     {
-        
+        var s = view.EventsView.GetGameTexture();
+        var pos = result.Step.Coords.ToVec2() + result.Step.Dir.ToVec2() * (result.Valid ? 0.5f : 0.2f);
+        s.GamePosition = new(pos.X, pos.Y, view.TilesView.GetTileHeight(result.Step.Coords));
+        s.Texture = view.CurrentStyle.PushTextures[result.Step.Dir.ToIndex()];
+        s.Modulate = (sim.IsFocused , result.Valid) switch
+        {
+            (true, true) => Colors.Yellow,
+            (true, false) => Colors.White,
+            _ => new Color(1,1,1,0.5f),
+        };
     }
 
     public static partial GDTask ApplyPushUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
