@@ -48,9 +48,10 @@ public partial class CombatUi : Control
             if (e.PropertyName is nameof(IPlayer.SkillingUnitSkillStates))
             {
                 ClearSkillItem();
-                foreach (var skill in _player.SkillingUnitSkillStates)
+                for (var index = 0; index < _player.SkillingUnitSkillStates.Count; index++)
                 {
-                    AddSkillItem(skill);
+                    var skill = _player.SkillingUnitSkillStates[index];
+                    AddSkillItem(skill, index);
                 }
             }
             if (e.PropertyName is nameof(IPlayer.SelectedUnitId))
@@ -106,13 +107,14 @@ public partial class CombatUi : Control
         }
     }
 
-    public void AddSkillItem(SkillState skillState)
+    public void AddSkillItem(SkillState skillState, int index)
     {
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _skillContainer.AddChild(itemBox);
         itemBox.MetaData = skillState.Skill;
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
+        itemBox.Click += () => _player.OnInput(new PlayerInputSkill(index));
     }
 
     public void ClearSkillItem()

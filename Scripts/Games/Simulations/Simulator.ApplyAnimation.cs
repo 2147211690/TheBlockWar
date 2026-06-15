@@ -70,11 +70,10 @@ partial class Simulator
             var startPosition = view.GetGamePosition(thr.Coords);
             var endPosition = view.GetGamePosition(thr.To);
             v.GamePosition = startPosition;
-            var startTick = Time.GetTicksMsec();
-            var nTime = 0f;
-            while (nTime <= 1)
+            var timer = new RecordTimer(thr.Time);
+            while (timer.HasTime)
             {
-                nTime = (Time.GetTicksMsec() - startTick) / (thr.Time * 1000f);
+                var nTime = timer.GetNormalizedTime();
                 var pos = AnimationThrowLine(startPosition, endPosition, nTime);
                 var nPos = AnimationThrowLine(startPosition, endPosition, nTime + 0.03f);
                 v.GamePosition = pos;

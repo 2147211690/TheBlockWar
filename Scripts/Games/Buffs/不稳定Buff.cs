@@ -11,7 +11,6 @@ public class 不稳定Buff() : Buff(BuffNames.不稳定)
     {
         obj.PushContext(new SimContext(unit.Id));
         var coords = unit.Coords;
-        obj.ApplyModifyUnitBuff(unit.Coords, BuffNames.不稳定, BuffOperation.RemoveBuff, int.MaxValue, false);
         obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
         for (var i = 0; i < 4; i++)
         {

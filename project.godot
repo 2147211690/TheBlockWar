@@ -25,9 +25,12 @@ resources_spreadsheet_view/color_rows=true
 [application]
 
 config/name="TheBlockWar"
+config/name_localized={
+"zh": "荒芜烽火"
+}
 run/main_scene="uid://c5lqvqedob4yx"
 config/features=PackedStringArray("4.6", "C#")
-config/icon="res://icon.svg"
+config/icon="uid://cf6td8qmy77qj"
 
 [autoload]
 

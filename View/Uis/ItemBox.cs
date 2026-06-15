@@ -15,6 +15,8 @@ public partial class ItemBox : PanelContainer
     public static float AnimationDuration = 0.05f;
     public static float ClickScale = 0.96f;
     public static float SelectedScale = 1.08f;
+
+    [Signal] public delegate void ClickEventHandler();
     public bool IsSelected
     {
         get => field;
@@ -77,6 +79,7 @@ public partial class ItemBox : PanelContainer
         if (inputEvent is InputEventMouseButton {Pressed:true, ButtonMask: MouseButtonMask.Left})
         {
             OnClick();
+            EmitSignal(nameof(Click));
         }
     }
 
