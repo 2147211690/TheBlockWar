@@ -425,6 +425,12 @@ namespace StepGenerator
             sb.AppendLine($"{indent}    {{");
             sb.AppendLine($"{indent}        return obj.{method.MethodName}({callArgs});");
             sb.AppendLine($"{indent}    }}");
+            sb.AppendLine();
+            sb.AppendLine($"{indent}    public override string ToString()");
+            sb.AppendLine($"{indent}    {{");
+            var stepPropPatterns = method.MethodParameters.Select(p => $"{Capitalize(p.ParameterName)}: {{{Capitalize(p.ParameterName)}}}");
+            sb.AppendLine($"{indent}        return $\"{{{{{method.StepClassName}->{string.Join(", ", stepPropPatterns)}}}}}\";");
+            sb.AppendLine($"{indent}    }}");
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();
         }
@@ -466,6 +472,13 @@ namespace StepGenerator
             sb.AppendLine();
             sb.AppendLine($"{indent}    public override GDTask ViewRun{viewRunSig} => {TemplateClass}.{method.MethodName}ViewRun{viewRunCall};");
             sb.AppendLine($"{indent}    public override void ViewDraw{viewDrawSig} => {TemplateClass}.{method.MethodName}ViewDraw{viewDrawCall};");
+            sb.AppendLine();
+            sb.AppendLine($"{indent}    public override string ToString()");
+            sb.AppendLine($"{indent}    {{");
+            var resultPropPatterns = method.ExtraParameters.Select(e => $"{Capitalize(e.Name)}: {{{Capitalize(e.Name)}}}")
+                .Prepend("Step: {Step}");
+            sb.AppendLine($"{indent}        return $\"{{{{{method.ResultClassName}->{string.Join(", ", resultPropPatterns)}}}}}\";");
+            sb.AppendLine($"{indent}    }}");
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();
         }
