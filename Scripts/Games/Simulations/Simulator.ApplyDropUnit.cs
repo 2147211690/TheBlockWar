@@ -19,14 +19,14 @@ partial class Simulator
 
             ApplyDropUnitResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyDropUnitResult(CurrentDeep, coords, 0));
+                var r = obj.Steps.AddResult(new ApplyDropUnitResult(CurrentDeep, CurrentTeam, coords, 0));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
                 obj.State.UnitMapState.RemoveUnit(unit.Id);
                 return r;
             }
@@ -38,6 +38,6 @@ partial class Simulator
     
     public static partial GDTask ApplyDropUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyDropUnitResult result)
     {
-        return view.UnitsView.DropUnit(result.UnitId);
+        return view.UnitsView.DropUnit(result.ReUnitId);
     }
 }

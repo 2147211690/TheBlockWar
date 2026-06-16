@@ -20,14 +20,14 @@ partial class Simulator
 
             ApplyDamageResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyDamageResult(CurrentDeep, coords, damage, 0, 0));
+                var r = obj.Steps.AddResult(new ApplyDamageResult(CurrentDeep, CurrentTeam, coords, damage, 0, 0));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
                 
                 if (unit.IsNull() || unit.IsDead)
                 {
@@ -55,7 +55,7 @@ partial class Simulator
                 var validDamage = Mathf.Min(rawDamage, unit.Health);
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health -= validDamage);
                 unit = obj.State.UnitMapState.GetUnit(unit.Id);
-                r.ValidDamage = validDamage;
+                r.ReValidDamage = validDamage;
 
                 // 触发受伤后事件
                 if (validDamage > 0 && obj.ComplexSimulationRegion(0))
@@ -75,20 +75,20 @@ partial class Simulator
     
     public static partial void ApplyDamageViewDraw(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
     {
-        view.EventsView.BlockDraw.AddHealthChange(result.Step.Coords, -result.Step.Damage, -result.ValidDamage, 
-            result.UnitId != 0 ,sim.IsFocused);
-        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        view.EventsView.BlockDraw.AddHealthChange(result.Coords, -result.Damage, -result.ReValidDamage, 
+            result.ReUnitId != 0 ,sim.IsFocused);
+        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
         if (uv == null) return;
-        uv.HealthBar.HealthChange -= result.ValidDamage;
-        view.EventsView.NeedClearUnit(result.UnitId);
+        uv.HealthBar.HealthChange -= result.ReValidDamage;
+        view.EventsView.NeedClearUnit(result.ReUnitId);
     }
     
     public static partial GDTask ApplyDamageViewRun(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
     {
-        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
         if (uv == null) return GDTask.CompletedTask;
         uv.PlayHurtAnim();
-        uv.HealthBar.CurrentHealth -= result.ValidDamage;
+        uv.HealthBar.CurrentHealth -= result.ReValidDamage;
         return GDTask.CompletedTask;
     }
 }

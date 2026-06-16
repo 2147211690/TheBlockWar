@@ -17,7 +17,7 @@ partial class Simulator
 
             ApplyModifyGlobalBuffResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyModifyGlobalBuffResult(CurrentDeep, sourceUnitName, sourceBuff, groupMask, targetBuff, add));
+                var r = obj.Steps.AddResult(new ApplyModifyGlobalBuffResult(CurrentDeep, CurrentTeam, sourceUnitName, sourceBuff, groupMask, targetBuff, add));
                 if (add)
                 {
                     var index = obj.State.BuffGlobalState.AddGlobalBuff(sourceUnitName, sourceBuff, groupMask, targetBuff);

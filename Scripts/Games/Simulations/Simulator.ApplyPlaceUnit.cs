@@ -10,7 +10,7 @@ partial class Simulator
     {
         //result:UnitState:UnitState Valid:bool
         [Step(["UnitState", "Valid"], [typeof(UnitState), typeof(bool)])]
-        public ApplyPlaceUnitResult ApplyPlaceUnit(Vector2I coords, string unitName, int team)
+        public ApplyPlaceUnitResult ApplyPlaceUnit(Vector2I coords, string unitName, int unitTeam)
         {
             EnterSimulation();
             var r = Main();
@@ -19,8 +19,9 @@ partial class Simulator
 
             ApplyPlaceUnitResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyPlaceUnitResult(CurrentDeep, coords, unitName, team, UnitState.Null, false));
-                r.Valid = !obj.State.UnitMapState.HasUnit(coords);
+                var r = obj.Steps.AddResult(new ApplyPlaceUnitResult(
+                    CurrentDeep, CurrentTeam, coords, unitName, unitTeam, UnitState.Null, false));
+                r.ReValid = !obj.State.UnitMapState.HasUnit(coords);
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
@@ -29,13 +30,13 @@ partial class Simulator
                 if (obj.ComplexSimulationRegion( 2))
                 {
                     //如果在等待层,或者此处有单位,则放置失败
-                    if (!r.Valid)
+                    if (!r.ReValid)
                     {
                         return r;
                     }
-                    var unitState = UnitFactory.CreateUnit(unitName, team, obj.State.IdGenerator.NewLong(), coords);
+                    var unitState = UnitFactory.CreateUnit(unitName, unitTeam, obj.State.IdGenerator.NewLong(), coords);
                     obj.State.UnitMapState.AddUnit(unitState);
-                    r.UnitState = unitState.Clone();
+                    r.ReUnitState = unitState.Clone();
                     //单位buff初始化
                     var info = unitName.GetUnitInfo();
                     var newUnit = obj.State.UnitMapState.GetUnit(unitState.Id);
@@ -69,11 +70,18 @@ partial class Simulator
     
     public static partial GDTask ApplyPlaceUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)
     {
-        return result.Valid
-            ? view.UnitsView.PlaceUnit(
-                result.Step.Coords,
-                result.UnitState,
-                view.GetTeamType(result.Step.Team))
-            : GDTask.CompletedTask;
+        if (result.ReValid)
+        {
+            var uv = view.UnitsView.CreateOrGetUnit(
+                result.Coords,
+                result.ReUnitState,
+                view.GetTeamType(result.UnitTeam));
+            if (uv == null) return GDTask.CompletedTask;
+            //初始化buff视图
+            foreach (var a in sim.State.UnitMapState.GetUnit(result.ReUnitState.Id).Buffs)
+                uv.BuffView.AddVisibleBuff(a.BuffName);
+            return uv.PlayPlaceDownAnim();
+        }
+        return GDTask.CompletedTask;
     }
 }

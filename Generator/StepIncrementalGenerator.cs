@@ -349,9 +349,9 @@ namespace StepGenerator
                 sb.AppendLine($"{indent}[global::System.Text.Json.Serialization.JsonDerivedType(typeof({method.StepClassName}), \"{method.StepClassName}\")]");
             }
 
-            sb.AppendLine($"{indent}public abstract class ApplyStep");
+            sb.AppendLine($"{indent}public class ApplyStep");
             sb.AppendLine($"{indent}{{");
-            sb.AppendLine($"{indent}    public abstract StepResult Apply(global::TheBlockWar.Scripts.Games.Simulations.SimObject obj);");
+            sb.AppendLine($"{indent}    public virtual StepResult Apply(global::TheBlockWar.Scripts.Games.Simulations.SimObject obj) => new StepResult(short.MinValue, -1);");
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();
         }
@@ -368,14 +368,17 @@ namespace StepGenerator
             var viewRunSig = string.IsNullOrEmpty(viewRunParams) ? "()" : $"({viewRunParams})";
             var viewDrawSig = string.IsNullOrEmpty(viewDrawParams) ? "()" : $"({viewDrawParams})";
 
-            sb.AppendLine($"{indent}public class StepResult(ApplyStep step, int deep)");
-            sb.AppendLine($"{indent}{{");
-            sb.AppendLine($"{indent}    public ApplyStep Step {{ get; set; }} = step;");
-            sb.AppendLine($"{indent}    public int Deep {{ get; set; }} = deep;");
-            sb.AppendLine();
-            sb.AppendLine($"{indent}    public virtual GDTask ViewRun{viewRunSig} => GDTask.CompletedTask;");
-            sb.AppendLine($"{indent}    public virtual void ViewDraw{viewDrawSig} {{ }}");
-            sb.AppendLine($"{indent}}}");
+            sb.Append(
+                $$"""
+                 {{indent}}public class StepResult(short deep, int team)
+                 {{indent}}{
+                 {{indent}}    public short Deep { get; set; } = deep;
+                 {{indent}}    public int Team { get; set; } = team;
+                 {{indent}}    public virtual ApplyStep GetStep() => new ApplyStep();
+                 {{indent}}    public virtual GDTask ViewRun{{viewRunSig}} => GDTask.CompletedTask;
+                 {{indent}}    public virtual void ViewDraw{{viewDrawSig}} { }
+                 {{indent}}}
+                 """);
             sb.AppendLine();
         }
 
@@ -437,13 +440,12 @@ namespace StepGenerator
 
         private void GenerateApplyResultClass(StringBuilder sb, string indent, StepMethodInfo method, GeneratorConfig config)
         {
-            var allCtorParams = new List<string> { "int deep" };
+            var allCtorParams = new List<string> { "short deep, int team" };
             allCtorParams.AddRange(method.MethodParameters.Select(p => $"{GetNullableTypeName(p)} {p.ParameterName}"));
             allCtorParams.AddRange(method.ExtraParameters.Select(e => $"{e.TypeName} {e.Name}"));
 
             var ctorParamList = string.Join(", ", allCtorParams);
-            var stepCtorArgs = string.Join(", ", method.MethodParameters.Select(p => p.ParameterName));
-            var baseCall = $"StepResult(new {method.StepClassName}({stepCtorArgs}), deep)";
+            var baseCall = "StepResult(deep, team)";
 
             var viewRunParams = ReplacePlaceholders(config.ViewRunParameters, "StepResult");
             var viewDrawParams = ReplacePlaceholders(config.ViewDrawParameters, "StepResult");
@@ -462,22 +464,32 @@ namespace StepGenerator
 
             sb.AppendLine($"{indent}public class {method.ResultClassName}({ctorParamList}) : {baseCall}");
             sb.AppendLine($"{indent}{{");
-            sb.AppendLine($"{indent}    public new {method.StepClassName} Step => ({method.StepClassName})base.Step;");
+
+            foreach (var param in method.MethodParameters)
+            {
+                var typeName = GetNullableTypeName(param);
+                sb.AppendLine($"{indent}    public {typeName} {Capitalize(param.ParameterName)} {{ get; set; }} = {param.ParameterName};");
+            }
 
             foreach (var extra in method.ExtraParameters)
             {
-                sb.AppendLine($"{indent}    public {extra.TypeName} {Capitalize(extra.Name)} {{ get; set; }} = {extra.Name};");
+                sb.AppendLine($"{indent}    public {extra.TypeName} Re{Capitalize(extra.Name)} {{ get; set; }} = {extra.Name};");
             }
 
+            var stepCtorArgs = string.Join(", ", method.MethodParameters.Select(p => $"{Capitalize(p.ParameterName)}"));
+            sb.AppendLine();
+            sb.AppendLine($"{indent}    public override {method.StepClassName} GetStep() => new {method.StepClassName}({stepCtorArgs});");
             sb.AppendLine();
             sb.AppendLine($"{indent}    public override GDTask ViewRun{viewRunSig} => {TemplateClass}.{method.MethodName}ViewRun{viewRunCall};");
             sb.AppendLine($"{indent}    public override void ViewDraw{viewDrawSig} => {TemplateClass}.{method.MethodName}ViewDraw{viewDrawCall};");
             sb.AppendLine();
             sb.AppendLine($"{indent}    public override string ToString()");
             sb.AppendLine($"{indent}    {{");
-            var resultPropPatterns = method.ExtraParameters.Select(e => $"{Capitalize(e.Name)}: {{{Capitalize(e.Name)}}}")
-                .Prepend("Step: {Step}");
-            sb.AppendLine($"{indent}        return $\"{{{{{method.ResultClassName}->{string.Join(", ", resultPropPatterns)}}}}}\";");
+            string[] basePatterns = ["Deep: {Deep}", "Team: {Team}"];
+            var stepPropPatterns = method.MethodParameters.Select(p => $"{Capitalize(p.ParameterName)}: {{{Capitalize(p.ParameterName)}}}");
+            var resultPropPatterns = method.ExtraParameters.Select(e => $"Re{Capitalize(e.Name)}: {{Re{Capitalize(e.Name)}}}");
+            var allPatterns = basePatterns.Concat(stepPropPatterns).Concat(resultPropPatterns);
+            sb.AppendLine($"{indent}        return $\"{{{{{method.ResultClassName}->{string.Join(", ", allPatterns)}}}}}\";");
             sb.AppendLine($"{indent}    }}");
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();

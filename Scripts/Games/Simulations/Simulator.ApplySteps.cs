@@ -17,7 +17,8 @@ partial class Simulator
 
             ApplyStepsResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyStepsResult(CurrentDeep, applys, startDelay, endDelay, runningMode));
+                var r = obj.Steps.AddResult(new ApplyStepsResult(
+                    CurrentDeep, CurrentTeam, applys, startDelay, endDelay, runningMode));
                 foreach (var apply in applys ?? [])
                 {
                     apply.Apply(obj);

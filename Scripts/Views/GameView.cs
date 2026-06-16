@@ -225,6 +225,7 @@ public partial class GameView : Node2D
     {
         var id = step.GetHashCode();
         Logger.Debug("处理事件开始->id:{0}-type:{1}-time:{2}", id, step.GetType(), Time.GetTicksMsec() / 100);
+        SetCurrentTheme(step.Team.GetTeamTypeRelativeToPlayer(_eventScheduler));
         return step.ViewRun(this, sim);
         /*switch (step)
         {
@@ -311,6 +312,7 @@ public partial class GameView : Node2D
         {
             foreach (var step in sim.Steps ?? [])
             {
+                SetCurrentTheme(step.Team.GetTeamTypeRelativeToPlayer(_eventScheduler));
                 step.ViewDraw(this, sim);
             }
         }

@@ -22,7 +22,8 @@ partial class Simulator
 
             ApplyModifyUnitBuffResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyModifyUnitBuffResult(CurrentDeep, coords, buffName, operation,
+                var r = obj.Steps.AddResult(new ApplyModifyUnitBuffResult(
+                    CurrentDeep, CurrentTeam, coords, buffName, operation,
                     count, draw, forceRemove,0, 0, 0, BuffOperationResult.None));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
@@ -31,9 +32,9 @@ partial class Simulator
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
                 if (unit.IsNull()) return r;
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
                 var index = unit.FindBuff(buffName);
-                r.OldCount = index == -1 ? 0 : unit.Buffs[index].Count;
+                r.ReOldCount = index == -1 ? 0 : unit.Buffs[index].Count;
                 if (operation == BuffOperation.AddBuff)
                 {
                     if (unit.IsDead) return r;
@@ -43,14 +44,14 @@ partial class Simulator
                     {
                         var newIndex = 0;
                         obj.State.UnitMapState.ModifyUnit(unit.Id, u => newIndex = u.AddBuff(buffName, count));
-                        r.NewCount = newIndex < 0 ? 0 : unit.Buffs[newIndex].Count;
-                        if (r.OldCount == 0 && r.NewCount > r.OldCount) r.Result = BuffOperationResult.BuffAdded;
-                        else if (r.NewCount != r.OldCount) r.Result = BuffOperationResult.BuffCountChanged;
+                        r.ReNewCount = newIndex < 0 ? 0 : unit.Buffs[newIndex].Count;
+                        if (r.ReOldCount == 0 && r.ReNewCount > r.ReOldCount) r.ReResult = BuffOperationResult.BuffAdded;
+                        else if (r.ReNewCount != r.ReOldCount) r.ReResult = BuffOperationResult.BuffCountChanged;
                     }
                     else
                     {
-                        r.Result = BuffOperationResult.None;
-                        r.NewCount = r.OldCount;
+                        r.ReResult = BuffOperationResult.None;
+                        r.ReNewCount = r.ReOldCount;
                     }
                 }
                 else if (operation == BuffOperation.RemoveBuff && index >= 0)
@@ -74,32 +75,32 @@ partial class Simulator
                     {
                         var newIndex = 0;
                         obj.State.UnitMapState.ModifyUnit(unit.Id, u => newIndex = u.RemoveBuff(buffName, count));
-                        r.NewCount = newIndex < 0 ? 0 : unit.Buffs[newIndex].Count;
-                        if (r.NewCount == 0 && r.NewCount < r.OldCount) r.Result = BuffOperationResult.BuffRemoved;
-                        else if (r.NewCount != r.OldCount) r.Result = BuffOperationResult.BuffCountChanged;
+                        r.ReNewCount = newIndex < 0 ? 0 : unit.Buffs[newIndex].Count;
+                        if (r.ReOldCount == 0 && r.ReNewCount < r.ReOldCount) r.ReResult = BuffOperationResult.BuffRemoved;
+                        else if (r.ReNewCount != r.ReOldCount) r.ReResult = BuffOperationResult.BuffCountChanged;
                     }
                     else
                     {
-                        r.Result = BuffOperationResult.None;
-                        r.NewCount = r.OldCount;
+                        r.ReResult = BuffOperationResult.None;
+                        r.ReNewCount = r.ReOldCount;
                     }
                 }
 
                 if (obj.ComplexSimulationRegion(1))
                 {
-                    switch (r.Result)
+                    switch (r.ReResult)
                     {
                         case BuffOperationResult.BuffAdded:
-                            NotifyUnitBuff(unit, buffName, b => b.OnAddToUnit(obj, unit, r.NewCount));
+                            NotifyUnitBuff(unit, buffName, b => b.OnAddToUnit(obj, unit, r.ReNewCount));
                             break;
                         case BuffOperationResult.BuffRemoved:
-                            NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(obj, unit, r.NewCount, r.OldCount));
+                            NotifyUnitBuff(unit, buffName, b => b.OnRemoveFromUnit(obj, unit, r.ReNewCount, r.ReOldCount));
                             break;
                         case BuffOperationResult.BuffCountChanged:
                             NotifyUnitBuff(unit, buffName, b => b.OnBuffCountChanged(obj, unit,
-                                r.NewCount,
-                                r.OldCount,
-                                r.NewCount));
+                                r.ReNewCount,
+                                r.ReOldCount,
+                                r.ReNewCount));
                             break;
                     }
                 }
@@ -123,30 +124,30 @@ partial class Simulator
     public static partial void ApplyModifyUnitBuffViewDraw(GameView view, ReadOnlySimObject sim,
         ApplyModifyUnitBuffResult result)
     {
-        if (result.Step.Draw)
+        if (result.Draw)
         {
-            view.EventsView.BlockDraw.AddBuffChange(result.Step.Coords, result.Step.BuffName,
-                result.Step.Operation == BuffOperation.AddBuff, sim.IsFocused);
+            view.EventsView.BlockDraw.AddBuffChange(result.Coords, result.BuffName,
+                result.Operation == BuffOperation.AddBuff, sim.IsFocused);
         }
 
-        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
         if (uv == null) return;
-        uv.BuffView.ChangeBuffChange(result.Step.BuffName, Mathf.Sign(result.NewCount - result.OldCount));
-        view.EventsView.NeedClearUnit(result.UnitId);
+        uv.BuffView.ChangeBuffChange(result.BuffName, Mathf.Sign(result.ReNewCount - result.ReOldCount));
+        view.EventsView.NeedClearUnit(result.ReUnitId);
     }
 
     public static partial GDTask ApplyModifyUnitBuffViewRun(GameView view, ReadOnlySimObject sim,
         ApplyModifyUnitBuffResult result)
     {
-        if (result.Result == BuffOperationResult.BuffAdded)
+        if (result.ReResult == BuffOperationResult.BuffAdded)
         {
-            view.UnitsView.GetUnitView(result.UnitId)?.BuffView
-                .AddVisibleBuff(result.Step.BuffName);
+            view.UnitsView.GetUnitView(result.ReUnitId)?.BuffView
+                .AddVisibleBuff(result.BuffName);
         }
-        else if (result.Result == BuffOperationResult.BuffRemoved)
+        else if (result.ReResult == BuffOperationResult.BuffRemoved)
         {
-            view.UnitsView.GetUnitView(result.UnitId)?.BuffView
-                .RemoveVisibleBuff(result.Step.BuffName);
+            view.UnitsView.GetUnitView(result.ReUnitId)?.BuffView
+                .RemoveVisibleBuff(result.BuffName);
         }
 
         return GDTask.CompletedTask;

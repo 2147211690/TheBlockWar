@@ -17,7 +17,8 @@ public static partial class Simulator
     /// </summary>
     public static int ComplexSimulationMaxLevel { get; set; } = int.MaxValue;
     private static int _simulationStack = -1;
-    private static int CurrentDeep => _simulationStack;
+    private static short CurrentDeep => (short)_simulationStack;
+    private static int CurrentTeam { get; set; }
     private static void EnterSimulation()
     {
         if (_simulationStack == -1)
@@ -40,9 +41,9 @@ public static partial class Simulator
             var previous = CurrentContext;
             _contexts.Add(context);
             if (_contexts.Count == 2)
-                obj.ApplyRaiseContextChanged(context);
-            else 
-                obj.TryRaiseContextChanged(context, previous);
+                obj.UpdateCurrentTeamType(context.SourceUnitId);
+            else if (context != previous)
+                obj.UpdateCurrentTeamType(context.SourceUnitId);
         }
 
         public SimContext PopContext()
@@ -51,12 +52,14 @@ public static partial class Simulator
             var previous = _contexts[^1];
             _contexts.RemoveAt(_contexts.Count - 1);
             var current = _contexts[^1];
-            obj.TryRaiseContextChanged(current, previous);
+            if (current != previous)
+                obj.UpdateCurrentTeamType(current.SourceUnitId);
             return previous;
         }
-        private void TryRaiseContextChanged(in SimContext current, in SimContext previous)
+        private void UpdateCurrentTeamType(in long sourceUnitId)
         {
-            if (current != previous) obj.ApplyRaiseContextChanged(current);
+            if (sourceUnitId == 0) CurrentTeam = -1;
+            else CurrentTeam = obj.State.UnitMapState.GetUnit(sourceUnitId).Team;
         }
         private bool ComplexSimulationRegion(int level) 
             => CurrentComplexSimulationMaxLevel >= level || obj.Layer == SimulationLayer.Running;
@@ -119,7 +122,7 @@ public static partial class Simulator
         {
             if (obj.Layer != SimulationLayer.Running) return;
             EnterSimulation();
-            obj.Steps?.AddResult(new ApplyStepsResult(CurrentDeep, [], startDelay, endDelay, runningMode));
+            obj.Steps.AddResult(new ApplyStepsResult(CurrentDeep, CurrentTeam, [], startDelay, endDelay, runningMode));
         }
         /// <summary>
         /// 结束封装一系列步骤

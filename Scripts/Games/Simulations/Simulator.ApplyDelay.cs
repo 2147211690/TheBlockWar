@@ -11,7 +11,7 @@ partial class Simulator
         public ApplyDelayResult ApplyDelay(int delay)
         {
             EnterSimulation(); 
-            var r = obj.Steps.AddResult(new ApplyDelayResult(CurrentDeep, delay));
+            var r = obj.Steps.AddResult(new ApplyDelayResult(CurrentDeep, CurrentTeam, delay));
             ExitSimulation();
             return r;
         }
@@ -22,6 +22,6 @@ partial class Simulator
     
     public static partial GDTask ApplyDelayViewRun(GameView view, ReadOnlySimObject sim, ApplyDelayResult result)
     {
-        return GDTask.Delay(result.Step.Delay);
+        return GDTask.Delay(result.Delay);
     }
 }

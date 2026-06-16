@@ -19,7 +19,7 @@ partial class Simulator
 
             ApplyMoveUnitResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyMoveUnitResult(CurrentDeep, coords, to, 0, false));
+                var r = obj.Steps.AddResult(new ApplyMoveUnitResult(CurrentDeep, CurrentTeam, coords, to, 0, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
@@ -27,10 +27,10 @@ partial class Simulator
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
                 var toUnit = obj.State.UnitMapState.GetUnit(to);
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
                 if (unit.IsNull() || !toUnit.IsNull()) return r;
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Coords = to);
-                r.Valid = true;
+                r.ReValid = true;
                 obj.ApplyUnitRemoveFromCoords(unit, coords);
                 obj.ApplyUnitSetInCoords(unit);
                 return r;
@@ -39,19 +39,19 @@ partial class Simulator
     }
     public static partial void ApplyMoveUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)
     {
-        var uv = view.UnitsView.GetUnitView(result.UnitId);
-        if (uv != null && result.Valid)
+        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
+        if (uv != null && result.ReValid)
         {
             uv.AddFack(uv.WishCoords);
-            view.UnitsView.SetUnitAimCoords(result.UnitId, result.Step.To);
-            view.EventsView.SetUnitNeedClear(result.UnitId);
+            view.UnitsView.SetUnitAimCoords(result.ReUnitId, result.To);
+            view.EventsView.SetUnitNeedClear(result.ReUnitId);
         }
     }
     
     public static partial GDTask ApplyMoveUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)
     {
-        if (result.Valid) view.UnitsView.MoveUnit(result.UnitId, result.Step.To);
-        view.UnitsView.UpdateUnitPosition(result.Step.To);
+        if (result.ReValid) view.UnitsView.MoveUnit(result.ReUnitId, result.To);
+        view.UnitsView.UpdateUnitPosition(result.To);
         return GDTask.CompletedTask;
     }
 }

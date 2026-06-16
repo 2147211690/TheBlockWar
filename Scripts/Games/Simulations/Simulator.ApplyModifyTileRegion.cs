@@ -21,23 +21,25 @@ partial class Simulator
             
             ApplyModifyTileRegionResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyModifyTileRegionResult(CurrentDeep, coords, regionName,
-                    operation, duration, draw, operation, 0, 0, RegionOperationResult.None));
+                var r = obj.Steps.AddResult(
+                    new ApplyModifyTileRegionResult(CurrentDeep, CurrentTeam, coords, regionName,
+                    operation, duration, draw, 
+                    operation, 0, 0, RegionOperationResult.None));
                 if (obj.Layer == SimulationLayer.Waiting) return r;
 
                 var tile = obj.State.TileMapState.GetTile(coords);
                 if (tile.IsNull()) return r;
 
                 var index = tile.FindRegion(regionName);
-                r.OldDuration = index == -1 ? 0 : tile.Regions[index].Duration;
+                r.ReOldDuration = index == -1 ? 0 : tile.Regions[index].Duration;
 
                 if (operation == RegionOperation.AddRegion)
                 {
                     var newIndex = 0;
                     obj.State.TileMapState.ModifyTile(coords, t => newIndex = t.AddRegion(regionName, duration));
-                    r.NewDuration = newIndex < 0 ? 0 : tile.Regions[newIndex].Duration;
-                    if (r.OldDuration == 0 && r.NewDuration > 0) r.Result = RegionOperationResult.RegionAdded;
-                    else if (r.NewDuration != r.OldDuration) r.Result = RegionOperationResult.RegionDurationChanged;
+                    r.ReNewDuration = newIndex < 0 ? 0 : tile.Regions[newIndex].Duration;
+                    if (r.ReOldDuration == 0 && r.ReNewDuration > 0) r.ReResult = RegionOperationResult.RegionAdded;
+                    else if (r.ReNewDuration != r.ReOldDuration) r.ReResult = RegionOperationResult.RegionDurationChanged;
                 }
                 else if (operation == RegionOperation.RemoveRegion && index >= 0)
                 {
@@ -46,14 +48,14 @@ partial class Simulator
                     {
                         var newIndex = 0;
                         obj.State.TileMapState.ModifyTile(coords, t => newIndex = t.RemoveRegion(regionName, duration));
-                        r.NewDuration = newIndex < 0 ? 0 : tile.Regions[newIndex].Duration;
-                        if (r.NewDuration == 0 && r.OldDuration > 0) r.Result = RegionOperationResult.RegionRemoved;
-                        else if (r.NewDuration != r.OldDuration) r.Result = RegionOperationResult.RegionDurationChanged;
+                        r.ReNewDuration = newIndex < 0 ? 0 : tile.Regions[newIndex].Duration;
+                        if (r.ReNewDuration == 0 && r.ReOldDuration > 0) r.ReResult = RegionOperationResult.RegionRemoved;
+                        else if (r.ReNewDuration != r.ReOldDuration) r.ReResult = RegionOperationResult.RegionDurationChanged;
                     }
                     else
                     {
-                        r.Result = RegionOperationResult.None;
-                        r.NewDuration = r.OldDuration;
+                        r.ReResult = RegionOperationResult.None;
+                        r.ReNewDuration = r.ReOldDuration;
                     }
                 }
 
@@ -62,7 +64,7 @@ partial class Simulator
                     var unit = obj.State.UnitMapState.GetUnit(coords);
                     if (!unit.IsNull())
                     {
-                        switch (r.Result)
+                        switch (r.ReResult)
                         {
                             case RegionOperationResult.RegionAdded:
                                 NotifyTileRegion(tile, regionName,

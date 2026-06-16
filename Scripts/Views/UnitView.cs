@@ -47,6 +47,7 @@ public partial class UnitView : ViewNode2D
             if (!value) return;
             MainSprite.Play("dead");
             HealthBar.IsDead = true;
+            BuffView.ClearVisibleBuffs();
             MainSprite.Modulate = new Color(0.5f, 0.5f, 0.5f);
         }
     }

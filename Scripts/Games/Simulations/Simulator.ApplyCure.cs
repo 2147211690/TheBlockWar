@@ -19,14 +19,14 @@ partial class Simulator
 
             ApplyCureResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyCureResult(CurrentDeep, coords, cure, 0, 0));;
+                var r = obj.Steps.AddResult(new ApplyCureResult(CurrentDeep, CurrentTeam, coords, cure, 0, 0));;
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
                 if (unit.IsNull() || unit.IsDead)
                 {
                     return r;
@@ -54,7 +54,7 @@ partial class Simulator
                 var validCure = Mathf.Min(rawCure, unit.MaxHealth - unit.Health);
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health += validCure);
                 unit = obj.State.UnitMapState.GetUnit(unit.Id);
-                r.ValidCure = validCure;
+                r.ReValidCure = validCure;
 
                 if (validCure > 0 && obj.ComplexSimulationRegion(0))
                 {
@@ -68,17 +68,17 @@ partial class Simulator
 
     public static partial void ApplyCureViewDraw(GameView view, ReadOnlySimObject sim, ApplyCureResult result)
     {
-        view.EventsView.BlockDraw.AddHealthChange(result.Step.Coords, result.Step.Cure, result.ValidCure, 
-                result.UnitId != 0 ,sim.IsFocused);
-        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        view.EventsView.BlockDraw.AddHealthChange(result.Coords, result.Cure, result.ReValidCure, 
+                result.ReUnitId != 0 ,sim.IsFocused);
+        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
         if (uv == null) return;
-        uv.HealthBar.HealthChange += result.ValidCure;
-        view.EventsView.NeedClearUnit(result.UnitId);
+        uv.HealthBar.HealthChange += result.ReValidCure;
+        view.EventsView.NeedClearUnit(result.ReUnitId);
     }
 
     public static partial GDTask ApplyCureViewRun(GameView view, ReadOnlySimObject sim, ApplyCureResult result)
     {
-        view.UnitsView.GetUnitView(result.UnitId)?.HealthBar.CurrentHealth += result.ValidCure;
+        view.UnitsView.GetUnitView(result.ReUnitId)?.HealthBar.CurrentHealth += result.ReValidCure;
         return GDTask.CompletedTask;
     }
 }

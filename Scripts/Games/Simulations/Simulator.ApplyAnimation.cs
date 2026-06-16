@@ -13,7 +13,7 @@ partial class Simulator
         public ApplyAnimationResult ApplyAnimation(AnimationType animation)
         {
             EnterSimulation();
-            var r = obj.Steps.AddResult(new ApplyAnimationResult(CurrentDeep, animation));
+            var r = obj.Steps.AddResult(new ApplyAnimationResult(CurrentDeep, CurrentTeam, animation));
             ExitSimulation();
             return r;
         }
@@ -21,14 +21,14 @@ partial class Simulator
 
     public static partial void ApplyAnimationViewDraw(GameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
     {
-        if (result.Step.Animation is ShotSomethingAnim shot)
+        if (result.Animation is ShotSomethingAnim shot)
         {
             var h = view.TilesView.GetTileHeight(shot.Coords);
             var start = new Vector3(shot.Coords.X, shot.Coords.Y, h);
             var end = new Vector3(shot.To.X, shot.To.Y, h);
             view.EventsView.DrawPointLine(AnimationLine, start, end, 0.5f, Colors.Yellow);
         }
-        else if (result.Step.Animation is ThrowSomethingAnim thr)
+        else if (result.Animation is ThrowSomethingAnim thr)
         {
             var throwStart = new Vector3(thr.Coords.X, thr.Coords.Y, view.TilesView.GetTileHeight(thr.Coords));
             var throwEnd = new Vector3(thr.To.X, thr.To.Y, view.TilesView.GetTileHeight(thr.To));
@@ -50,7 +50,7 @@ partial class Simulator
 
     public static async partial GDTask ApplyAnimationViewRun(GameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
     {
-        if (result.Step.Animation is ShotSomethingAnim shot)
+        if (result.Animation is ShotSomethingAnim shot)
         {
             var v = view.CurrentStyle.EffectTable.CreateEffect(view, shot.ThingName);
             if (v == null) return;
@@ -63,7 +63,7 @@ partial class Simulator
             await tween.WaitForTween();
             v.QueueFree();
         }
-        else if (result.Step.Animation is ThrowSomethingAnim thr)
+        else if (result.Animation is ThrowSomethingAnim thr)
         {
             var v = view.CurrentStyle.EffectTable.CreateEffect(view, thr.ThingName);
             if (v == null) return;

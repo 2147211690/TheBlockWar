@@ -19,7 +19,7 @@ partial class Simulator
 
             ApplyBuffTurnResult Main()
             {
-                ApplyBuffTurnResult r = obj.Steps.AddResult(new ApplyBuffTurnResult(CurrentDeep, turn));
+                ApplyBuffTurnResult r = obj.Steps.AddResult(new ApplyBuffTurnResult(CurrentDeep, CurrentTeam, turn));
                 if (obj.Layer == SimulationLayer.Waiting) return r;
                 List<(long id, IReadOnlyList<BuffState> buffs)> buffPairs =
                     obj.State.UnitMapState.GetAllUnits().Where(u => u is { IsDead: false, Buffs.Count: > 0 }

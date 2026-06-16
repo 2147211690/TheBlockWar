@@ -19,20 +19,20 @@ partial class Simulator
 
             ApplyDeathResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyDeathResult(CurrentDeep, coords, 0, false));
+                var r = obj.Steps.AddResult(new ApplyDeathResult(CurrentDeep, CurrentTeam, coords, 0, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
 
                 if (unit.IsNull() || unit.IsDead)
                 {
                     return r;
                 }
-                r.Valid = true;
+                r.ReValid = true;
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health = 0);
                 
@@ -41,11 +41,10 @@ partial class Simulator
                 //移除所有buff
                 foreach (var buff in unit.BuffsStatic)
                 {
-                    obj.ApplyModifyUnitBuff(unit.Coords, buff.BuffName, BuffOperation.RemoveBuff, -1, false, true);
+                    buff.BuffName.GetBuffInfo().Hook.OnRemoveFromUnit(obj, unit, buff.Count, buff.Count);
                 }
-                ExitSimulation();
-                
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.ClearBuff());
+                ExitSimulation();
                 //TODO:可能引入区域相关事件
                 return r;
             }
@@ -53,16 +52,18 @@ partial class Simulator
     }
     public static partial void ApplyDeathViewDraw(GameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
-        var uv = view.UnitsView.GetUnitView(result.UnitId);
+        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
         if (uv == null) return;
         uv.HealthBar.WillDie = true;
-        view.EventsView.NeedClearUnit(result.UnitId);
+        view.EventsView.NeedClearUnit(result.ReUnitId);
     }
     
     public static partial GDTask ApplyDeathViewRun(GameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
-        view.UnitsView.GetUnitView(result.UnitId)?.HealthBar.CurrentHealth = 0;
-        view.UnitsView.GetUnitView(result.UnitId)?.IsDead = true;
+        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
+        if (uv == null) return GDTask.CompletedTask;
+        uv.HealthBar.CurrentHealth = 0;
+        uv.IsDead = true;
         return GDTask.CompletedTask;
     }
 }

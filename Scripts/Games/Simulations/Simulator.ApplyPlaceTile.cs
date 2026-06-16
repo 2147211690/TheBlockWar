@@ -18,14 +18,15 @@ partial class Simulator
 
             ApplyPlaceTileResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyPlaceTileResult(CurrentDeep, coords, tileName, false));
+                var r = obj.Steps.AddResult(new ApplyPlaceTileResult(
+                    CurrentDeep, CurrentTeam, coords, tileName, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
                 }
 
                 if (!obj.State.TileMapState.IsEmpty(coords)) return r;
-                r.Valid = true;
+                r.ReValid = true;
                 obj.State.TileMapState.ModifyTile(coords, t =>
                 {
                     t.Name = tileName;
@@ -60,7 +61,7 @@ partial class Simulator
     
     public static partial GDTask ApplyPlaceTileViewRun(GameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
     {
-        if (!result.Valid) return GDTask.CompletedTask;
-        return view.TilesView.PlaceTile(result.Step.Coords, result.Step.TileName);
+        if (!result.ReValid) return GDTask.CompletedTask;
+        return view.TilesView.PlaceTile(result.Coords, result.TileName);
     }
 }

@@ -18,7 +18,8 @@ partial class Simulator
 
             ApplyRectWindResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyRectWindResult(CurrentDeep, rect, dir));
+                var r = obj.Steps.AddResult(new ApplyRectWindResult(
+                    CurrentDeep, CurrentTeam, rect, dir));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
@@ -56,7 +57,6 @@ partial class Simulator
                     DirMask.Right => rect.Size.X,
                     _ => 0,
                 };
-                obj.Steps?.AddResult(new ApplyRectWindResult(CurrentDeep, rect, dir));
                 var aims = new Queue<Queue<Vector2I>>();
                 var currentLine = new Queue<Vector2I>();
                 for (var j = 0; j < secondOffsetCount; j++)

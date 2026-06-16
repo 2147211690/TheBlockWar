@@ -19,10 +19,10 @@ partial class Simulator
 
             ApplyMoveUnitPathResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, coords, path, 0, 0));
+                var r = obj.Steps.AddResult(new ApplyMoveUnitPathResult(CurrentDeep, CurrentTeam, coords, path, 0, 0));
                 if (path is not {Count: > 1}) return r;
                 var unit = obj.State.UnitMapState.GetUnit(coords + path[0]);
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
                 if (unit.IsNull())
                 {
                     return r;
@@ -38,7 +38,7 @@ partial class Simulator
                     if (unit.IsCanBeDestination(obj.State, coords + path[targetIndex]))
                         break;
 
-                r.TargetIndex = targetIndex;
+                r.ReTargetIndex = targetIndex;
                 
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
@@ -54,24 +54,24 @@ partial class Simulator
     public static partial void ApplyMoveUnitPathViewDraw(GameView view, ReadOnlySimObject sim,
         ApplyMoveUnitPathResult result)
     {
-        var path = result.Step.Path;
+        var path = result.Path;
         if (path is not {Count: >= 2}) return;
         var maxTileHeight = 0f;
         foreach (var coord in path) 
-            maxTileHeight = Mathf.Max(maxTileHeight, view.TilesView.GetTileHeight(coord + result.Step.Coords));
+            maxTileHeight = Mathf.Max(maxTileHeight, view.TilesView.GetTileHeight(coord + result.Coords));
         var tex = view.Style[TeamTypeEnum.Player].PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
-        SetSprite(result.Step.Coords + path[0], tex, 0);
+        SetSprite(result.Coords + path[0], tex, 0);
         for (int i = 1; i < path.Count - 1; i++)
         {
             tex = view.Style[TeamTypeEnum.Player]
                 .PathTextures[
                     (int)(path[i - 1] - path[i]).ToVecDirMask() |
                     (int)(path[i + 1] - path[i]).ToVecDirMask()];
-            SetSprite(result.Step.Coords + path[i], tex, i);
+            SetSprite(result.Coords + path[i], tex, i);
         }
 
         tex = view.Style[TeamTypeEnum.Player].PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
-        SetSprite(result.Step.Coords + path[^1], tex, path.Count - 1);
+        SetSprite(result.Coords + path[^1], tex, path.Count - 1);
 
         void SetSprite(in Vector2I coords, Texture2D tex, int index)
         {
@@ -85,7 +85,7 @@ partial class Simulator
 
     public static partial GDTask ApplyMoveUnitPathViewRun(GameView view, ReadOnlySimObject sim, ApplyMoveUnitPathResult result)
     {
-        return view.UnitsView.MovePathUnit(result.UnitId, result.Step.Coords, result.Step.Path,
-                result.TargetIndex);
+        return view.UnitsView.MovePathUnit(result.ReUnitId, result.Coords, result.Path,
+                result.ReTargetIndex);
     }
 }

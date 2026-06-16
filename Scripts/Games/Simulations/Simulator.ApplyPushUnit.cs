@@ -19,20 +19,21 @@ partial class Simulator
 
             ApplyPushUnitResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyPushUnitResult(CurrentDeep, coords, dir, 0, true));
+                var r = obj.Steps.AddResult(new ApplyPushUnitResult(
+                    CurrentDeep, CurrentTeam, coords, dir, 0, true));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
                 }
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
-                r.UnitId = unit.Id;
+                r.ReUnitId = unit.Id;
                 var target = coords + dir.ToVec2I();
                 var targetUnit = obj.State.UnitMapState.GetUnit(target);
                 var validPush = !unit.IsNull() && targetUnit.IsNull() && obj.State.IsInMap(target);
                 var shouldPush = true;
                 Hook.BuffUnitBeforePush(unit, obj, dir, ref shouldPush);
-                r.Valid = validPush && shouldPush;
+                r.ReValid = validPush && shouldPush;
                 if (unit.IsNull() || !shouldPush) return r;
                 if (validPush)
                 {
@@ -55,10 +56,10 @@ partial class Simulator
     public static partial void ApplyPushUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
     {
         var s = view.EventsView.GetGameTexture();
-        var pos = result.Step.Coords.ToVec2() + result.Step.Dir.ToVec2() * (result.Valid ? 0.5f : 0.2f);
-        s.GamePosition = new(pos.X, pos.Y, view.TilesView.GetTileHeight(result.Step.Coords));
-        s.Texture = view.CurrentStyle.PushTextures[result.Step.Dir.ToIndex()];
-        s.Modulate = (sim.IsFocused , result.Valid) switch
+        var pos = result.Coords.ToVec2() + result.Dir.ToVec2() * (result.ReValid ? 0.5f : 0.2f);
+        s.GamePosition = new(pos.X, pos.Y, view.TilesView.GetTileHeight(result.Coords));
+        s.Texture = view.CurrentStyle.PushTextures[result.Dir.ToIndex()];
+        s.Modulate = (sim.IsFocused , result.ReValid) switch
         {
             (true, true) => Colors.Yellow,
             (true, false) => Colors.White,
@@ -68,6 +69,6 @@ partial class Simulator
 
     public static partial GDTask ApplyPushUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
     {
-        return view.UnitsView.PushUnit(result.UnitId, result.Step.Dir, result.Valid);
+        return view.UnitsView.PushUnit(result.ReUnitId, result.Dir, result.ReValid);
     }
 }

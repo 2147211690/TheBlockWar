@@ -1,3 +1,4 @@
+using System.Linq;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Resources;
@@ -143,7 +144,14 @@ public partial class BuffView : Node2D
             GameView.ViewPools.AnimatedSprite2DPool.Return(animatedSprite2D);
         }
     }
-    public override void _Draw()
+    public void ClearVisibleBuffs()
+    {
+        foreach (var s in _visibleBuffs.Keys.ToList())
+        {
+            RemoveVisibleBuff(s);
+        }
+    }
+       public override void _Draw()
     {
         base._Draw();
 

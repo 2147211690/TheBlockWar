@@ -19,7 +19,8 @@ partial class Simulator
 
             ApplySwapUnitResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplySwapUnitResult(CurrentDeep, coords1, coords2, 0, 0, false));
+                var r = obj.Steps.AddResult(new ApplySwapUnitResult(
+                    CurrentDeep, CurrentTeam, coords1, coords2, 0, 0, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
@@ -27,12 +28,12 @@ partial class Simulator
 
                 var unit1 = obj.State.UnitMapState.GetUnit(coords1);
                 var unit2 = obj.State.UnitMapState.GetUnit(coords2);
-                r.UnitId1 = unit1.Id;
-                r.UnitId2 = unit2.Id;
+                r.ReUnitId1 = unit1.Id;
+                r.ReUnitId2 = unit2.Id;
                 
                 if (!unit1.IsNull() && !unit2.IsNull())
                 {
-                    r.Valid = true;
+                    r.ReValid = true;
                     obj.State.UnitMapState.ModifyUnit(unit1.Id, u => u.Coords = coords2);
                     obj.State.UnitMapState.ModifyUnit(unit2.Id, u => u.Coords = coords1);
                     
@@ -41,7 +42,7 @@ partial class Simulator
                     obj.ApplyUnitRemoveFromCoords(unit2, coords2);
                     obj.ApplyUnitSetInCoords(unit2);
                 }
-                else r.Valid = false;
+                else r.ReValid = false;
                 return r;
             }
         }
@@ -52,8 +53,8 @@ partial class Simulator
     
     public static partial GDTask ApplySwapUnitViewRun(GameView view, ReadOnlySimObject sim, ApplySwapUnitResult result)
     {
-        if (!result.Valid) return GDTask.CompletedTask;
-        view.UnitsView.SwapUnit(result.UnitId1, result.UnitId2);
+        if (!result.ReValid) return GDTask.CompletedTask;
+        view.UnitsView.SwapUnit(result.ReUnitId1, result.ReUnitId2);
         return GDTask.CompletedTask;
     }
 }

@@ -19,7 +19,8 @@ partial class Simulator
 
             ApplyRegionTurnResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyRegionTurnResult(CurrentDeep, turn));
+                var r = obj.Steps.AddResult(new ApplyRegionTurnResult(
+                    CurrentDeep, CurrentTeam, turn));
                 if (obj.Layer == SimulationLayer.Waiting) return r;
                 var regionPairs = new List<(Vector2I coords, IReadOnlyList<RegionState> regions)>();
                 var size = obj.State.TileMapState.Size;

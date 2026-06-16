@@ -18,7 +18,7 @@ partial class Simulator
 
             ApplyDropTileResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyDropTileResult(CurrentDeep, coords));
+                var r = obj.Steps.AddResult(new ApplyDropTileResult(CurrentDeep, CurrentTeam, coords));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
@@ -46,6 +46,6 @@ partial class Simulator
     
     public static partial GDTask ApplyDropTileViewRun(GameView view, ReadOnlySimObject sim, ApplyDropTileResult result)
     {
-        return view.TilesView.DropTile(result.Step.Coords);
+        return view.TilesView.DropTile(result.Coords);
     }
 }
