@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Tools;
 
@@ -39,60 +40,67 @@ public class TileState : IReadOnlyTileState
         Name = data.Name;
         _regions = data.Regions.CloneToListOrNullWhenCountZero();
     }
-    /// <summary>
-    /// 添加一个区域效果,不做检查
-    /// </summary>
-    public void AddRegion(string regionName, int duration)
+    public int FindRegion(string regionName)
     {
+        return _regions?.FindIndex(a => a.RegionName == regionName) ?? -1;
+    }
+    /// <summary>
+    /// 添加一个区域效果, 若已存在则累加持续时间
+    /// </summary>
+    public int AddRegion(string regionName, int duration)
+    {
+        if (duration < 0) duration = int.MaxValue;
         var list = GetRegionList();
-        list.Add(new RegionState
-        {
-            RegionName = regionName,
-            Duration = duration
-        });
+        var index = FindRegion(regionName);
+        var span = CollectionsMarshal.AsSpan(_regions);
         _isRegionStaticDirty = true;
+        if (index >= 0)
+        {
+            span[index].Duration = duration == int.MaxValue ? int.MaxValue : span[index].Duration + duration;
+            return index;
+        }
+        else
+        {
+            var p = regionName.GetRegionInfo().Priority;
+            var i = 0;
+            for (; i < span.Length; i++)
+                if (span[i].RegionName.GetRegionInfo().Priority > p) break;
+            list.Insert(i, new RegionState()
+            {
+                RegionName = regionName,
+                Duration = duration
+            });
+            return i;
+        }
     }
 
-    public void RemoveRegion(string regionName)
+    public int RemoveRegion(string regionName, int duration)
     {
-        if (!this.TryFindRegion(regionName, out var index)) return;
-        var list = GetRegionList();
-        list.RemoveAt(index);
-        _isRegionStaticDirty = true;
+        var index = FindRegion(regionName);
+        if (index < 0) return -1;
+        return RemoveRegion(index, duration);
     }
-    public void RemoveRegion(int index)
+    public int RemoveRegion(int index, int duration)
     {
-        if (index < 0 || index >= Regions.Count) return;
+        if (index < 0 || index >= Regions.Count) return -1;
         var list = GetRegionList();
-        list.RemoveAt(index);
+        var span = CollectionsMarshal.AsSpan(_regions);
+        span[index].Duration = Mathf.Max(0, span[index].Duration - (duration < 0 ? int.MaxValue : duration));
         _isRegionStaticDirty = true;
-    }
-    public void ModifyRegion(string regionName, int modifyDuration)
-    {
-        if (!this.TryFindRegion(regionName, out var index)) return;
-        var list = GetRegionList();
-        list[index] = new RegionState
+        if (span[index].Duration == 0)
         {
-            RegionName = regionName,
-            Duration = modifyDuration
-        };
-        _isRegionStaticDirty = true;
-    }
-    public void ModifyRegion(int index, int modifyDuration)
-    {
-        if (index < 0 || index >= Regions.Count) return;
-        var list = GetRegionList();
-        list[index] = new RegionState
+            list.RemoveAt(index);
+            return -1;
+        }
+        else
         {
-            RegionName = Regions[index].RegionName,
-            Duration = modifyDuration
-        };
-        _isRegionStaticDirty = true;
+            return index;
+        }
     }
+
     public void ClearRegion()
     {
-        var list = GetRegionList();
-        list.Clear();
+        GetRegionList().Clear();
         _isRegionStaticDirty = true;
     }
     

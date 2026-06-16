@@ -25,11 +25,15 @@ public enum BuffOperationResult
 }
 public enum RegionOperation
 {
-    None,
     AddRegion,
     RemoveRegion,
-    ChangeDuration,
-    SetDuration
+}
+public enum RegionOperationResult
+{
+    None,
+    RegionAdded,
+    RegionRemoved,
+    RegionDurationChanged,
 }
 
 public enum StepsRunningMode

@@ -44,8 +44,8 @@ partial class Simulator
                     var tile = obj.State.TileMapState.GetTile(pair.coords);
                     foreach (var region in pair.regions)
                     {
-                        if (tile.GetRegionDuration(region.RegionName) is 0 or int.MaxValue) continue;
-                        obj.ApplyModifyTileRegion(pair.coords, region.RegionName, RegionOperation.ChangeDuration, -1);
+                        if (region.Duration is 0 or int.MaxValue) continue;
+                        obj.ApplyModifyTileRegion(pair.coords, region.RegionName, RegionOperation.RemoveRegion, -1);
                     }
                 }
                 obj.EndSteps();

@@ -55,5 +55,6 @@ MovePower = 2
 MaxHealth = 30.0
 MaxShield = 30.0
 Buffs = PackedStringArray("贤者的庇护")
+BuffCounts = PackedInt32Array(1)
 Skills = PackedStringArray("一般移动")
 ViewFrames = SubResource("SpriteFrames_ots65")

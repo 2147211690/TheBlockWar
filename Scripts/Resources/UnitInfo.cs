@@ -11,8 +11,9 @@ public partial class UnitInfo : Resource, IInfo
     [Export] public float MaxHealth { get; set; }
     [Export] public float MaxShield { get; set; }
     [Export] public bool IsFlying { get; set; }
-    [Export] public string[]? Buffs { get; set; }
-    [Export] public string[]? Skills { get; set; }
+    [Export] public string[] Buffs { get; set; } = [];
+    [Export] public int[] BuffCounts { get; set; } = [];
+    [Export] public string[] Skills { get; set; } = [];
     [ExportGroup("View")]
     [Export] public Vector2 ViewOffset { get; set; }
     [Export] public SpriteFrames? ViewFrames { get; set; }

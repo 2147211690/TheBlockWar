@@ -88,10 +88,10 @@ public static partial class Simulator
                 }
 
                 // 移除所有一次性区域
-                for (var i = toTile.Regions.Count - 1; i >= 0; i--)
+                foreach (var region in toTile.RegionsStatic)
                 {
-                    if (!toTile.Regions[i].RegionName.GetRegionInfo().IsOnece) continue;
-                    obj.State.TileMapState.ModifyTile(coords, u => u.RemoveRegion(i));
+                    if (!region.RegionName.GetRegionInfo().IsOnece) continue;
+                    obj.ApplyModifyTileRegion(coords, region.RegionName, RegionOperation.RemoveRegion, -1);
                 }
             }
             ExitSimulation();

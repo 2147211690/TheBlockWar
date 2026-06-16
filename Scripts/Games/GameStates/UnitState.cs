@@ -76,13 +76,14 @@ public class UnitState : IReadOnlyUnitState
     
     public int AddBuff(string buffName, int count)
     {
+        if (count < 0) count = int.MaxValue;
         var list = GetBuffList();
         var index = FindBuff(buffName);
         var span = CollectionsMarshal.AsSpan(_buffs);
         _isBuffStaticDirty = true;
         if (index >= 0)
         {
-            span[index].Count += count;
+            span[index].Count = count == int.MaxValue ? int.MaxValue : span[index].Count + count;
             return index;
         }
         else

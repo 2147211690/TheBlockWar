@@ -43,7 +43,11 @@ partial class Simulator
                     {
                         obj.State.UnitMapState.ModifyUnit(newUnit.Id, u =>
                         {
-                            foreach (var buffName in info.Buffs) u.AddBuff(buffName, 1);
+                            for (var i = 0; i < info.Buffs.Length; i++)
+                            {
+                                var buffName = info.Buffs[i];
+                                u.AddBuff(buffName, info.BuffCounts[i]);
+                            }
                         });
                         Hook.BuffAddToUnit(newUnit, obj);
                     }

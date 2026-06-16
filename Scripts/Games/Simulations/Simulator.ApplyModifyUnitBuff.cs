@@ -56,7 +56,7 @@ partial class Simulator
                 else if (operation == BuffOperation.RemoveBuff && index >= 0)
                 {
                     if (unit.IsDead && !forceRemove) return r;
-                    var add = true;
+                    var shouldRemove = true;
                     if (!forceRemove)
                     {
                         var tile = obj.State.TileMapState.GetTile(unit.Coords);
@@ -65,12 +65,12 @@ partial class Simulator
                             var rbs = region.RegionName.GetRegionInfo().RegionBuffs;
                             // 如果结果为移除buff,但是当前所在区域是具有这个buff的区域,则无法移除
                             if (rbs.IndexOf(buffName) == -1) continue;
-                            add = false;
+                            shouldRemove = false;
                             break;
                         }
                     }
 
-                    if (add)
+                    if (shouldRemove)
                     {
                         var newIndex = 0;
                         obj.State.UnitMapState.ModifyUnit(unit.Id, u => newIndex = u.RemoveBuff(buffName, count));

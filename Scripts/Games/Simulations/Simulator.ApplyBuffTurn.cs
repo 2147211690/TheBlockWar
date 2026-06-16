@@ -39,8 +39,7 @@ partial class Simulator
                     foreach (var buff in pair.buffs)
                     {
                         var info = buff.BuffName.GetBuffInfo();
-                        if (unit.GetBuffCount(buff.BuffName) is 0 or int.MaxValue || info.TurnRemoveCount == 0)
-                            continue;
+                        if (buff.Count is 0 or int.MaxValue || info.TurnRemoveCount == 0) continue;
                         obj.ApplyModifyUnitBuff(unit.Coords, buff.BuffName, BuffOperation.RemoveBuff,
                             info.TurnRemoveCount, false);
                     }

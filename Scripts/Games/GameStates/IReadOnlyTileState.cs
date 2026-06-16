@@ -8,6 +8,7 @@ public interface IReadOnlyTileState
     string Name { get; }
     IReadOnlyList<RegionState> Regions { get; }
     IReadOnlyList<RegionState> RegionsStatic { get; }
+    int FindRegion(string regionName);
     TileState Clone();
     TileState CopyTo(TileState tile);
     TileStateData ToData();

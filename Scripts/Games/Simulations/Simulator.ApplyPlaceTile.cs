@@ -39,7 +39,11 @@ partial class Simulator
                     {
                         obj.State.TileMapState.ModifyTile(coords, t =>
                         {
-                            foreach (var regionName in info.Regions) t.AddRegion(regionName, int.MaxValue);
+                            for (var i = 0; i < info.Regions.Length; i++)
+                            {
+                                var regionName = info.Regions[i];
+                                t.AddRegion(regionName, info.RegionDurations[i]);
+                            }
                         });
                     }
                     //更新单位位置

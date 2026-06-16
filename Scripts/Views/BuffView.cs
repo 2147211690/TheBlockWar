@@ -15,7 +15,7 @@ public partial class BuffView : Node2D
     [Export] public Godot.Collections.Dictionary<string, Vector2> BuffEffectOffsets { get; set; } = null!;
     [Export] public UnitView UnitView { get; set; } = null!;
     // 【元素外框尺寸】默认值匹配截图
-    [Export] public Vector2 IconBoxSize { get; private set; } = new(32, 32);
+    [Export] public Vector2 IconBoxSize { get; private set; } = new(42, 42);
 
     // 【边距间隔】默认值匹配截图
     [Export] public float ElementSpacing { get; private set; } = 2f;

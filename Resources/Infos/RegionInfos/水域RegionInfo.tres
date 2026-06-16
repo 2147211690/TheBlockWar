@@ -6,4 +6,3 @@
 script = ExtResource("1_f5oac")
 Name = "水域"
 RegionBuffs = PackedStringArray("水域")
-DefaultDuration = 10000000
