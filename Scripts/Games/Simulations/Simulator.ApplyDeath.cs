@@ -35,8 +35,16 @@ partial class Simulator
                 r.Valid = true;
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.IsDead = true);
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.Health = 0);
+                
+                EnterSimulation();
                 Hook.BuffUnitDeath(unit, obj);
-                Hook.BuffRemoveFromUnit(unit, obj);
+                //移除所有buff
+                foreach (var buff in unit.BuffsStatic)
+                {
+                    obj.ApplyModifyUnitBuff(unit.Coords, buff.BuffName, BuffOperation.RemoveBuff, -1, false, true);
+                }
+                ExitSimulation();
+                
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.ClearBuff());
                 //TODO:可能引入区域相关事件
                 return r;

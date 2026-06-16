@@ -3,12 +3,24 @@ namespace TheBlockWar.View.Uis;
 public partial class ItemBox : PanelContainer
 {
     [Export] private TextureRect _textureRect = null!;
+    [Export] private Label _countLabel = null!;
     private Tween? _currentTween;
     [Export] public bool CanClick { get; set; } = true;
     public Texture2D Texture
     {
         get => _textureRect.Texture;
         set => _textureRect.Texture = value;
+    }
+    public int Count
+    {
+        get => int.Parse(_countLabel.Text);
+        set => _countLabel.Text = value.ToString();
+    }
+
+    public bool HasCount
+    {
+        get => _countLabel.Visible;
+        set => _countLabel.Visible = value;
     }
     public object? MetaData { get; set; }
     public static float MouseEnterScale = 1.04f;

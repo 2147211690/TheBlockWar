@@ -278,9 +278,9 @@ namespace TheBlockWar.Scripts.Games.Simulations
             return prefix + a.Text;
         }));
 
+        var hasSimObj = paramList.IndexOf("simObj", StringComparison.Ordinal) != -1;
         if (method.Kind == HookKind.Buff)
         {
-            var hasSimObj = paramList.IndexOf("simObj", StringComparison.Ordinal) != -1;
             return hasSimObj
                 ? $$"""
                             public static {{method.ReturnType}} {{method.HookMethodName}}({{paramList}})
@@ -307,17 +307,32 @@ namespace TheBlockWar.Scripts.Games.Simulations
         }
         else
         {
-            return $$"""
-        public static {{method.ReturnType}} {{method.HookMethodName}}({{paramList}})
-        {
-            var tile = simObj.State.TileMapState.GetTile(tileCoords);
-            foreach (var regionState in tile.RegionsStatic)
-            {
-                regionState.RegionName.GetRegionInfo().Hook
-                    .{{method.InterfaceMethodName}}({{args}});
-            }
-        }
-""";
+            return 
+                hasSimObj
+                ? $$"""
+                            public static {{method.ReturnType}} {{method.HookMethodName}}({{paramList}})
+                            {
+                                simObj.PushContext(new SimContext(0));
+                                var tile = simObj.State.TileMapState.GetTile(tileCoords);
+                                foreach (var regionState in tile.RegionsStatic)
+                                {
+                                    regionState.RegionName.GetRegionInfo().Hook
+                                        .{{method.InterfaceMethodName}}({{args}});
+                                }
+                                simObj.PopContext();
+                            }
+                    """
+                : $$"""
+                               public static {{method.ReturnType}} {{method.HookMethodName}}({{paramList}})
+                               {
+                                   var tile = simObj.State.TileMapState.GetTile(tileCoords);
+                                   foreach (var regionState in tile.RegionsStatic)
+                                   {
+                                       regionState.RegionName.GetRegionInfo().Hook
+                                           .{{method.InterfaceMethodName}}({{args}});
+                                   }
+                               }
+                    """;
         }
     }
 

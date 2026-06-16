@@ -1,8 +1,10 @@
 [gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://jj5iiqei77o7"]
 
 [ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_b4hmh"]
+[ext_resource type="Texture2D" uid="uid://ducblxdcybwi6" path="res://Art/Img/effects/laser_freeze_hit.png" id="1_bugnc"]
 
 [resource]
 script = ExtResource("1_b4hmh")
 Name = "火域"
-RegionBuffs = PackedStringArray("火域")
+Icon = ExtResource("1_bugnc")
+Description = "单位进入时或回合进入时,方格上单位获得一层燃烧"

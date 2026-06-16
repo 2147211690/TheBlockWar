@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Tools;
@@ -66,73 +67,66 @@ public class UnitState : IReadOnlyUnitState
             IsFlying = IsFlying,
             Buffs = _buffs.CloneToListOrNullWhenCountZero(),
         };
-    }   
-    /// <summary>
-    /// 添加一个buff,不做检查
-    /// </summary>
-    public void AddBuff(string buffName, int count)
+    }
+
+    public int FindBuff(string buffName)
+    {
+        return _buffs?.FindIndex(a => a.BuffName == buffName) ?? -1;
+    }
+    
+    public int AddBuff(string buffName, int count)
     {
         var list = GetBuffList();
-        for (var i = 0; i < list.Count; i++)
+        var index = FindBuff(buffName);
+        var span = CollectionsMarshal.AsSpan(_buffs);
+        _isBuffStaticDirty = true;
+        if (index >= 0)
         {
-            if (list[i].BuffName.GetBuffInfo().Priority < buffName.GetBuffInfo().Priority) continue;
-            list.Insert(i, new BuffState
+            span[index].Count += count;
+            return index;
+        }
+        else
+        {
+            var p = buffName.GetBuffInfo().Priority;
+            var i = 0;
+            for (; i < span.Length; i++)
+                if (span[i].BuffName.GetBuffInfo().Priority > p) break;
+            list.Insert(i, new BuffState()
             {
                 BuffName = buffName,
                 Count = count
             });
-            _isBuffStaticDirty = true;
-            return;
+            return i;
         }
-        list.Add(new BuffState
-        {
-            BuffName = buffName,
-            Count = count
-        });
-        _isBuffStaticDirty = true;
     }
 
-    public void RemoveBuff(string buffName)
+    public int RemoveBuff(string buffName, int count)
     {
-        if (!this.TryFindBuff(buffName, out var index)) return;
-        var list = GetBuffList();
-        list.RemoveAt(index);
-        _isBuffStaticDirty = true;
+        var index = FindBuff(buffName);
+        if (index < 0) return -1;
+        return RemoveBuff(index, count);
     }
-    public void RemoveBuff(int index)
+    public int RemoveBuff(int index, int count)
     {
-        if (index < 0 || index >= Buffs.Count) return;
+        if (index < 0 || index >= Buffs.Count) return -1;
         var list = GetBuffList();
-        list.RemoveAt(index);
+        var span = CollectionsMarshal.AsSpan(_buffs);
+        span[index].Count = Mathf.Max(0, span[index].Count - (count < 0 ? int.MaxValue : count));
         _isBuffStaticDirty = true;
+        if (span[index].Count == 0)
+        {
+            list.RemoveAt(index);
+            return -1;
+        }
+        else
+        {
+            return index;
+        }
     }
 
     public void ClearBuff()
     {
         GetBuffList().Clear();
-        _isBuffStaticDirty = true;
-    }
-
-    public void ModifyBuff(string buffName, int modifyDuration)
-    {
-        if (!this.TryFindBuff(buffName, out var index)) return;
-        var list = GetBuffList();
-        list[index] = new BuffState
-        {
-            BuffName = buffName,
-            Count =  modifyDuration
-        };
-        _isBuffStaticDirty = true;
-    }
-    public void ModifyBuff(int index, int modifyCount)
-    {
-        if (index < 0 || index >= Buffs.Count) return;
-        var list = GetBuffList();
-        list[index] = new BuffState
-        {
-            BuffName = Buffs[index].BuffName,
-            Count =  modifyCount
-        };
         _isBuffStaticDirty = true;
     }
     

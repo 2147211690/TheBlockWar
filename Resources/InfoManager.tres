@@ -21,6 +21,7 @@
 [ext_resource type="Resource" uid="uid://bdnl6xfj384br" path="res://Resources/Infos/TileInfos/水块TileInfo.tres" id="10_u2eed"]
 [ext_resource type="Resource" uid="uid://bccsk3gsy0yr4" path="res://Resources/Infos/SkillInfos/Test1SkillInfo.tres" id="11_11wvo"]
 [ext_resource type="Resource" uid="uid://87qrmh2vl6el" path="res://Resources/Infos/SkillInfos/一般移动SkillInfo.tres" id="11_cwtjy"]
+[ext_resource type="Resource" uid="uid://dh813h8xmpjg5" path="res://Resources/Infos/BuffInfos/燃烧BuffInfo.tres" id="11_lej7k"]
 [ext_resource type="Resource" uid="uid://cdpppapttf5to" path="res://Resources/Infos/UnitInfos/Unit0UnitInfo.tres" id="11_lsjiv"]
 [ext_resource type="Resource" uid="uid://doiuaok7flt55" path="res://Resources/Infos/TileInfos/Soil0TileInfo.tres" id="11_yw7y4"]
 [ext_resource type="Resource" uid="uid://jj5iiqei77o7" path="res://Resources/Infos/RegionInfos/火域RegionInfo.tres" id="12_11wvo"]
@@ -38,6 +39,7 @@ BuffInfos = Dictionary[String, ExtResource("1_4ogc0")]({
 "水域": ExtResource("2_mjrgt"),
 "火域": ExtResource("8_x1kfi"),
 "熔岩域": ExtResource("6_cgp2c"),
+"燃烧": ExtResource("11_lej7k"),
 "荆棘1": ExtResource("4_yw7y4"),
 "贤者的庇护": ExtResource("9_t22tk"),
 "贤者的庇护光环": ExtResource("10_sbefa")

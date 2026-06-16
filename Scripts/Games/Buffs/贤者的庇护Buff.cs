@@ -11,7 +11,7 @@ public class 贤者的庇护Buff() : Buff(BuffNames.贤者的庇护)
     {
         obj.ApplyModifyGlobalBuff(unit.Name, BuffNames.贤者的庇护, 1 << unit.Team, BuffNames.贤者的庇护光环 ,true);
     }
-    public override void OnRemoveFromUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount)
+    public override void OnRemoveFromUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount, int buffOldCount)
     {
         obj.ApplyModifyGlobalBuff(unit.Name, BuffNames.贤者的庇护, 1 << unit.Team, BuffNames.贤者的庇护光环 ,false);
     }

@@ -13,11 +13,15 @@ public record UnitJumpToAnim(Vector2I Coords, Vector2I To, float Time) : Animati
 public record SummonEffectAnim(Vector2I Coords, string EffectName) : AnimationType;
 public enum BuffOperation
 {
-    None,
     AddBuff,
     RemoveBuff,
-    ChangeDuration,
-    SetDuration
+}
+public enum BuffOperationResult
+{
+    None,
+    BuffAdded,
+    BuffRemoved,
+    BuffCountChanged,
 }
 public enum RegionOperation
 {

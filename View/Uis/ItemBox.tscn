@@ -4,7 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://c5ayhd5fgh63i" path="res://icon.svg" id="1_us0sw"]
 [ext_resource type="Script" uid="uid://d4cltyu51ueg5" path="res://View/Uis/ItemBox.cs" id="1_yit01"]
 
-[node name="ItemBox" type="PanelContainer" unique_id=1163128792 node_paths=PackedStringArray("_textureRect")]
+[sub_resource type="LabelSettings" id="LabelSettings_ohqpj"]
+font_size = 29
+
+[node name="ItemBox" type="PanelContainer" unique_id=1163128792 node_paths=PackedStringArray("_textureRect", "_countLabel")]
 offset_right = 134.0
 offset_bottom = 134.0
 pivot_offset_ratio = Vector2(0.5, 0.5)
@@ -12,6 +15,7 @@ theme = ExtResource("1_ohqpj")
 theme_type_variation = &"ItemBox_Normal"
 script = ExtResource("1_yit01")
 _textureRect = NodePath("MarginContainer/AspectRatioContainer/TextureRect")
+_countLabel = NodePath("MarginContainer/AspectRatioContainer/TextureRect/CountLabel")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=38520972]
 layout_mode = 2
@@ -29,3 +33,16 @@ layout_mode = 2
 texture = ExtResource("1_us0sw")
 expand_mode = 2
 stretch_mode = 5
+
+[node name="CountLabel" type="Label" parent="MarginContainer/AspectRatioContainer/TextureRect" unique_id=2092434989]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_ohqpj")
+horizontal_alignment = 2
+vertical_alignment = 2

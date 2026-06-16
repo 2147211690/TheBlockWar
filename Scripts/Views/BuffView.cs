@@ -101,6 +101,7 @@ public partial class BuffView : Node2D
         s.GetParent().RemoveChild(s);
         UnitView.Center.AddChild(s);
         s.Position = Vector2.Zero;
+        s.Rotation = 0;
         _visibleBuffs.Add(buffName, s);
         if (BuffEffectOffsets.TryGetValue(buffName, out var offset)) s.Offset = offset;
         

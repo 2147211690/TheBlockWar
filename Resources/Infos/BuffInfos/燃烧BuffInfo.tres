@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://dh813h8xmpjg5"]
+
+[ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_5sx2q"]
+[ext_resource type="Texture2D" uid="uid://efd4vguuhw8b" path="res://Art/Img/combat/icons/icon_fire_glow.png" id="1_7ukmh"]
+[ext_resource type="Texture2D" uid="uid://bhady3idpyaal" path="res://Art/Img/effects/splash_3.png" id="2_ywk8n"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8hneq"]
+atlas = ExtResource("2_ywk8n")
+region = Rect2(0, 0, 56, 49)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_74mwj"]
+atlas = ExtResource("2_ywk8n")
+region = Rect2(56, 0, 56, 49)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h7ov0"]
+atlas = ExtResource("2_ywk8n")
+region = Rect2(112, 0, 56, 49)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rxaj1"]
+atlas = ExtResource("2_ywk8n")
+region = Rect2(168, 0, 56, 49)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4c3ro"]
+atlas = ExtResource("2_ywk8n")
+region = Rect2(224, 0, 56, 49)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ut5c"]
+atlas = ExtResource("2_ywk8n")
+region = Rect2(280, 0, 56, 49)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_30gs3"]
+atlas = ExtResource("2_ywk8n")
+region = Rect2(336, 0, 56, 49)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yb1ui"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8hneq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_74mwj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h7ov0")
+}],
+"loop": false,
+"name": &"add",
+"speed": 15.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rxaj1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4c3ro")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5ut5c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_30gs3")
+}],
+"loop": false,
+"name": &"remove",
+"speed": 15.0
+}]
+
+[resource]
+script = ExtResource("1_5sx2q")
+Name = "燃烧"
+Icon = ExtResource("1_7ukmh")
+TurnRemoveCount = 1
+ViewFrames = SubResource("SpriteFrames_yb1ui")
+Description = "单位在回合进入时受到10*层数伤害"

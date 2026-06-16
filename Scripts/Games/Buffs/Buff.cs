@@ -50,11 +50,11 @@ public abstract class Buff(string name) : IBuff
     {
     }
 
-    public virtual void OnRemoveFromUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount)
+    public virtual void OnRemoveFromUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount, int buffOldCount)
     {
     }
 
-    public virtual void OnBuffCountChanged(SimObject obj, IReadOnlyUnitState unit, int buffCount, int oldDuration, int newDuration)
+    public virtual void OnBuffCountChanged(SimObject obj, IReadOnlyUnitState unit, int buffCount, int oldCount, int newCount)
     {
     }
 
@@ -72,6 +72,10 @@ public abstract class Buff(string name) : IBuff
 
     public virtual void OnUnitShouldUseSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, int buffCount, ISkill skill,
         ref bool shouldUseSkill)
+    {
+    }
+
+    public virtual void OnShouldAddToUnit(IReadOnlyGameState state, IReadOnlyUnitState unit, ref bool shouldAdd)
     {
     }
 }

@@ -34,10 +34,10 @@ public interface IBuff
     [BuffHook]
     void OnUnitAfterGetCure(SimObject obj, IReadOnlyUnitState unit, int buffCount, float getCure);
     [BuffHook]
-    void OnRemoveFromUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount);
+    void OnRemoveFromUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount, int buffOldCount);
     [BuffHook]
     void OnBuffCountChanged(SimObject obj, IReadOnlyUnitState unit, int buffCount,
-        int oldDuration, int newDuration);
+        int oldCount, int newCount);
     [BuffHook]
     void OnUnitDeath(SimObject obj, IReadOnlyUnitState unit, int buffCount);
     [BuffHook]
@@ -46,5 +46,7 @@ public interface IBuff
     void OnUnitBeforePush(SimObject obj, IReadOnlyUnitState unit, int buffCount, DirMask dir, ref bool shouldPush);
     [BuffHook]
     void OnUnitShouldUseSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, int buffCount, ISkill skill, ref bool shouldUseSkill);
+    [BuffHook]
+    void OnShouldAddToUnit(IReadOnlyGameState state, IReadOnlyUnitState unit, ref bool shouldAdd);
 
 }

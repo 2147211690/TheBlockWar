@@ -11,7 +11,6 @@ public partial class BuffInfo : Resource, IInfo
     };
     [Export] public string Name { get; set; } = "None";
     [Export] public Texture2D? Icon { get; set; }
-    [Export] public BuffMode Mode { get; set; } = BuffMode.Single;
     [Export] public int TurnRemoveCount { get; set; }
     /// <summary>
     /// 优先级，越低越先执行

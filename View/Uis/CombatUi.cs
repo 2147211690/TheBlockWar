@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
@@ -60,7 +61,7 @@ public partial class CombatUi : Control
                 ClearBuffItem();
                 foreach (var buff in unit.Buffs)
                 {
-                    AddBuffItem(buff.BuffName);
+                    AddBuffItem(buff);
                 }
             }
         }
@@ -126,12 +127,14 @@ public partial class CombatUi : Control
         }
     }
     
-    public void AddBuffItem(string buffNameEnum)
+    public void AddBuffItem(in BuffState state)
     {
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _buffContainer.AddChild(itemBox);
-        itemBox.Texture = buffNameEnum.GetBuffInfo().Icon!;
-        itemBox.MetaData = buffNameEnum.GetBuffInfo().Hook;
+        itemBox.Texture = state.BuffName.GetBuffInfo().Icon!;
+        itemBox.MetaData = state.BuffName.GetBuffInfo().Hook;
+        itemBox.HasCount = true;
+        itemBox.Count = state.Count;
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
     }

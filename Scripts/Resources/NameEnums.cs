@@ -17,6 +17,7 @@ public enum BuffNameEnum
     火域,
     贤者的庇护,
     贤者的庇护光环,
+    燃烧,
 }
 [NameEnum]
 public enum RegionNameEnum
