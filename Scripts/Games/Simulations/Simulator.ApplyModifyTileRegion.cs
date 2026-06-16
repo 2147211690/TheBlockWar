@@ -38,7 +38,7 @@ partial class Simulator
                     var newIndex = 0;
                     obj.State.TileMapState.ModifyTile(coords, t => newIndex = t.AddRegion(regionName, duration));
                     r.ReNewDuration = newIndex < 0 ? 0 : tile.Regions[newIndex].Duration;
-                    if (r.ReOldDuration == 0 && r.ReNewDuration > 0) r.ReResult = RegionOperationResult.RegionAdded;
+                    if (r.ReOldDuration == 0 && r.ReNewDuration > r.ReOldDuration) r.ReResult = RegionOperationResult.RegionAdded;
                     else if (r.ReNewDuration != r.ReOldDuration) r.ReResult = RegionOperationResult.RegionDurationChanged;
                 }
                 else if (operation == RegionOperation.RemoveRegion && index >= 0)
@@ -49,7 +49,7 @@ partial class Simulator
                         var newIndex = 0;
                         obj.State.TileMapState.ModifyTile(coords, t => newIndex = t.RemoveRegion(regionName, duration));
                         r.ReNewDuration = newIndex < 0 ? 0 : tile.Regions[newIndex].Duration;
-                        if (r.ReNewDuration == 0 && r.ReOldDuration > 0) r.ReResult = RegionOperationResult.RegionRemoved;
+                        if (r.ReNewDuration == 0 && r.ReNewDuration < r.ReOldDuration) r.ReResult = RegionOperationResult.RegionRemoved;
                         else if (r.ReNewDuration != r.ReOldDuration) r.ReResult = RegionOperationResult.RegionDurationChanged;
                     }
                     else

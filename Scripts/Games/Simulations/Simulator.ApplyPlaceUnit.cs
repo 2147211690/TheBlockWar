@@ -78,8 +78,8 @@ partial class Simulator
                 view.GetTeamType(result.UnitTeam));
             if (uv == null) return GDTask.CompletedTask;
             //初始化buff视图
-            foreach (var a in sim.State.UnitMapState.GetUnit(result.ReUnitState.Id).Buffs)
-                uv.BuffView.AddVisibleBuff(a.BuffName);
+            foreach (var a in result.UnitName.GetUnitInfo().Buffs)
+                uv.BuffView.AddVisibleBuff(a);
             return uv.PlayPlaceDownAnim();
         }
         return GDTask.CompletedTask;

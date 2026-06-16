@@ -76,7 +76,7 @@ partial class Simulator
                         var newIndex = 0;
                         obj.State.UnitMapState.ModifyUnit(unit.Id, u => newIndex = u.RemoveBuff(buffName, count));
                         r.ReNewCount = newIndex < 0 ? 0 : unit.Buffs[newIndex].Count;
-                        if (r.ReOldCount == 0 && r.ReNewCount < r.ReOldCount) r.ReResult = BuffOperationResult.BuffRemoved;
+                        if (r.ReNewCount == 0 && r.ReNewCount < r.ReOldCount) r.ReResult = BuffOperationResult.BuffRemoved;
                         else if (r.ReNewCount != r.ReOldCount) r.ReResult = BuffOperationResult.BuffCountChanged;
                     }
                     else
