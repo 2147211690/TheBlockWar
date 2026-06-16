@@ -14,6 +14,7 @@ public interface IReadOnlyGameState
     IReadOnlyGameState? Owner { get; }
     IReadOnlyTileMapState TileMapState { get; }
     IReadOnlyUnitMapState UnitMapState { get; }
+    IReadOnlyBuffGlobalState BuffGlobalState { get; }
     TeamState TeamState { get; }
     IReadOnlyList<ISkill> GetUnitValidSkills(string unitName);
     IGameState GetSnapshot();

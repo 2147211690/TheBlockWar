@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="UnitInfo" format=3 uid="uid://cok8erx75qwwg"]
+
+[ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_34orb"]
+[ext_resource type="Texture2D" uid="uid://cejatw51v6ae1" path="res://Art/Img/units/player/mech_guard_broken.png" id="1_fitvi"]
+[ext_resource type="Texture2D" uid="uid://bhuqfq1cysbkv" path="res://Art/Img/units/player/mech_guard_a.png" id="2_fitvi"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxxkl"]
+atlas = ExtResource("2_fitvi")
+region = Rect2(0, 0, 40, 33)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ots65"]
+atlas = ExtResource("2_fitvi")
+region = Rect2(40, 0, 40, 33)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7yaaa"]
+atlas = ExtResource("2_fitvi")
+region = Rect2(80, 0, 40, 33)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tjw6r"]
+atlas = ExtResource("2_fitvi")
+region = Rect2(120, 0, 40, 33)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ots65"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_fitvi")
+}],
+"loop": false,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxxkl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ots65")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7yaaa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tjw6r")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[resource]
+script = ExtResource("1_34orb")
+Name = "Unit2"
+MovePower = 2
+MaxHealth = 30.0
+MaxShield = 30.0
+Buffs = PackedStringArray("贤者的庇护")
+Skills = PackedStringArray("一般移动")
+ViewFrames = SubResource("SpriteFrames_ots65")

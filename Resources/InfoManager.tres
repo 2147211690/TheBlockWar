@@ -13,9 +13,11 @@
 [ext_resource type="Resource" uid="uid://ccjjrf25ocs1j" path="res://Resources/Infos/RegionInfos/熔岩域RegionInfo.tres" id="8_cgp2c"]
 [ext_resource type="Resource" uid="uid://ca2eue7yies5h" path="res://Resources/Infos/BuffInfos/火域BuffInfo.tres" id="8_x1kfi"]
 [ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="9_imjp5"]
+[ext_resource type="Resource" uid="uid://c54tnbrh31dfe" path="res://Resources/Infos/BuffInfos/贤者的庇护BuffInfo.tres" id="9_t22tk"]
 [ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="9_yw7y4"]
 [ext_resource type="Resource" uid="uid://bdxyoor75ofks" path="res://Resources/Infos/TileInfos/AirTileInfo.tres" id="10_fu7tl"]
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="10_lsjiv"]
+[ext_resource type="Resource" uid="uid://cgep11qh1lv3p" path="res://Resources/Infos/BuffInfos/贤者的庇护光环BuffInfo.tres" id="10_sbefa"]
 [ext_resource type="Resource" uid="uid://bdnl6xfj384br" path="res://Resources/Infos/TileInfos/水块TileInfo.tres" id="10_u2eed"]
 [ext_resource type="Resource" uid="uid://bccsk3gsy0yr4" path="res://Resources/Infos/SkillInfos/Test1SkillInfo.tres" id="11_11wvo"]
 [ext_resource type="Resource" uid="uid://87qrmh2vl6el" path="res://Resources/Infos/SkillInfos/一般移动SkillInfo.tres" id="11_cwtjy"]
@@ -25,6 +27,7 @@
 [ext_resource type="Resource" uid="uid://doy53t4jua3e0" path="res://Resources/Infos/TileInfos/熔岩块TileInfo.tres" id="16_ps5i8"]
 [ext_resource type="Resource" uid="uid://ce4ukf471gwmg" path="res://Resources/Infos/TileInfos/燃烧块TileInfo.tres" id="21_11wvo"]
 [ext_resource type="Resource" uid="uid://d2mmc8ch7i1m" path="res://Resources/Infos/UnitInfos/Unit1UnitInfo.tres" id="24_1fdqu"]
+[ext_resource type="Resource" uid="uid://cok8erx75qwwg" path="res://Resources/Infos/UnitInfos/Unit2UnitInfo.tres" id="27_sbefa"]
 
 [resource]
 script = ExtResource("2_4s57m")
@@ -35,7 +38,9 @@ BuffInfos = Dictionary[String, ExtResource("1_4ogc0")]({
 "水域": ExtResource("2_mjrgt"),
 "火域": ExtResource("8_x1kfi"),
 "熔岩域": ExtResource("6_cgp2c"),
-"荆棘1": ExtResource("4_yw7y4")
+"荆棘1": ExtResource("4_yw7y4"),
+"贤者的庇护": ExtResource("9_t22tk"),
+"贤者的庇护光环": ExtResource("10_sbefa")
 })
 RegionInfos = Dictionary[String, ExtResource("2_rc7cr")]({
 "水域": ExtResource("4_u2eed"),
@@ -44,7 +49,8 @@ RegionInfos = Dictionary[String, ExtResource("2_rc7cr")]({
 })
 UnitInfos = Dictionary[String, ExtResource("10_lsjiv")]({
 "Unit0": ExtResource("11_lsjiv"),
-"Unit1": ExtResource("24_1fdqu")
+"Unit1": ExtResource("24_1fdqu"),
+"Unit2": ExtResource("27_sbefa")
 })
 TileInfos = Dictionary[String, ExtResource("9_imjp5")]({
 "Air": ExtResource("10_fu7tl"),

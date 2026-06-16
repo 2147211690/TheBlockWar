@@ -47,6 +47,11 @@ partial class Simulator
                         });
                         Hook.BuffAddToUnit(newUnit, obj);
                     }
+                    //注册光环buff
+                    foreach (var auraBuff in obj.State.BuffGlobalState.GetTargetBuffs(newUnit.Name, newUnit.Team))
+                    {
+                        obj.ApplyModifyUnitBuff(newUnit.Coords, auraBuff, BuffOperation.AddBuff, 1, false);
+                    }
                     //应用单位放置到坐标的额外操作
                     obj.ApplyUnitSetInCoords(obj.State.UnitMapState.GetUnit(unitState.Id));
                 }

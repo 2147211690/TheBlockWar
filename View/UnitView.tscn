@@ -64,6 +64,7 @@ Center = NodePath("Center")
 HealthBar = NodePath("Center/HealthBar")
 BuffView = NodePath("Center/BuffView")
 MainSprite = NodePath("Center/AnimatedSprite2D")
+DrawDebug = true
 
 [node name="Center" type="Node2D" parent="." unique_id=1069590474]
 

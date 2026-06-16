@@ -9,8 +9,6 @@ public class 熔岩域Buff() : Buff(BuffNames.熔岩域)
 {
     public override void OnAddToUnit(SimObject obj, IReadOnlyUnitState unit, int buffCount)
     {
-        obj.PushContext(new SimContext(0));
         obj.ApplyDeath(unit.Coords);
-        obj.PopContext();
     }
 }

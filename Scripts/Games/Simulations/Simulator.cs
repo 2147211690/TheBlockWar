@@ -29,15 +29,16 @@ public static partial class Simulator
     private static void ExitSimulation() => _simulationStack--;
     private static int CurrentComplexSimulationMaxLevel { get; set; }
 
-
-    public static SimContext CurrentContext => _contexts.Peek();
-    private static Stack<SimContext> _contexts = new([new SimContext(0)]);
+    public static SimContext PreviousContext => _contexts.Count > 2 ? _contexts[^2] : new SimContext(0);
+    public static SimContext CurrentContext => _contexts[^1];
+    
+    private static List<SimContext> _contexts = new([new SimContext(0)]);
     extension(SimObject obj)
     {
         public void PushContext(SimContext context)
         {
             var previous = CurrentContext;
-            _contexts.Push(context);
+            _contexts.Add(context);
             if (_contexts.Count == 2)
                 obj.ApplyRaiseContextChanged(context);
             else 
@@ -47,8 +48,9 @@ public static partial class Simulator
         public SimContext PopContext()
         {
             if (_contexts.Count == 1) return CurrentContext;
-            var previous = _contexts.Pop();
-            var current = _contexts.Peek();
+            var previous = _contexts[^1];
+            _contexts.RemoveAt(_contexts.Count - 1);
+            var current = _contexts[^1];
             obj.TryRaiseContextChanged(current, previous);
             return previous;
         }

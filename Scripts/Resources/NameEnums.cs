@@ -15,6 +15,8 @@ public enum BuffNameEnum
     熔岩域,
     屹立,
     火域,
+    贤者的庇护,
+    贤者的庇护光环,
 }
 [NameEnum]
 public enum RegionNameEnum
@@ -27,7 +29,8 @@ public enum RegionNameEnum
 public enum UnitNameEnum
 {
     Unit0,
-    Unit1
+    Unit1,
+    Unit2,
 }
 [NameEnum]
 public enum TileNameEnum

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Simulations;
@@ -421,7 +422,18 @@ public static class Extensions
             return true;
         }
     }
-    
+
+    extension(EventScheduler eventScheduler)
+    {
+        public void RunAction(Action<SimObject> action)
+        {
+            eventScheduler.CreateEvent(id => new ActionEvent(id)
+            {
+                ActionCore = (_, o) => action(o),
+                Layer = SimulationLayer.Running,
+            });
+        }
+    }
 }
 
 public class ItemTabStyle

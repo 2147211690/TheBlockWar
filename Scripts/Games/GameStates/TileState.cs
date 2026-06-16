@@ -67,7 +67,6 @@ public class TileState : IReadOnlyTileState
         list.RemoveAt(index);
         _isRegionStaticDirty = true;
     }
-
     public void ModifyRegion(string regionName, int modifyDuration)
     {
         if (!this.TryFindRegion(regionName, out var index)) return;
@@ -90,7 +89,7 @@ public class TileState : IReadOnlyTileState
         };
         _isRegionStaticDirty = true;
     }
-    public void ClearRegions()
+    public void ClearRegion()
     {
         var list = GetRegionList();
         list.Clear();

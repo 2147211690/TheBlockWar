@@ -19,10 +19,13 @@ public class GameState : IGameState
     public IReadOnlyGameState? Owner => null;
     public ITileMapState TileMapState { get; private set; }
     public IUnitMapState UnitMapState { get; private set; }
+    public IBuffGlobalState BuffGlobalState { get; private set; }
     public TeamState TeamState { get; private set; }
     
     IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
+    IReadOnlyBuffGlobalState IReadOnlyGameState.BuffGlobalState => BuffGlobalState;
+    
     private Dictionary<string, ISkill[]> _unitSkillMap;
     private Dictionary<long, SchedulerEvent> _events;
 
@@ -52,6 +55,7 @@ public class GameState : IGameState
         });
         TileMapState = new TileMapState(mapSize);
         UnitMapState = new UnitMapState(mapSize);
+        BuffGlobalState = new BuffGlobalState();
         TeamState = new TeamState(teamRelations);
     }
 
@@ -73,9 +77,13 @@ public class GameState : IGameState
         TileMapState = new TileMapState(data.TileMapState);
         UnitMapState = new UnitMapState(data.UnitMapState);
         TeamState = new TeamState(data.TeamState);
+        BuffGlobalState = new BuffGlobalState(data.BuffGlobalState);
     }
 
-    public void ClearIfSnapshot(){}
+    public void ClearIfSnapshot()
+    {
+        BuffGlobalState.ClearIfSnapshot();
+    }
     public GameStateData ToData()
     {
         return new GameStateData
@@ -86,6 +94,7 @@ public class GameState : IGameState
             UnitMapState = UnitMapState.ToData(),
             TeamState = TeamState.ToData(),
             Events = _events.Values.ToList(),
+            BuffGlobalState = BuffGlobalState.ToData(),
         };
     }
     /// <summary>
@@ -104,10 +113,12 @@ public class GameState : IGameState
         public IReadOnlyGameState Owner { get; }
         public ITileMapState TileMapState { get; }
         public IUnitMapState UnitMapState { get; }
+        public IBuffGlobalState BuffGlobalState { get; }
         public TeamState TeamState => Owner.TeamState;
 
         IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
         IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
+        IReadOnlyBuffGlobalState IReadOnlyGameState.BuffGlobalState => BuffGlobalState;
         public GameStateSnapshot(IReadOnlyGameState owner)
         {
             // 只能是GameState或其快照
@@ -115,6 +126,7 @@ public class GameState : IGameState
             
             TileMapState = owner.TileMapState.GetSnapshot();
             UnitMapState = owner.UnitMapState.GetSnapshot();
+            BuffGlobalState = owner.BuffGlobalState.GetSnapshot();
         }
         public GameStateData ToData()
         {
@@ -126,6 +138,7 @@ public class GameState : IGameState
                 TeamState = TeamState.ToData(),
                 Events = Owner.Events?.Values.ToList() ?? [],
                 Size = Size,
+                BuffGlobalState = BuffGlobalState.ToData(),
             };
         }
 
@@ -136,6 +149,7 @@ public class GameState : IGameState
         {
             TileMapState.ClearIfSnapshot();
             UnitMapState.ClearIfSnapshot();
+            BuffGlobalState.ClearIfSnapshot();
         }
         public IGameState GetSnapshot()
         {

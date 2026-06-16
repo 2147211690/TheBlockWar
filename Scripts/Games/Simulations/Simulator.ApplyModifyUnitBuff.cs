@@ -91,7 +91,9 @@ partial class Simulator
                 if (unit.IsNull()) return;
                 if (!unit.TryFindBuff(buffName, out var index)) return;
                 EnterSimulation();
+                obj.PushContext(new SimContext(unit.Id));
                 action(unit.Buffs[index].BuffName.GetBuffInfo().Hook);
+                obj.PopContext();
                 ExitSimulation();
             }
         }
@@ -162,6 +164,7 @@ partial class Simulator
         var uv = view.UnitsView.GetUnitView(result.UnitId);
         if (uv == null) return;
         uv.BuffView.ChangeBuffChange(result.Step.BuffName, result.Operation == BuffOperation.AddBuff ? 1 : -1);
+        view.EventsView.NeedClearUnit(result.UnitId);
     }
     
     public static partial GDTask ApplyModifyUnitBuffViewRun(GameView view, ReadOnlySimObject sim, ApplyModifyUnitBuffResult result)

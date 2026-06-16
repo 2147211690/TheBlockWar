@@ -107,6 +107,12 @@ public class UnitState : IReadOnlyUnitState
         _isBuffStaticDirty = true;
     }
 
+    public void ClearBuff()
+    {
+        GetBuffList().Clear();
+        _isBuffStaticDirty = true;
+    }
+
     public void ModifyBuff(string buffName, int modifyDuration)
     {
         if (!this.TryFindBuff(buffName, out var index)) return;

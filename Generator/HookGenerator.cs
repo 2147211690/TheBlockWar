@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -279,16 +280,30 @@ namespace TheBlockWar.Scripts.Games.Simulations
 
         if (method.Kind == HookKind.Buff)
         {
-            return $$"""
-        public static {{method.ReturnType}} {{method.HookMethodName}}({{paramList}})
-        {
-            foreach (var buffState in unit.BuffsStatic)
-            {
-                buffState.BuffName.GetBuffInfo().Hook
-                    .{{method.InterfaceMethodName}}({{args}});
-            }
-        }
-""";
+            var hasSimObj = paramList.IndexOf("simObj", StringComparison.Ordinal) != -1;
+            return hasSimObj
+                ? $$"""
+                            public static {{method.ReturnType}} {{method.HookMethodName}}({{paramList}})
+                            {
+                                simObj.PushContext(new SimContext(unit.Id));
+                                foreach (var buffState in unit.BuffsStatic)
+                                {
+                                    buffState.BuffName.GetBuffInfo().Hook
+                                        .{{method.InterfaceMethodName}}({{args}});
+                                }
+                                simObj.PopContext();
+                            }
+                    """
+                : $$"""
+                            public static {{method.ReturnType}} {{method.HookMethodName}}({{paramList}})
+                            {
+                                foreach (var buffState in unit.BuffsStatic)
+                                {
+                                    buffState.BuffName.GetBuffInfo().Hook
+                                        .{{method.InterfaceMethodName}}({{args}});
+                                }
+                            }
+                    """;
         }
         else
         {

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://c54tnbrh31dfe"]
+
+[ext_resource type="Texture2D" uid="uid://cy3gtgqvwy7f1" path="res://Art/Img/ui/options.png" id="1_61qvh"]
+[ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_b7dn0"]
+
+[resource]
+script = ExtResource("1_b7dn0")
+Name = "贤者的庇护"
+Icon = ExtResource("1_61qvh")
+Description = "单位存在时,友方单位获得贤者的庇护光环"

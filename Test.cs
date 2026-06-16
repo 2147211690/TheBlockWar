@@ -47,6 +47,11 @@ public partial class Test : Node2D
     private TurnManager _turnManager;
     private bool _checkNextTurn;
     private string _buffName = string.Empty;
+    private int _editUnitIdInt;
+    private string _spawnUnitName = UnitNames.Unit0;
+    private int _spawnUnitX;
+    private int _spawnUnitY;
+    private int _spawnUnitTeam;
     private JsonSerializerOptions _jsonSerializerOptions = new()
     {
         WriteIndented = true,
@@ -452,7 +457,8 @@ public partial class Test : Node2D
             SaveManager.LoadCurrentGameState(data, _gameState, _eventScheduler);
         }
         ImGui.End();
-        
+
+        UnitEditor();
     }
 
     private void TestPlace()
@@ -491,5 +497,122 @@ public partial class Test : Node2D
         }
         string json = file.GetAsText();
         return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions);
+    }
+
+    private void UnitEditor()
+    {
+        ImGui.Begin("单位编辑器");
+
+        if (_currentGameState is null)
+        {
+            ImGui.Text("游戏状态未初始化");
+            ImGui.End();
+            return;
+        }
+
+        ImGui.Separator();
+        ImGui.Text("查看/编辑单位");
+        ImGui.InputInt("单位ID", ref _editUnitIdInt);
+
+        var unit = _currentGameState.UnitMapState.GetUnit(_editUnitIdInt);
+        if (!unit.IsNull())
+        {
+            ImGui.Text($"名称: {unit.Name}");
+            ImGui.Text($"队伍: {unit.Team}");
+            ImGui.Text($"坐标: ({unit.Coords.X}, {unit.Coords.Y})");
+            ImGui.Text($"生命值: {unit.Health}/{unit.MaxHealth}");
+            ImGui.Text($"护盾值: {unit.Shield}/{unit.MaxShield}");
+            ImGui.Text($"是否死亡: {unit.IsDead}");
+            ImGui.Text($"是否飞行: {unit.IsFlying}");
+
+            if (unit.Buffs.Count > 0)
+            {
+                ImGui.Text("Buff列表:");
+                foreach (var buff in unit.Buffs)
+                {
+                    ImGui.Text($"  {buff.BuffName} x{buff.Count}");
+                }
+            }
+            else
+            {
+                ImGui.Text("Buff列表: 无");
+            }
+
+            ImGui.Separator();
+            ImGui.Text("编辑属性");
+
+            int coordX = unit.Coords.X;
+            int coordY = unit.Coords.Y;
+            ImGui.InputInt("新坐标X", ref coordX);
+            ImGui.InputInt("新坐标Y", ref coordY);
+            if (ImGui.Button("应用坐标"))
+            {
+                _currentGameState.UnitMapState.ModifyUnit(_editUnitIdInt, u =>
+                {
+                    u.Coords = new Vector2I(coordX, coordY);
+                });
+            }
+
+            float health = unit.Health;
+            ImGui.SliderFloat("生命值", ref health, 0, unit.MaxHealth);
+            if (ImGui.Button("应用生命值"))
+            {
+                _currentGameState.UnitMapState.ModifyUnit(_editUnitIdInt, u =>
+                {
+                    u.Health = health;
+                });
+            }
+
+            float shield = unit.Shield;
+            ImGui.SliderFloat("护盾值", ref shield, 0, unit.MaxShield);
+            if (ImGui.Button("应用护盾值"))
+            {
+                _currentGameState.UnitMapState.ModifyUnit(_editUnitIdInt, u =>
+                {
+                    u.Shield = shield;
+                });
+            }
+
+            if (ImGui.Button($"{(unit.IsDead ? "复活" : "杀死")}单位"))
+            {
+                _currentGameState.UnitMapState.ModifyUnit(_editUnitIdInt, u =>
+                {
+                    u.IsDead = !u.IsDead;
+                });
+            }
+
+            if (ImGui.Button($"切换飞行状态 (当前: {(unit.IsFlying ? "飞行" : "地面")})"))
+            {
+                _currentGameState.UnitMapState.ModifyUnit(_editUnitIdInt, u =>
+                {
+                    u.IsFlying = !u.IsFlying;
+                });
+            }
+
+            ImGui.Separator();
+            if (ImGui.Button("删除此单位"))
+            {
+                _currentGameState.UnitMapState.RemoveUnit(_editUnitIdInt);
+            }
+        }
+        else
+        {
+            ImGui.Text("未找到该单位");
+        }
+
+        ImGui.Separator();
+        ImGui.Text("生成单位");
+        ImGui.InputText("单位名称", ref _spawnUnitName, 100);
+        ImGui.InputInt("生成X", ref _spawnUnitX);
+        ImGui.InputInt("生成Y", ref _spawnUnitY);
+        ImGui.InputInt("队伍", ref _spawnUnitTeam);
+
+        if (ImGui.Button("生成单位"))
+        {
+            var coords = new Vector2I(_spawnUnitX, _spawnUnitY);
+            _eventScheduler.RunAction(obj => obj.ApplyPlaceUnit(coords, _spawnUnitName, _spawnUnitTeam));
+        }
+
+        ImGui.End();
     }
 }

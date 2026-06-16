@@ -9,6 +9,7 @@ public interface IGameState : IReadOnlyGameState
     new IDictionary<long, SchedulerEvent>? Events { get; }
     new ITileMapState TileMapState { get; }
     new IUnitMapState UnitMapState { get; }
+    new IBuffGlobalState BuffGlobalState { get; }
     void LoadGameData(GameStateData data);
     void ClearIfSnapshot();
 }
