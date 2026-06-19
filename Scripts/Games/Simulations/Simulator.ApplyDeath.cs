@@ -10,7 +10,7 @@ partial class Simulator
     {
         //result:UnitId:long Valid:bool
         [Step(["UnitId", "Valid"], [typeof(long), typeof(bool)])]
-        public ApplyDeathResult ApplyDeath(Vector2I coords)
+        public ApplyDeathResult ApplyDeath(Vector2I coords, bool draw = true)
         {
             EnterSimulation();
             var r = Main();
@@ -19,7 +19,7 @@ partial class Simulator
 
             ApplyDeathResult Main()
             {
-                var r = obj.Steps.AddResult(new ApplyDeathResult(CurrentDeep, CurrentTeam, coords, 0, false));
+                var r = obj.Steps.AddResult(new ApplyDeathResult(CurrentDeep, CurrentTeam, coords, draw,0, false));
                 if (obj.Layer == SimulationLayer.Waiting)
                 {
                     return r;
@@ -52,6 +52,14 @@ partial class Simulator
     }
     public static partial void ApplyDeathViewDraw(GameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
+        if (result.Draw)
+        {
+            var tex = view.EventsView.GetGameTexture();
+            tex.Texture = view.CurrentStyle.DeathTexture;
+            tex.GamePosition = result.Coords.ToUnderVec3(view);
+            tex.GameZIndex = 3;
+        }
+        
         var uv = view.UnitsView.GetUnitView(result.ReUnitId);
         if (uv == null) return;
         uv.HealthBar.WillDie = true;

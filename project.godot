@@ -28,8 +28,9 @@ config/name="TheBlockWar"
 config/name_localized={
 "zh": "荒芜烽火"
 }
+config/tags=PackedStringArray("main")
 run/main_scene="uid://c5lqvqedob4yx"
-config/features=PackedStringArray("4.6", "C#")
+config/features=PackedStringArray("4.7", "C#")
 config/icon="uid://cf6td8qmy77qj"
 
 [autoload]

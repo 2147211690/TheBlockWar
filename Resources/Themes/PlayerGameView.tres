@@ -19,7 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://b1wdo1i7rqsu4" path="res://Art/Img/combat/icons/damage_16.png" id="17_tnvw6"]
 [ext_resource type="Texture2D" uid="uid://cs6xgxg3oqsm1" path="res://Art/Img/combat/icons/damage_17.png" id="18_g2ic4"]
 [ext_resource type="Texture2D" uid="uid://bx570llafahem" path="res://Art/Img/combat/icons/damage_18.png" id="19_1dp28"]
-[ext_resource type="Texture2D" uid="uid://c1vagxy78nxeo" path="res://Art/Img/mouse/crosshair.png" id="20_t3sco"]
+[ext_resource type="Texture2D" uid="uid://pefhdrktg4q6" path="res://Art/Img/combat/icons/icon_kill.png" id="20_kcbxx"]
 [ext_resource type="Resource" uid="uid://d2t2lgb1rumg7" path="res://Resources/Themes/EffectTable.tres" id="21_kcbxx"]
 [ext_resource type="Texture2D" uid="uid://b6ydvx64xrlwr" path="res://Art/Img/path/up_start.png" id="21_u24mg"]
 [ext_resource type="Texture2D" uid="uid://dgkufvmye24dj" path="res://Art/Img/combat/icons/icon_turnbar_circle.png" id="21_w04ar"]
@@ -52,7 +52,7 @@ PlaceDownTexture = ExtResource("35_euafj")
 PathTextures = Array[Texture2D]([null, ExtResource("21_u24mg"), ExtResource("22_wcl17"), ExtResource("23_2il82"), ExtResource("24_ae57u"), ExtResource("25_r1qje"), ExtResource("26_tnhut"), ExtResource("27_pmef5"), ExtResource("28_aqrci"), ExtResource("29_teu5c"), ExtResource("30_dcna1"), ExtResource("31_0vjk6"), ExtResource("32_dh6hm"), ExtResource("33_ms5db"), ExtResource("34_ohnve")])
 PushTextures = Array[Texture2D]([ExtResource("36_uf5r4"), ExtResource("37_sm57t"), ExtResource("38_tn5yo"), ExtResource("39_vhha8")])
 BlockNumberTextures = Array[Texture2D]([ExtResource("1_qkx4c"), ExtResource("2_w04ar"), ExtResource("3_kcbxx"), ExtResource("4_0xpdv"), ExtResource("5_f1ya0"), ExtResource("6_s2rxd"), ExtResource("7_e1di1"), ExtResource("8_hcqwb"), ExtResource("9_iqxvk"), ExtResource("10_t6dig"), ExtResource("11_uqs5k"), ExtResource("12_ra38w"), ExtResource("13_cwvqp"), ExtResource("14_3loa8"), ExtResource("15_obu33"), ExtResource("16_dsgbk"), ExtResource("17_tnvw6"), ExtResource("18_g2ic4"), ExtResource("19_1dp28")])
-DeathTexture = ExtResource("20_t3sco")
+DeathTexture = ExtResource("20_kcbxx")
 LinePointTexture = ExtResource("21_w04ar")
 HealthCurrentColor = Color(0.2027216, 0.6880478, 0.4521318, 1)
 ShieldCurrentColor = Color(0.7857211, 0.5788141, 0.45463789, 1)

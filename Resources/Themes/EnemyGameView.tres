@@ -1,6 +1,5 @@
 [gd_resource type="Resource" script_class="GameViewTeamStyle" format=3 uid="uid://cq2p6s7ekjjsg"]
 
-[ext_resource type="Texture2D" uid="uid://c1vagxy78nxeo" path="res://Art/Img/mouse/crosshair.png" id="1_4b3a8"]
 [ext_resource type="Texture2D" uid="uid://cnjy3h3s7ftod" path="res://Art/Img/combat/icons/damage_0.png" id="1_gm7pg"]
 [ext_resource type="Texture2D" uid="uid://b6ydvx64xrlwr" path="res://Art/Img/path/up_start.png" id="2_fw28k"]
 [ext_resource type="Texture2D" uid="uid://dprbwj8plp745" path="res://Art/Img/combat/icons/damage_1.png" id="2_uc7c6"]
@@ -38,6 +37,7 @@
 [ext_resource type="Texture2D" uid="uid://boiiurj7aaxi8" path="res://Art/Img/combat/arrow_down.png" id="18_njn56"]
 [ext_resource type="Texture2D" uid="uid://bi50bo3kev630" path="res://Art/Img/combat/arrow_left.png" id="19_hq55w"]
 [ext_resource type="Texture2D" uid="uid://bx570llafahem" path="res://Art/Img/combat/icons/damage_18.png" id="19_o300d"]
+[ext_resource type="Texture2D" uid="uid://pefhdrktg4q6" path="res://Art/Img/combat/icons/icon_kill.png" id="20_evi8k"]
 [ext_resource type="Texture2D" uid="uid://bm0hdspgfujef" path="res://Art/Img/combat/arrow_right.png" id="20_gm7pg"]
 [ext_resource type="Texture2D" uid="uid://dgkufvmye24dj" path="res://Art/Img/combat/icons/icon_turnbar_circle.png" id="21_evi8k"]
 [ext_resource type="Script" uid="uid://slsetkd0kji2" path="res://Scripts/Resources/GameViewTeamStyle.cs" id="21_uc7c6"]
@@ -52,7 +52,7 @@ PlaceDownTexture = ExtResource("16_3er8c")
 PathTextures = Array[Texture2D]([null, ExtResource("2_fw28k"), ExtResource("3_mgc8r"), ExtResource("4_ti28s"), ExtResource("5_f2fpj"), ExtResource("6_purc2"), ExtResource("7_thphq"), ExtResource("8_ruign"), ExtResource("9_nt12c"), ExtResource("10_p66ol"), ExtResource("11_aeknl"), ExtResource("12_m32ix"), ExtResource("13_lvole"), ExtResource("14_a4c4f"), ExtResource("15_teg2g")])
 PushTextures = Array[Texture2D]([ExtResource("17_c747a"), ExtResource("18_njn56"), ExtResource("19_hq55w"), ExtResource("20_gm7pg")])
 BlockNumberTextures = Array[Texture2D]([ExtResource("1_gm7pg"), ExtResource("2_uc7c6"), ExtResource("3_evi8k"), ExtResource("4_wu0k8"), ExtResource("5_8070q"), ExtResource("6_k3ec4"), ExtResource("7_1n413"), ExtResource("8_ey6r5"), ExtResource("9_qvy8c"), ExtResource("10_olm10"), ExtResource("11_g6vxd"), ExtResource("12_m034l"), ExtResource("13_43j4p"), ExtResource("14_a0wwr"), ExtResource("15_465f0"), ExtResource("16_yaw5g"), ExtResource("17_5itfw"), ExtResource("18_6jypa"), ExtResource("19_o300d")])
-DeathTexture = ExtResource("1_4b3a8")
+DeathTexture = ExtResource("20_evi8k")
 LinePointTexture = ExtResource("21_evi8k")
 OutlineColor = Color(0.7282033, 0, 0.12066277, 1)
 ShieldCurrentColor = Color(0.81648004, 0.0870079, 0.4975397, 1)

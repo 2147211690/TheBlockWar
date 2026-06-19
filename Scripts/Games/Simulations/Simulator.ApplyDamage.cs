@@ -66,7 +66,7 @@ partial class Simulator
 
                 if (!unit.IsDead && validDamage > 0 && unit.Health <= 0)
                 {
-                    obj.ApplyDeath(coords);
+                    obj.ApplyDeath(coords, false);
                 }
                 return r;
             }
@@ -87,7 +87,7 @@ partial class Simulator
     {
         var uv = view.UnitsView.GetUnitView(result.ReUnitId);
         if (uv == null) return GDTask.CompletedTask;
-        uv.PlayHurtAnim();
+        AnimationHelper.HurtShakeAsync(uv);
         uv.HealthBar.CurrentHealth -= result.ReValidDamage;
         return GDTask.CompletedTask;
     }

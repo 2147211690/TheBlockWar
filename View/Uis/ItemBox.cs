@@ -52,7 +52,7 @@ public partial class ItemBox : PanelContainer
         _currentTween?.Kill();
         _currentTween = CreateTween();
         _currentTween.SetParallel(true);
-        _currentTween.TweenProperty(this, "scale", Vector2.One * SelectedScale, AnimationDuration)
+        _currentTween.TweenProperty(this, "offset_transform_scale", Vector2.One * SelectedScale, AnimationDuration)
             .SetTrans(Tween.TransitionType.Cubic)
             .SetEase(Tween.EaseType.Out);
         _currentTween.TweenProperty(_textureRect, "modulate", new Color(1.3f, 1.3f, 1.3f), AnimationDuration)
@@ -67,7 +67,7 @@ public partial class ItemBox : PanelContainer
         _currentTween?.Kill();
         _currentTween = CreateTween();
         _currentTween.SetParallel(true);
-        _currentTween.TweenProperty(this, "scale", Vector2.One, AnimationDuration)
+        _currentTween.TweenProperty(this, "offset_transform_scale", Vector2.One, AnimationDuration)
             .SetTrans(Tween.TransitionType.Cubic)
             .SetEase(Tween.EaseType.Out);
         _currentTween.TweenProperty(_textureRect, "modulate", Colors.White, AnimationDuration)
@@ -102,10 +102,10 @@ public partial class ItemBox : PanelContainer
         _currentTween?.Kill();
         _currentTween = CreateTween();
         _currentTween.SetParallel(true);
-        _currentTween.TweenProperty(this, "scale", Vector2.One * ClickScale, AnimationDuration * 0.5f)
+        _currentTween.TweenProperty(this, "offset_transform_scale", Vector2.One * ClickScale, AnimationDuration * 0.5f)
             .SetTrans(Tween.TransitionType.Cubic)
             .SetEase(Tween.EaseType.Out);
-        _currentTween.Chain().TweenProperty(this, "scale", Vector2.One * MouseEnterScale, AnimationDuration * 0.5f)
+        _currentTween.Chain().TweenProperty(this, "offset_transform_scale", Vector2.One * MouseEnterScale, AnimationDuration * 0.5f)
             .SetTrans(Tween.TransitionType.Cubic)
             .SetEase(Tween.EaseType.Out);
     }
@@ -117,7 +117,7 @@ public partial class ItemBox : PanelContainer
         _currentTween?.Kill();
         _currentTween = CreateTween();
         _currentTween.SetParallel(true);
-        _currentTween.TweenProperty(this, "scale", Vector2.One, AnimationDuration)
+        _currentTween.TweenProperty(this, "offset_transform_scale", Vector2.One, AnimationDuration)
             .SetTrans(Tween.TransitionType.Cubic)
             .SetEase(Tween.EaseType.Out);
         _currentTween.TweenProperty(_textureRect, "modulate", Colors.White, AnimationDuration)
@@ -132,7 +132,7 @@ public partial class ItemBox : PanelContainer
         _currentTween?.Kill();
         _currentTween = CreateTween();
         _currentTween.SetParallel(true);
-        _currentTween.TweenProperty(this, "scale", Vector2.One * MouseEnterScale, AnimationDuration)
+        _currentTween.TweenProperty(this, "offset_transform_scale", Vector2.One * MouseEnterScale, AnimationDuration)
             .SetTrans(Tween.TransitionType.Cubic)
             .SetEase(Tween.EaseType.Out);
         _currentTween.TweenProperty(_textureRect, "modulate", new Color(1.2f, 1.2f, 1.2f), AnimationDuration)

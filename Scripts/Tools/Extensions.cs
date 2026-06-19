@@ -7,6 +7,7 @@ using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Tools;
 
@@ -217,6 +218,8 @@ public static class Extensions
             };
         }
         public Vector2 ToVec2() => new(coords.X, coords.Y);
+        public Vector3 ToVec3(float z = 0) => new(coords.X, coords.Y, z);
+        public Vector3 ToUnderVec3(GameView gameView) => new(coords.X, coords.Y, gameView.TilesView.GetTileHeight(coords));
         public bool IsInSize(in Vector2I size, Vector2I offset = default)
         {
             return coords.X >= 0 + offset.X && coords.X < size.X + offset.X && coords.Y >= 0 + offset.Y && coords.Y < size.Y + offset.Y;
