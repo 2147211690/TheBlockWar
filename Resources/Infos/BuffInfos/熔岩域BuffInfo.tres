@@ -1,10 +1,14 @@
 [gd_resource type="Resource" script_class="BuffInfo" format=3 uid="uid://by3lu2j5wyt5x"]
 
 [ext_resource type="Script" uid="uid://qrkhfr53ls33" path="res://Scripts/Resources/BuffInfo.cs" id="1_1p8vp"]
-[ext_resource type="Texture2D" uid="uid://efd4vguuhw8b" path="res://Art/Img/combat/icons/icon_fire_glow.png" id="1_5iftk"]
+[ext_resource type="Texture2D" uid="uid://ci4dlrdly61dc" path="res://Art/Img/effects/smash_D.png" id="1_5iftk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ywk8n"]
+atlas = ExtResource("1_5iftk")
+region = Rect2(28.49, -3.62, 23, 23)
 
 [resource]
 script = ExtResource("1_1p8vp")
 Name = "熔岩域"
-Icon = ExtResource("1_5iftk")
+Icon = SubResource("AtlasTexture_ywk8n")
 Description = "单位处于熔岩域,进入立刻死亡"

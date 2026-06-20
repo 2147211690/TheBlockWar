@@ -51,41 +51,42 @@ partial class Simulator
         }
     }
 
-    public static partial void ApplyMoveUnitPathViewDraw(GameView view, ReadOnlySimObject sim,
+    public static partial void ApplyMoveUnitPathViewDraw(IGameView view, ReadOnlySimObject sim,
         ApplyMoveUnitPathResult result)
     {
         var path = result.Path;
         if (path is not {Count: >= 2}) return;
         var maxTileHeight = 0f;
         foreach (var coord in path) 
-            maxTileHeight = Mathf.Max(maxTileHeight, view.TilesView.GetTileHeight(coord + result.Coords));
-        var tex = view.Style[TeamTypeEnum.Player].PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
+            maxTileHeight = Mathf.Max(maxTileHeight, view.GetTileHeight(coord + result.Coords));
+        var tex = view.CurrentStyle.PathTextures[(int)(path[1] - path[0]).ToVecDirMask()];
         SetSprite(result.Coords + path[0], tex, 0);
         for (int i = 1; i < path.Count - 1; i++)
         {
-            tex = view.Style[TeamTypeEnum.Player]
+            tex = view.CurrentStyle
                 .PathTextures[
                     (int)(path[i - 1] - path[i]).ToVecDirMask() |
                     (int)(path[i + 1] - path[i]).ToVecDirMask()];
             SetSprite(result.Coords + path[i], tex, i);
         }
 
-        tex = view.Style[TeamTypeEnum.Player].PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
+        tex = view.CurrentStyle.PathTextures[(int)DirMask.All ^ (int)(path[^1] - path[^2]).ToVecDirMask()];
         SetSprite(result.Coords + path[^1], tex, path.Count - 1);
 
         void SetSprite(in Vector2I coords, Texture2D tex, int index)
         {
-            var sprite = view.EventsView.GetGameTexture();
-            sprite.GamePosition = view.TilesView.GetGamePosition(coords, maxTileHeight);
+            var sprite = view.EventSprite();
+            sprite.GamePosition = view.CoordsToGamePosition(coords, 0, maxTileHeight);
             sprite.Texture = tex;
             sprite.Modulate = Colors.White with { A = sim.IsFocused ? 1 : 0.6f };
             sprite.GameZIndex = -1;
         }
     }
 
-    public static partial GDTask ApplyMoveUnitPathViewRun(GameView view, ReadOnlySimObject sim, ApplyMoveUnitPathResult result)
+    public static partial GDTask ApplyMoveUnitPathViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyMoveUnitPathResult result)
     {
-        return view.UnitsView.MovePathUnit(result.ReUnitId, result.Coords, result.Path,
-                result.ReTargetIndex);
+        var uv = view.EventUnit(result.ReUnitId);
+        if (uv == null || result.Path == null) return GDTask.CompletedTask;
+        return AnimationHelper.MoveAlongPathAsync(uv, view, result.Path, 0, result.ReTargetIndex + 1);
     }
 }

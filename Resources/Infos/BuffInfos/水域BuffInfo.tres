@@ -6,7 +6,7 @@
 [sub_resource type="SpriteFrames" id="SpriteFrames_fwqte"]
 animations = [{
 "frames": [],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 5.0
 }]

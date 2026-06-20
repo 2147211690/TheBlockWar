@@ -50,25 +50,24 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyDeathViewDraw(GameView view, ReadOnlySimObject sim, ApplyDeathResult result)
+    public static partial void ApplyDeathViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
         if (result.Draw)
         {
-            var tex = view.EventsView.GetGameTexture();
+            var tex = view.EventSprite();
             tex.Texture = view.CurrentStyle.DeathTexture;
             tex.GamePosition = result.Coords.ToUnderVec3(view);
             tex.GameZIndex = 3;
         }
         
-        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
+        var uv = view.EventUnit(result.ReUnitId);
         if (uv == null) return;
-        uv.HealthBar.WillDie = true;
-        view.EventsView.NeedClearUnit(result.ReUnitId);
+        uv.HealthBar.EventDie = true;
     }
     
-    public static partial GDTask ApplyDeathViewRun(GameView view, ReadOnlySimObject sim, ApplyDeathResult result)
+    public static partial GDTask ApplyDeathViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
-        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
+        var uv = view.GetUnitView(result.ReUnitId);
         if (uv == null) return GDTask.CompletedTask;
         uv.HealthBar.CurrentHealth = 0;
         uv.IsDead = true;

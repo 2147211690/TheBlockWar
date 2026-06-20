@@ -54,11 +54,11 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyRegionTurnViewDraw(GameView view, ReadOnlySimObject sim, ApplyRegionTurnResult result)
+    public static partial void ApplyRegionTurnViewDraw(IGameView view, ReadOnlySimObject sim, ApplyRegionTurnResult result)
     {
     }
     
-    public static partial GDTask ApplyRegionTurnViewRun(GameView view, ReadOnlySimObject sim, ApplyRegionTurnResult result)
+    public static partial GDTask ApplyRegionTurnViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyRegionTurnResult result)
     {
         return GDTask.CompletedTask;
     }

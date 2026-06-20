@@ -40,12 +40,15 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyDropTileViewDraw(GameView view, ReadOnlySimObject sim, ApplyDropTileResult result)
+    public static partial void ApplyDropTileViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDropTileResult result)
     {
     }
     
-    public static partial GDTask ApplyDropTileViewRun(GameView view, ReadOnlySimObject sim, ApplyDropTileResult result)
+    public static partial async GDTask ApplyDropTileViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyDropTileResult result)
     {
-        return view.TilesView.DropTile(result.Coords);
+        var tv = view.GetTileView(result.Coords);
+        if (tv == null) return;
+        await AnimationHelper.DropToAsync(tv, tv.GamePosition + new Vector3(0, 0, -40));
+        view.SetTileView(result.Coords, "Air"); 
     }
 }

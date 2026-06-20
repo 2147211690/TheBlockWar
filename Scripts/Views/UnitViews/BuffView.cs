@@ -1,19 +1,13 @@
 using System.Linq;
-using TheBlockWar.Scripts.Games;
-using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
-using TheBlockWar.Scripts.Views.ViewNodes;
 using Autoload = TheBlockWar.Scripts.Tools.Autoload;
 
-namespace TheBlockWar.Scripts.Views;
+namespace TheBlockWar.Scripts.Views.UnitViews;
 
 [GlobalClass]
 public partial class BuffView : Node2D
 {
-    [Export] public GameViewStyle Style { get; set; } = null!;
-    [Export] public TeamTypeEnum TeamType { get; set; }
-    [Export] public Godot.Collections.Dictionary<string, Vector2> BuffEffectOffsets { get; set; } = null!;
     [Export] public UnitView UnitView { get; set; } = null!;
     // 【元素外框尺寸】默认值匹配截图
     [Export] public Vector2 IconBoxSize { get; private set; } = new(42, 42);
@@ -33,9 +27,7 @@ public partial class BuffView : Node2D
     [Export] public float GainHighlightMax { get; set; } = 1f;
     [Export] public float LoseDimMin { get; set; } = 0.2f;
     [Export] public float LoseDimMax { get; set; } = 0.6f;
-
-    
-    public GameView GameView { get; set; } = null!;
+    public GameViewTeamStyle Style { get; set; } = null!;
     // ===================== 缓存列表（无GC） =====================
     private readonly List<string> _gainBuffs = new();
     private readonly List<string> _loseBuffs = new();
@@ -45,7 +37,7 @@ public partial class BuffView : Node2D
     
     // Buff数据
     private readonly Dictionary<string, int> _buffChanges = new();
-    private readonly Dictionary<string, ViewAnimatedSprite2D> _visibleBuffs = new();
+    private readonly Dictionary<string, AnimatedSprite2D> _visibleBuffs = new();
     private bool _refreshBuffListsDirty = true;
     private ItemTabStyle _gainItemTabStyle = new()
     {
@@ -62,11 +54,9 @@ public partial class BuffView : Node2D
         Layout = -1,
         Modulate = Colors.White
     };
-    public void Init(GameView gameView, GameViewStyle style, TeamTypeEnum teamType)
+    public void Init(GameViewTeamStyle style)
     {
-        GameView = gameView;
         Style = style;
-        TeamType = teamType;
     }
 
     public override void _Process(double delta)
@@ -83,7 +73,7 @@ public partial class BuffView : Node2D
         QueueRedraw();
     }
 
-    public void ChangeBuffChange(string buffName, int change)
+    public void EventBuffChange(string buffName, int change)
     {
         if (change == 0) return;
         if (!_buffChanges.TryAdd(buffName, change))
@@ -98,14 +88,11 @@ public partial class BuffView : Node2D
     public void AddVisibleBuff(string buffName)
     {
         if (_visibleBuffs.ContainsKey(buffName)) return;
-        var s = GameView.ViewPools.AnimatedSprite2DPool.Get();
-        s.GetParent().RemoveChild(s);
+        var s = new AnimatedSprite2D();
         UnitView.Center.AddChild(s);
         s.Position = Vector2.Zero;
         s.Rotation = 0;
         _visibleBuffs.Add(buffName, s);
-        if (BuffEffectOffsets.TryGetValue(buffName, out var offset)) s.Offset = offset;
-        
         s.Offset = buffName.GetBuffInfo().ViewOffset;
         s.SpriteFrames = buffName.GetBuffInfo().ViewFrames;
         if (s.SpriteFrames == null) return;
@@ -135,13 +122,9 @@ public partial class BuffView : Node2D
         }
         else AfterAnim(s);
 
-        void AfterAnim(ViewAnimatedSprite2D animatedSprite2D)
+        void AfterAnim(AnimatedSprite2D animatedSprite2D)
         {
-            animatedSprite2D.GetParent().RemoveChild(animatedSprite2D);
-            GameView.DrawContainer.AddChild(animatedSprite2D);
-            animatedSprite2D.SpriteFrames = null;
-            animatedSprite2D.Offset = Vector2.Zero;
-            GameView.ViewPools.AnimatedSprite2DPool.Return(animatedSprite2D);
+            animatedSprite2D.QueueFree();
         }
     }
     public void ClearVisibleBuffs()
@@ -225,7 +208,7 @@ public partial class BuffView : Node2D
         }
     }
     
-    public void ClearAllBuffChanges()
+    public void EventClear()
     {
         _buffChanges.Clear();
         RefreshBuffLists();

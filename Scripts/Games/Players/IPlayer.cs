@@ -9,6 +9,7 @@ public interface IPlayer : INotifyPropertyChanged
     IReadOnlyList<SkillState> SkillingUnitSkillStates { get; }
     long SelectedUnitId { get; }
     int Power { get; }
+    int Team { get; }
     bool IsTurn { get; set; }
     void OnInput<T>(in T input);
     void Init();

@@ -100,17 +100,17 @@ public partial class Test : Node2D
         _eventScheduler = new EventScheduler(_currentGameState, 0);
         _snapshot = null;
 
-        _player = new StatePlayer();
+        _player = StatePlayer.Create(0, _view);
         _player.GameScheduler = _eventScheduler;
         AddChild(_player);
         
-        _view.Bind(_eventScheduler);
-        _view.Player = _player;
+        _view.Init(_eventScheduler);
+        _view.PlayerTeam = _player.Team;
         
         _pvpMode = new PvpMode([_player], _player);
         _turnManager = new TurnManager(_eventScheduler, _view, _pvpMode);
         _player.TurnManager = _turnManager;
-        _combatUi.Bind(_eventScheduler, _player);
+        _combatUi.Bind(_eventScheduler, _view, _player);
         _turnManager.Start().Forget();
 
         TestPlace();

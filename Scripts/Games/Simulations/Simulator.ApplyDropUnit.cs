@@ -32,12 +32,15 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyDropUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyDropUnitResult result)
+    public static partial void ApplyDropUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDropUnitResult result)
     {
     }
     
-    public static partial GDTask ApplyDropUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyDropUnitResult result)
+    public static partial async GDTask ApplyDropUnitViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyDropUnitResult result)
     {
-        return view.UnitsView.DropUnit(result.ReUnitId);
+        var uv = view.GetUnitView(result.ReUnitId);
+        if (uv == null) return;
+        await AnimationHelper.DropToAsync(uv, uv.GamePosition + new Vector3(0, 0, -80), 0.24f);
+        view.FreeUnitView(result.ReUnitId);
     }
 }

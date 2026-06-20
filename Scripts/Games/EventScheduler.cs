@@ -143,6 +143,7 @@ public class EventScheduler
             ev.OnApply(ev, obj);
             obj.PopContext();
         }
+        result.RunningCount = _eventManager.RunningEvents.Count;
         // 创建快照，用于焦点层和等待层事件执行
         var snapshot = _snapshotChache =
             (_snapshotChache is null || _snapshotChache.Owner != GameState)
@@ -160,7 +161,7 @@ public class EventScheduler
         }
         
         var sb = new StringBuilder();
-        Logger.Debug("结构树:\n{tree}", result.Steps.ToTree());
+        Logger.Trace("结构树:\n{tree}", result.Steps.ToTree());
         // 运行层事件执行完毕后，清空运行层
         _eventManager.ClearLayerEvent(SimulationLayer.Running);
         

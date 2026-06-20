@@ -1,7 +1,7 @@
 
 namespace TheBlockWar.Scripts.Resources;
 
-[GlobalClass, Tool]
+[GlobalClass, Tool, Icon("res://addons/at-icons/node/tank.svg")]
 public partial class UnitInfo : Resource, IInfo
 {
     public static readonly UnitInfo Null = new();

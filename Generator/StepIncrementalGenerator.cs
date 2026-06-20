@@ -16,12 +16,12 @@ namespace StepGenerator
         private readonly string TemplateClass = "global::TheBlockWar.Scripts.Games.Simulations.Simulator";
         
         private static readonly GeneratorConfig DefaultConfig = new(
-            ViewRunParameters: "global::TheBlockWar.Scripts.Views.GameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim",
-            ViewDrawParameters: "global::TheBlockWar.Scripts.Views.GameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim",
+            ViewRunParameters: "global::TheBlockWar.Scripts.Views.IGameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim",
+            ViewDrawParameters: "global::TheBlockWar.Scripts.Views.IGameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim",
             ViewRunArguments: "view, sim, this",
             ViewDrawArguments: "view, sim, this",
-            ViewCoreRunParameters: "global::TheBlockWar.Scripts.Views.GameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim, {ResultType} result",
-            ViewCoreDrawParameters: "global::TheBlockWar.Scripts.Views.GameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim, {ResultType} result",
+            ViewCoreRunParameters: "global::TheBlockWar.Scripts.Views.IGameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim, {ResultType} result",
+            ViewCoreDrawParameters: "global::TheBlockWar.Scripts.Views.IGameView view, global::TheBlockWar.Scripts.Games.Simulations.ReadOnlySimObject sim, {ResultType} result",
             ViewCoreRunArguments: "",
             ViewCoreDrawArguments: ""
         );
@@ -375,7 +375,7 @@ namespace StepGenerator
                  {{indent}}    public short Deep { get; set; } = deep;
                  {{indent}}    public int Team { get; set; } = team;
                  {{indent}}    public virtual ApplyStep GetStep() => new ApplyStep();
-                 {{indent}}    public virtual GDTask ViewRun{{viewRunSig}} => GDTask.CompletedTask;
+                 {{indent}}    public virtual GDTask ViewRunAsync{{viewRunSig}} => GDTask.CompletedTask;
                  {{indent}}    public virtual void ViewDraw{{viewDrawSig}} { }
                  {{indent}}}
                  """);
@@ -401,7 +401,7 @@ namespace StepGenerator
                 var viewRunSig = string.IsNullOrEmpty(viewRunParams) ? "()" : $"({viewRunParams})";
                 var viewDrawSig = string.IsNullOrEmpty(viewDrawParams) ? "()" : $"({viewDrawParams})";
 
-                sb.AppendLine($"{indent}    public static partial GDTask {method.MethodName}ViewRun{viewRunSig};");
+                sb.AppendLine($"{indent}    public static partial GDTask {method.MethodName}ViewRunAsync{viewRunSig};");
                 sb.AppendLine($"{indent}    public static partial void {method.MethodName}ViewDraw{viewDrawSig};");
             }
 
@@ -480,7 +480,7 @@ namespace StepGenerator
             sb.AppendLine();
             sb.AppendLine($"{indent}    public override {method.StepClassName} GetStep() => new {method.StepClassName}({stepCtorArgs});");
             sb.AppendLine();
-            sb.AppendLine($"{indent}    public override GDTask ViewRun{viewRunSig} => {TemplateClass}.{method.MethodName}ViewRun{viewRunCall};");
+            sb.AppendLine($"{indent}    public override GDTask ViewRunAsync{viewRunSig} => {TemplateClass}.{method.MethodName}ViewRunAsync{viewRunCall};");
             sb.AppendLine($"{indent}    public override void ViewDraw{viewDrawSig} => {TemplateClass}.{method.MethodName}ViewDraw{viewDrawCall};");
             sb.AppendLine();
             sb.AppendLine($"{indent}    public override string ToString()");

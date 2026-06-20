@@ -66,19 +66,19 @@ partial class Simulator
         }
     }
 
-    public static partial void ApplyCureViewDraw(GameView view, ReadOnlySimObject sim, ApplyCureResult result)
+    public static partial void ApplyCureViewDraw(IGameView view, ReadOnlySimObject sim, ApplyCureResult result)
     {
-        view.EventsView.BlockDraw.AddHealthChange(result.Coords, result.Cure, result.ReValidCure, 
+        view.EventHealth(result.Coords, result.Cure, result.ReValidCure, 
                 result.ReUnitId != 0 ,sim.IsFocused);
-        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
+        
+        var uv = view.EventUnit(result.ReUnitId);
         if (uv == null) return;
-        uv.HealthBar.HealthChange += result.ReValidCure;
-        view.EventsView.NeedClearUnit(result.ReUnitId);
+        uv.HealthBar.EventHealthChange += result.ReValidCure;
     }
 
-    public static partial GDTask ApplyCureViewRun(GameView view, ReadOnlySimObject sim, ApplyCureResult result)
+    public static partial GDTask ApplyCureViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyCureResult result)
     {
-        view.UnitsView.GetUnitView(result.ReUnitId)?.HealthBar.CurrentHealth += result.ReValidCure;
+        view.GetUnitView(result.ReUnitId)?.HealthBar.CurrentHealth += result.ReValidCure;
         return GDTask.CompletedTask;
     }
 }

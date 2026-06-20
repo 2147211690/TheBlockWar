@@ -16,11 +16,11 @@ partial class Simulator
             return r;
         }
     }
-    public static partial void ApplyDelayViewDraw(GameView view, ReadOnlySimObject sim, ApplyDelayResult result)
+    public static partial void ApplyDelayViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDelayResult result)
     {
     }
     
-    public static partial GDTask ApplyDelayViewRun(GameView view, ReadOnlySimObject sim, ApplyDelayResult result)
+    public static partial GDTask ApplyDelayViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyDelayResult result)
     {
         return GDTask.Delay(result.Delay);
     }

@@ -1,374 +1,279 @@
-using System.Linq;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
-using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.EventViews;
+using TheBlockWar.Scripts.Views.TileViews;
+using TheBlockWar.Scripts.Views.UnitViews;
 using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views;
 
-[GlobalClass]
-public partial class GameView : Node2D
+[GlobalClass, Icon("res://addons/at-icons/node2d/checkerboard.svg")]
+public partial class GameView : Node2D, IGameView
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    [Export] public PackedScene UnitViewScene { get; private set; } = null!;
+    [Export] public PackedScene TileViewScene { get; private set; } = null!;
+    [Export] public float NormalGridHeight { get; set; } = 34;
+    [Export] public GameViewStyle GameStyle { get; set; } = null!;
+    
+    
+    [ExportGroup("Self")]
     [Export] public GameViewNodeContainer DrawContainer { get; private set; } = null!;
-    [Export] public GameViewStyle Style { get; set; } = null!;
     [Export] public TilesView TilesView { get; set; } = null!;
     [Export] public UnitsView UnitsView { get; set; } = null!;
     [Export] public EventsView EventsView { get; set; } = null!;
-    [Export] public AnimationView AnimationView { get; set; } = null!;
-    [Export] public Camera2D SubCamera { get; set; } = null!;
-    [Export] public SubViewport SubViewport { get; set; } = null!;
-    [Export] public float NormalHeight { get; set; } = 35;
-    public IPlayer? Player { get; set; }
-    public ViewPools ViewPools { get; private set; } = null!;
-    public bool IsRunning { get; private set; }
+    [Export] public Timer DrawEventTimer { get; set; } = null!;
+    Node2D IGameView.DrawContainer => DrawContainer;
+    public ViewPools Pools { get; private set; }
+    public bool IsRunning => _runningQueue.IsRunning;
+    public IReadOnlyGameState GameState => Scheduler.GameState;
+    public EventScheduler Scheduler { get; private set; }
     public GameViewTeamStyle CurrentStyle { get; private set; } = null!;
-    public TeamTypeEnum CurrentTeamType { get; private set; } = TeamTypeEnum.Player;
-    
-    private Dictionary<long, ReadOnlySimObject> _runningSimulations = new();
-    private List<ReadOnlySimObject> _prepareSimulations = new();
-    private EventScheduler? _eventScheduler;
-    private Queue<(IReadOnlyList<ReadOnlySimObject> simulations, int? delay)> _simulationCache = new();
-    private Vector2I? _previousMouseCoords = null;
-    private Vector2I _currentCoords;
-    private bool _refocus = false;
-    private Queue<int> _nextDelays = new();
-    private int? _currentDelay;
-    private SimResultHandler _simResultHandler;
+    public int PlayerTeam { get; set; }
 
-    public GameView()
+    public TeamTypeEnum CurrentTeamType
     {
-        _simResultHandler = new(HandleSimStep);
-    }
+        get => field;
+        private set
+        {
+            if (field == value) return;
+            field = value;
+            CurrentStyle = GameStyle[value];
+        }
+    } = TeamTypeEnum.Enemy;
+
+    public Vector2 NodeRight => -TilesView.LocalLeft;
+    public Vector2 NodeLeft => TilesView.LocalLeft;
+    public Vector2 NodeUp => TilesView.LocalUp;
+    public Vector2 NodeDown => -TilesView.LocalUp;
+
+    #region EventUpdate
+    private TaskQueue _runningQueue = new();
+    private Queue<ReadOnlySimObject> _eventQueue = new();
+    private SimResultHandler _resultHandler;
+    private bool _isEventDirty = true;
+    private bool _isEventDrawn = false;
+    #endregion
+    
+    #region Init
 
     public override void _Ready()
     {
-        base._Ready();
-        ViewPools = new ViewPools(DrawContainer, Style);
-        SubViewport.World2D = GetTree().Root.World2D;
-        CurrentStyle = Style[TeamTypeEnum.Player];
+        DrawContainer.GameView = this;
+        Pools = new ViewPools(DrawContainer, UnitViewScene, TileViewScene);
+        UnitsView.GameView = this;
+        EventsView.GameView = this;
+        TilesView.GameView = this;
+        CurrentTeamType = TeamTypeEnum.Enemy;
+        DrawEventTimer.Timeout += CheckDrawEvent;
     }
 
-    public void Bind(EventScheduler eventScheduler)
+    public void Init(EventScheduler scheduler)
     {
-        _eventScheduler = eventScheduler;
-        _eventScheduler.SimulationUpdated += EventSchedulerOnSimulationUpdated;
-        _eventScheduler.OtherStateUpdated += EventSchedulerOnOtherStateUpdated;
-        _eventScheduler.NextDelay += EventSchedulerOnNextDelay;
-        _eventScheduler.GameStateReload += EventSchedulerOnGameStateReload;
+        Scheduler = scheduler;
+        Scheduler.SimulationUpdated += SchedulerOnSimulationUpdated;
+        Scheduler.GameStateReload += SchedulerOnGameStateReload;
+        _resultHandler = new SimResultHandler(HandleActionAsync);
+        _runningQueue.IsRunningChanged += IsRunningChanged;
 
-
-        TreeExiting += () =>
+        void IsRunningChanged(object? sender, bool e)
         {
-            _eventScheduler.SimulationUpdated -= EventSchedulerOnSimulationUpdated;
-            _eventScheduler.OtherStateUpdated -= EventSchedulerOnOtherStateUpdated;
-            _eventScheduler.NextDelay -= EventSchedulerOnNextDelay;
-        };
+            Logger.Debug("运行状态改变{isRunning}", e);
+            if (e) return;
+            //运行结束
+            
+        }
+
+        GDTask HandleActionAsync(ReadOnlySimObject arg1, StepResult arg2)
+        {
+            CurrentTeamType = GetTeamType(arg2.Team);
+            return arg2.ViewRunAsync(this, arg1);
+        }
     }
-    
-    private void EventSchedulerOnGameStateReload(object? sender, IReadOnlyGameState e)
+
+    private void SchedulerOnGameStateReload(object? sender, IReadOnlyGameState e)
     {
         TilesView.ClearAllTile();
         UnitsView.ClearAllUnit();
         var size = e.Size;
         for (int i = 0; i < size.X; i++)
         {
-            for(int j = 0; j < size.Y; j++)
+            for (int j = 0; j < size.Y; j++)
             {
                 var tile = e.TileMapState.GetTile(new Vector2I(i, j));
-                TilesView.PlaceTile(new(i, j), tile.Name).Forget();
+                TilesView.SetTileView(new(i, j), tile.Name);
                 foreach (var region in tile.Regions)
                 {
                     //TODO: 绘制区域
                 }
             }
         }
-
         foreach (var unit in e.UnitMapState.GetAllUnits())
         {
-            var view = UnitsView.CreateOrGetUnit(unit.Coords, unit, GetTeamType(unit.Team))!;
-            view.PlayPlaceDownAnim().Forget();
+            var view = UnitsView.CreateUnitView(unit.Coords, unit)!;
             view.IsDead = unit.IsDead;
         }
     }
 
-    private void EventSchedulerOnNextDelay(object? sender, int e)
+    private void SchedulerOnSimulationUpdated(object? sender, SchedulerResult e)
     {
-        _nextDelays.Enqueue(e);
+        int eventCount = e.Sims.Count - e.RunningCount;
+        if (eventCount != 0 || eventCount != _eventQueue.Count) 
+            _isEventDirty = true;
+        
+        if (e.RunningCount > 0)
+        {
+            ClearEventViews();
+            _runningQueue.AddTask(() => _resultHandler.HandleAsync(e.Sims.GetRange(0, e.RunningCount)));
+        }
+
+        _eventQueue.Clear();
+        for (int i = e.RunningCount; i < e.Sims.Count; i++)
+            _eventQueue.Enqueue(e.Sims[i]);
     }
 
-    public override void _UnhandledInput(InputEvent @event)
+    #endregion
+    
+    private void CheckDrawEvent()
     {
-        if (IsRunning) return;
-        switch (@event)
+        if (_isEventDirty && !_runningQueue.IsRunning)
         {
-            case InputEventMouseMotion e:
-                _currentCoords = TilesView.GlobalMouseToTileCoords(GetGlobalMousePosition());
-                if (_previousMouseCoords is null || _currentCoords != _previousMouseCoords)
-                {
-                    _previousMouseCoords = _currentCoords;
-                    Player?.OnInput(new PlayerInputMouseCoords(_currentCoords));
-                }
-
-                break;
-            case InputEventMouseButton e:
-                Player?.OnInput(new PlayerInputClick(_currentCoords, e.ButtonMask));
-                break;
+            _isEventDirty = false;
+            ClearEventViews();
+            DrawEventViews();
+        }
+    }
+    private void DrawEventViews()
+    {
+        if (_isEventDrawn) return;
+        _isEventDrawn = true;
+        foreach (var e in _eventQueue)
+        {
+            foreach (var s in e.Steps)
+            {
+                CurrentTeamType = GetTeamType(s.Team);
+                s.ViewDraw(this, e);
+            }
         }
     }
 
+    private void ClearEventViews()
+    {
+        if (!_isEventDrawn) return;
+        _isEventDrawn = false;
+        EventsView.EventClear();
+    }
+    
     public TeamTypeEnum GetTeamType(int team)
     {
-        return team.GetTeamTypeRelativeToPlayer(_eventScheduler);
-    }
-    private void EventSchedulerOnOtherStateUpdated(object? sender, EventScheduler.OtherStateUpdateTypeEnum e)
-    {
-        switch (e)
-        {
-            case EventScheduler.OtherStateUpdateTypeEnum.FocusedUnitId:
-                UnitsView.FocusUnit(_eventScheduler!.FocusedUnitId);
-                SubCamera.Position = TilesView.GetRealPosition(
-                    UnitsView.GetUnitView(_eventScheduler!.FocusedUnitId)?.WishCoords ?? _currentCoords,
-                    Layer.Underground);
-                break;
-            case EventScheduler.OtherStateUpdateTypeEnum.CoordsRegion:
-                TilesView.DrawRegions(_eventScheduler!.CoordsRegions.Values,
-                    _eventScheduler.GameState.TileMapState.Size);
-                break;
-        }
+        return GameState.TeamState.GetTeamTypeRelativeToPlayer(PlayerTeam, team);
     }
 
-    private void EventSchedulerOnSimulationUpdated(object? sender, SchedulerResult e)
+    public Vector3 CoordsToGamePosition(Vector2 coords, float heightOffset = 0, float? height = null)
     {
-        var hasDelay = _nextDelays.TryDequeue(out var delay);
-        SetSimulations(e.Sims, hasDelay ? delay : null);
+        return TilesView.CoordsToGamePosition(coords, heightOffset, height);
     }
 
-    /// <param name="simulations">确保传入有序的模拟结果</param>
-    private void SetSimulations(IReadOnlyList<ReadOnlySimObject> simulations, int? delay = null)
+    public Vector2 GamePositionToNodePosition(in Vector3 gamePosition)
     {
-        if (IsRunning)
-        {
-            Logger.Info("缓存操作结果");
-            _simulationCache.Enqueue((simulations, delay));
-            return;
-        }
-        foreach (var simulation in simulations)
-        {
-            if (simulation.Layer == SimulationLayer.Running)
-                _runningSimulations.Add(simulation.SourceEventId, simulation);
-            else
-                _prepareSimulations.Add(simulation);
-        }
-
-        IsRunning = true;
-        Run().Forget();
-
-        async GDTaskVoid Run()
-        {
-            await StartSimulations(delay);
-            RunCompleted();
-        }
+        return TilesView.GamePositionToNodePosition(gamePosition);
     }
 
-    private void RunCompleted()
+    public Vector2I NodePositionToCoords(Vector2 nodePosition)
     {
-        IsRunning = false;
-        //回收
-        _prepareSimulations.Clear();
-        _runningSimulations.Clear();
-        
-        if (_simulationCache.TryDequeue(out var simulations))
-        {
-            _currentDelay = simulations.delay;
-            SetSimulations(simulations.simulations, simulations.delay);
-        }
-        else
-        {
-            if (_refocus) //如果完全完成了且运行过模拟,则重置下关注的坐标
-            {
-                Player?.OnInput(new PlayerInputMouseCoords(_currentCoords));
-                _refocus = false;
-            }
-        }
-    }
-    public Vector3 GetGamePosition(in Vector2 coords, float? height = null)
-    {
-        return height != null
-            ? TilesView.GetGamePosition(coords, height.Value)
-            : TilesView.GetGamePosition(coords, 
-                TilesView.GetTileHeight(new (Mathf.RoundToInt(coords.X), Mathf.RoundToInt(coords.Y))));
-    }
-    public void SetCurrentTheme(TeamTypeEnum team)
-    {
-        CurrentTeamType = team;
-        CurrentStyle = Style[team];
+        return TilesView.NodePositionToCoords(nodePosition);
     }
 
-    private async GDTask StartSimulations(int? delay = null)
+    public UnitView? CreateUnitView(Vector2I coords, IReadOnlyUnitState unitState)
     {
-        ClearDraw();
-        DrawEvents(_prepareSimulations);
-        if (_runningSimulations.Count > 0)
-        {
-            _refocus = true;
-            await RunSimulations(_runningSimulations.Values);
-        }
-        if (delay != null) await GDTask.Delay(delay.Value);
+        return UnitsView.CreateUnitView(coords, unitState);
     }
 
-    private GDTask HandleSimStep(ReadOnlySimObject sim, StepResult step)
+    public UnitView? GetUnitView(long id)
     {
-        var id = step.GetHashCode();
-        Logger.Debug("处理事件开始->id:{0}-type:{1}-time:{2}", id, step.GetType(), Time.GetTicksMsec() / 100);
-        SetCurrentTheme(step.Team.GetTeamTypeRelativeToPlayer(_eventScheduler));
-        return step.ViewRun(this, sim);
-        /*switch (step)
-        {
-            case PlaceTileStep placeStep:
-                await TilesView.PlaceTile(placeStep.Apply.Coords, placeStep.Apply.TileName);
-                UnitsView.UpdateUnitPosition(placeStep.Apply.Coords);
-                break;
-            case DropTileStep dropStep:
-                await TilesView.DropTile(dropStep.Apply.Coords);
-                UnitsView.UpdateUnitPosition(dropStep.Apply.Coords);
-                break;
-            case PlaceUnitStep placeStep:
-                if (placeStep.Valid)
-                {
-                    var u = UnitFactory.CreateUnit(placeStep.Apply.UnitName, placeStep.Apply.Team, 
-                        placeStep.UnitState.Id, placeStep.Apply.Coords);
-                    await UnitsView.PlaceUnit(
-                        placeStep.Apply.Coords,
-                        u,
-                        placeStep.Apply.Team.GetTeamTypeRelativeToPlayer(_eventScheduler!));
-                }
-
-                break;
-            case MoveUnitStep moveStep:
-                if (moveStep.Valid) UnitsView.MoveUnit(moveStep.UnitId, moveStep.Apply.To);
-                UnitsView.UpdateUnitPosition(moveStep.Apply.To);
-                break;
-            case DamageStep damageStep:
-                UnitsView.GetUnitView(damageStep.UnitId)?.HealthBar.CurrentHealth -= damageStep.ValidDamage;
-                break;
-            case CureStep cureStep:
-                UnitsView.GetUnitView(cureStep.UnitId)?.HealthBar.CurrentHealth += cureStep.ValidCure;
-                break;
-            case MoveUnitPathStep movePathStep:
-                if (movePathStep.Valid)
-                    await UnitsView.MovePathUnit(movePathStep.UnitId, movePathStep.Apply.Coords, movePathStep.Apply.Path,
-                        movePathStep.TargetIndex);
-                break;
-            case DropUnitStep dropStep:
-                await UnitsView.DropUnit(dropStep.UnitId);
-                break;
-            case PushUnitStep pushStep:
-                await UnitsView.PushUnit(pushStep.UnitId, pushStep.Apply.Dir, pushStep.Valid);
-                break;
-            case ModifyUnitBuffStep modifyUnitBuffStep:
-                if (modifyUnitBuffStep.Operation == BuffOperation.AddBuff)
-                {
-                    UnitsView.GetUnitView(modifyUnitBuffStep.UnitId)?.BuffView
-                        .AddVisibleBuff(modifyUnitBuffStep.Apply.BuffName);
-                }
-                else if (modifyUnitBuffStep.Operation == BuffOperation.RemoveBuff)
-                {
-                    UnitsView.GetUnitView(modifyUnitBuffStep.UnitId)?.BuffView
-                        .RemoveVisibleBuff(modifyUnitBuffStep.Apply.BuffName);
-                }
-
-                break;
-            case AnimationStep animationStep:
-                await AnimationView.Play(animationStep.Apply.Animation);
-                break;
-            case DelayStep delayStep:
-                await GDTask.Delay(delayStep.Apply.Delay);
-                break;
-            case DeathStep deathStep:
-                UnitsView.GetUnitView(deathStep.UnitId)?.HealthBar.CurrentHealth = 0;
-                break;
-            case null:
-                break;
-        }*/
+        return UnitsView.GetUnitView(id);
     }
 
-    private GDTask RunSimulations(IEnumerable<ReadOnlySimObject> sims)
+    public UnitView? GetUnitView(Vector2I coords)
     {
-        return _simResultHandler.Handle(sims);
+        return UnitsView.GetUnitView(coords);
     }
 
-    private void ClearDraw()
+    public void FreeUnitView(long id)
     {
-        EventsView.ClearAll();
+        UnitsView.FreeUnitView(id);
     }
-    private void DrawEvents(IEnumerable<ReadOnlySimObject> sims)
-    {
-        foreach (var sim in sims)
-        {
-            foreach (var step in sim.Steps ?? [])
-            {
-                SetCurrentTheme(step.Team.GetTeamTypeRelativeToPlayer(_eventScheduler));
-                step.ViewDraw(this, sim);
-            }
-        }
-        /*EventsView.ClearAll();
-        foreach (var simulation in sims)
-        {
-            var isFocused = simulation.Layer == SimulationLayer.Focused;
-            var teamType = TeamTypeEnum.Player; //TODO:每一步都不一样
-            var view = EventsView.BeginAddEventView(simulation.SourceEventId, isFocused, teamType);
-            if (view is null) continue;
-            foreach (var step in simulation.Steps ?? [])
-            {
-                switch (step)
-                {
-                    case PlaceTileStep placeStep:
-                        //await _tilesView.PlaceTile(placeStep.Coords, placeStep.Tile);
-                        break;
-                    case DropTileStep dropStep:
-                        //await _tilesView.DropTile(dropStep.Coords);
-                        break;
-                    case PlaceUnitStep placeStep:
-                        view.PlaceUnit(placeStep);
-                        break;
-                    case MoveUnitStep moveStep:
-                        view.MoveUnit(moveStep);
-                        break;
-                    case DamageStep damageStep:
-                        view.Damage(damageStep);
-                        break;
-                    case CureStep cureStep:
-                        view.Cure(cureStep);
-                        break;
-                    case MoveUnitPathStep movePathStep:
-                        view.MoveUnitPath(movePathStep);
-                        break;
-                    case DropUnitStep dropStep:
-                        view.DropUnit(dropStep);
-                        break;
-                    case PushUnitStep pushStep:
-                        view.PushUnit(pushStep);
-                        break;
-                    case ModifyUnitBuffStep modifyUnitBuffStep:
-                        view.ModifyUnitBuff(modifyUnitBuffStep);
-                        break;
-                    case AnimationStep animationStep:
-                        view.Animation(animationStep);
-                        break;
-                    case DeathStep deathStep:
-                        view.Death(deathStep);
-                        break;
-                    case null:
-                        break;
-                }
-            }
 
-            EventsView.EndAddEventView();
-        }*/
+    public void SetUnitRealCoords(long id, Vector2I coords)
+    {
+        UnitsView.SetUnitRealCoords(id, coords);
+    }
+
+    public TileView? SetTileView(Vector2I coords, string tileName)
+    {
+        return TilesView.SetTileView(coords, tileName);
+    }
+
+    public TileView? GetTileView(Vector2I coords)
+    {
+        return TilesView.GetTileView(coords);
+    }
+
+    public float GetTileHeight(Vector2I coords)
+    {
+        return TilesView.GetTileHeight(coords);
+    }
+
+    public TileInfo GetTileInfo(Vector2I coords)
+    {
+        return TilesView.GetTileInfo(coords);
+    }
+
+
+    public UnitView? EventUnit(long id)
+    {
+        return EventsView.EventUnit(id);
+    }
+
+    public ViewSprite2D EventSprite()
+    {
+        return EventsView.EventSprite();
+    }
+
+    public void EventTopDraw(Action<ViewNode2D> action, int zOffset = 0)
+    {
+        EventsView.EventTopDraw(action, zOffset);
+    }
+
+    public ViewNode2D EventDraw(Action<ViewNode2D> action)
+    {
+        return EventsView.EventDraw(action);
+    }
+
+    public void EventHealth(Vector2I coords, float originHealthChange, float validHealthChange, bool hasTarget, bool isFocused)
+    { 
+        EventsView.BlockDraw.AddHealthChange(coords, originHealthChange, validHealthChange, hasTarget, isFocused);
+    }
+
+    public void EventBuff(Vector2I coords, string buffName, int countChange, bool isFocused)
+    {
+        EventsView.BlockDraw.AddBuffChange(coords, buffName, countChange > 0, isFocused);
+    }
+
+    public void EventRegion(Vector2I coords, string regionName, bool isAdd, bool isFocused)
+    {
+        EventsView.BlockDraw.AddRegionChange(coords, regionName, isAdd, isFocused);
+    }
+
+    public ViewNode2D? CreateEffect(string effectName)
+    {
+        var effectScene = CurrentStyle.EffectTable.EffectScenes.GetValueOrDefault(effectName);
+        if (effectScene == null) return null;
+        var effect = effectScene.Instantiate<ViewNode2D>();
+        DrawContainer.AddChild(effect);
+        return effect;
     }
 }

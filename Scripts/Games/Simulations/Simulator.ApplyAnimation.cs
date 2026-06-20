@@ -19,11 +19,11 @@ partial class Simulator
         }
     }
 
-    public static partial void ApplyAnimationViewDraw(GameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
+    public static partial void ApplyAnimationViewDraw(IGameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
     {
-        if (result.Animation is ShotSomethingAnim shot)
+        /*if (result.Animation is ShotSomethingAnim shot)
         {
-            var h = view.TilesView.GetTileHeight(shot.Coords);
+            var h = view.GetTileHeight(shot.Coords);
             var start = new Vector3(shot.Coords.X, shot.Coords.Y, h);
             var end = new Vector3(shot.To.X, shot.To.Y, h);
             view.EventsView.DrawPointLine(AnimationLine, start, end, 0.5f, Colors.Yellow);
@@ -33,7 +33,7 @@ partial class Simulator
             var throwStart = new Vector3(thr.Coords.X, thr.Coords.Y, view.TilesView.GetTileHeight(thr.Coords));
             var throwEnd = new Vector3(thr.To.X, thr.To.Y, view.TilesView.GetTileHeight(thr.To));
             view.EventsView.DrawPointLine(AnimationThrowLine, throwStart, throwEnd, 0.5f, Colors.Yellow);
-        }
+        }*/
     }
     private static Vector3 AnimationLine(Vector3 v1, Vector3 v2, float arg3)
     {
@@ -48,14 +48,14 @@ partial class Simulator
         return l1.Lerp(l2, v);
     }
 
-    public static async partial GDTask ApplyAnimationViewRun(GameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
+    public static async partial GDTask ApplyAnimationViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
     {
         if (result.Animation is ShotSomethingAnim shot)
         {
             var v = view.CurrentStyle.EffectTable.CreateEffect(view, shot.ThingName);
             if (v == null) return;
-            var startPosition = view.GetGamePosition(shot.Coords);
-            var endPosition = view.GetGamePosition(shot.To);
+            var startPosition = view.CoordsToGamePosition(shot.Coords);
+            var endPosition = view.CoordsToGamePosition(shot.To);
             v.GamePosition = startPosition;
             v.SetGameRotation(endPosition - startPosition);
             var tween = v.CreateTween();
@@ -67,8 +67,8 @@ partial class Simulator
         {
             var v = view.CurrentStyle.EffectTable.CreateEffect(view, thr.ThingName);
             if (v == null) return;
-            var startPosition = view.GetGamePosition(thr.Coords);
-            var endPosition = view.GetGamePosition(thr.To);
+            var startPosition = view.CoordsToGamePosition(thr.Coords);
+            var endPosition = view.CoordsToGamePosition(thr.To);
             v.GamePosition = startPosition;
             var timer = new RecordTimer(thr.Time);
             while (timer.HasTime)

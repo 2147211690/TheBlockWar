@@ -1,8 +1,5 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games;
-using TheBlockWar.Scripts.Games.Buffs;
-using TheBlockWar.Scripts.Games.Regions;
-using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.ViewNodes;
 
@@ -11,7 +8,7 @@ namespace TheBlockWar.Scripts.Views.EventViews;
 [GlobalClass]
 public partial class BlockEventDrawNode : ViewNode2D
 {
-    public GameViewStyle Style { get; set; } = null!;
+    public IGameView GameView => Container.GameView;
     public Vector2I Coords { get; set; }
     
     
@@ -112,7 +109,7 @@ public partial class BlockEventDrawNode : ViewNode2D
             var healtColor = healthValue > 0 ? Colors.Green : Colors.Red;
             healtColor.A = IsFocused ? 1 : 0.5f;
             this.DrawTextureCentered(
-                Style[0].GetBlockNumberTexture(Mathf.Abs((int)(healthValue / 10))),
+                GameView.CurrentStyle.GetBlockNumberTexture(Mathf.Abs((int)(healthValue / 10))),
                 healthPos,
                 healtColor);
         }

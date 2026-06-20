@@ -1,6 +1,3 @@
-using TheBlockWar.Scripts.Games;
-using TheBlockWar.Scripts.Games.Buffs;
-using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Views.EventViews;
@@ -8,7 +5,7 @@ namespace TheBlockWar.Scripts.Views.EventViews;
 public class BlockDraw
 {
     private EventsView _eventsView;
-    private TypedPool<BlockEventDrawNode> Pool => _eventsView.GameView.ViewPools.BlockEventDrawNodePool;
+    private TypedPool<BlockEventDrawNode> Pool => _eventsView.GameView.Pools.BlockEventDrawNodePool;
     private Dictionary<Vector2I, BlockEventDrawNode> _nodes = new();
 
     public BlockDraw(EventsView eventsView)
@@ -43,7 +40,7 @@ public class BlockDraw
         node = Pool.Get();
         node.NodeZIndexOffset = 4001;
         _nodes.Add(coords, node);
-        node.GamePosition = _eventsView.GameView.TilesView.GetGamePositionOnGround(coords);
+        node.GamePosition = _eventsView.GameView.CoordsToGamePosition(coords);
 
         return node;
     }

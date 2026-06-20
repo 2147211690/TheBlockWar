@@ -64,23 +64,22 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyPlaceUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)
+    public static partial void ApplyPlaceUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)
     {
     }
     
-    public static partial GDTask ApplyPlaceUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)
+    public static partial GDTask ApplyPlaceUnitViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)
     {
         if (result.ReValid)
         {
-            var uv = view.UnitsView.CreateOrGetUnit(
+            var uv = view.CreateUnitView(
                 result.Coords,
-                result.ReUnitState,
-                view.GetTeamType(result.UnitTeam));
+                result.ReUnitState);
             if (uv == null) return GDTask.CompletedTask;
             //初始化buff视图
             foreach (var a in result.UnitName.GetUnitInfo().Buffs)
                 uv.BuffView.AddVisibleBuff(a);
-            return uv.PlayPlaceDownAnim();
+            return AnimationHelper.DropInHeavyAsync(uv, 35);
         }
         return GDTask.CompletedTask;
     }

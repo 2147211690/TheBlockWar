@@ -57,4 +57,10 @@ public partial class ViewAnimatedSprite2D : AnimatedSprite2D, IGameViewNode<Anim
     {
         _gameViewNode.SetGameRotation(direction);
     }
+
+    public virtual void Reset()
+    {
+        _gameViewNode.Reset();
+        Offset = Vector2.Zero;
+    }
 }

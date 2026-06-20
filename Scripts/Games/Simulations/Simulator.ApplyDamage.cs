@@ -73,20 +73,19 @@ partial class Simulator
         }
     }
     
-    public static partial void ApplyDamageViewDraw(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
+    public static partial void ApplyDamageViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDamageResult result)
     {
-        view.EventsView.BlockDraw.AddHealthChange(result.Coords, -result.Damage, -result.ReValidDamage, 
+        view.EventHealth(result.Coords, -result.Damage, -result.ReValidDamage, 
             result.ReUnitId != 0 ,sim.IsFocused);
-        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
+        var uv = view.EventUnit(result.ReUnitId);
         if (uv == null) return;
-        uv.HealthBar.HealthChange -= result.ReValidDamage;
-        view.EventsView.NeedClearUnit(result.ReUnitId);
+        uv.HealthBar.EventHealthChange -= result.ReValidDamage;
     }
     
-    public static partial GDTask ApplyDamageViewRun(GameView view, ReadOnlySimObject sim, ApplyDamageResult result)
+    public static partial GDTask ApplyDamageViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyDamageResult result)
     {
-        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
-        if (uv == null) return GDTask.CompletedTask;
+        var uv = view.GetUnitView(result.ReUnitId);
+        if (uv == null || uv.IsDead) return GDTask.CompletedTask;
         AnimationHelper.HurtShakeAsync(uv);
         uv.HealthBar.CurrentHealth -= result.ReValidDamage;
         return GDTask.CompletedTask;

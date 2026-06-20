@@ -53,11 +53,11 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyPushUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
+    public static partial void ApplyPushUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
     {
-        var s = view.EventsView.GetGameTexture();
+        var s = view.EventSprite();
         var pos = result.Coords.ToVec2() + result.Dir.ToVec2() * (result.ReValid ? 0.5f : 0.2f);
-        s.GamePosition = new(pos.X, pos.Y, view.TilesView.GetTileHeight(result.Coords));
+        s.GamePosition = pos.ToVec3(view.GetTileHeight(result.Coords));
         s.Texture = view.CurrentStyle.PushTextures[result.Dir.ToIndex()];
         s.Modulate = (sim.IsFocused , result.ReValid) switch
         {
@@ -67,8 +67,18 @@ partial class Simulator
         };
     }
 
-    public static partial GDTask ApplyPushUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
+    public static partial GDTask ApplyPushUnitViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
     {
-        return view.UnitsView.PushUnit(result.ReUnitId, result.Dir, result.ReValid);
+        var uv = view.GetUnitView(result.ReUnitId);
+        if (uv == null) return GDTask.CompletedTask;
+        var targetPos = view.CoordsToGamePosition(result.Coords + result.Dir.ToVec2I());
+        if (result.ReValid)
+        {
+            return AnimationHelper.PushToAsync(uv, targetPos);
+        }
+        else
+        {
+            return AnimationHelper.PushBounceAsync(uv, targetPos);
+        }
     }
 }

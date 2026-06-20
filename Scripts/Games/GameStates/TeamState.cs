@@ -56,6 +56,7 @@ public class TeamState
     
     public TeamTypeEnum GetTeamTypeRelativeToPlayer(int playerTeam, int team)
     {
+        if (team < 0) return TeamTypeEnum.Enemy;
         if (IsPlayer(playerTeam, team)) return TeamTypeEnum.Player;
         var relation = TryGetRelation(playerTeam, team);
         return (TeamTypeEnum)relation;

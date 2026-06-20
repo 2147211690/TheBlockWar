@@ -1,7 +1,7 @@
 using TheBlockWar.Scripts.Games.Buffs;
 
 namespace TheBlockWar.Scripts.Resources;
-[GlobalClass, Tool]
+[GlobalClass, Tool, Icon("res://addons/at-icons/node/stars.svg")]
 public partial class BuffInfo : Resource, IInfo
 {
     public static readonly BuffInfo Null = new BuffInfo()

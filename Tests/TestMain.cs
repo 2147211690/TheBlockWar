@@ -49,7 +49,7 @@ public partial class TestMain : Node2D
     {
         var index = animationIndex++;
         GD.Print($"开始添加动画{index}");
-        await _taskQueue.AddTask(async () =>
+        await _taskQueue.AddTaskAndWaitAsync(async () =>
         {
             await GDTask.Delay(3000);
             GD.Print($"动画{index}完成");

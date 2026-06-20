@@ -7,17 +7,13 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
-        [Step([], [])]
-        public ApplyModifyGlobalBuffResult ApplyModifyGlobalBuff(string sourceUnitName, string sourceBuff, int groupMask, string targetBuff, bool add)
+        public void ApplyModifyGlobalBuff(string sourceUnitName, string sourceBuff, int groupMask, string targetBuff, bool add)
         {
             EnterSimulation();
-            var r = Main();
+            Main();
             ExitSimulation();
-            return r;
-
-            ApplyModifyGlobalBuffResult Main()
+            void Main()
             {
-                var r = obj.Steps.AddResult(new ApplyModifyGlobalBuffResult(CurrentDeep, CurrentTeam, sourceUnitName, sourceBuff, groupMask, targetBuff, add));
                 if (add)
                 {
                     var index = obj.State.BuffGlobalState.AddGlobalBuff(sourceUnitName, sourceBuff, groupMask, targetBuff);
@@ -46,16 +42,7 @@ partial class Simulator
                         }
                     }
                 }
-                return r;
             }
         }
-    }
-    public static partial void ApplyModifyGlobalBuffViewDraw(GameView view, ReadOnlySimObject sim, ApplyModifyGlobalBuffResult result)
-    {
-    }
-    
-    public static partial GDTask ApplyModifyGlobalBuffViewRun(GameView view, ReadOnlySimObject sim, ApplyModifyGlobalBuffResult result)
-    {
-        return GDTask.CompletedTask;
     }
 }

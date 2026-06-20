@@ -50,11 +50,11 @@ partial class Simulator
         }
     }
 
-    public static partial void ApplyBuffTurnViewDraw(GameView view, ReadOnlySimObject sim, ApplyBuffTurnResult result)
+    public static partial void ApplyBuffTurnViewDraw(IGameView view, ReadOnlySimObject sim, ApplyBuffTurnResult result)
     {
     }
 
-    public static partial GDTask ApplyBuffTurnViewRun(GameView view, ReadOnlySimObject sim, ApplyBuffTurnResult result)
+    public static partial GDTask ApplyBuffTurnViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyBuffTurnResult result)
     {
         return GDTask.CompletedTask;
     }

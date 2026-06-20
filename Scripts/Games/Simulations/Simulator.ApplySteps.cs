@@ -27,11 +27,11 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyStepsViewDraw(GameView view, ReadOnlySimObject sim, ApplyStepsResult result)
+    public static partial void ApplyStepsViewDraw(IGameView view, ReadOnlySimObject sim, ApplyStepsResult result)
     {
     }
     
-    public static partial GDTask ApplyStepsViewRun(GameView view, ReadOnlySimObject sim, ApplyStepsResult result)
+    public static partial GDTask ApplyStepsViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyStepsResult result)
     {
         return GDTask.CompletedTask;
     }

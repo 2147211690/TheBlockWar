@@ -121,32 +121,31 @@ partial class Simulator
         }
     }
 
-    public static partial void ApplyModifyUnitBuffViewDraw(GameView view, ReadOnlySimObject sim,
+    public static partial void ApplyModifyUnitBuffViewDraw(IGameView view, ReadOnlySimObject sim,
         ApplyModifyUnitBuffResult result)
     {
         if (result.Draw)
         {
-            view.EventsView.BlockDraw.AddBuffChange(result.Coords, result.BuffName,
-                result.Operation == BuffOperation.AddBuff, sim.IsFocused);
+            view.EventBuff(result.Coords, result.BuffName,
+                result.ReNewCount - result.ReOldCount, sim.IsFocused);
         }
 
-        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
+        var uv = view.EventUnit(result.ReUnitId);
         if (uv == null) return;
-        uv.BuffView.ChangeBuffChange(result.BuffName, Mathf.Sign(result.ReNewCount - result.ReOldCount));
-        view.EventsView.NeedClearUnit(result.ReUnitId);
+        uv.BuffView.EventBuffChange(result.BuffName, Mathf.Sign(result.ReNewCount - result.ReOldCount));
     }
 
-    public static partial GDTask ApplyModifyUnitBuffViewRun(GameView view, ReadOnlySimObject sim,
+    public static partial GDTask ApplyModifyUnitBuffViewRunAsync(IGameView view, ReadOnlySimObject sim,
         ApplyModifyUnitBuffResult result)
     {
         if (result.ReResult == BuffOperationResult.BuffAdded)
         {
-            view.UnitsView.GetUnitView(result.ReUnitId)?.BuffView
+            view.GetUnitView(result.ReUnitId)?.BuffView
                 .AddVisibleBuff(result.BuffName);
         }
         else if (result.ReResult == BuffOperationResult.BuffRemoved)
         {
-            view.UnitsView.GetUnitView(result.ReUnitId)?.BuffView
+            view.GetUnitView(result.ReUnitId)?.BuffView
                 .RemoveVisibleBuff(result.BuffName);
         }
 

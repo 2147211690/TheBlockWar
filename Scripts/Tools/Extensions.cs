@@ -198,6 +198,10 @@ public static class Extensions
         }
     }
 
+    extension(in Vector2 pos)
+    {
+        public Vector3 ToVec3(float z = 0) => new(pos.X, pos.Y, z);
+    }
     extension(in Vector2I coords)
     {
         public DirMask ToVecDirMask()
@@ -219,7 +223,7 @@ public static class Extensions
         }
         public Vector2 ToVec2() => new(coords.X, coords.Y);
         public Vector3 ToVec3(float z = 0) => new(coords.X, coords.Y, z);
-        public Vector3 ToUnderVec3(GameView gameView) => new(coords.X, coords.Y, gameView.TilesView.GetTileHeight(coords));
+        public Vector3 ToUnderVec3(IGameView gameView) => new(coords.X, coords.Y, gameView.GetTileHeight(coords));
         public bool IsInSize(in Vector2I size, Vector2I offset = default)
         {
             return coords.X >= 0 + offset.X && coords.X < size.X + offset.X && coords.Y >= 0 + offset.Y && coords.Y < size.Y + offset.Y;

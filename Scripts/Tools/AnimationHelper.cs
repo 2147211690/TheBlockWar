@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Views;
 using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Tools;
@@ -35,6 +36,23 @@ public static class AnimationHelper
         tween.SetTrans(Tween.TransitionType.Bounce);
         tween.SetEase(Tween.EaseType.Out);
         tween.TweenProperty(target, "GamePosition", groundPos, duration);
+        return tween.WaitForTween();
+    }
+
+    /// <summary>
+    /// 重力加速下落：从当前位置以 Quad.In 加速下落到目标位置，模拟物体受重力加速下落的效果。
+    /// 适用于 UnitView 等单位节点从空中落到地面的场景。
+    /// </summary>
+    /// <param name="target">实现了 IGameViewNode 的 Node2D</param>
+    /// <param name="targetPosition">目标 GamePosition（落地位置）</param>
+    /// <param name="duration">下落时长（秒）</param>
+    public static GDTask DropToAsync<T>(T target, Vector3 targetPosition, float duration = 0.12f)
+        where T : Node2D, IGameViewNode<Node2D>
+    {
+        var tween = target.CreateTween();
+        tween.TweenProperty(target, "GamePosition", targetPosition, duration)
+            .SetTrans(Tween.TransitionType.Quad)
+            .SetEase(Tween.EaseType.In);
         return tween.WaitForTween();
     }
 
@@ -188,20 +206,20 @@ public static class AnimationHelper
     /// <param name="target">实现了 IGameViewNode 的 Node2D</param>
     /// <param name="path">路径点序列（Vector3，GamePosition）</param>
     /// <param name="speedPerSegment">每段移动时长（秒）</param>
-    public static async GDTask MoveAlongPathAsync<T>(T target,
-        IReadOnlyList<Vector3> path, float speedPerSegment = 0.15f)
+    public static async GDTask MoveAlongPathAsync<T>(T target, IGameView view,
+        IReadOnlyList<Vector2I> path, int startIndex, int count, float speedPerSegment = 0.05f, float moveDelay = 0.05f)
         where T : Node2D, IGameViewNode<Node2D>
     {
         if (path.Count == 0) return;
 
-        target.GamePosition = path[0];
-
-        for (int i = 1; i < path.Count; i++)
+        target.GamePosition = path[startIndex].ToUnderVec3(view);
+        
+        for (int i = startIndex + 1; i < startIndex + count; i++)
         {
             var tween = target.CreateTween();
-            tween.TweenProperty(target, "GamePosition", path[i], speedPerSegment)
+            tween.TweenProperty(target, "GamePosition", path[i].ToUnderVec3(view), speedPerSegment)
                 .SetTrans(Tween.TransitionType.Quad)
-                .SetEase(Tween.EaseType.InOut);
+                .SetEase(Tween.EaseType.InOut).SetDelay(moveDelay);
             await tween.WaitForTween();
         }
     }
@@ -238,6 +256,54 @@ public static class AnimationHelper
         }
 
         target.GamePosition = toPos;
+    }
+
+    // ========================================================================
+    //  3.5 推撞动画（基于 GamePosition Vector3）
+    // ========================================================================
+
+    /// <summary>
+    /// 直线推撞：将 target 从当前位置直接推到目标位置。
+    /// 适用于单位被击退等场景。
+    /// </summary>
+    /// <param name="target">实现了 IGameViewNode 的 Node2D</param>
+    /// <param name="targetPosition">目标 GamePosition</param>
+    /// <param name="duration">推撞时长（秒）</param>
+    public static GDTask PushToAsync<T>(T target, Vector3 targetPosition, float duration = 0.08f)
+        where T : Node2D, IGameViewNode<Node2D>
+    {
+        var tween = target.CreateTween();
+        tween.TweenProperty(target, "GamePosition", targetPosition, duration);
+        return tween.WaitForTween();
+    }
+
+    /// <summary>
+    /// 撞击弹回：先向目标方向前冲一段距离，再弹回原位。
+    /// 适用于单位被撞击但未被击退的场景（如撞墙反弹）。
+    /// </summary>
+    /// <param name="target">实现了 IGameViewNode 的 Node2D</param>
+    /// <param name="pushTarget">推撞目标位置（决定方向和距离）</param>
+    /// <param name="pushRatio">前冲比例（0~1，默认 0.5 表示冲到一半）</param>
+    /// <param name="pushTime">前冲时长（秒）</param>
+    /// <param name="bounceTime">弹回时长（秒）</param>
+    public static GDTask PushBounceAsync<T>(T target, Vector3 pushTarget,
+        float pushRatio = 0.5f, float pushTime = 0.05f, float bounceTime = 0.10f)
+        where T : Node2D, IGameViewNode<Node2D>
+    {
+        var initialPos = target.GamePosition;
+        var intermediatePos = initialPos + (pushTarget - initialPos) * pushRatio;
+
+        var tween = target.CreateTween();
+        tween.TweenProperty(target, "GamePosition", intermediatePos, pushTime)
+            .SetTrans(Tween.TransitionType.Quad)
+            .SetEase(Tween.EaseType.Out);
+
+        tween.Chain()
+            .TweenProperty(target, "GamePosition", initialPos, bounceTime)
+            .SetTrans(Tween.TransitionType.Bounce)
+            .SetEase(Tween.EaseType.Out);
+
+        return tween.WaitForTween();
     }
 
     // ========================================================================
@@ -296,6 +362,7 @@ public static class AnimationHelper
         tween.TweenProperty(target, "modulate", Colors.Transparent, duration);
         return tween.WaitForTween();
     }
+    
 
     // ========================================================================
     //  6. 组合动画

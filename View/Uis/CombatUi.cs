@@ -10,7 +10,7 @@ namespace TheBlockWar.View.Uis;
 
 public partial class CombatUi : Control
 {
-    [Export] public GameView GameView { get; set; } = null!;
+    public IGameView GameView { get; set; } = null!;
     [Export] private InfoPanel _infoPanel = null!;
     [Export] private PackedScene _itemBoxScene = null!;
     [Export] private Control _skillContainer = null!;
@@ -25,8 +25,9 @@ public partial class CombatUi : Control
         _tooltipManager.OnHoverChange += OnHoverChange;
     }
 
-    public void Bind(EventScheduler eventScheduler, IPlayer player)
+    public void Bind(EventScheduler eventScheduler, IGameView gameView, IPlayer player)
     {
+        GameView = gameView;
         _eventScheduler = eventScheduler;
         _player = player;
         

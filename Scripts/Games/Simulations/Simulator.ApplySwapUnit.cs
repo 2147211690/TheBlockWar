@@ -47,14 +47,19 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplySwapUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplySwapUnitResult result)
+    public static partial void ApplySwapUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplySwapUnitResult result)
     {
     }
     
-    public static partial GDTask ApplySwapUnitViewRun(GameView view, ReadOnlySimObject sim, ApplySwapUnitResult result)
+    public static partial GDTask ApplySwapUnitViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplySwapUnitResult result)
     {
         if (!result.ReValid) return GDTask.CompletedTask;
-        view.UnitsView.SwapUnit(result.ReUnitId1, result.ReUnitId2);
+        var uv1 = view.GetUnitView(result.ReUnitId1);
+        var uv2 = view.GetUnitView(result.ReUnitId2);
+        uv1.EventFack(result.Coords1);
+        uv2.EventFack(result.Coords2);
+        view.SetUnitRealCoords(result.ReUnitId1, result.Coords2);
+        view.SetUnitRealCoords(result.ReUnitId2, result.Coords1);
         return GDTask.CompletedTask;
     }
 }

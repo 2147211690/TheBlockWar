@@ -37,21 +37,16 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyMoveUnitViewDraw(GameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)
+    public static partial void ApplyMoveUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)
     {
-        var uv = view.UnitsView.GetUnitView(result.ReUnitId);
-        if (uv != null && result.ReValid)
-        {
-            uv.AddFack(uv.WishCoords);
-            view.UnitsView.SetUnitAimCoords(result.ReUnitId, result.To);
-            view.EventsView.SetUnitNeedClear(result.ReUnitId);
-        }
+        var uv = view.EventUnit(result.ReUnitId);
+        if (uv == null || !result.ReValid) return;
+        uv.EventFack(uv.WishCoords);
+        uv.EventAimCoords = result.To;
     }
-    
-    public static partial GDTask ApplyMoveUnitViewRun(GameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)
+    public static partial GDTask ApplyMoveUnitViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyMoveUnitResult result)
     {
-        if (result.ReValid) view.UnitsView.MoveUnit(result.ReUnitId, result.To);
-        view.UnitsView.UpdateUnitPosition(result.To);
+        if (result.ReValid) view.SetUnitRealCoords(result.ReUnitId, result.To);
         return GDTask.CompletedTask;
     }
 }

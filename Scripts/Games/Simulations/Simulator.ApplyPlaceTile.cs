@@ -55,13 +55,15 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyPlaceTileViewDraw(GameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
+    public static partial void ApplyPlaceTileViewDraw(IGameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
     {
     }
     
-    public static partial GDTask ApplyPlaceTileViewRun(GameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
+    public static partial GDTask ApplyPlaceTileViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
     {
         if (!result.ReValid) return GDTask.CompletedTask;
-        return view.TilesView.PlaceTile(result.Coords, result.TileName);
+        var tv = view.SetTileView(result.Coords, result.TileName);
+        if (tv == null) return GDTask.CompletedTask;
+        return AnimationHelper.FadeInDropAsync(tv, 50);
     }
 }

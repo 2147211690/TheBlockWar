@@ -60,4 +60,9 @@ public partial class ViewNode2D : Node2D, IGameViewNode<Node2D>
     {
         _gameViewNode.SetGameRotation(direction);
     }
+
+    public virtual void Reset()
+    {
+        _gameViewNode.Reset();
+    }
 }

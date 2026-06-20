@@ -1,6 +1,4 @@
-using TheBlockWar.Scripts.Views.ViewNodes;
-
-namespace TheBlockWar.Scripts.Views;
+namespace TheBlockWar.Scripts.Views.ViewNodes;
 [GlobalClass]
 public partial class DrawNode : ViewNode2D
 {
@@ -21,13 +19,6 @@ public partial class DrawNode : ViewNode2D
     public float ResetTime { get; private set; }
     public object? Args { get; set; }
     private bool _hadDrawn = false;
-    public void Reset()
-    {
-        DeltaTime = 0;
-        ResetTime = 0;
-        _hadDrawn = false;
-        Args = null;
-    }
 
     public DrawNode()
     {
@@ -59,5 +50,15 @@ public partial class DrawNode : ViewNode2D
         _hadDrawn = true;
         DrawAction?.Invoke(this, true);
     }
-    
+
+    public override void Reset()
+    {
+        base.Reset();
+        ProcessRedraw = false;
+        DeltaTime = 0;
+        ResetTime = 0;
+        _hadDrawn = false;
+        Args = null;
+        DrawAction = null;
+    }
 }

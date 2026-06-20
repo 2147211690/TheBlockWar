@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://deknlmtpc7g4t"]
+
+[ext_resource type="Script" uid="uid://bt85u8jnkingf" path="res://Scripts/Views/GameView.cs" id="1_c8q0r"]
+[ext_resource type="PackedScene" uid="uid://bccdls2vsjite" path="res://View/UnitView.tscn" id="2_t4jah"]
+[ext_resource type="PackedScene" uid="uid://cas0m3vshvj1g" path="res://View/TileView.tscn" id="3_tjm1i"]
+[ext_resource type="Resource" uid="uid://cu0gh2aruhrjc" path="res://Resources/GameViewStyle_0.tres" id="4_mccl8"]
+[ext_resource type="Script" uid="uid://b4sgjkp7yfofn" path="res://Scripts/Views/TileViews/TilesView.cs" id="5_vlo47"]
+[ext_resource type="Script" uid="uid://bbsl8xk5ntlvd" path="res://Scripts/Views/UnitViews/UnitsView.cs" id="6_c8q0r"]
+[ext_resource type="Script" uid="uid://dk12ehg31xf4o" path="res://Scripts/Views/EventViews/EventsView.cs" id="8_btfgy"]
+[ext_resource type="Script" uid="uid://ble1upceejr4q" path="res://Scripts/Views/ViewNodes/GameViewNodeContainer.cs" id="9_dgx78"]
+
+[sub_resource type="TileSet" id="TileSet_8tn2x"]
+tile_shape = 1
+tile_layout = 5
+tile_size = Vector2i(56, 42)
+
+[node name="GameView" type="Node2D" unique_id=1885583899 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView", "DrawEventTimer")]
+script = ExtResource("1_c8q0r")
+UnitViewScene = ExtResource("2_t4jah")
+TileViewScene = ExtResource("3_tjm1i")
+GameStyle = ExtResource("4_mccl8")
+DrawContainer = NodePath("DrawContainer")
+TilesView = NodePath("TilesView")
+UnitsView = NodePath("UnitsView")
+EventsView = NodePath("EventsView")
+DrawEventTimer = NodePath("DrawEventTimer")
+
+[node name="TilesView" type="TileMapLayer" parent="." unique_id=723753831]
+enabled = false
+tile_set = SubResource("TileSet_8tn2x")
+script = ExtResource("5_vlo47")
+
+[node name="UnitsView" type="Node2D" parent="." unique_id=466146149]
+script = ExtResource("6_c8q0r")
+metadata/_custom_type_script = "uid://bbsl8xk5ntlvd"
+
+[node name="EventsView" type="Node2D" parent="." unique_id=567131622]
+script = ExtResource("8_btfgy")
+
+[node name="DrawContainer" type="Node2D" parent="." unique_id=2044305608]
+y_sort_enabled = true
+rotation = -3.1415927
+script = ExtResource("9_dgx78")
+metadata/_custom_type_script = "uid://ble1upceejr4q"
+
+[node name="DrawEventTimer" type="Timer" parent="." unique_id=836843991]
+wait_time = 0.05
+autostart = true

@@ -91,11 +91,11 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyRectWindViewDraw(GameView view, ReadOnlySimObject sim, ApplyRectWindResult result)
+    public static partial void ApplyRectWindViewDraw(IGameView view, ReadOnlySimObject sim, ApplyRectWindResult result)
     {
     }
     
-    public static partial GDTask ApplyRectWindViewRun(GameView view, ReadOnlySimObject sim, ApplyRectWindResult result)
+    public static partial GDTask ApplyRectWindViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyRectWindResult result)
     {
         return GDTask.CompletedTask;
     }

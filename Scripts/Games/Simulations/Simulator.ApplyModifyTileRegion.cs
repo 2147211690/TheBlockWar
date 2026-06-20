@@ -93,11 +93,11 @@ partial class Simulator
             }
         }
     }
-    public static partial void ApplyModifyTileRegionViewDraw(GameView view, ReadOnlySimObject sim, ApplyModifyTileRegionResult result)
+    public static partial void ApplyModifyTileRegionViewDraw(IGameView view, ReadOnlySimObject sim, ApplyModifyTileRegionResult result)
     {
     }
     
-    public static partial GDTask ApplyModifyTileRegionViewRun(GameView view, ReadOnlySimObject sim, ApplyModifyTileRegionResult result)
+    public static partial GDTask ApplyModifyTileRegionViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyModifyTileRegionResult result)
     {
         return GDTask.CompletedTask;
     }
