@@ -4,9 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://deknlmtpc7g4t" path="res://View/GameView.tscn" id="2_2au82"]
 [ext_resource type="PackedScene" uid="uid://clbp4km484ly4" path="res://View/Uis/CombatUi.tscn" id="15_ilduj"]
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_2au82"]
-viewport_path = NodePath("../../../../../../../../../../SubViewport")
-
 [node name="Node2D" type="Node2D" unique_id=1155941121 node_paths=PackedStringArray("_view", "_combatUi")]
 script = ExtResource("1_myinc")
 _view = NodePath("GameView")
@@ -22,16 +19,9 @@ zoom = Vector2(2.825, 2.825)
 
 [node name="CombatUi" parent="CanvasLayer" unique_id=100001026 instance=ExtResource("15_ilduj")]
 
-[node name="TextureRect" parent="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer/AspectRatioContainer" parent_id_path=PackedInt32Array(100001026, 1163128792, 1775412479) index="0" unique_id=408846773]
-texture = SubResource("ViewportTexture_2au82")
-
 [node name="SubViewport" type="SubViewport" parent="." unique_id=1510478228]
 disable_3d = true
 canvas_item_default_texture_filter = 0
 size = Vector2i(50, 50)
 
 [node name="Camera2D" type="Camera2D" parent="SubViewport" unique_id=1324955972]
-
-[editable path="CanvasLayer/CombatUi"]
-[editable path="CanvasLayer/CombatUi/MarginContainer/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]
-[editable path="CanvasLayer/CombatUi/MarginContainer/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]

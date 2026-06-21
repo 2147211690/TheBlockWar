@@ -23,6 +23,11 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
         }
     }
 
+    public override bool CheckIsValid(EventScheduler scheduler)
+    {
+        return true;
+    }
+
     public override string ToString()
     {
         return $"{base.ToString()} -> TurnEvent 类型:{TurnType}";

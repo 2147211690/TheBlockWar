@@ -20,7 +20,9 @@ public partial class GameViewTeamStyle : Resource
     [Export] public Color SplitColor { get; set; } = new Color("#000000", 0.4f);       // 半透明黑 - 分割线
     [ExportGroup("Effects")]
     [Export] public EffectTable EffectTable { get; set; } = null!;
-    
+    [ExportGroup("Regions")]
+    [Export] public Texture2D SkillRegionTexture { get; set; } = null!;
+    [Export] public Color SkillRegionColor { get; set; } = new Color("#3aa200");
     public Texture2D? GetBlockNumberTexture(int number)
     {
         if (number < 0 || number >= BlockNumberTextures.Length) return null;

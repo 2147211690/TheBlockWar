@@ -17,6 +17,11 @@ public class StepsEvent(long id) : SchedulerEvent(id)
         obj.ApplySteps(Steps, StartDelay, EndDelay, RunningMode);
     }
 
+    public override bool CheckIsValid(EventScheduler scheduler)
+    {
+        return Steps is not null;
+    }
+
     public override string ToString()
     {
         return $"{base.ToString()} -> StepsEvent 步骤数:{Steps?.Count ?? 0}";

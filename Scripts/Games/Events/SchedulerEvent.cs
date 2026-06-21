@@ -27,7 +27,6 @@ public abstract class SchedulerEvent(long id) : IComparable<SchedulerEvent>
     public int Team { get; set => SetField(ref field, value); }
     public int Turn { get; set => SetField(ref field, value); } //用于排序
     public int Priority { get; set => SetField(ref field, value); } //用于排序
-    
     public event EventHandler<(string? PropertyName, bool IsChanging)>? PropertyChange;
 
     public override string ToString() => 
@@ -66,4 +65,5 @@ public abstract class SchedulerEvent(long id) : IComparable<SchedulerEvent>
         if (priorityComparison != 0) return priorityComparison;
         return a.Id.CompareTo(b.Id);
     }
+    public abstract bool CheckIsValid(EventScheduler scheduler);
 }

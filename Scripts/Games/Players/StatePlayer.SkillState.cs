@@ -6,6 +6,7 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Games.Players;
 
@@ -21,7 +22,7 @@ public partial class StatePlayer
         private Vector2I?[]? _currentSkillArgs;
         private IReadOnlyUnitState _unitState = UnitState.Null;
         private long _validRegionId;
-
+        private HashSet<Vector2I> _validRegionCoords = new();
         public override void OnEnter()
         {
             _unitState = GameState?.UnitMapState.GetUnit(FocusedUnitId) ?? UnitState.Null;
@@ -33,7 +34,7 @@ public partial class StatePlayer
         public override void OnExit()
         {
             base.OnExit();
-            //GameScheduler!.RemoveCoordsRegion(_validRegionId);
+            Player.GameView.ClearRegion();
             _validSkills = [];
             _currentSkill = null!;
             _currentSkillEvent = null;
@@ -41,6 +42,7 @@ public partial class StatePlayer
             _currentSkillArgs = null;
             _validRegionId = 0;
             _currentArgIndex = -1;
+            _validRegionCoords.Clear();
             NotifySkillStatesChanged();
         }
 
@@ -63,7 +65,7 @@ public partial class StatePlayer
                         !_unitState.GetShouldUseSkill(GameState, _validSkills[skill.Index])) return;
                     Logger.Info("选择技能{skill}", skill.Index);
                     EventScheduler!.DeleteEvent(_currentSkillEvent!);
-                    EventScheduler.RemoveCoordsRegion(_validRegionId);
+                    Player.GameView.ClearRegion();
                     CurrentSkillIndex = skill.Index;
                     Player._stateMachine.ResetState();
                     break;
@@ -110,8 +112,9 @@ public partial class StatePlayer
             {
                 if (!IsCurrentValidArg()) return;
                 //所有参数完成
-                EventScheduler!.RemoveCoordsRegion(_validRegionId);
-                _currentSkillEvent!.Layer = SimulationLayer.Running;
+                Player.GameView.ClearRegion();
+                _currentSkillEvent!.Layer = SimulationLayer.Waiting;
+                _currentSkillEvent.Turn = Player.TurnManager.CurrentTurn + 1;
                 StateMachine.ChangeState(Player._freeState);
             }
             else //进入下一个参数
@@ -127,7 +130,7 @@ public partial class StatePlayer
         {
             if (_currentArgIndex == 0) //如果已经在第一个参数，取消技能
             {
-                EventScheduler!.RemoveCoordsRegion(_validRegionId);
+                Player.GameView.ClearRegion();
                 EventScheduler.DeleteEvent(_currentSkillEvent!);
                 _currentArgIndex--;
                 StateMachine.ChangeState(Player._freeState);
@@ -153,24 +156,22 @@ public partial class StatePlayer
 
         private void UpdateCurrentValidSkillCoords()
         {
-            EventScheduler?.RemoveCoordsRegion(_validRegionId);
-            var validArgs =
+            Player.GameView.ClearRegion();
+            _validRegionCoords =
                 _currentSkill
                     .GetSkillArgs(GameState!, _unitState, _unitState.Coords, _currentArgIndex, _currentSkillArgs!)
-                    .Select(a => a + _unitState.Coords);
-            _validRegionId = EventScheduler?.AddCoordsRegion(validArgs, 0) ?? 0;
+                    .Select(a => a + _unitState.Coords).ToHashSet();
+            Player.GameView.ShowRegion(_validRegionCoords, _unitState.Team, RegionShowTypeEnum.Skill);
         }
 
         private bool IsCurrentValidArg()
         {
             return _currentSkillArgs![_currentArgIndex] is not null &&
-                   EventScheduler!.IsInCoordsRegion(_validRegionId,
-                       _currentSkillArgs![_currentArgIndex]!.Value + _unitState.Coords);
+                   _validRegionCoords.Contains(_currentSkillArgs![_currentArgIndex]!.Value + _unitState.Coords);
         }
 
         private bool IsArgGlobalValid(Vector2I? coords) => coords is not null &&
-                                                           EventScheduler?.IsInCoordsRegion(_validRegionId,
-                                                               coords.Value) == true;
+                                                           _validRegionCoords.Contains(coords.Value);
 
         private void NotifySkillStatesChanged()
         {

@@ -82,6 +82,7 @@ public partial class GameView : Node2D, IGameView
 
         void IsRunningChanged(object? sender, bool e)
         {
+            Scheduler.IsRunning = e;
             Logger.Debug("运行状态改变{isRunning}", e);
             if (e) return;
             //运行结束
@@ -283,5 +284,15 @@ public partial class GameView : Node2D, IGameView
         var effect = effectScene.Instantiate<ViewNode2D>();
         DrawContainer.AddChild(effect);
         return effect;
+    }
+
+    public void ShowRegion(IEnumerable<Vector2I> coords, int team, RegionShowTypeEnum showTypeEnum)
+    {
+        TilesView.ShowRegion(coords, team, showTypeEnum);
+    }
+
+    public void ClearRegion()
+    {
+        TilesView.ClearRegion();
     }
 }

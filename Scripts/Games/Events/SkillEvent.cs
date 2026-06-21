@@ -46,6 +46,12 @@ public sealed class SkillEvent(long id) : SchedulerEvent(id)
         var useCoords = unit.Coords;
         SkillName.GetSkillInfo().Instance.SkillCore(obj, unit, useCoords, SkillArgs ?? []);
     }
+
+    public override bool CheckIsValid(EventScheduler scheduler)
+    {
+        return scheduler.GameState.UnitMapState.HasUnit(SkillBindUnitId);
+    }
+
     public override string ToString()
     {
         return $"{base.ToString()} -> SkillEvent 单位:{SkillBindUnitId} 技能:{SkillName} 参数:{string.Join(",", SkillArgs ?? [])}";

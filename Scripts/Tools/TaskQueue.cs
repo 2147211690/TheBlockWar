@@ -17,7 +17,7 @@ public class TaskQueue
         {
             if (field == value) return;
             field = value;
-            IsRunningChanged?.Invoke(this, value);
+            IsRunningChanged?.Invoke(this, field);
         }
     }
 

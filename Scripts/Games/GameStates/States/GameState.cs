@@ -12,6 +12,7 @@ public class GameState : IGameState
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     
     public IDictionary<long, SchedulerEvent> Events => _events;
+    public bool IsSnapshot { get; private set; } = false;
     IReadOnlyDictionary<long, SchedulerEvent> IReadOnlyGameState.Events => _events;
     public Vector2I Size { get; private set; }
     public DefaultIdGenerator IdGenerator { get; private set; }
@@ -87,7 +88,6 @@ public class GameState : IGameState
 
     public void ClearIfSnapshot()
     {
-        BuffGlobalState.ClearIfSnapshot();
     }
     public GameStateData ToData()
     {
@@ -111,6 +111,7 @@ public class GameState : IGameState
     {
         // 父状态引用 - 未修改数据的回退源
         IReadOnlyDictionary<long, SchedulerEvent>? IReadOnlyGameState.Events => null;
+        public bool IsSnapshot { get; } = true;
         IDictionary<long, SchedulerEvent>? IGameState.Events => null;
 
         public Vector2I Size => Owner.Size;
@@ -158,6 +159,7 @@ public class GameState : IGameState
             TileMapState.ClearIfSnapshot();
             UnitMapState.ClearIfSnapshot();
             BuffGlobalState.ClearIfSnapshot();
+            TurnState.ClearIfSnapshot();
         }
         public IGameState GetSnapshot()
         {

@@ -13,21 +13,21 @@ public class Test1Skill() : Skill(SkillNames.Test1, 1)
     {
         if (argsIndex == 0)
         {
-            return CoordsRegion.GetRingRegion(Vector2I.Zero, 3, 10);
+            return CoordsRegion.GetRingRegion(Vector2I.Zero, 3, 10).WhereInMap(state, useCoords);
         }
         else if(argsIndex == 1)
         {
-            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6);
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6).WhereInMap(state, useCoords);
             //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
         else if(argsIndex == 2)
         {
-            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6);
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6).WhereInMap(state, useCoords);
             //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
         else if(argsIndex == 3)
         {
-            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6);
+            return CoordsRegion.GetCircleRegion(args[0] ?? Vector2I.Zero, 6).WhereInMap(state, useCoords);
             //.Where(a => caster.IsCanBeDestination(state ,a + caster.Coords));
         }
         return [];

@@ -8,6 +8,7 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 public interface IReadOnlyGameState : IReadOnlyGameDataState<IGameState, GameStateData>
 {
     IReadOnlyDictionary<long, SchedulerEvent>? Events { get; }
+    bool IsSnapshot { get; }
     Vector2I Size { get; }
     DefaultIdGenerator IdGenerator { get; }
     DateTime BaseTime { get; }

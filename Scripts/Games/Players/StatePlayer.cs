@@ -22,7 +22,6 @@ public partial class StatePlayer : Node2D, IPlayer
     public long FocusedUnitId { get; set => SetField(ref field, value); }
     public IGameView GameView { get; private set; } = null!;
     
-    private GDTaskCompletionSource _completionSource = new();
     private StateMachine<State> _stateMachine;
     private FreeState _freeState;
     private SkillingState _skillingState;
@@ -78,11 +77,6 @@ public partial class StatePlayer : Node2D, IPlayer
     public void Init()
     {
         _stateMachine.Init();
-    }
-    public void CompleteTurn()
-    {
-        _completionSource.TrySetResult();
-        _completionSource = new();
     }
     
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

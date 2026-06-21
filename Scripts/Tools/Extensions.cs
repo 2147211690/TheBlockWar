@@ -447,6 +447,25 @@ public static class Extensions
             });
         }
     }
+
+    extension(IEnumerable<Vector2I> coords)
+    {
+        public IEnumerable<Vector2I> WhereInMap(IReadOnlyGameState gameState, Vector2I center)
+            => coords.Where(a => (a + center).IsInSize(gameState.Size));
+    }
+
+    extension<TKey, TValue>(IReadOnlyDictionary<TKey, TValue> e)
+    {
+        public Dictionary<TKey, TValue> Clone()
+        {
+            var clone = new Dictionary<TKey, TValue>();
+            foreach (var value in e)
+            {
+                clone.Add(value.Key, value.Value);
+            }
+            return clone;
+        }
+    }
 }
 
 public class ItemTabStyle

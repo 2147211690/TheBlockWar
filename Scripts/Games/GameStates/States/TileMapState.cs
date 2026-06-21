@@ -58,6 +58,17 @@ public class TileMapState : ITileMapState
         return !coords.IsInSize(Size) ? TileState.Empty : _tiles[coords.X, coords.Y];
     }
 
+    public IEnumerable<IReadOnlyTileState> GetAllTiles()
+    {
+        for (int x = 0; x < Size.X; x++)
+        {
+            for (int y = 0; y < Size.Y; y++)
+            {
+                yield return _tiles[x, y];
+            }
+        }
+    }
+
     public bool IsEmpty(Vector2I coords)
     {
         return GetTile(coords).Name == "Air";
@@ -129,6 +140,17 @@ public class TileMapState : ITileMapState
 
             // 永远返回本地数组的对象
             return _tiles[x, y];
+        }
+
+        public IEnumerable<IReadOnlyTileState> GetAllTiles()
+        {
+            for (int x = 0; x < Size.X; x++)
+            {
+                for (int y = 0; y < Size.Y; y++)
+                {
+                    yield return GetTile(new(x, y));
+                }
+            }
         }
 
         public bool IsEmpty(Vector2I coords)

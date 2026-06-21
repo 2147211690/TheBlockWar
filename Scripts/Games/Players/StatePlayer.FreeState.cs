@@ -17,8 +17,11 @@ public partial class StatePlayer
             {
                 if (value == Player.FocusedUnitId) return;
                 EventScheduler?.GetUnitSkillEvent(Player.FocusedUnitId)?.Layer = SimulationLayer.Waiting;
+                Player.GameView.GetUnitView(FocusedUnitId)?.IsFocused = false;
                 Player.FocusedUnitId = value;
                 EventScheduler?.GetUnitSkillEvent(Player.FocusedUnitId)?.Layer = SimulationLayer.Focused;
+                Player.GameView.GetUnitView(FocusedUnitId)?.IsFocused = true;
+                
             }
         }
         public long SelectedUnitId
@@ -91,7 +94,6 @@ public partial class StatePlayer
         {
             var unit = EventScheduler?.GameState?.UnitMapState.GetUnit(coords);
             FocusedUnitId = unit?.Id ?? 0;
-            EventScheduler?.FocusUnit(unit?.Id ?? 0);
         }
     }
 }

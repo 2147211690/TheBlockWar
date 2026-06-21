@@ -7,5 +7,6 @@ public interface IReadOnlyTileMapState : IReadOnlyGameDataState<ITileMapState, T
     public IReadOnlyTileMapState? Owner { get; }
     Vector2I Size { get; }
     IReadOnlyTileState GetTile(Vector2I coords);
+    IEnumerable<IReadOnlyTileState> GetAllTiles();
     bool IsEmpty(Vector2I coords);
 }

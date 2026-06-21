@@ -11,6 +11,7 @@ namespace TheBlockWar.View.Uis;
 public partial class CombatUi : Control
 {
     public IGameView GameView { get; set; } = null!;
+    [ExportGroup("Self")]
     [Export] private InfoPanel _infoPanel = null!;
     [Export] private PackedScene _itemBoxScene = null!;
     [Export] private Control _skillContainer = null!;

@@ -28,24 +28,37 @@ public class EventScheduler
     public ICollection<SchedulerEvent> DisabledEvents => _eventManager.DisabledEvents;
     public IReadOnlyDictionary<long, SchedulerEvent> SkillEvents => _eventManager.SkillEvents;
     public IReadOnlyGameState GameState => _gameState;
-    public long FocusedUnitId { get; private set; }
     public int PlayerTeam { get; }
     public int CurrentTurn { get => _gameState.TurnState.CurrentTurn; set => _gameState.TurnState.CurrentTurn = value; }
-    public IReadOnlyDictionary<long, (HashSet<Vector2I> Coords, int type)> CoordsRegions => _coordsRegions;
-
     private SchedulerEventManager _eventManager;
 
     private IGameState _gameState;
-    private Dictionary<long, (HashSet<Vector2I> Coords, int type)> _coordsRegions = new();
-    private long _coordsRegionsId;
     private IGameState? _snapshotChache;
-
     public event EventHandler<SchedulerResult>? SimulationUpdated;
-    public event EventHandler<OtherStateUpdateTypeEnum>? OtherStateUpdated;
     public event EventHandler<IReadOnlyGameState>? GameStateReload;
-    public event EventHandler<int>? NextDelay;
 
-    private bool _isRunning = false;
+    public bool IsRunning
+    {
+        get;
+        set
+        { 
+            if (field == value) return;
+            field = value;
+            if (field)
+            {
+                _runningCompletionSource = new();
+                _runningCompletionSource.Task.Forget();
+            }
+            else
+            {
+                _runningCompletionSource!.TrySetResult();
+                _runningCompletionSource = null;
+            }
+        }
+    }
+    private GDTaskCompletionSource? _runningCompletionSource;
+
+    private bool _isSimulating = false;
 
     public EventScheduler(IGameState gameState, int playerTeam)
     {
@@ -60,22 +73,11 @@ public class EventScheduler
         UpdateSimulation();
     }
 
-    public void FocusUnit(long id)
-    {
-        if (FocusedUnitId == id) return;
-        FocusedUnitId = id;
-        OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.FocusedUnitId);
-    }
-
     public void ReloadGameState()
     {
         GameStateReload?.Invoke(this, _gameState);
         _eventManager.ReloadStateEvents();
         _snapshotChache = null;
-    }
-    public void SetNextCompleteDelay(int delay)
-    {
-        NextDelay?.Invoke(this, delay);
     }
 
     public SchedulerEvent? GetUnitSkillEvent(long unitId)
@@ -108,29 +110,14 @@ public class EventScheduler
     }
     public IReadOnlyList<SchedulerEvent> GetTurnEvents(int turn) => _eventManager.GetTurnEvents(turn);
 
-    public long AddCoordsRegion(IEnumerable<Vector2I> coords, int type)
-    {
-        var id = _coordsRegionsId++;
-        _coordsRegions[id] = (coords.ToHashSet(), type);
-        OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
-        return id;
-    }
-
-    public bool IsInCoordsRegion(long id, in Vector2I coord) =>
-        CoordsRegions.TryGetValue(id, out var region) && region.Coords.Contains(coord);
-
-    public void RemoveCoordsRegion(long id)
-    {
-        _coordsRegions.Remove(id);
-        OtherStateUpdated?.Invoke(this, OtherStateUpdateTypeEnum.CoordsRegion);
-    }
+    public GDTask WaitCompleteRunning() => _runningCompletionSource?.Task ?? GDTask.CompletedTask;
     /// <summary>
     /// 更新模拟
     /// </summary>
     public void UpdateSimulation()
     {
-        if (_isRunning) return;
-        _isRunning = true;
+        if (_isSimulating) return;
+        _isSimulating = true;
         Logger.Info("触发更新");
         var result = new SchedulerResult();
         _runningSchedulers.Push(this);
@@ -138,6 +125,7 @@ public class EventScheduler
         // 运行层直接执行
         foreach (var ev in _eventManager.RunningEvents)
         {
+            if (!ev.CheckIsValid(this)) continue;
             var obj = new SimObject(_gameState, ev.Layer, new(), ev.Id);
             obj.PushContext(CreateSimulationContext(ev));
             result.Sims.Add(obj);
@@ -154,6 +142,7 @@ public class EventScheduler
         // 焦点层和等待层事件执行
         foreach (var ev in _eventManager.FocusedEvents.Concat(_eventManager.WaitingEvents))
         {
+            if (!ev.CheckIsValid(this)) continue;
             var obj = new SimObject(_snapshotChache, ev.Layer, new(), ev.Id);
             obj.PushContext(CreateSimulationContext(ev));
             result.Sims.Add(obj);
@@ -167,7 +156,7 @@ public class EventScheduler
         _eventManager.ClearLayerEvent(SimulationLayer.Running);
         
         _runningSchedulers.Pop();
-        _isRunning = false;
+        _isSimulating = false;
         SimulationUpdated?.Invoke(this, result);
     }
 
@@ -176,14 +165,6 @@ public class EventScheduler
         var context = new SimContext(ev is SkillEvent sev ? sev.SkillBindUnitId : 0);
         return context;
     }
-
-    public enum OtherStateUpdateTypeEnum
-    {
-        None,
-        FocusedUnitId,
-        CoordsRegion,
-    }
-
 
 
     private class SchedulerEventManager

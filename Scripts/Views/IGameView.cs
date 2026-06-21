@@ -83,4 +83,13 @@ public interface IGameView
     #endregion
 
     ViewNode2D? CreateEffect(string effectName);
+
+    #region Region
+    void ShowRegion(IEnumerable<Vector2I> coords, int team, RegionShowTypeEnum showTypeEnum);
+    void ClearRegion();
+    #endregion
+}
+public enum RegionShowTypeEnum
+{
+    Skill,
 }

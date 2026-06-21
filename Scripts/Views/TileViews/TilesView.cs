@@ -1,6 +1,7 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Views.TileViews;
 [GlobalClass]
@@ -15,7 +16,8 @@ public partial class TilesView : TileMapLayer
     public Vector2 LocalUp { get; private set; }
     public Vector2 LocalRightDown{ get; private set; }
     public IGameView GameView { get; set; } = null!;
-    
+    private Dictionary<Vector2I, (RegionShowTypeEnum, int)> _regionViews = new();
+    private List<ViewSprite2D> _regionSprites = new();
     public override void _Ready()
     {
         LocalLeft = MapToLocal(Vector2I.Left) - MapToLocal(Vector2I.Zero);
@@ -84,4 +86,51 @@ public partial class TilesView : TileMapLayer
     
     public TileInfo GetTileInfo(in Vector2I coords) 
         => _tileViews!.GetValueOrDefault(coords, null)?.TileName.GetTileInfo() ?? TileInfo.Null;
+    
+    public void ShowRegion(IEnumerable<Vector2I> coords, int team, RegionShowTypeEnum showTypeEnum)
+    {
+        foreach (var coord in coords)
+        {
+            _regionViews[coord] = (showTypeEnum, team);
+        }
+        UpdateRegionView();
+    }
+    public void ClearRegion()
+    {
+        _regionViews.Clear();
+        UpdateRegionView();
+    }
+    private void UpdateRegionView()
+    {
+        var spIndex = 0;
+        foreach (var (coords, (showTypeEnum, team)) in _regionViews)
+        {
+            var teamStyle = GameView.GameStyle[GameView.GetTeamType(team)];
+            var sprite = GetSprite();
+            sprite.GamePosition = GameView.CoordsToGamePosition(coords);
+            sprite.Modulate = teamStyle.SkillRegionColor;
+            sprite.Texture = teamStyle.SkillRegionTexture;
+            sprite.GameZIndex = -3;
+        }
+        for (int i = _regionSprites.Count - 1; i >= spIndex; i--)
+        {
+            GameView.Pools.Sprite2DPool.Return(_regionSprites[i]);
+            _regionSprites.RemoveAt(i);
+        }
+
+        ViewSprite2D GetSprite()
+        {
+            if (spIndex < _regionSprites.Count)
+            {
+                return _regionSprites[spIndex++];
+            }
+            else
+            {
+                var s = GameView.Pools.Sprite2DPool.Get();
+                _regionSprites.Add(s);
+                spIndex += 1;
+                return s;
+            }
+        }
+    }
 }

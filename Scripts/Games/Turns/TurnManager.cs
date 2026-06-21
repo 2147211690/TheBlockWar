@@ -12,16 +12,14 @@ namespace TheBlockWar.Scripts.Games.Turns;
 public class TurnManager
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public TurnManager(EventScheduler eventScheduler, GameView gameView, IGameMode gameMode)
+    public TurnManager(EventScheduler eventScheduler, IGameMode gameMode)
     {
         EventScheduler = eventScheduler;
         GameMode = gameMode;
-        GameView = gameView;
     }
 
     public EventScheduler EventScheduler { get; }
     public IGameMode GameMode { get; }
-    public GameView GameView { get; }
     public int CurrentTurn { get => EventScheduler.CurrentTurn; set => EventScheduler.CurrentTurn = value; }
     public GameStateEnum State => GameMode.State;
     public IReadOnlyGameState GameState => EventScheduler.GameState!;
@@ -32,7 +30,7 @@ public class TurnManager
         while (!_stop)
         {
             Logger.Info($"开始回合{CurrentTurn}");
-            RunTurnEvents(CurrentTurn);
+            await RunTurnEvents(CurrentTurn);
             
             GameMode.EnterTurn(this, CurrentTurn);
             await GameMode.Turn(this, CurrentTurn);
@@ -42,19 +40,16 @@ public class TurnManager
             CurrentTurn++;
         }
     }
-    private void RunTurnEvents(int turn)
+    private async GDTask RunTurnEvents(int turn)
     {
         var turnEvents = EventScheduler.GetTurnEvents(turn);
         foreach (var ev in turnEvents)
         {
-            Logger.Debug($"运行回合事件开始一个");
-            EventScheduler.SetNextCompleteDelay(800);
-            Logger.Debug($"Focused");
+            if (!ev.CheckIsValid(EventScheduler)) continue;
             ev.Layer = SimulationLayer.Focused;
-            EventScheduler.SetNextCompleteDelay(100);
-            Logger.Debug($"Running");
+            await GDTask.Delay(800);
             ev.Layer = SimulationLayer.Running;
-            Logger.Debug($"运行回合事件结束一个");
+            await EventScheduler.WaitCompleteRunning();
         }
     }
     
