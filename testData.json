@@ -3188,6 +3188,9 @@
 	  ]
 	]
   },
+  "TurnState": {
+	"CurrentTurn": 0
+  },
   "Events": [
 	{
 	  "$type": "TurnEvent",

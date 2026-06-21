@@ -12,6 +12,7 @@ public partial class ViewAnimatedSprite2D : AnimatedSprite2D, IGameViewNode<Anim
     public GameViewNodeContainer? Container => _gameViewNode.Container;
 
     public AnimatedSprite2D Node => _gameViewNode.Node;
+    public Node2D RenderNode => _gameViewNode.RenderNode;
 
     public Vector3 GamePosition
     {

@@ -30,6 +30,7 @@ public class EventScheduler
     public IReadOnlyGameState GameState => _gameState;
     public long FocusedUnitId { get; private set; }
     public int PlayerTeam { get; }
+    public int CurrentTurn { get => _gameState.TurnState.CurrentTurn; set => _gameState.TurnState.CurrentTurn = value; }
     public IReadOnlyDictionary<long, (HashSet<Vector2I> Coords, int type)> CoordsRegions => _coordsRegions;
 
     private SchedulerEventManager _eventManager;

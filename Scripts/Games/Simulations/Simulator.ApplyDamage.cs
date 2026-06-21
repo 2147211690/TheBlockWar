@@ -86,8 +86,8 @@ partial class Simulator
     {
         var uv = view.GetUnitView(result.ReUnitId);
         if (uv == null || uv.IsDead) return GDTask.CompletedTask;
-        AnimationHelper.HurtShakeAsync(uv);
         uv.HealthBar.CurrentHealth -= result.ReValidDamage;
+        AnimationHelper.HurtShakeAsync(uv).Forget();
         return GDTask.CompletedTask;
     }
 }

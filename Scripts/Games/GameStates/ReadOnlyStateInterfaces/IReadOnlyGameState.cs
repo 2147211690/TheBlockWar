@@ -5,7 +5,7 @@ using Yitter.IdGenerator;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 
-public interface IReadOnlyGameState
+public interface IReadOnlyGameState : IReadOnlyGameDataState<IGameState, GameStateData>
 {
     IReadOnlyDictionary<long, SchedulerEvent>? Events { get; }
     Vector2I Size { get; }
@@ -15,8 +15,7 @@ public interface IReadOnlyGameState
     IReadOnlyTileMapState TileMapState { get; }
     IReadOnlyUnitMapState UnitMapState { get; }
     IReadOnlyBuffGlobalState BuffGlobalState { get; }
+    IReadOnlyTurnState TurnState { get; }
     TeamState TeamState { get; }
     IReadOnlyList<ISkill> GetUnitValidSkills(string unitName);
-    IGameState GetSnapshot();
-    GameStateData ToData();
 }

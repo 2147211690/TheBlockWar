@@ -121,14 +121,13 @@ public static class AnimationHelper
     /// <param name="flashCount">闪白次数</param>
     /// <param name="flashIntensity">闪白强度（>1 表示过曝）</param>
     public static GDTask HurtShakeAsync<T>(T target,
-        float shakeRadius = 0.1f,
+        float shakeRadius = 4f,
         int shakeCount = 4,
         int flashCount = 3,
         float flashIntensity = 3f)
         where T : Node2D, IGameViewNode<Node2D>
     {
-        var originPos = target.GamePosition;
-        var originColor = target.Modulate;
+        var originColor = target.RenderNode.Modulate;
         var tween = target.CreateTween();
         tween.SetParallel();
 
@@ -136,11 +135,10 @@ public static class AnimationHelper
         for (int i = 0; i < shakeCount; i++)
         {
             var r = GD.Randf() * Mathf.Pi * 2;
-            var offset = new Vector3(
+            var offset = new Vector2(
                 Mathf.Cos(r) * shakeRadius,
-                Mathf.Sin(r) * shakeRadius,
-                0);
-            tween.TweenProperty(target, "GamePosition", originPos + offset, 0)
+                Mathf.Sin(r) * shakeRadius);
+            tween.TweenProperty(target.RenderNode, "position", offset, 0)
                 .SetTrans(Tween.TransitionType.Linear)
                 .SetDelay(i * 0.03f);
         }
@@ -148,18 +146,18 @@ public static class AnimationHelper
         // 闪白
         for (int i = 0; i < flashCount; i++)
         {
-            tween.TweenProperty(target, "modulate",
+            tween.TweenProperty(target.RenderNode, "modulate",
                     new Color(flashIntensity, flashIntensity, flashIntensity, 1f), 0.02f)
                 .SetTrans(Tween.TransitionType.Linear)
                 .SetDelay(i * 0.03f);
-            tween.TweenProperty(target, "modulate", originColor, 0.02f)
+            tween.TweenProperty(target.RenderNode, "modulate", originColor, 0.02f)
                 .SetTrans(Tween.TransitionType.Linear);
         }
 
         return tween.WaitForTween(t =>
         {
-            target.GamePosition = originPos;
-            target.Modulate = originColor;
+            target.RenderNode.Position = Vector2.Zero;
+            target.RenderNode.Modulate = originColor;
         });
     }
 

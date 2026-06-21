@@ -34,6 +34,12 @@ public class TileState : IReadOnlyTileState
             Regions = _regions.CloneToListOrNullWhenCountZero(),
         };
     }
+
+    public TileState GetSnapshot()
+    {
+        return Clone();
+    }
+
     public TileState(){}
     public TileState(TileStateData data)
     {

@@ -22,7 +22,7 @@ public class TurnManager
     public EventScheduler EventScheduler { get; }
     public IGameMode GameMode { get; }
     public GameView GameView { get; }
-    public int CurrentTurn { get; private set; }
+    public int CurrentTurn { get => EventScheduler.CurrentTurn; set => EventScheduler.CurrentTurn = value; }
     public GameStateEnum State => GameMode.State;
     public IReadOnlyGameState GameState => EventScheduler.GameState!;
     private bool _stop;

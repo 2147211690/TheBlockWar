@@ -69,6 +69,11 @@ public class UnitState : IReadOnlyUnitState
         };
     }
 
+    public UnitState GetSnapshot()
+    {
+        return Clone();
+    }
+
     public int FindBuff(string buffName)
     {
         return _buffs?.FindIndex(a => a.BuffName == buffName) ?? -1;

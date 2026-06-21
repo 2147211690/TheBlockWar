@@ -8,6 +8,7 @@ public partial class TileView : ViewNode2D
 {
     [ExportGroup("Self")]
     [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
+    public override Node2D RenderNode => MainSprite;
     public string TileName
     {
         get => _tileName;

@@ -1,9 +1,15 @@
+using System;
 using System.Threading;
 
 namespace TheBlockWar.Scripts.Tools;
+
+/// <summary>
+/// 异步任务队列，确保任务按 FIFO 顺序串行执行，线程安全。
+/// </summary>
 public class TaskQueue
 {
-    public EventHandler<bool>? IsRunningChanged;
+    public event EventHandler<bool>? IsRunningChanged;
+
     public bool IsRunning
     {
         get;
@@ -14,71 +20,104 @@ public class TaskQueue
             IsRunningChanged?.Invoke(this, value);
         }
     }
-    private readonly Queue<Func<GDTask>> _queue = [];
-    private Lock _queueLoock = new();
-    
+
+    private readonly Queue<TaskItem> _queue = [];
+    private readonly Lock _lock = new();
+    private bool _isClearing;
     /// <summary>
-    /// 添加一个事件,他会等待之前添加的事件执行完成之后再执行
+    /// 添加任务并等待其完成。
     /// </summary>
-    /// <param name="taskFunc">事件函数</param>
-    /// <returns>当前事件确实执行完成任务</returns>
     public GDTask AddTaskAndWaitAsync(Func<GDTask> taskFunc)
     {
-        var completionSource = new GDTaskCompletionSource();
-        lock(_queueLoock)
-        {
-            _queue.Enqueue(CreateTask(taskFunc, completionSource));
-            if (_queue.Count == 1)
-            {
-                IsRunning = true;
-                _queue.Peek()().Forget(); // 如果是第一个,直接执行
-            }
-        }
-        return completionSource.Task;
+        ArgumentNullException.ThrowIfNull(taskFunc);
 
-        Func<GDTask> CreateTask(Func<GDTask> func, GDTaskCompletionSource completion)
-        {
-            return async () =>
-            {
-                await func();
-                lock(_queueLoock)
-                {
-                    _queue.Dequeue(); // 去除自己
-                    completion.TrySetResult();
-                    if (_queue.Count == 0) IsRunning = false;
-                    else _queue.Peek()().Forget(); // 执行下一个
-                }
-            };
-        }
+        var completion = new GDTaskCompletionSource();
+        EnqueueItem(new TaskItem(taskFunc, completion));
+        return completion.Task;
     }
+
     /// <summary>
-    /// 添加一个事件,他会等待之前添加的事件执行完成之后再执行
+    /// 添加任务（不等待完成）。
     /// </summary>
-    /// <param name="taskFunc">事件函数</param>
     public void AddTask(Func<GDTask> taskFunc)
     {
-        lock(_queueLoock)
+        ArgumentNullException.ThrowIfNull(taskFunc);
+
+        EnqueueItem(new TaskItem(taskFunc, null));
+    }
+
+    private void EnqueueItem(in TaskItem item)
+    {
+        bool needStart;
+        lock (_lock)
         {
-            _queue.Enqueue(CreateTask(taskFunc));
-            if (_queue.Count == 1) 
+            _queue.Enqueue(item);
+            needStart = !IsRunning;
+            if (needStart)
             {
                 IsRunning = true;
-                _queue.Peek()().Forget(); // 如果是第一个,直接执行
             }
         }
 
-        Func<GDTask> CreateTask(Func<GDTask> func)
+        if (needStart)
+            ProcessLoopCore().Forget();
+    }
+
+    private async GDTask ProcessLoopCore()
+    {
+        while (true)
         {
-            return async () =>
+            TaskItem item;
+            lock (_lock)
             {
-                await func();
-                lock(_queueLoock)
+                item = _queue.Dequeue();
+            }
+
+            try
+            {
+                await item.TaskFunc();
+                item.Completion?.TrySetResult();
+            }
+            catch (Exception ex)
+            {
+                // 异常隔离：单个任务失败不影响队列中其他任务
+                item.Completion?.TrySetException(ex);
+            }
+
+            lock (_lock)
+            {
+                if (_isClearing)
                 {
-                    _queue.Dequeue(); // 去除自己
-                    if (_queue.Count == 0) IsRunning = false;
-                    else _queue.Peek()().Forget(); // 执行下一个
+                    foreach (var a in _queue) a.Completion?.TrySetResult();
+                    _queue.Clear();
+                    _isClearing = false;
+                    return;
                 }
-            };
+                
+                if (_queue.Count > 0)
+                    continue; // 还有任务，继续处理
+
+                IsRunning = false;
+                return;       // 队列为空，结束循环
+            }
         }
+    }
+
+    public void Clear()
+    {
+        if (!IsRunning) return;
+        lock (_lock)
+        {
+            _isClearing = true;
+        }
+    }
+    
+    /// <summary>
+    /// 队列内部条目，用于统一 "有返回" 和 "无返回" 两种添加方式。
+    /// </summary>
+    private readonly struct TaskItem(Func<GDTask> taskFunc, GDTaskCompletionSource? completion)
+    {
+        public Func<GDTask> TaskFunc { get; } = taskFunc;
+        public GDTaskCompletionSource? Completion { get; } = completion;
     }
 }

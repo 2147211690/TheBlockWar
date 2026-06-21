@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cas0m3vshvj1g"]
 
-[ext_resource type="Script" uid="uid://b1mhflxm0nels" path="res://Scripts/Views/TileView.cs" id="1_v2aou"]
+[ext_resource type="Script" uid="uid://b1mhflxm0nels" path="res://Scripts/Views/TileViews/TileView.cs" id="1_v2aou"]
 [ext_resource type="Texture2D" uid="uid://bn5nqpxievijm" path="res://Art/Img/combat/tiles_grass/ground_0.png" id="2_v2aou"]
 [ext_resource type="Texture2D" uid="uid://cpvn3fmy0wg1y" path="res://Art/Img/combat/tiles_acid/water_0.png" id="3_buedm"]
 

@@ -5,6 +5,7 @@ namespace TheBlockWar.Scripts.Views.UnitViews;
 [GlobalClass]
 public partial class UnitsView : Node2D
 {
+    private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     public IGameView GameView { get; set; } = null!;
     private readonly Dictionary<long, UnitView> _unitViews = new();
     private readonly Dictionary<Vector2I, long> _unitMaps = new();
@@ -13,7 +14,7 @@ public partial class UnitsView : Node2D
     {
         foreach (var render in _unitViews.Values)
         {
-            render.QueueFree();
+            GameView.Pools.UnitViewPool.Return(render);
         }
         _unitViews.Clear();
         _unitMaps.Clear();
@@ -23,9 +24,9 @@ public partial class UnitsView : Node2D
     public void FreeUnitView(long unitId)
     {
         if (!_unitViews.TryGetValue(unitId, out var render)) return;
-        render.QueueFree();
         _unitViews.Remove(unitId);
         _unitMaps.Remove(render.RealCoordsData);
+        GameView.Pools.UnitViewPool.Return(render);
     }
     public void SetUnitRealCoords(long unitId, Vector2I coords)
     {
@@ -38,12 +39,15 @@ public partial class UnitsView : Node2D
     {
         if (unit.IsNull()) return null;
         var unitTeamType = GameView.GetTeamType(unit.Team);
-        if (!_unitViews.TryGetValue(unit.Id, out var render))
+        if (_unitViews.TryGetValue(unit.Id, out var render))
         {
-            render = _unitViews[unit.Id] = GameView.Pools.UnitViewPool.Get();
-            render.Init(GameView.GameStyle, unitTeamType, unit.Id, this);
-            _unitMaps.Add(coords, unit.Id);
+            Logger.Warn("当前单位已创建存在，不要重复创建：{0}", unit.Id);
+            return render;
         }
+        
+        render = _unitViews[unit.Id] = GameView.Pools.UnitViewPool.Get();
+        render.Init(GameView.GameStyle, unitTeamType, unit.Id, this);
+        _unitMaps[coords] = unit.Id;
         //设置单位位置和动画
         render.RealCoordsData = coords;
         render.UnitName = unit.Name;
@@ -59,6 +63,7 @@ public partial class UnitsView : Node2D
         {
             render.BuffView.AddVisibleBuff(buff.BuffName);
         }
+        render.IsDead = unit.IsDead;
         return render;
     }
 }

@@ -53,6 +53,7 @@ public partial class GameView : Node2D, IGameView
     #region EventUpdate
     private TaskQueue _runningQueue = new();
     private Queue<ReadOnlySimObject> _eventQueue = new();
+    private int _prevEventQueueCount = 0;
     private SimResultHandler _resultHandler;
     private bool _isEventDirty = true;
     private bool _isEventDrawn = false;
@@ -67,7 +68,7 @@ public partial class GameView : Node2D, IGameView
         UnitsView.GameView = this;
         EventsView.GameView = this;
         TilesView.GameView = this;
-        CurrentTeamType = TeamTypeEnum.Enemy;
+        CurrentStyle = GameStyle[CurrentTeamType];
         DrawEventTimer.Timeout += CheckDrawEvent;
     }
 
@@ -96,6 +97,8 @@ public partial class GameView : Node2D, IGameView
 
     private void SchedulerOnGameStateReload(object? sender, IReadOnlyGameState e)
     {
+        ClearEventViews();
+        _runningQueue.Clear();
         TilesView.ClearAllTile();
         UnitsView.ClearAllUnit();
         var size = e.Size;
@@ -114,20 +117,23 @@ public partial class GameView : Node2D, IGameView
         foreach (var unit in e.UnitMapState.GetAllUnits())
         {
             var view = UnitsView.CreateUnitView(unit.Coords, unit)!;
-            view.IsDead = unit.IsDead;
         }
+        _prevEventQueueCount = 0;
+        _isEventDirty = true;
+        _isEventDrawn = false;
     }
 
     private void SchedulerOnSimulationUpdated(object? sender, SchedulerResult e)
     {
         int eventCount = e.Sims.Count - e.RunningCount;
-        if (eventCount != 0 || eventCount != _eventQueue.Count) 
+        if (eventCount != 0 || _prevEventQueueCount != 0) 
             _isEventDirty = true;
         
         if (e.RunningCount > 0)
         {
             ClearEventViews();
-            _runningQueue.AddTask(() => _resultHandler.HandleAsync(e.Sims.GetRange(0, e.RunningCount)));
+            var running = e.Sims.GetRange(0, e.RunningCount);
+            _runningQueue.AddTask(() => _resultHandler.HandleAsync(running));
         }
 
         _eventQueue.Clear();
@@ -158,6 +164,8 @@ public partial class GameView : Node2D, IGameView
                 s.ViewDraw(this, e);
             }
         }
+        _prevEventQueueCount = _eventQueue.Count;
+        _eventQueue.Clear();
     }
 
     private void ClearEventViews()

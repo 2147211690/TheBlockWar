@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://bccdls2vsjite"]
 
-[ext_resource type="Script" uid="uid://bxcvnfn0ji655" path="res://Scripts/Views/UnitView.cs" id="1_hq4fu"]
-[ext_resource type="Script" uid="uid://bcfsqru8ni8v0" path="res://Scripts/Views/HealthBar.cs" id="3_0gwqe"]
+[ext_resource type="Script" uid="uid://bxcvnfn0ji655" path="res://Scripts/Views/UnitViews/UnitView.cs" id="1_hq4fu"]
+[ext_resource type="Script" uid="uid://bcfsqru8ni8v0" path="res://Scripts/Views/UnitViews/HealthBar.cs" id="3_0gwqe"]
 [ext_resource type="Shader" uid="uid://bp0nooa7oij51" path="res://Shaders/unit.gdshader" id="4_r4ymd"]
 [ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="4_vsdra"]
 [ext_resource type="Texture2D" uid="uid://dm7188puqyhc8" path="res://Art/Img/ui/strategy/plus.png" id="5_5mqhy"]
-[ext_resource type="Script" uid="uid://dmemr0krwh881" path="res://Scripts/Views/BuffView.cs" id="5_r4ymd"]
+[ext_resource type="Script" uid="uid://dmemr0krwh881" path="res://Scripts/Views/UnitViews/BuffView.cs" id="5_r4ymd"]
 [ext_resource type="Texture2D" uid="uid://bll45ntridu3t" path="res://Art/Img/ui/x.png" id="6_b2pj8"]
 [ext_resource type="Texture2D" uid="uid://crq6cvsnggqiu" path="res://Art/Img/water_mask.png" id="7_5mqhy"]
 
@@ -53,18 +53,18 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_5mqhy")
 }],
-"loop": true,
+"loop": 1,
 "name": &"Unit_0",
 "speed": 5.0
 }]
 
 [node name="UnitView" type="Node2D" unique_id=1880059611 node_paths=PackedStringArray("Center", "HealthBar", "BuffView", "MainSprite")]
 script = ExtResource("1_hq4fu")
+DrawDebug = true
 Center = NodePath("Center")
 HealthBar = NodePath("Center/HealthBar")
 BuffView = NodePath("Center/BuffView")
 MainSprite = NodePath("Center/AnimatedSprite2D")
-DrawDebug = true
 
 [node name="Center" type="Node2D" parent="." unique_id=1069590474]
 
@@ -80,10 +80,6 @@ BlockWidth = 4.0
 z_index = 1
 position = Vector2(0, -18)
 script = ExtResource("5_r4ymd")
-BuffEffectOffsets = Dictionary[String, Vector2]({
-"Test": Vector2(8, -8),
-"Test2": Vector2(0, -8)
-})
 UnitView = NodePath("../..")
 IconBoxSize = Vector2(6.5, 6.5)
 ElementSpacing = 0.2

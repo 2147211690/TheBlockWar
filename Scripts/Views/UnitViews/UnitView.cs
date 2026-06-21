@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games;
+using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views.ViewNodes;
@@ -14,6 +15,7 @@ public partial class UnitView : ViewNode2D
     [Export] public BuffView BuffView { get; set; } = null!;
     [Export] public AnimatedSprite2D MainSprite { get; set; } = null!;
     public IReadOnlyList<(Vector2I coords, ViewSprite2D sprite)> Fakes => _fakes ?? [];
+    public override Node2D RenderNode => Center;
 
     public Vector2I? EventAimCoords
     {
@@ -59,11 +61,20 @@ public partial class UnitView : ViewNode2D
         get;
         set
         {
-            if (!value) return;
-            MainSprite.Play("dead");
-            HealthBar.IsDead = true;
-            BuffView.ClearVisibleBuffs();
-            MainSprite.Modulate = new Color(0.5f, 0.5f, 0.5f);
+            if (field == value) return;
+            field = value;
+            if (field)
+            {
+                HealthBar.IsDead = true;
+                BuffView.ClearVisibleBuffs();
+                MainSprite.Modulate = new Color(0.5f, 0.5f, 0.5f);
+            }
+            else
+            {
+                HealthBar.IsDead = false;
+                MainSprite.Modulate = Colors.White;
+            }
+            UpdateAnimation();
         }
     }
 
@@ -99,11 +110,12 @@ public partial class UnitView : ViewNode2D
         {
             _unitInfo = value.GetUnitInfo();
             MainSprite.SpriteFrames = _unitInfo.ViewFrames;
-            MainSprite.Play("idle");
             MainSprite.Offset = _unitInfo.ViewOffset;
+            UpdateAnimation();
             _unitName = value;
         }
     }
+    
 
     public void Init(GameViewStyle style, TeamTypeEnum teamType, long id, UnitsView unitsView)
     {
@@ -113,6 +125,12 @@ public partial class UnitView : ViewNode2D
         HealthBar.Init(style[teamType]);
         BuffView.Init(style[teamType]);
     }
+
+    public void UpdateAnimation()
+    {
+        MainSprite.Play(IsDead ? "dead" : "idle");
+    }
+    
     public override void _Ready()
     {
         _shaderMaterial = MainSprite.Material as ShaderMaterial;
@@ -193,6 +211,14 @@ public partial class UnitView : ViewNode2D
             GameView.Pools.Sprite2DPool.Return(fakePair.sprite);
         }
         _fakes.Clear();
+    }
+
+    public override void Reset()
+    {
+        base.Reset();
+        EventClear();
+        BuffView.ClearVisibleBuffs();
+        UnitsView = null;
     }
 
     public void ResetToWishCoords()

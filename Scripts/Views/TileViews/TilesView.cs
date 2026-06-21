@@ -26,7 +26,7 @@ public partial class TilesView : TileMapLayer
     {
         foreach (var render in _tileViews.Values)
         {
-            render.QueueFree();
+            GameView.Pools.TileViewPool.Return(render);
         }
         _tileViews.Clear();
     }
@@ -37,7 +37,16 @@ public partial class TilesView : TileMapLayer
     
     public TileView? SetTileView(Vector2I coords, string tileName)
     {
-        if (tileName == "Air") return null;
+        if (tileName == "Air")
+        {
+            var tile = _tileViews.GetValueOrDefault(coords);
+            if (tile is not null)
+            {
+                _tileViews.Remove(coords);
+                GameView.Pools.TileViewPool.Return(tile);
+            }
+            return null;
+        }
         if (!_tileViews.TryGetValue(coords, out var render))
         {
             render = _tileViews[coords] = GameView.Pools.TileViewPool.Get();

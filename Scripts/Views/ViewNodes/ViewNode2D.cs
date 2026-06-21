@@ -8,9 +8,14 @@ public partial class ViewNode2D : Node2D, IGameViewNode<Node2D>
     {
         _gameViewNode = new GameViewNode<Node2D>(this);
     }
+    public ViewNode2D(Node2D renderCenter)
+    {
+        _gameViewNode = new GameViewNode<Node2D>(this, renderCenter);
+    }
     public GameViewNodeContainer? Container => _gameViewNode.Container;
 
     public Node2D Node => _gameViewNode.Node;
+    public virtual Node2D RenderNode => _gameViewNode.RenderNode;
 
     public Vector3 GamePosition
     {

@@ -360,10 +360,16 @@ public static class Extensions
     {
         public GDTask WaitForTween()
         {
+            if (!tween.IsValid()) return GDTask.CompletedTask;
             return tween.ToSignal(tween, Tween.SignalName.Finished).AsGDTask();
         }
         public GDTask WaitForTween(Action<Tween> action)
         {
+            if (!tween.IsValid())
+            {
+                action(tween);
+                return GDTask.CompletedTask;
+            }
             var complete = new GDTaskCompletionSource();
             tween.Finished += () =>
             {

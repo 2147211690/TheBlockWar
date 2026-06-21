@@ -2,7 +2,7 @@ using TheBlockWar.Scripts.Games.GameStates.Datas;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 
-public interface IReadOnlyTileState
+public interface IReadOnlyTileState : IReadOnlyGameDataState<TileState, TileStateData>
 {
     public static readonly float MaxTileHeight = 34;
     string Name { get; }
@@ -11,5 +11,4 @@ public interface IReadOnlyTileState
     int FindRegion(string regionName);
     TileState Clone();
     TileState CopyTo(TileState tile);
-    TileStateData ToData();
 }

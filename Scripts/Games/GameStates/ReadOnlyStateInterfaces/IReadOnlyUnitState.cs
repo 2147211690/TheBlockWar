@@ -2,7 +2,7 @@ using TheBlockWar.Scripts.Games.GameStates.Datas;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
 
-public interface IReadOnlyUnitState
+public interface IReadOnlyUnitState : IReadOnlyGameDataState<UnitState, UnitStateData>
 {
     public static readonly IReadOnlyUnitState Null = new UnitState()
     {
@@ -28,5 +28,4 @@ public interface IReadOnlyUnitState
     int FindBuff(string buffName);
     UnitState Clone();
     UnitState CopyTo(UnitState unit);
-    UnitStateData ToData();
 }

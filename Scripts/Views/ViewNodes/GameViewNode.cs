@@ -4,6 +4,7 @@ public interface IGameViewNode<out T> where T : Node2D
 {
     GameViewNodeContainer? Container { get; }
     T Node { get; }
+    Node2D RenderNode { get; }
     Vector3 GamePosition { get; set; }
     float GameRotationDegrees { get; set; }
     float NodeRotation { get; set; }
@@ -19,6 +20,7 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
 {
     public GameViewNodeContainer? Container { get; private set; }
     public T Node { get; }
+    public Node2D RenderNode { get; set; }
 
     public Vector3 GamePosition
     {
@@ -79,9 +81,10 @@ public class GameViewNode<T> : IGameViewNode<T> where T : Node2D
         return -pos;
     }
 
-    public GameViewNode(T node)
+    public GameViewNode(T node, Node2D? renderNode = null)
     {
         Node = node;
+        RenderNode = renderNode ?? node;
         Node.Rotation = Mathf.Pi;
         Node.TreeEntered += OnTreeEntered;
         Node.TreeExiting += OnTreeExiting;
