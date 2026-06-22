@@ -26,6 +26,7 @@ public abstract class SchedulerEvent(long id) : IComparable<SchedulerEvent>
     public SimulationLayer Layer { get; set => SetField(ref field, value); } = SimulationLayer.Waiting;
     public int Team { get; set => SetField(ref field, value); }
     public int Turn { get; set => SetField(ref field, value); } //用于排序
+    public int PhaseOrder { get; set => SetField(ref field, value); } //用于排序
     public int Priority { get; set => SetField(ref field, value); } //用于排序
     public event EventHandler<(string? PropertyName, bool IsChanging)>? PropertyChange;
 
@@ -50,6 +51,8 @@ public abstract class SchedulerEvent(long id) : IComparable<SchedulerEvent>
         if (layerComparison != 0) return layerComparison;
         var turnComparison = Turn.CompareTo(other.Turn);
         if (turnComparison != 0) return turnComparison;
+        var phaseOrderComparison = PhaseOrder.CompareTo(other.PhaseOrder);
+        if (phaseOrderComparison != 0) return phaseOrderComparison;
         var priorityComparison = Priority.CompareTo(other.Priority);
         if (priorityComparison != 0) return priorityComparison;
         return Id.CompareTo(other.Id);
@@ -61,9 +64,11 @@ public abstract class SchedulerEvent(long id) : IComparable<SchedulerEvent>
         if (ReferenceEquals(a, b)) return 0;
         var turnComparison = a.Turn.CompareTo(b.Turn);
         if (turnComparison != 0) return turnComparison;
+        var phaseOrderComparison = a.PhaseOrder.CompareTo(b.PhaseOrder);
+        if (phaseOrderComparison != 0) return phaseOrderComparison;
         var priorityComparison = a.Priority.CompareTo(b.Priority);
         if (priorityComparison != 0) return priorityComparison;
         return a.Id.CompareTo(b.Id);
     }
-    public abstract bool CheckIsValid(EventScheduler scheduler);
+    public abstract bool CheckIsValid(IReadOnlyGameState gameState);
 }

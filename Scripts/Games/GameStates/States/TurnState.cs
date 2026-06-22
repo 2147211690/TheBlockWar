@@ -6,7 +6,7 @@ public class TurnState : ITurnState
 {
     public int CurrentTurn { get; set; }
 
-    public TurnState(int currentTurn = 0)
+    public TurnState(int currentTurn = -1)
     {
         CurrentTurn = currentTurn;
     }

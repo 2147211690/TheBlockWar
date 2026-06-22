@@ -265,7 +265,11 @@ public static class Extensions
         }
         public bool GetShouldUseSkill(IReadOnlyGameState state, ISkill skill)
         {
-            if (unit.IsDead) return false;
+            if (unit.IsDead || 
+                !(skill.SkillName.EndsWith("移动") ? 
+                    unit.CanUseSkill.HasFlag(CanUseSkillMask.Move) : 
+                    unit.CanUseSkill.HasFlag(CanUseSkillMask.Skill))) 
+                return false;
             var shouldUseSkill = true;
             Hook.BuffUnitShouldUseSkill(unit, state, skill, ref shouldUseSkill);
             return shouldUseSkill;
@@ -445,6 +449,19 @@ public static class Extensions
                 ActionCore = (_, o) => action(o),
                 Layer = SimulationLayer.Running,
             });
+        }
+        public async GDTask RunTurnEvents(int turn, int focusDelay = 800, int runAfterDelay = 100)
+        {
+            var turnEvents = eventScheduler.GetTurnEvents(turn);
+            foreach (var ev in turnEvents)
+            {
+                if (!ev.CheckIsValid(eventScheduler.GameState)) continue;
+                ev.Layer = SimulationLayer.Focused;
+                await GDTask.Delay(focusDelay);
+                ev.Layer = SimulationLayer.Running;
+                await eventScheduler.WaitCompleteRunning();
+                await GDTask.Delay(runAfterDelay);
+            }
         }
     }
 

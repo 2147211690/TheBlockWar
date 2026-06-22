@@ -18,6 +18,7 @@ public class UnitState : IReadOnlyUnitState
     public float MaxShield { get; set; } = 100;
     public bool IsDead { get; set; }
     public bool IsFlying { get; set; } = false;
+    public CanUseSkillMask CanUseSkill { get; set; } = CanUseSkillMask.All;
     public IReadOnlyList<BuffState> Buffs => _buffs ?? [];
 
     public IReadOnlyList<BuffState> BuffsStatic
@@ -49,6 +50,7 @@ public class UnitState : IReadOnlyUnitState
         MaxShield = data.MaxShield;
         IsDead = data.IsDead;
         IsFlying = data.IsFlying;
+        CanUseSkill = data.CanUseSkillMask;
         _buffs = data.Buffs.CloneToListOrNullWhenCountZero();
     }
     public UnitStateData ToData()
@@ -65,6 +67,7 @@ public class UnitState : IReadOnlyUnitState
             MaxShield = MaxShield,
             IsDead = IsDead,
             IsFlying = IsFlying,
+            CanUseSkillMask = CanUseSkill,
             Buffs = _buffs.CloneToListOrNullWhenCountZero(),
         };
     }
@@ -155,6 +158,7 @@ public class UnitState : IReadOnlyUnitState
         unit.IsFlying = IsFlying;
         unit._buffs = _buffs.CloneToListOrNullWhenCountZero();
         unit._isBuffStaticDirty = _isBuffStaticDirty;
+        unit.CanUseSkill = CanUseSkill;
         unit._buffsStatic = _isBuffStaticDirty ? null : _buffsStatic;
         return unit;
     }

@@ -26,6 +26,11 @@ public abstract class Skill(string skillName, int argCount) : ISkill
         Vector2I useCoords, Vector2I?[] args)
     {
         if (!unit.GetShouldUseSkill(obj.State, this)) return;
+        obj.State.UnitMapState.ModifyUnit(unit.Id, 
+            u => u.CanUseSkill &= 
+                SkillName.EndsWith("移动") ?
+                    ~CanUseSkillMask.Move : 
+                    ~CanUseSkillMask.All);
         Core(obj, unit, useCoords, args);
     }
     

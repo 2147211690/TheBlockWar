@@ -74,18 +74,24 @@ public partial class StatePlayer
 
         private void TryBeginNewSkill(int index)
         {
-            if (index < 0 || index >= _validSkills.Count) return;
-            _currentSkill = _validSkills[index];
-            if (_currentSkill.ArgCount == 0 || !_unitState.GetShouldUseSkill(GameState, _currentSkill))
-            {
+            if (TrySelectSkill(index)) return;
+            var i = 0;
+            for (; i < _validSkills.Count; i++)
+                if (TrySelectSkill(i)) break;
+            if (i == _validSkills.Count)
                 StateMachine.ChangeState(Player._freeState);
-                return;
-            }
 
-            for (var i = 0; i < Player._skillStates.Length; i++) Player._skillStates[i].IsSelecting = false;
-            Player._skillStates[index].IsSelecting = true;
-            NotifySkillStatesChanged();
-            TryEnterToNextArg();
+            bool TrySelectSkill(int index)
+            {
+                _currentSkill = _validSkills[index];
+                if (_currentSkill.ArgCount == 0 || !_unitState.GetShouldUseSkill(GameState, _currentSkill)) return false;
+                for (var j = 0; j < Player._skillStates.Length; j++) 
+                    Player._skillStates[j].IsSelecting = false;
+                Player._skillStates[index].IsSelecting = true;
+                NotifySkillStatesChanged();
+                TryEnterToNextArg();
+                return true;
+            }
         }
 
 
@@ -93,11 +99,13 @@ public partial class StatePlayer
         {
             if (_currentArgIndex == -1) //进入第一个参数
             {
+                //创建技能
                 _currentSkillEvent = EventScheduler!.CreateEvent(id => new SkillEvent(id)
                 {
                     SkillBindUnitId = Player.SelectedUnitId,
                     SkillName = _currentSkill.SkillName,
                     Team = _unitState.Team,
+                    PhaseOrder = Player.PhaseOrder,
                 });
 
                 _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
@@ -113,8 +121,7 @@ public partial class StatePlayer
                 if (!IsCurrentValidArg()) return;
                 //所有参数完成
                 Player.GameView.ClearRegion();
-                _currentSkillEvent!.Layer = SimulationLayer.Waiting;
-                _currentSkillEvent.Turn = Player.TurnManager.CurrentTurn + 1;
+                _currentSkillEvent!.Layer = SimulationLayer.Running;
                 StateMachine.ChangeState(Player._freeState);
             }
             else //进入下一个参数

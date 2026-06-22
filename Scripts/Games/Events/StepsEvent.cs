@@ -17,7 +17,7 @@ public class StepsEvent(long id) : SchedulerEvent(id)
         obj.ApplySteps(Steps, StartDelay, EndDelay, RunningMode);
     }
 
-    public override bool CheckIsValid(EventScheduler scheduler)
+    public override bool CheckIsValid(IReadOnlyGameState gameState)
     {
         return Steps is not null;
     }

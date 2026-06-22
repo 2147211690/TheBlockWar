@@ -27,6 +27,7 @@ public class EventScheduler
     public ICollection<SchedulerEvent> WaitingEvents => _eventManager.WaitingEvents;
     public ICollection<SchedulerEvent> DisabledEvents => _eventManager.DisabledEvents;
     public IReadOnlyDictionary<long, SchedulerEvent> SkillEvents => _eventManager.SkillEvents;
+    public IReadOnlyDictionary<long, SchedulerEvent> Events => _eventManager.Events;
     public IReadOnlyGameState GameState => _gameState;
     public int PlayerTeam { get; }
     public int CurrentTurn { get => _gameState.TurnState.CurrentTurn; set => _gameState.TurnState.CurrentTurn = value; }
@@ -72,14 +73,13 @@ public class EventScheduler
     {
         UpdateSimulation();
     }
-
     public void ReloadGameState()
     {
         GameStateReload?.Invoke(this, _gameState);
         _eventManager.ReloadStateEvents();
         _snapshotChache = null;
     }
-
+    
     public SchedulerEvent? GetUnitSkillEvent(long unitId)
     {
         SkillEvents.TryGetValue(unitId, out var skillEvent);
@@ -125,7 +125,7 @@ public class EventScheduler
         // 运行层直接执行
         foreach (var ev in _eventManager.RunningEvents)
         {
-            if (!ev.CheckIsValid(this)) continue;
+            if (!ev.CheckIsValid(GameState)) continue;
             var obj = new SimObject(_gameState, ev.Layer, new(), ev.Id);
             obj.PushContext(CreateSimulationContext(ev));
             result.Sims.Add(obj);
@@ -142,7 +142,7 @@ public class EventScheduler
         // 焦点层和等待层事件执行
         foreach (var ev in _eventManager.FocusedEvents.Concat(_eventManager.WaitingEvents))
         {
-            if (!ev.CheckIsValid(this)) continue;
+            if (!ev.CheckIsValid(snapshot)) continue;
             var obj = new SimObject(_snapshotChache, ev.Layer, new(), ev.Id);
             obj.PushContext(CreateSimulationContext(ev));
             result.Sims.Add(obj);
@@ -314,7 +314,8 @@ public class EventScheduler
                         if (e.PropertyName is 
                             nameof(SchedulerEvent.Priority) or 
                             nameof(SchedulerEvent.Turn) or
-                            nameof(SkillEvent.SkillBindUnitId))
+                            nameof(SkillEvent.SkillBindUnitId) or 
+                            nameof(SchedulerEvent.PhaseOrder))
                         {
                             if (e.IsChanging)
                             {
@@ -331,7 +332,8 @@ public class EventScheduler
                     //如果引发在Turn相关的属性改变,则需要清除当前回合的事件
                     if (e.PropertyName is 
                         nameof(SchedulerEvent.Turn) or 
-                        nameof(SchedulerEvent.Priority))
+                        nameof(SchedulerEvent.Priority) or 
+                        nameof(SchedulerEvent.PhaseOrder))
                     {
                         if (e.IsChanging)
                         {

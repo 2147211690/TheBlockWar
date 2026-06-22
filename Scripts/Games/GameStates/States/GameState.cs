@@ -46,7 +46,7 @@ public class GameState : IGameState
         LoadGameData(data);
     }
     public GameState() : this(new (0,0), [], new int[0,0]){}
-    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations, int currentTurn = 0)
+    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations, int currentTurn = -1)
     {
         _unitSkillMap = unitSkillMap;
         _events = new();

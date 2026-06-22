@@ -1,3 +1,4 @@
+using System.Linq;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
@@ -12,59 +13,55 @@ namespace TheBlockWar.Scripts.Games.Turns;
 public class TurnManager
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public TurnManager(EventScheduler eventScheduler, IGameMode gameMode)
+    public TurnManager(EventScheduler eventScheduler, ITurnStrategy turnStrategy)
     {
         EventScheduler = eventScheduler;
-        GameMode = gameMode;
+        TurnStrategy = turnStrategy;
     }
-
     public EventScheduler EventScheduler { get; }
-    public IGameMode GameMode { get; }
+    public ITurnStrategy TurnStrategy { get; }
     public int CurrentTurn { get => EventScheduler.CurrentTurn; set => EventScheduler.CurrentTurn = value; }
-    public GameStateEnum State => GameMode.State;
-    public IReadOnlyGameState GameState => EventScheduler.GameState!;
+    
+    private List<ITurnPhase> _currentPhases = new();
+    private List<ITurnPhase> _nextPhases = new();
+    
     private bool _stop;
-    private int _currentFocusedTurn = -1;
     public async GDTask Start()
     {
+        MoveNextPhases();
         while (!_stop)
         {
-            Logger.Info($"开始回合{CurrentTurn}");
-            await RunTurnEvents(CurrentTurn);
-            
-            GameMode.EnterTurn(this, CurrentTurn);
-            await GameMode.Turn(this, CurrentTurn);
-            GameMode.ExitTurn(this, CurrentTurn);
-            
-            Logger.Info($"回合{CurrentTurn}完成");
-            CurrentTurn++;
+            foreach (var phase in _currentPhases)
+            {
+                Logger.Debug("阶段进入{0}", phase.GetType().Name);
+                await phase.Execute();
+                Logger.Debug("阶段退出{0}", phase.GetType().Name);
+            }
+            MoveNextPhases();
         }
     }
-    private async GDTask RunTurnEvents(int turn)
+
+    private void MoveNextPhases()
     {
-        var turnEvents = EventScheduler.GetTurnEvents(turn);
-        foreach (var ev in turnEvents)
+        CurrentTurn++;
+        if (CurrentTurn == 0)
         {
-            if (!ev.CheckIsValid(EventScheduler)) continue;
-            ev.Layer = SimulationLayer.Focused;
-            await GDTask.Delay(800);
-            ev.Layer = SimulationLayer.Running;
-            await EventScheduler.WaitCompleteRunning();
+            _currentPhases.AddRange(GetTurnPhases(CurrentTurn));
+            _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
+            return;
         }
+        (_currentPhases, _nextPhases) = (_nextPhases, _currentPhases);
+        _nextPhases.Clear();
+        _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
     }
-    
-    public void FocusTurnEvent(int turn)
+
+    private IEnumerable<ITurnPhase> GetTurnPhases(int turn)
     {
-        if (_currentFocusedTurn == turn) return;
-        EventScheduler.BlockUpdate();
-        var prev = EventScheduler.GetTurnEvents(_currentFocusedTurn);
-        foreach (var ev in prev)
-            ev.Layer = ev is SkillEvent skillEvent ? SimulationLayer.Waiting : SimulationLayer.Disabled;
-        _currentFocusedTurn = turn;
-        var now = EventScheduler.GetTurnEvents(_currentFocusedTurn);
-        foreach (var ev in now)
-            ev.Layer = SimulationLayer.Focused;
-        EventScheduler.UnblockUpdate();
+        return TurnStrategy.GetTurnPhases(this, turn).Select((p, i) => p.Init(turn, EventScheduler, i));
+    }
+    public void FocusNextTurn(int turn)
+    {
+        foreach (var phase in _nextPhases) phase.IsFocused = turn >= 0;
     }
     public void Stop()
     {

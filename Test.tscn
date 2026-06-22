@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://clo7kpedsd4h6" path="res://Test.cs" id="1_myinc"]
 [ext_resource type="PackedScene" uid="uid://deknlmtpc7g4t" path="res://View/GameView.tscn" id="2_2au82"]
+[ext_resource type="Script" uid="uid://bggta4x7kf5v4" path="res://addons/mapcamera2d/MapCamera2D.gd" id="3_8tn2x"]
 [ext_resource type="PackedScene" uid="uid://clbp4km484ly4" path="res://View/Uis/CombatUi.tscn" id="15_ilduj"]
 
 [node name="Node2D" type="Node2D" unique_id=1155941121 node_paths=PackedStringArray("_view", "_combatUi")]
@@ -9,11 +10,13 @@ script = ExtResource("1_myinc")
 _view = NodePath("GameView")
 _combatUi = NodePath("CanvasLayer/CombatUi")
 
-[node name="GameView" parent="." unique_id=1885583899 instance=ExtResource("2_2au82")]
+[node name="MapCamera2D" type="Camera2D" parent="." unique_id=1348683975]
+zoom = Vector2(2.205, 2.205)
+script = ExtResource("3_8tn2x")
+pan_speed = 0.0
+drag_inertia = 0.0
 
-[node name="Camera2D2" type="Camera2D" parent="GameView" unique_id=1001446039]
-position = Vector2(0, 112)
-zoom = Vector2(2.825, 2.825)
+[node name="GameView" parent="." unique_id=1885583899 instance=ExtResource("2_2au82")]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=892010729]
 

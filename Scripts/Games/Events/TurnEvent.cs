@@ -23,7 +23,7 @@ public sealed class TurnEvent(long id) : SchedulerEvent(id)
         }
     }
 
-    public override bool CheckIsValid(EventScheduler scheduler)
+    public override bool CheckIsValid(IReadOnlyGameState gameState)
     {
         return true;
     }

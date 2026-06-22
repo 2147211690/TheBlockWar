@@ -15,7 +15,7 @@ public sealed class ActionEvent(long id) : SchedulerEvent(id)
         ActionCore?.Invoke(this, obj);
     }
 
-    public override bool CheckIsValid(EventScheduler scheduler)
+    public override bool CheckIsValid(IReadOnlyGameState gameState)
     {
         return IsValidCore?.Invoke() ?? true;
     }

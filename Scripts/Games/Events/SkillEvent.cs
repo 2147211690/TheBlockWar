@@ -47,9 +47,10 @@ public sealed class SkillEvent(long id) : SchedulerEvent(id)
         SkillName.GetSkillInfo().Instance.SkillCore(obj, unit, useCoords, SkillArgs ?? []);
     }
 
-    public override bool CheckIsValid(EventScheduler scheduler)
+    public override bool CheckIsValid(IReadOnlyGameState gameState)
     {
-        return scheduler.GameState.UnitMapState.HasUnit(SkillBindUnitId);
+        var unit = gameState.UnitMapState.GetUnit(SkillBindUnitId);
+        return !unit.IsNull() && !unit.IsDead && unit.GetShouldUseSkill(gameState, SkillName.GetSkillInfo().Instance);
     }
 
     public override string ToString()

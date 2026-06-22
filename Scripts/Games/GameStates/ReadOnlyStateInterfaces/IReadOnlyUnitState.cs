@@ -20,6 +20,7 @@ public interface IReadOnlyUnitState : IReadOnlyGameDataState<UnitState, UnitStat
     float MaxShield { get; }
     bool IsDead { get; }
     bool IsFlying { get; }
+    CanUseSkillMask CanUseSkill { get; }
     IReadOnlyList<BuffState> Buffs { get; }
     /// <summary>
     /// 获取buff的静态列表,更新buff时不会改变列表中的元素
@@ -28,4 +29,12 @@ public interface IReadOnlyUnitState : IReadOnlyGameDataState<UnitState, UnitStat
     int FindBuff(string buffName);
     UnitState Clone();
     UnitState CopyTo(UnitState unit);
+}
+[Flags]
+public enum CanUseSkillMask
+{
+    None = 0,
+    Move = 1 << 0,
+    Skill = 1 << 1,
+    All = Move | Skill,
 }

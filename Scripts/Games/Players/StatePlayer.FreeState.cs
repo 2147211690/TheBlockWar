@@ -74,17 +74,17 @@ public partial class StatePlayer
                 case PlayerInputStopTurn stopTurn:
                     if (stopTurn.Type == PlayerSotpTurnEnum.Click)
                     {
-                        Player.TurnManager.FocusTurnEvent(-1);
+                        Player.TurnManager.FocusNextTurn(-1);
                         Player.IsTurn = false;
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverExit)
                     {
-                        Player.TurnManager.FocusTurnEvent(-1);
+                        Player.TurnManager.FocusNextTurn(-1);
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverEnter)
                     {
                         FocusedUnitId = 0;
-                        Player.TurnManager.FocusTurnEvent(Player.TurnManager.CurrentTurn + 1);
+                        Player.TurnManager.FocusNextTurn(Player.TurnManager.CurrentTurn + 1);
                     }
                     break;
             }

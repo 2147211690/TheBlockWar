@@ -43,7 +43,7 @@ public partial class Test : Node2D
     private SchedulerEvent _damage;
     private SchedulerEvent _follow;
     private StatePlayer _player;
-    private PvpMode _pvpMode;
+    private PvpTurnStrategy _pvpMode;
     private TurnManager _turnManager;
     private bool _checkNextTurn;
     private string _buffName = string.Empty;
@@ -107,7 +107,7 @@ public partial class Test : Node2D
         _view.Init(_eventScheduler);
         _view.PlayerTeam = _player.Team;
         
-        _pvpMode = new PvpMode([_player], _player);
+        _pvpMode = new PvpTurnStrategy([new EasyAiPlayer(1){GameScheduler = _eventScheduler}, _player]);
         _turnManager = new TurnManager(_eventScheduler, _pvpMode);
         _player.TurnManager = _turnManager;
         _combatUi.Bind(_eventScheduler, _view, _player);
@@ -405,7 +405,7 @@ public partial class Test : Node2D
 
         if (ImGui.Checkbox("关注结束回合", ref _checkNextTurn))
         {
-            _turnManager.FocusTurnEvent(_checkNextTurn ? _turnManager.CurrentTurn + 1 : -1);
+            _turnManager.FocusNextTurn(_checkNextTurn ? _turnManager.CurrentTurn + 1 : -1);
         }
         
         ImGui.End();
@@ -482,6 +482,11 @@ public partial class Test : Node2D
                 }
                 obj.ApplyPlaceUnit(new(5, 5), UnitNames.Unit0, 0);
                 obj.ApplyPlaceUnit(new(3, 3), UnitNames.Unit1, 1);
+                obj.ApplyPlaceUnit(new(5, 5), UnitNames.Unit1, 1);
+                obj.ApplyPlaceUnit(new(4, 2), UnitNames.Unit2, 1);
+                obj.ApplyPlaceUnit(new(1, 4), UnitNames.Unit2, 1);
+                obj.ApplyPlaceUnit(new(6, 1), UnitNames.Unit0, 1);
+                obj.ApplyPlaceUnit(new(1, 5), UnitNames.Unit1, 1);
             },
             Layer = SimulationLayer.Running,
         });

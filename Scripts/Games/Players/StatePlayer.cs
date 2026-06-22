@@ -16,6 +16,7 @@ public partial class StatePlayer : Node2D, IPlayer
     public int Power { get; set => SetField(ref field, value); }
     public int Team { get; private set; }
     public bool IsTurn { get; set => SetField(ref field, value); }
+    public int PhaseOrder { get; set; }
     public Vector2I CurrentMouseCoords { get; private set; }
     public TurnManager TurnManager { get; set; } = null!;
     public long SelectedUnitId { get; set => SetField(ref field, value); }

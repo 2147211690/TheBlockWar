@@ -11,6 +11,7 @@ public interface IPlayer : INotifyPropertyChanged
     int Power { get; }
     int Team { get; }
     bool IsTurn { get; set; }
+    int PhaseOrder { get; set; }
     void OnInput<T>(in T input);
     void Init();
 }
