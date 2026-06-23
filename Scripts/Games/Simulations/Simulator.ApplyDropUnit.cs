@@ -32,6 +32,10 @@ partial class Simulator
             }
         }
     }
+    public static partial void ApplyDropUnitReplayCore(IGameState state, ApplyDropUnitResult result)
+    {
+        state.UnitMapState.RemoveUnit(result.ReUnitId);
+    }
     public static partial void ApplyDropUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDropUnitResult result)
     {
     }

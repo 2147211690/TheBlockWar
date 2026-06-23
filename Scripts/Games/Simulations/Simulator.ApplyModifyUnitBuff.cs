@@ -120,7 +120,30 @@ partial class Simulator
             }
         }
     }
-
+    
+    public static partial void ApplyModifyUnitBuffReplayCore(IGameState state, ApplyModifyUnitBuffResult result)
+    {
+        state.UnitMapState.ModifyUnit(result.ReUnitId, u =>
+        {
+            switch (result.ReResult)
+            {
+                case BuffOperationResult.None:
+                    break;
+                case not BuffOperationResult.None:
+                    var change = result.ReNewCount - result.ReOldCount;
+                    if (change > 0)
+                    {
+                        u.AddBuff(result.BuffName, change);
+                    }
+                    else if (change < 0)
+                    {
+                        u.RemoveBuff(result.BuffName, -change);
+                    }
+                    break;
+            }
+        });
+    }
+    
     public static partial void ApplyModifyUnitBuffViewDraw(IGameView view, ReadOnlySimObject sim,
         ApplyModifyUnitBuffResult result)
     {

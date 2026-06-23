@@ -66,6 +66,11 @@ partial class Simulator
         }
     }
 
+    public static partial void ApplyCureReplayCore(IGameState state, ApplyCureResult result)
+    {
+        state.UnitMapState.ModifyUnit(result.ReUnitId, u => u.Health += result.ReValidCure);
+    }
+
     public static partial void ApplyCureViewDraw(IGameView view, ReadOnlySimObject sim, ApplyCureResult result)
     {
         view.EventHealth(result.Coords, result.Cure, result.ReValidCure, 

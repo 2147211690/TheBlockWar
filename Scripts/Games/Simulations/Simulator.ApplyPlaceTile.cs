@@ -55,6 +55,25 @@ partial class Simulator
             }
         }
     }
+
+    public static partial void ApplyPlaceTileReplayCore(IGameState state, ApplyPlaceTileResult result)
+    {
+        if (!result.ReValid) return;
+        state.TileMapState.ModifyTile(result.Coords, t => t.Name = result.TileName);
+        //初始化区域
+        var info = result.TileName.GetTileInfo();
+        if (info.Regions is { Length: > 0 })
+        {
+            state.TileMapState.ModifyTile(result.Coords, t =>
+            {
+                for (var i = 0; i < info.Regions.Length; i++)
+                {
+                    var regionName = info.Regions[i];
+                    t.AddRegion(regionName, info.RegionDurations[i]);
+                }
+            });
+        }
+    }
     public static partial void ApplyPlaceTileViewDraw(IGameView view, ReadOnlySimObject sim, ApplyPlaceTileResult result)
     {
     }

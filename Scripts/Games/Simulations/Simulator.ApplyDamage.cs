@@ -72,7 +72,11 @@ partial class Simulator
             }
         }
     }
-    
+
+    public static partial void ApplyDamageReplayCore(IGameState state, ApplyDamageResult result)
+    {
+        state.UnitMapState.ModifyUnit(result.ReUnitId, u => u.Health -= result.ReValidDamage);
+    }
     public static partial void ApplyDamageViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDamageResult result)
     {
         view.EventHealth(result.Coords, -result.Damage, -result.ReValidDamage, 

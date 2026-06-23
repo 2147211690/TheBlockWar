@@ -64,6 +64,24 @@ partial class Simulator
             }
         }
     }
+    public static partial void ApplyPlaceUnitReplayCore(IGameState state, ApplyPlaceUnitResult result)
+    {
+        if (!result.ReValid) return;
+        state.UnitMapState.ModifyUnit(result.ReUnitState.Id, u => u.Name = result.UnitName);
+        var info = result.UnitName.GetUnitInfo();
+        var newUnit = state.UnitMapState.GetUnit(result.ReUnitState.Id);
+        if (info.Buffs is { Length: > 0 })
+        {
+            state.UnitMapState.ModifyUnit(newUnit.Id, u =>
+            {
+                for (var i = 0; i < info.Buffs.Length; i++)
+                {
+                    var buffName = info.Buffs[i];
+                    u.AddBuff(buffName, info.BuffCounts[i]);
+                }
+            });
+        }
+    }
     public static partial void ApplyPlaceUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)
     {
     }

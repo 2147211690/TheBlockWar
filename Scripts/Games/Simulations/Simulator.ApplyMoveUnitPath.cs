@@ -51,6 +51,10 @@ partial class Simulator
         }
     }
 
+    public static partial void ApplyMoveUnitPathReplayCore(IGameState state, ApplyMoveUnitPathResult result)
+    {
+    }
+
     public static partial void ApplyMoveUnitPathViewDraw(IGameView view, ReadOnlySimObject sim,
         ApplyMoveUnitPathResult result)
     {

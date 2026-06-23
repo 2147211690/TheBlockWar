@@ -91,6 +91,9 @@ partial class Simulator
             }
         }
     }
+    public static partial void ApplyRectWindReplayCore(IGameState state, ApplyRectWindResult result)
+    {
+    }
     public static partial void ApplyRectWindViewDraw(IGameView view, ReadOnlySimObject sim, ApplyRectWindResult result)
     {
     }

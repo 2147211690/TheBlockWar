@@ -18,7 +18,11 @@ partial class Simulator
             return r;
         }
     }
-
+    
+    public static partial void ApplyAnimationReplayCore(IGameState state, ApplyAnimationResult result)
+    {
+    }
+    
     public static partial void ApplyAnimationViewDraw(IGameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
     {
         /*if (result.Animation is ShotSomethingAnim shot)
@@ -35,6 +39,9 @@ partial class Simulator
             view.EventsView.DrawPointLine(AnimationThrowLine, throwStart, throwEnd, 0.5f, Colors.Yellow);
         }*/
     }
+
+
+
     private static Vector3 AnimationLine(Vector3 v1, Vector3 v2, float arg3)
     {
         return v1.Lerp(v2, arg3);

@@ -44,6 +44,11 @@ public class EasyAiPlayer : IPlayer
     {
     }
 
+    public GDTask WaitTurnComplete()
+    {
+        return GDTask.WaitUntil(() => !IsTurn);
+    }
+
     public async GDTask TurnAsync()
     {
         var state = GameScheduler!.GameState;

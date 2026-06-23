@@ -53,6 +53,11 @@ partial class Simulator
             }
         }
     }
+
+    public static partial void ApplyPushUnitReplayCore(IGameState state, ApplyPushUnitResult result)
+    {
+    }
+    
     public static partial void ApplyPushUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyPushUnitResult result)
     {
         var s = view.EventSprite();

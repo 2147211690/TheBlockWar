@@ -54,6 +54,10 @@ partial class Simulator
             }
         }
     }
+
+    public static partial void ApplyRegionTurnReplayCore(IGameState state, ApplyRegionTurnResult result)
+    {
+    }
     public static partial void ApplyRegionTurnViewDraw(IGameView view, ReadOnlySimObject sim, ApplyRegionTurnResult result)
     {
     }

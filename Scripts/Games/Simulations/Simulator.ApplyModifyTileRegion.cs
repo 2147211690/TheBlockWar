@@ -93,6 +93,28 @@ partial class Simulator
             }
         }
     }
+    public static partial void ApplyModifyTileRegionReplayCore(IGameState state, ApplyModifyTileRegionResult result)
+    {
+        state.TileMapState.ModifyTile(result.Coords, t =>
+        {
+            switch (result.ReResult)
+            {
+                case RegionOperationResult.None:
+                    break;
+                case not RegionOperationResult.None:
+                    var change = result.ReNewDuration - result.ReOldDuration;
+                    if (change > 0)
+                    {
+                        t.AddRegion(result.RegionName, change);
+                    }
+                    else if (change < 0)
+                    {
+                        t.RemoveRegion(result.RegionName, -change);
+                    }
+                    break;
+            }
+        });
+    }
     public static partial void ApplyModifyTileRegionViewDraw(IGameView view, ReadOnlySimObject sim, ApplyModifyTileRegionResult result)
     {
     }

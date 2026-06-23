@@ -50,6 +50,9 @@ partial class Simulator
         }
     }
 
+    public static partial void ApplyBuffTurnReplayCore(IGameState state, ApplyBuffTurnResult result)
+    {
+    }
     public static partial void ApplyBuffTurnViewDraw(IGameView view, ReadOnlySimObject sim, ApplyBuffTurnResult result)
     {
     }

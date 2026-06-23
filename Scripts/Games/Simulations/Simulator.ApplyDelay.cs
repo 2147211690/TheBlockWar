@@ -16,6 +16,10 @@ partial class Simulator
             return r;
         }
     }
+
+    public static partial void ApplyDelayReplayCore(IGameState state, ApplyDelayResult result)
+    {
+    }
     public static partial void ApplyDelayViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDelayResult result)
     {
     }

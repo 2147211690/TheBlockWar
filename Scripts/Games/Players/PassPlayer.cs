@@ -24,4 +24,9 @@ public class PassPlayer : IPlayer
     public void Init()
     {
     }
+
+    public GDTask WaitTurnComplete()
+    {
+        throw new NotImplementedException();
+    }
 }

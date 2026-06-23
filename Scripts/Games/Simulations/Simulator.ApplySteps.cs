@@ -27,6 +27,9 @@ partial class Simulator
             }
         }
     }
+    public static partial void ApplyStepsReplayCore(IGameState state, ApplyStepsResult result)
+    {
+    }
     public static partial void ApplyStepsViewDraw(IGameView view, ReadOnlySimObject sim, ApplyStepsResult result)
     {
     }

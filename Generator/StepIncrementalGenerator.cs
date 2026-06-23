@@ -291,6 +291,10 @@ namespace StepGenerator
                 sb.AppendLine("#nullable enable");
                 sb.AppendLine("#pragma warning disable");
                 sb.AppendLine("using GodotTask;  // GDTask 使用 using，不添加 global::");
+                sb.AppendLine("using TheBlockWar.Scripts.Games.GameStates;");
+                sb.AppendLine("using TheBlockWar.Scripts.Games.Buffs;");
+                sb.AppendLine("using TheBlockWar.Scripts.Games.Regions;");
+                sb.AppendLine("using TheBlockWar.Scripts.Tools;");
                 sb.AppendLine();
 
                 var indent = "";
@@ -311,6 +315,8 @@ namespace StepGenerator
                     GenerateApplyStepClass(sb, indent, method);
                     GenerateApplyResultClass(sb, indent, method, config);
                 }
+                
+                GenerateReplayCoreDeclarations(sb, indent, group.ToList());
 
                 if (!string.IsNullOrEmpty(group.Key))
                 {
@@ -377,6 +383,7 @@ namespace StepGenerator
                  {{indent}}    public virtual ApplyStep GetStep() => new ApplyStep();
                  {{indent}}    public virtual GDTask ViewRunAsync{{viewRunSig}} => GDTask.CompletedTask;
                  {{indent}}    public virtual void ViewDraw{{viewDrawSig}} { }
+                 {{indent}}    public virtual void ReplayCore(global::TheBlockWar.Scripts.Games.GameStates.IGameState state) { }
                  {{indent}}}
                  """);
             sb.AppendLine();
@@ -482,6 +489,7 @@ namespace StepGenerator
             sb.AppendLine();
             sb.AppendLine($"{indent}    public override GDTask ViewRunAsync{viewRunSig} => {TemplateClass}.{method.MethodName}ViewRunAsync{viewRunCall};");
             sb.AppendLine($"{indent}    public override void ViewDraw{viewDrawSig} => {TemplateClass}.{method.MethodName}ViewDraw{viewDrawCall};");
+            sb.AppendLine($"{indent}    public override void ReplayCore(global::TheBlockWar.Scripts.Games.GameStates.IGameState state) => {TemplateClass}.{method.MethodName}ReplayCore(state, this);");
             sb.AppendLine();
             sb.AppendLine($"{indent}    public override string ToString()");
             sb.AppendLine($"{indent}    {{");
@@ -491,6 +499,21 @@ namespace StepGenerator
             var allPatterns = basePatterns.Concat(stepPropPatterns).Concat(resultPropPatterns);
             sb.AppendLine($"{indent}        return $\"{{{{{method.ResultClassName}->{string.Join(", ", allPatterns)}}}}}\";");
             sb.AppendLine($"{indent}    }}");
+            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+        }
+
+        private void GenerateReplayCoreDeclarations(StringBuilder sb, string indent, List<StepMethodInfo> methods)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"{indent}partial class Simulator");
+            sb.AppendLine($"{indent}{{");
+
+            foreach (var method in methods)
+            {
+                sb.AppendLine($"{indent}    public static partial void {method.MethodName}ReplayCore(global::TheBlockWar.Scripts.Games.GameStates.IGameState state, {method.ResultClassName} result);");
+            }
+
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();
         }

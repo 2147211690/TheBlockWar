@@ -15,7 +15,26 @@ public partial class StatePlayer : Node2D, IPlayer
     public IReadOnlyList<SkillState> SkillingUnitSkillStates => _skillStates;
     public int Power { get; set => SetField(ref field, value); }
     public int Team { get; private set; }
-    public bool IsTurn { get; set => SetField(ref field, value); }
+
+    public bool IsTurn
+    {
+        get;
+        set
+        {
+            if (!SetField(ref field, value)) return;
+            if (field)
+            {
+                _turnCompletionSource = new GDTaskCompletionSource();
+                _turnCompletionSource.Task.Forget();
+            }
+            else
+            {
+                _turnCompletionSource?.TrySetResult();
+                _turnCompletionSource = null;
+            }
+        }
+    }
+
     public int PhaseOrder { get; set; }
     public Vector2I CurrentMouseCoords { get; private set; }
     public TurnManager TurnManager { get; set; } = null!;
@@ -23,6 +42,7 @@ public partial class StatePlayer : Node2D, IPlayer
     public long FocusedUnitId { get; set => SetField(ref field, value); }
     public IGameView GameView { get; private set; } = null!;
     
+    private GDTaskCompletionSource? _turnCompletionSource;
     private StateMachine<State> _stateMachine;
     private FreeState _freeState;
     private SkillingState _skillingState;
@@ -79,7 +99,9 @@ public partial class StatePlayer : Node2D, IPlayer
     {
         _stateMachine.Init();
     }
-    
+
+    public GDTask WaitTurnComplete() => _turnCompletionSource?.Task ?? GDTask.CompletedTask;
+
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

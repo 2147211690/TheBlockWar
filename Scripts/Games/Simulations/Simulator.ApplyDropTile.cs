@@ -40,6 +40,11 @@ partial class Simulator
             }
         }
     }
+
+    public static partial void ApplyDropTileReplayCore(IGameState state, ApplyDropTileResult result)
+    {
+        state.TileMapState.ModifyTile(result.Coords, t => TileState.Empty.CopyTo(t));
+    }
     public static partial void ApplyDropTileViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDropTileResult result)
     {
     }

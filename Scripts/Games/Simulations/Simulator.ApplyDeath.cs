@@ -50,6 +50,17 @@ partial class Simulator
             }
         }
     }
+
+    public static partial void ApplyDeathReplayCore(IGameState state, ApplyDeathResult result)
+    {
+        if (!result.ReValid) return;
+        state.UnitMapState.ModifyUnit(result.ReUnitId, u =>
+        {
+            u.IsDead = true;
+            u.Health = 0;
+            u.ClearBuff();
+        });
+    }
     public static partial void ApplyDeathViewDraw(IGameView view, ReadOnlySimObject sim, ApplyDeathResult result)
     {
         if (result.Draw)

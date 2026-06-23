@@ -47,6 +47,13 @@ partial class Simulator
             }
         }
     }
+
+    public static partial void ApplySwapUnitReplayCore(IGameState state, ApplySwapUnitResult result)
+    {
+        if (!result.ReValid) return;
+        state.UnitMapState.ModifyUnit(result.ReUnitId1, u => u.Coords = result.Coords2);
+        state.UnitMapState.ModifyUnit(result.ReUnitId2, u => u.Coords = result.Coords1);
+    }
     public static partial void ApplySwapUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplySwapUnitResult result)
     {
     }

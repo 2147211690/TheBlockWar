@@ -14,6 +14,7 @@ public interface IPlayer : INotifyPropertyChanged
     int PhaseOrder { get; set; }
     void OnInput<T>(in T input);
     void Init();
+    GDTask WaitTurnComplete();
 }
 
 public struct SkillState
