@@ -19,14 +19,14 @@ public partial class CombatUi : Control
     [Export] private TooltipManager _tooltipManager = null!;
     [Export] private Button _stopTurnButton = null!;
     private IPlayer _player = null!;
-    private EventScheduler _eventScheduler = null!;
+    private IEventScheduler _eventScheduler = null!;
     public override void _Ready()
     {
         base._Ready();
         _tooltipManager.OnHoverChange += OnHoverChange;
     }
 
-    public void Bind(EventScheduler eventScheduler, IGameView gameView, IPlayer player)
+    public void Bind(IEventScheduler eventScheduler, IGameView gameView, IPlayer player)
     {
         GameView = gameView;
         _eventScheduler = eventScheduler;

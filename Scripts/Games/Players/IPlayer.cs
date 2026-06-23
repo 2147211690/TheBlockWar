@@ -5,7 +5,7 @@ namespace TheBlockWar.Scripts.Games.Players;
 
 public interface IPlayer : INotifyPropertyChanged
 {
-    EventScheduler? GameScheduler { get; set; }
+    IEventScheduler? GameScheduler { get; set; }
     IReadOnlyList<SkillState> SkillingUnitSkillStates { get; }
     long SelectedUnitId { get; }
     int Power { get; }

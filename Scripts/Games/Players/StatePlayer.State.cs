@@ -9,7 +9,7 @@ public partial class StatePlayer
         protected StatePlayer Player = player;
         protected Logger Logger => StatePlayer.Logger;
         public IReadOnlyGameState? GameState => Player.GameScheduler?.GameState;
-        public EventScheduler? EventScheduler => Player.GameScheduler;
+        public IEventScheduler? EventScheduler => Player.GameScheduler;
         public StateMachine<State> StateMachine => Player._stateMachine;
         public long FocusedUnitId => Player.FocusedUnitId;
         public virtual void OnEnter() {}

@@ -18,9 +18,9 @@ public class BuffPhase : ITurnPhase
         }
     }
     public int PhaseOrder { get; private set; }
-    public EventScheduler EventScheduler { get; private set; }
+    public IEventScheduler EventScheduler { get; private set; }
     private TurnEvent _buffTurnEvent;
-    public ITurnPhase Init(int turn, EventScheduler eventScheduler, int order)
+    public ITurnPhase Init(int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;

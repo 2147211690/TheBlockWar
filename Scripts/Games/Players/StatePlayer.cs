@@ -11,7 +11,7 @@ public partial class StatePlayer : Node2D, IPlayer
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public EventScheduler? GameScheduler { get; set; }
+    public IEventScheduler? GameScheduler { get; set; }
     public IReadOnlyList<SkillState> SkillingUnitSkillStates => _skillStates;
     public int Power { get; set => SetField(ref field, value); }
     public int Team { get; private set; }

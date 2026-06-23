@@ -8,13 +8,13 @@ public class PlayerPhase : ITurnPhase
     public int Turn { get; private set; }
     public bool IsFocused { get; set; }
     public int PhaseOrder { get; private set; }
-    public EventScheduler EventScheduler { get; private set; }
+    public IEventScheduler EventScheduler { get; private set; }
     public IPlayer Player { get; }
     public PlayerPhase(IPlayer player)
     {
         Player = player;
     }
-    public ITurnPhase Init(int turn, EventScheduler eventScheduler, int order)
+    public ITurnPhase Init(int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;

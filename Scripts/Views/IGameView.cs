@@ -16,7 +16,7 @@ public interface IGameView
     bool IsRunning { get; }
     #region Data
     IReadOnlyGameState GameState { get; }
-    EventScheduler Scheduler { get; }
+    IEventScheduler Scheduler { get; }
     Node2D DrawContainer { get; }
     #endregion
     

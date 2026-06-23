@@ -13,12 +13,12 @@ namespace TheBlockWar.Scripts.Games.Turns;
 public class TurnManager
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    public TurnManager(EventScheduler eventScheduler, ITurnStrategy turnStrategy)
+    public TurnManager(IEventScheduler eventScheduler, ITurnStrategy turnStrategy)
     {
         EventScheduler = eventScheduler;
         TurnStrategy = turnStrategy;
     }
-    public EventScheduler EventScheduler { get; }
+    public IEventScheduler EventScheduler { get; }
     public ITurnStrategy TurnStrategy { get; }
     public int CurrentTurn { get => EventScheduler.CurrentTurn; set => EventScheduler.CurrentTurn = value; }
     

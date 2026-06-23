@@ -236,7 +236,7 @@ public static class Extensions
         {
             return gameState.TeamState.GetTeamTypeRelativeToPlayer(playerTeam, unit.Team);
         }
-        public TeamTypeEnum GetTeamTypeRelativeToPlayer(EventScheduler eventScheduler)
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(IEventScheduler eventScheduler)
         {
             return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, unit.Team) ?? TeamTypeEnum.Enemy;
         }
@@ -425,7 +425,7 @@ public static class Extensions
         {
             return gameState.TeamState.GetTeamTypeRelativeToPlayer(playerTeam, team);
         }
-        public TeamTypeEnum GetTeamTypeRelativeToPlayer(EventScheduler eventScheduler)
+        public TeamTypeEnum GetTeamTypeRelativeToPlayer(IEventScheduler eventScheduler)
         {
             return eventScheduler.GameState?.TeamState.GetTeamTypeRelativeToPlayer(eventScheduler.PlayerTeam, team) ?? TeamTypeEnum.Enemy;
         }
@@ -440,7 +440,7 @@ public static class Extensions
         }
     }
 
-    extension(EventScheduler eventScheduler)
+    extension(IEventScheduler eventScheduler)
     {
         public void RunAction(Action<SimObject> action)
         {

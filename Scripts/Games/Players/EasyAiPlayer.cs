@@ -15,7 +15,7 @@ public class EasyAiPlayer : IPlayer
         Team = team;
     }
     public event PropertyChangedEventHandler? PropertyChanged;
-    public EventScheduler? GameScheduler { get; set; }
+    public IEventScheduler? GameScheduler { get; set; }
     public IReadOnlyList<SkillState> SkillingUnitSkillStates { get; }
     public long SelectedUnitId { get; }
     public int Power { get; }

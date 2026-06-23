@@ -12,7 +12,7 @@ public static class SaveManager
         return data;
     }
 
-    public static void LoadCurrentGameState(GameStateData data, IGameState gameState, EventScheduler? eventScheduler)
+    public static void LoadCurrentGameState(GameStateData data, IGameState gameState, IEventScheduler? eventScheduler)
     {
         gameState.LoadGameData(data);
         eventScheduler?.ReloadGameState();

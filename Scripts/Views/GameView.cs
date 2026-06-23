@@ -30,7 +30,7 @@ public partial class GameView : Node2D, IGameView
     public ViewPools Pools { get; private set; }
     public bool IsRunning => _runningQueue.IsRunning;
     public IReadOnlyGameState GameState => Scheduler.GameState;
-    public EventScheduler Scheduler { get; private set; }
+    public IEventScheduler Scheduler { get; private set; }
     public GameViewTeamStyle CurrentStyle { get; private set; } = null!;
     public int PlayerTeam { get; set; }
 
@@ -72,7 +72,7 @@ public partial class GameView : Node2D, IGameView
         DrawEventTimer.Timeout += CheckDrawEvent;
     }
 
-    public void Init(EventScheduler scheduler)
+    public void Init(IEventScheduler scheduler)
     {
         Scheduler = scheduler;
         Scheduler.SimulationUpdated += SchedulerOnSimulationUpdated;
