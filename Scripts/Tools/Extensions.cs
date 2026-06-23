@@ -179,11 +179,12 @@ public static class Extensions
             return true;
         }
     }
-    extension(Vector2I?[] args)
+    extension(Vector2I?[]? args)
     {
         public bool TryGetArgs(int index, out Vector2I result)
         {
-            if (index < 0 || index >= args.Length || args[index] is null)
+            
+            if (args == null || index < 0 || index >= args.Length || args[index] is null)
             {
                 result = default;
                 return false;

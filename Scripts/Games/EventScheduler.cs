@@ -1,10 +1,12 @@
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using NLog;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
+using TheBlockWar.Scripts.Tools.Jsons;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -71,7 +73,7 @@ public class EventScheduler : IEventScheduler
 
     private void OnEventEnabledManagerUpdate(object? sender, EventArgs e)
     {
-        UpdateSimulation();
+        UpdateSimulationTest();
     }
     public void ReloadGameState()
     {
@@ -151,15 +153,62 @@ public class EventScheduler : IEventScheduler
         }
         
         var sb = new StringBuilder();
-        Logger.Trace("结构树:\n{tree}", result.Steps.ToTree());
+        //Logger.Trace("结构树:\n{tree}", result.Steps.ToTree());
         // 运行层事件执行完毕后，清空运行层
         _eventManager.ClearLayerEvent(SimulationLayer.Running);
         
         _runningSchedulers.Pop();
         _isSimulating = false;
         SimulationUpdated?.Invoke(this, result);
+        var json = result.ToJson();
+        var r = GameJson.FromJson<SchedulerResult>(json);
     }
 
+    /// <summary>
+    /// 更新模拟
+    /// </summary>
+    public void UpdateSimulationTest()
+    {
+        if (_isSimulating) return;
+        _isSimulating = true;
+        Logger.Info("触发更新");
+        var result = new SchedulerResult();
+        _runningSchedulers.Push(this);
+        
+        result.RunningCount = _eventManager.RunningEvents.Count;
+        // 创建快照，用于焦点层和等待层事件执行
+        var snapshot = _snapshotChache =
+            (_snapshotChache is null || _snapshotChache.Owner != GameState)
+                ? _gameState.GetSnapshot()
+                : _snapshotChache;
+        snapshot.ClearIfSnapshot();
+
+        // 焦点层和等待层事件执行
+        foreach (var ev in _eventManager.RunningEvents.Concat(_eventManager.FocusedEvents.Concat(_eventManager.WaitingEvents)))
+        {
+            if (!ev.CheckIsValid(snapshot)) continue;
+            var obj = new SimObject(_snapshotChache, ev.Layer, new(), ev.Id);
+            obj.PushContext(CreateSimulationContext(ev));
+            result.Sims.Add(obj);
+            ev.OnApply(ev, obj);
+            obj.PopContext();
+        }
+        
+        var sb = new StringBuilder();
+        //Logger.Trace("结构树:\n{tree}", result.Steps.ToTree());
+        // 运行层事件执行完毕后，清空运行层
+        _eventManager.ClearLayerEvent(SimulationLayer.Running);
+        
+        _runningSchedulers.Pop();
+        _isSimulating = false;
+        
+        var json = result.ToJson();
+        var r = GameJson.FromJson<SchedulerResult>(json);
+        r?.Replay(_gameState);
+        SimulationUpdated?.Invoke(this, result);
+    }
+    
+    
     private SimContext CreateSimulationContext(SchedulerEvent ev)
     {
         var context = new SimContext(ev is SkillEvent sev ? sev.SkillBindUnitId : 0);

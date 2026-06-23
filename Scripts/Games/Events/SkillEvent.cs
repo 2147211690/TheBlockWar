@@ -1,3 +1,4 @@
+using System.Linq;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
@@ -44,7 +45,7 @@ public sealed class SkillEvent(long id) : SchedulerEvent(id)
         var unit = obj.State.UnitMapState.GetUnit(SkillBindUnitId);
         if (unit.IsNull()) return;
         var useCoords = unit.Coords;
-        SkillName.GetSkillInfo().Instance.SkillCore(obj, unit, useCoords, SkillArgs ?? []);
+        obj.ApplyUnitSkill(unit.Id, SkillName, useCoords, SkillArgs);
     }
 
     public override bool CheckIsValid(IReadOnlyGameState gameState)

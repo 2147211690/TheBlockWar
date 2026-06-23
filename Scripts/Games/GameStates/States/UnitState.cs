@@ -1,10 +1,10 @@
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.GameStates;
-
 public class UnitState : IReadOnlyUnitState
 {
     public static readonly UnitState Null = IReadOnlyUnitState.Null.Clone();
@@ -20,7 +20,6 @@ public class UnitState : IReadOnlyUnitState
     public bool IsFlying { get; set; } = false;
     public CanUseSkillMask CanUseSkill { get; set; } = CanUseSkillMask.All;
     public IReadOnlyList<BuffState> Buffs => _buffs ?? [];
-
     public IReadOnlyList<BuffState> BuffsStatic
     {
         get
@@ -33,6 +32,7 @@ public class UnitState : IReadOnlyUnitState
             return _buffsStatic ?? [];
         }
     }
+    [JsonInclude]
     private List<BuffState>? _buffs;
     private List<BuffState>? _buffsStatic;
     private bool _isBuffStaticDirty = true;

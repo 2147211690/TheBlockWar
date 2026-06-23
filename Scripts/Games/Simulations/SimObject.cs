@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
@@ -13,6 +14,7 @@ public class ReadOnlySimObject(IReadOnlyGameState state, SimulationLayer layer, 
 public class SimObject(IGameState state, SimulationLayer layer, SimResultList steps, long sourceEventId)
     : ReadOnlySimObject(state, layer, steps, sourceEventId)
 {
+    [JsonIgnore]
     public override IGameState State { get; } = state;
 }
 

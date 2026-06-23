@@ -449,9 +449,9 @@ namespace StepGenerator
         {
             var allCtorParams = new List<string> { "short deep, int team" };
             allCtorParams.AddRange(method.MethodParameters.Select(p => $"{GetNullableTypeName(p)} {p.ParameterName}"));
-            allCtorParams.AddRange(method.ExtraParameters.Select(e => $"{e.TypeName} {e.Name}"));
+            allCtorParams.AddRange(method.ExtraParameters.Select(e => $"{e.TypeName} re{e.Name}"));
 
-            var ctorParamList = string.Join(", ", allCtorParams);
+            var ctorParamList = string.Join(", ", allCtorParams.Select(s => $"{s} = default"));
             var baseCall = "StepResult(deep, team)";
 
             var viewRunParams = ReplacePlaceholders(config.ViewRunParameters, "StepResult");
@@ -468,10 +468,8 @@ namespace StepGenerator
 
             var viewRunCall = string.IsNullOrEmpty(coreRunArgsTemplate) ? "()" : $"({coreRunArgsTemplate})";
             var viewDrawCall = string.IsNullOrEmpty(coreDrawArgsTemplate) ? "()" : $"({coreDrawArgsTemplate})";
-
             sb.AppendLine($"{indent}public class {method.ResultClassName}({ctorParamList}) : {baseCall}");
             sb.AppendLine($"{indent}{{");
-
             foreach (var param in method.MethodParameters)
             {
                 var typeName = GetNullableTypeName(param);
@@ -480,7 +478,7 @@ namespace StepGenerator
 
             foreach (var extra in method.ExtraParameters)
             {
-                sb.AppendLine($"{indent}    public {extra.TypeName} Re{Capitalize(extra.Name)} {{ get; set; }} = {extra.Name};");
+                sb.AppendLine($"{indent}    public {extra.TypeName} Re{Capitalize(extra.Name)} {{ get; set; }} = re{extra.Name};");
             }
 
             var stepCtorArgs = string.Join(", ", method.MethodParameters.Select(p => $"{Capitalize(p.ParameterName)}"));

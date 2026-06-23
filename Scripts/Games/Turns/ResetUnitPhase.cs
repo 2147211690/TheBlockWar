@@ -1,5 +1,6 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Turns;
@@ -14,10 +15,7 @@ public class ResetUnitPhase : ITurnPhase
     {
         EventScheduler.RunAction(obj =>
         {
-            foreach (var unit in obj.State.UnitMapState.GetAllUnits())
-            {
-                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.CanUseSkill = CanUseSkillMask.All);
-            }
+            obj.ApplyResetUnit();
         });
         return GDTask.CompletedTask;
     }

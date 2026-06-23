@@ -107,7 +107,7 @@ public partial class Test : Node2D
         _view.Init(_eventScheduler);
         _view.PlayerTeam = _player.Team;
         
-        _pvpMode = new PvpTurnStrategy([new EasyAiPlayer(1){GameScheduler = _eventScheduler}, _player]);
+        _pvpMode = new PvpTurnStrategy([new PassPlayer(1){GameScheduler = _eventScheduler}, _player]);
         _turnManager = new TurnManager(_eventScheduler, _pvpMode);
         _player.TurnManager = _turnManager;
         _combatUi.Bind(_eventScheduler, _view, _player);

@@ -7,13 +7,18 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
-        public void ApplyModifyGlobalBuff(string sourceUnitName, string sourceBuff, int groupMask, string targetBuff, bool add)
+        [Step([], [])]
+        public ApplyModifyGlobalBuffResult ApplyModifyGlobalBuff(string sourceUnitName, string sourceBuff, int groupMask, string targetBuff, bool add)
         {
             EnterSimulation();
-            Main();
+            var r = Main();
             ExitSimulation();
-            void Main()
+            return r;
+            
+            ApplyModifyGlobalBuffResult Main()
             {
+                var r = obj.Steps.AddResult(new ApplyModifyGlobalBuffResult(
+                    CurrentDeep, CurrentTeam, sourceUnitName, sourceBuff, groupMask, targetBuff, add));
                 if (add)
                 {
                     var index = obj.State.BuffGlobalState.AddGlobalBuff(sourceUnitName, sourceBuff, groupMask, targetBuff);
@@ -42,7 +47,28 @@ partial class Simulator
                         }
                     }
                 }
+                return r;
             }
         }
+    }
+
+    public static partial void ApplyModifyGlobalBuffReplayCore(IGameState state, ApplyModifyGlobalBuffResult result)
+    {
+        if (result.Add)
+        {
+            state.BuffGlobalState.AddGlobalBuff(result.SourceUnitName, result.SourceBuff, result.GroupMask, result.TargetBuff);
+        }
+        else
+        {
+            state.BuffGlobalState.RemoveGlobalBuff(result.SourceUnitName, result.SourceBuff, result.GroupMask, result.TargetBuff);
+        }
+    }
+
+    public static partial void ApplyModifyGlobalBuffViewDraw(IGameView view, ReadOnlySimObject sim, ApplyModifyGlobalBuffResult result)
+    {
+    }
+    public static partial GDTask ApplyModifyGlobalBuffViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyModifyGlobalBuffResult result)
+    {
+        return GDTask.CompletedTask;
     }
 }

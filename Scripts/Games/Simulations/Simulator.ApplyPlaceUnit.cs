@@ -67,7 +67,8 @@ partial class Simulator
     public static partial void ApplyPlaceUnitReplayCore(IGameState state, ApplyPlaceUnitResult result)
     {
         if (!result.ReValid) return;
-        state.UnitMapState.ModifyUnit(result.ReUnitState.Id, u => u.Name = result.UnitName);
+        var unitState = result.ReUnitState.Clone();
+        state.UnitMapState.AddUnit(unitState);
         var info = result.UnitName.GetUnitInfo();
         var newUnit = state.UnitMapState.GetUnit(result.ReUnitState.Id);
         if (info.Buffs is { Length: > 0 })
