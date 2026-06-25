@@ -1,5 +1,5 @@
 
-namespace TheBlockWar.View.Uis;
+namespace TheBlockWar.Scripts.Views.Uis;
 
 public partial class InfoPanel : CenterContainer
 {

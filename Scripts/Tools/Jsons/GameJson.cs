@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 
 namespace TheBlockWar.Scripts.Tools.Jsons;
@@ -11,7 +12,7 @@ public static class GameJson
         IgnoreReadOnlyFields = true,
         IgnoreReadOnlyProperties = true,
     };
-    extension(object obj)
+    extension<T>(T obj)
     {
         public string ToJson()
         {

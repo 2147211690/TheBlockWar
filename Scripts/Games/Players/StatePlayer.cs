@@ -1,5 +1,8 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using TheBlockWar.Scripts.Games.Events;
+using TheBlockWar.Scripts.Games.Onlines;
+using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
@@ -12,32 +15,16 @@ public partial class StatePlayer : Node2D, IPlayer
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
     public IEventScheduler? GameScheduler { get; set; }
-    public IReadOnlyList<SkillState> SkillingUnitSkillStates => _skillStates;
     public int Power { get; set => SetField(ref field, value); }
-    public int Team { get; private set; }
-
-    public bool IsTurn
-    {
-        get;
-        set
-        {
-            if (!SetField(ref field, value)) return;
-            if (field)
-            {
-                _turnCompletionSource = new GDTaskCompletionSource();
-                _turnCompletionSource.Task.Forget();
-            }
-            else
-            {
-                _turnCompletionSource?.TrySetResult();
-                _turnCompletionSource = null;
-            }
-        }
-    }
+    public int Team { get; set; }
+    public IPlayerOperationSynchronizer PlayerOperationSynchronizer { get; private set; } = null!;
+    public bool IsTurn { get; set => SetField(ref field, value); }
+    public TurnManager TurnManager { get; set; }
 
     public int PhaseOrder { get; set; }
+    public int CurrentTurn { get; set; }
+    public bool WaitConfirm { get; set; } = true;
     public Vector2I CurrentMouseCoords { get; private set; }
-    public TurnManager TurnManager { get; set; } = null!;
     public long SelectedUnitId { get; set => SetField(ref field, value); }
     public long FocusedUnitId { get; set => SetField(ref field, value); }
     public IGameView GameView { get; private set; } = null!;
@@ -45,23 +32,29 @@ public partial class StatePlayer : Node2D, IPlayer
     private GDTaskCompletionSource? _turnCompletionSource;
     private StateMachine<State> _stateMachine;
     private FreeState _freeState;
-    private SkillingState _skillingState;
-    private SkillState[] _skillStates = [];
+    private SkillState _skillState;
+    private BusyState _busyState;
+    private SelectState _selectState;
+    
     private Vector2I _currentCoords;
     public event PropertyChangedEventHandler? PropertyChanged;
-    
     protected StatePlayer()
     {
         _freeState = new(this);
-        _skillingState = new(this);
+        _skillState = new(this);
+        _busyState = new(this);
+        _selectState = new(this);
+        
         _stateMachine = new StateMachine<State>(_freeState);
     }
 
-    public static StatePlayer Create(int team, IGameView gameView)
+    public static StatePlayer Create(long id, IGameView gameView, IEventScheduler gameScheduler, IPlayerOperationSynchronizer playerOperationSynchronizer)
     {
         var player = new StatePlayer();
-        player.Team = team;
+        player.Id = id;
         player.GameView = gameView;
+        player.GameScheduler = gameScheduler;
+        player.PlayerOperationSynchronizer = playerOperationSynchronizer;
         return player;
     }
     
@@ -92,16 +85,16 @@ public partial class StatePlayer : Node2D, IPlayer
         {
             CurrentMouseCoords = coords.Coords;
         }
+        if (!IsTurn || WaitConfirm) return;
         _stateMachine.CurrentState.OnInput(input);
     }
+
+    public long Id { get; private set; }
 
     public void Init()
     {
         _stateMachine.Init();
     }
-
-    public GDTask WaitTurnComplete() => _turnCompletionSource?.Task ?? GDTask.CompletedTask;
-
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

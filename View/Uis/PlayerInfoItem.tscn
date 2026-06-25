@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://iwaf2bq0hsq2"]
+
+[ext_resource type="Theme" uid="uid://bdvmqnfsqqedl" path="res://Resources/Themes/UiTheme.tres" id="1_k8p7u"]
+[ext_resource type="Texture2D" uid="uid://c5ayhd5fgh63i" path="res://icon.svg" id="2_cs5aq"]
+[ext_resource type="Script" uid="uid://dt2cnrc4x0a53" path="res://Scripts/Views/Uis/PlayerInfoItem.cs" id="2_pdp0q"]
+
+[node name="PlayerInfoItem" type="PanelContainer" unique_id=1856761249 node_paths=PackedStringArray("NameLabel", "IdLabel", "HeaderTextureRect")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -965.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_k8p7u")
+script = ExtResource("2_pdp0q")
+NameLabel = NodePath("MarginContainer/HBoxContainer/Label")
+IdLabel = NodePath("MarginContainer/HBoxContainer/Label2")
+HeaderTextureRect = NodePath("MarginContainer/HBoxContainer/AspectRatioContainer/TextureRect")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=972255698]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=2050956381]
+layout_mode = 2
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="MarginContainer/HBoxContainer" unique_id=966893669]
+layout_mode = 2
+stretch_mode = 1
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer/AspectRatioContainer" unique_id=752824566]
+layout_mode = 2
+texture = ExtResource("2_cs5aq")
+expand_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/HBoxContainer" unique_id=1138606106]
+layout_mode = 2
+theme_override_font_sizes/font_size = 45
+text = "PlayerName"
+
+[node name="Label2" type="Label" parent="MarginContainer/HBoxContainer" unique_id=1633764408]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 45
+text = "1232412"
+horizontal_alignment = 2

@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://duxtd3f2r77m3"]
+
+[ext_resource type="Script" uid="uid://bggta4x7kf5v4" path="res://addons/mapcamera2d/MapCamera2D.gd" id="1_d54ji"]
+[ext_resource type="Script" uid="uid://cav3fiunigjjl" path="res://Scripts/Views/Scenes/Pvp.cs" id="1_opoqn"]
+[ext_resource type="PackedScene" uid="uid://deknlmtpc7g4t" path="res://View/GameView.tscn" id="2_opoqn"]
+[ext_resource type="PackedScene" uid="uid://clbp4km484ly4" path="res://View/Uis/CombatUi.tscn" id="3_uu4ov"]
+
+[node name="Pvp" type="Node2D" unique_id=1811319252 node_paths=PackedStringArray("_gameView", "_combatUi")]
+script = ExtResource("1_opoqn")
+_gameView = NodePath("GameView")
+_combatUi = NodePath("CanvasLayer/CombatUi")
+
+[node name="MapCamera2D" type="Camera2D" parent="." unique_id=657690164]
+zoom = Vector2(2.205, 2.205)
+script = ExtResource("1_d54ji")
+pan_speed = 0.0
+drag_inertia = 0.0
+
+[node name="GameView" parent="." unique_id=1885583899 instance=ExtResource("2_opoqn")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1467922399]
+
+[node name="CombatUi" parent="CanvasLayer" unique_id=100001026 instance=ExtResource("3_uu4ov")]
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=193610486]
+disable_3d = true
+canvas_item_default_texture_filter = 0
+size = Vector2i(50, 50)
+
+[node name="Camera2D" type="Camera2D" parent="SubViewport" unique_id=1689032999]

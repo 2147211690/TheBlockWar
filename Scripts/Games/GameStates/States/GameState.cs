@@ -30,7 +30,6 @@ public class GameState : IGameState
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
     IReadOnlyBuffGlobalState IReadOnlyGameState.BuffGlobalState => BuffGlobalState;
     
-    private Dictionary<string, ISkill[]> _unitSkillMap;
     private Dictionary<long, SchedulerEvent> _events;
 
     public IReadOnlyList<ISkill> GetUnitValidSkills(string unitName)
@@ -45,10 +44,9 @@ public class GameState : IGameState
     {
         LoadGameData(data);
     }
-    public GameState() : this(new (0,0), [], new int[0,0]){}
-    public GameState(Vector2I mapSize, Dictionary<string, ISkill[]> unitSkillMap, int[,] teamRelations, int currentTurn = -1)
+    public GameState() : this(new (0,0), new int[0,0]){}
+    public GameState(Vector2I mapSize, int[,] teamRelations, int currentTurn = -1)
     {
-        _unitSkillMap = unitSkillMap;
         _events = new();
         Size = mapSize;
         BaseTime = DateTime.UtcNow;
@@ -66,7 +64,6 @@ public class GameState : IGameState
 
     public void LoadGameData(GameStateData data)
     {
-        _unitSkillMap = new Dictionary<string, ISkill[]>();
         _events = new();
         foreach (var eventItem in data.Events)
         {

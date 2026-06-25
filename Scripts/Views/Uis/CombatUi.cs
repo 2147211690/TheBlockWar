@@ -3,10 +3,11 @@ using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
-using TheBlockWar.Scripts.Views;
 
-namespace TheBlockWar.View.Uis;
+namespace TheBlockWar.Scripts.Views.Uis;
 
 public partial class CombatUi : Control
 {
@@ -16,14 +17,31 @@ public partial class CombatUi : Control
     [Export] private PackedScene _itemBoxScene = null!;
     [Export] private Control _skillContainer = null!;
     [Export] private Control _buffContainer = null!;
+    [Export] private Control _unitPanel = null!;
     [Export] private TooltipManager _tooltipManager = null!;
     [Export] private Button _stopTurnButton = null!;
+    [Export] private TextureRect _unitPreviewRect = null!;
+    [Export] private Viewport _unitPreviewViewport = null!;
+    [Export] private Camera2D _unitPreviewCamera = null!;
+    [Export] private Control _titleTip = null!;
+    [Export] private Label _titleTipLabel = null!;
     private IPlayer _player = null!;
     private IEventScheduler _eventScheduler = null!;
+    private long _selectedUnitId = 0;
+    
+    private Tween? _titleTipTween;
     public override void _Ready()
     {
         base._Ready();
         _tooltipManager.OnHoverChange += OnHoverChange;
+        _unitPreviewViewport.World2D = GetViewport().World2D;
+    }
+
+    public override void _Process(double delta)
+    {
+        var uv = GameView.GetUnitView(_selectedUnitId);
+        if (uv == null) return;
+        _unitPreviewCamera.GlobalPosition = uv.GlobalPosition;
     }
 
     public void Bind(IEventScheduler eventScheduler, IGameView gameView, IPlayer player)
@@ -48,13 +66,22 @@ public partial class CombatUi : Control
         void PlayerOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var player = (sender as IPlayer)!;
-            if (e.PropertyName is nameof(IPlayer.SkillingUnitSkillStates))
+            if (e.PropertyName is nameof(IPlayer.SelectedUnitId))
             {
+                _selectedUnitId = player.SelectedUnitId;
                 ClearSkillItem();
-                for (var index = 0; index < _player.SkillingUnitSkillStates.Count; index++)
+                
+                _unitPanel.Visible = _selectedUnitId != 0;
+                if (_selectedUnitId != 0)
                 {
-                    var skill = _player.SkillingUnitSkillStates[index];
-                    AddSkillItem(skill, index);
+                    var skills =
+                        GameView.GameState.GetUnitValidSkills(
+                            GameView.GameState.UnitMapState.GetUnit(player.SelectedUnitId).Name);
+                    for (var index = 0; index < skills.Count; index++)
+                    {
+                        var skill = skills[index];
+                        AddSkillItem(skill.SkillName.GetSkillInfo(), index);
+                    }
                 }
             }
             if (e.PropertyName is nameof(IPlayer.SelectedUnitId))
@@ -65,6 +92,11 @@ public partial class CombatUi : Control
                 {
                     AddBuffItem(buff);
                 }
+            }
+
+            if (e.PropertyName is nameof(IPlayer.IsTurn))
+            {
+                ShowTitleTip(player.IsTurn ? "你的回合" : "回合结束", 1.0f);
             }
         }
         void StopTurnButtonOnPressed()
@@ -110,11 +142,11 @@ public partial class CombatUi : Control
         }
     }
 
-    public void AddSkillItem(SkillState skillState, int index)
+    public void AddSkillItem(SkillInfo skill, int index)
     {
         var itemBox = _itemBoxScene.Instantiate<ItemBox>();
         _skillContainer.AddChild(itemBox);
-        itemBox.MetaData = skillState.Skill;
+        itemBox.MetaData = skill;
         itemBox.MouseEntered += () => _tooltipManager.MouseEnter(itemBox);
         itemBox.MouseExited += () => _tooltipManager.MouseExit(itemBox);
         itemBox.Click += () => _player.OnInput(new PlayerInputSkill(index));
@@ -148,5 +180,39 @@ public partial class CombatUi : Control
         {
             _buffContainer.GetChild(i).QueueFree();
         }
+    }
+
+    public void ShowTitleTip(string title, float time)
+    {
+        // 如果已有动画，先杀死
+        if (_titleTipTween != null)
+        {
+            _titleTipTween.Kill();
+            _titleTipTween = null;
+        }
+
+        _titleTipLabel.Text = title;
+        _titleTip.Visible = true;
+        _titleTip.Modulate = new Color(1, 1, 1, 0); // 初始透明
+
+        _titleTipTween = CreateTween();
+        _titleTipTween.SetTrans(Tween.TransitionType.Linear);
+        _titleTipTween.SetEase(Tween.EaseType.InOut);
+
+        // 快速淡入（0.1 秒变为不透明）
+        _titleTipTween.TweenProperty(_titleTip, "modulate:a", 1.0, 0.1);
+    
+        // 停留显示
+        _titleTipTween.TweenInterval(time);
+    
+        // 快速淡出（0.1 秒变为透明）
+        _titleTipTween.TweenProperty(_titleTip, "modulate:a", 0.0, 0.1);
+    
+        // 动画结束隐藏并清理
+        _titleTipTween.Finished += () =>
+        {
+            _titleTip.Visible = false;
+            _titleTipTween = null;
+        };
     }
 }

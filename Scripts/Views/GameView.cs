@@ -129,7 +129,7 @@ public partial class GameView : Node2D, IGameView
         int eventCount = e.Sims.Count - e.RunningCount;
         if (eventCount != 0 || _prevEventQueueCount != 0) 
             _isEventDirty = true;
-        
+
         if (e.RunningCount > 0)
         {
             ClearEventViews();
@@ -139,7 +139,9 @@ public partial class GameView : Node2D, IGameView
 
         _eventQueue.Clear();
         for (int i = e.RunningCount; i < e.Sims.Count; i++)
+        {
             _eventQueue.Enqueue(e.Sims[i]);
+        }
     }
 
     #endregion

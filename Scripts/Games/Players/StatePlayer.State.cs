@@ -11,7 +11,6 @@ public partial class StatePlayer
         public IReadOnlyGameState? GameState => Player.GameScheduler?.GameState;
         public IEventScheduler? EventScheduler => Player.GameScheduler;
         public StateMachine<State> StateMachine => Player._stateMachine;
-        public long FocusedUnitId => Player.FocusedUnitId;
         public virtual void OnEnter() {}
         public virtual void OnExit() {}
         public virtual void OnInput<T>(in T input) {}

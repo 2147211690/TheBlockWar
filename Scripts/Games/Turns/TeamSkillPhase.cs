@@ -22,6 +22,7 @@ public class TeamSkillPhase : ITurnPhase
     }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; }
+    public TurnManager TurnManager { get; private set; }
     
     public TeamSkillPhase(int team)
     {
@@ -40,11 +41,12 @@ public class TeamSkillPhase : ITurnPhase
         }
     }
 
-    public ITurnPhase Init(int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         PhaseOrder = order;
         EventScheduler = eventScheduler;
         Turn = turn;
+        TurnManager = turnManager;
         return this;
     }
 

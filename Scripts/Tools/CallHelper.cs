@@ -3,6 +3,17 @@ public partial class CallHelper : Node
 {
     private Queue<(object,Action<object>)> _callActions = new();
     private HashSet<object> _calledKeys = new();
+    private static CallHelper _instance;
+
+    protected CallHelper()
+    {
+        if (_instance != null)
+        {
+            QueueFree();
+        }
+        else _instance = this;
+    }
+    
     public override void _Process(double delta)
     {
         if (_callActions.Count == 0) return;
@@ -14,11 +25,11 @@ public partial class CallHelper : Node
             pair.Item2(pair.Item1);
         }
     }
-    public void QueueCall(object key, Action<object> action)
+    public static void QueueCall(object caller, Action<object> action)
     {
-        if (_calledKeys.Contains(key)) return;
-        _callActions.Enqueue((key,action));
-        _calledKeys.Add(key);
+        if (_instance._calledKeys.Contains(caller)) return;
+        _instance._callActions.Enqueue((caller,action));
+        _instance._calledKeys.Add(caller);
     }
     
 }

@@ -19,7 +19,7 @@ public partial class UnitsView : Node2D
         _unitViews.Clear();
         _unitMaps.Clear();
     }
-    public UnitView? GetUnitView(long unitId) => _unitViews.GetValueOrDefault(unitId);
+    public UnitView? GetUnitView(long unitId) => unitId == 0 ? null : _unitViews.GetValueOrDefault(unitId);
     public UnitView? GetUnitView(Vector2I coords) => _unitViews.GetValueOrDefault(_unitMaps.GetValueOrDefault(coords));
     public void FreeUnitView(long unitId)
     {

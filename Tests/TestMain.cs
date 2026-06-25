@@ -1,16 +1,10 @@
 using ImGuiNET;
-using TheBlockWar.Scripts.Games;
-using TheBlockWar.Scripts.Games.Buffs;
-using TheBlockWar.Scripts.Games.Players;
-using TheBlockWar.Scripts.Games.Skills;
-using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Tests;
-[SceneTree]
 public partial class TestMain : Node2D
 {
-    private TaskQueue _taskQueue = new();
+    /*private TaskQueue _taskQueue = new();
     private int animationIndex = 0;
     public override void _Ready()
     {
@@ -55,5 +49,5 @@ public partial class TestMain : Node2D
             GD.Print($"动画{index}完成");
         });
         GD.Print($"检测到动画{index}完成");
-    }
+    }*/
 }

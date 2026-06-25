@@ -1,0 +1,163 @@
+[gd_scene format=3 uid="uid://dt5fmoyumujae"]
+
+[ext_resource type="Theme" uid="uid://bdvmqnfsqqedl" path="res://Resources/Themes/UiTheme.tres" id="1_7rjv6"]
+[ext_resource type="Script" uid="uid://uquwnxleoobh" path="res://Scripts/Views/Uis/PvpRoom.cs" id="2_24lpb"]
+[ext_resource type="PackedScene" uid="uid://duxtd3f2r77m3" path="res://Scenes/Pvp.tscn" id="3_isbbc"]
+[ext_resource type="PackedScene" uid="uid://iwaf2bq0hsq2" path="res://View/Uis/PlayerInfoItem.tscn" id="3_teav0"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_lho88"]
+font_size = 59
+
+[node name="PvpRoom" type="Control" unique_id=1261284488 node_paths=PackedStringArray("AddressText", "PortText", "NameText", "CreateButton", "JoinButton", "ExitButton", "StartButton", "LoadingButton", "PlayerInfoItemContainer")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_7rjv6")
+script = ExtResource("2_24lpb")
+PvpScene = ExtResource("3_isbbc")
+AddressText = NodePath("PanelContainer/MarginContainer/GridContainer/Infos/Address/LineEdit")
+PortText = NodePath("PanelContainer/MarginContainer/GridContainer/Infos/Port/LineEdit")
+NameText = NodePath("PanelContainer/MarginContainer/GridContainer/Infos/Name/LineEdit")
+CreateButton = NodePath("PanelContainer/MarginContainer/GridContainer/Buttons/CreateButton")
+JoinButton = NodePath("PanelContainer/MarginContainer/GridContainer/Buttons/JoinButton")
+ExitButton = NodePath("PanelContainer/MarginContainer/GridContainer/Buttons/ExitButton")
+StartButton = NodePath("PanelContainer/MarginContainer/GridContainer/Buttons/StartButton")
+LoadingButton = NodePath("PanelContainer/MarginContainer/GridContainer/Buttons/LoadingButton")
+PlayerInfoItemContainer = NodePath("PanelContainer/MarginContainer/GridContainer/PanelContainer/MarginContainer/ScrollContainer/VBoxContainer")
+PlayerInfoItemPrefab = ExtResource("3_teav0")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1595309957]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1324372890]
+layout_mode = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 60
+
+[node name="GridContainer" type="GridContainer" parent="PanelContainer/MarginContainer" unique_id=554059018]
+layout_mode = 2
+theme_override_constants/h_separation = 69
+theme_override_constants/v_separation = 43
+columns = 2
+
+[node name="Infos" type="HBoxContainer" parent="PanelContainer/MarginContainer/GridContainer" unique_id=1633189209]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 5.51
+theme_override_constants/separation = 24
+
+[node name="Name" type="HBoxContainer" parent="PanelContainer/MarginContainer/GridContainer/Infos" unique_id=660250957]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.72
+theme_override_constants/separation = 30
+
+[node name="Address" type="Label" parent="PanelContainer/MarginContainer/GridContainer/Infos/Name" unique_id=1590963189]
+layout_mode = 2
+text = "昵称"
+label_settings = SubResource("LabelSettings_lho88")
+
+[node name="LineEdit" type="LineEdit" parent="PanelContainer/MarginContainer/GridContainer/Infos/Name" unique_id=1557702251]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 45
+text = "Pig God"
+
+[node name="Address" type="HBoxContainer" parent="PanelContainer/MarginContainer/GridContainer/Infos" unique_id=73268443]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.69
+theme_override_constants/separation = 30
+
+[node name="Address" type="Label" parent="PanelContainer/MarginContainer/GridContainer/Infos/Address" unique_id=1853300202]
+layout_mode = 2
+text = "地址"
+label_settings = SubResource("LabelSettings_lho88")
+
+[node name="LineEdit" type="LineEdit" parent="PanelContainer/MarginContainer/GridContainer/Infos/Address" unique_id=1555380825]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 45
+text = "127.0.0.1"
+
+[node name="Port" type="HBoxContainer" parent="PanelContainer/MarginContainer/GridContainer/Infos" unique_id=263033743]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 30
+
+[node name="Port" type="Label" parent="PanelContainer/MarginContainer/GridContainer/Infos/Port" unique_id=725717883]
+layout_mode = 2
+text = "端口"
+label_settings = SubResource("LabelSettings_lho88")
+
+[node name="LineEdit" type="LineEdit" parent="PanelContainer/MarginContainer/GridContainer/Infos/Port" unique_id=1228589511]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 45
+text = "25565"
+
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/GridContainer" unique_id=901225659]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/GridContainer" unique_id=1717740840]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/GridContainer/PanelContainer" unique_id=153026402]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/GridContainer/PanelContainer/MarginContainer" unique_id=827348952]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/GridContainer/PanelContainer/MarginContainer/ScrollContainer" unique_id=1779665521]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Buttons" type="VBoxContainer" parent="PanelContainer/MarginContainer/GridContainer" unique_id=1197756773]
+layout_mode = 2
+theme_override_constants/separation = 19
+
+[node name="JoinButton" type="Button" parent="PanelContainer/MarginContainer/GridContainer/Buttons" unique_id=192729313]
+layout_mode = 2
+theme_override_font_sizes/font_size = 54
+text = "加入房间"
+
+[node name="ExitButton" type="Button" parent="PanelContainer/MarginContainer/GridContainer/Buttons" unique_id=131397369]
+layout_mode = 2
+theme_override_font_sizes/font_size = 54
+text = "退出房间"
+
+[node name="CreateButton" type="Button" parent="PanelContainer/MarginContainer/GridContainer/Buttons" unique_id=146334229]
+layout_mode = 2
+theme_override_font_sizes/font_size = 54
+text = "创建房间"
+
+[node name="StartButton" type="Button" parent="PanelContainer/MarginContainer/GridContainer/Buttons" unique_id=603086539]
+layout_mode = 2
+theme_override_font_sizes/font_size = 54
+text = "开始游戏"
+
+[node name="LoadingButton" type="Button" parent="PanelContainer/MarginContainer/GridContainer/Buttons" unique_id=521800701]
+layout_mode = 2
+theme_override_font_sizes/font_size = 54
+disabled = true
+text = "加载中"

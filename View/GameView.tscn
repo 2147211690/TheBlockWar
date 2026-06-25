@@ -44,5 +44,5 @@ script = ExtResource("9_dgx78")
 metadata/_custom_type_script = "uid://ble1upceejr4q"
 
 [node name="DrawEventTimer" type="Timer" parent="." unique_id=836843991]
-wait_time = 0.02
+wait_time = 0.001
 autostart = true

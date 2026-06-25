@@ -2,24 +2,30 @@ using System.ComponentModel;
 using System.Linq;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Players;
 
 public class EasyAiPlayer : IPlayer
 {
-    public EasyAiPlayer(int team)
+    private IPlayerOperationSynchronizer _playerOperationSynchronizer;
+    public EasyAiPlayer(int team, long id, IEventScheduler gameScheduler, IPlayerOperationSynchronizer playerOperationSynchronizer)
     {
         Team = team;
+        Id = id;
+        _playerOperationSynchronizer = playerOperationSynchronizer;
+        GameScheduler = gameScheduler;
     }
+    public long Id { get; }
     public event PropertyChangedEventHandler? PropertyChanged;
     public IEventScheduler? GameScheduler { get; set; }
-    public IReadOnlyList<SkillState> SkillingUnitSkillStates { get; }
     public long SelectedUnitId { get; }
     public int Power { get; }
-    public int Team { get; }
+    public int Team { get; set; }
 
     public bool IsTurn
     {
@@ -28,14 +34,19 @@ public class EasyAiPlayer : IPlayer
         {
             if (field == value) return;
             field = value;
-            if (field)
+            if (value)
             {
                 TurnAsync().Forget();
             }
         }
     }
 
+    public TurnManager TurnManager { get; set; }
+
     public int PhaseOrder { get; set; }
+    public int CurrentTurn { get; set; }
+    public bool WaitConfirm { get; set; } = true;
+
     public void OnInput<T>(in T input)
     {
     }
@@ -43,12 +54,7 @@ public class EasyAiPlayer : IPlayer
     public void Init()
     {
     }
-
-    public GDTask WaitTurnComplete()
-    {
-        return GDTask.WaitUntil(() => !IsTurn);
-    }
-
+    
     public async GDTask TurnAsync()
     {
         var state = GameScheduler!.GameState;
@@ -65,7 +71,8 @@ public class EasyAiPlayer : IPlayer
             if (validSkills.Count == 0)
                 continue;
 
-            var skill = validSkills[Random.Shared.Next(validSkills.Count)];
+            var skillIndex = Random.Shared.Next(validSkills.Count);
+            var skill = validSkills[skillIndex];
             var args = new Vector2I?[skill.ArgCount];
             var success = true;
             for (var i = 0; i < skill.ArgCount; i++)
@@ -76,25 +83,21 @@ public class EasyAiPlayer : IPlayer
                     success = false;
                     break;
                 }
+
                 args[i] = validArgs[Random.Shared.Next(validArgs.Count)];
             }
 
             if (!success)
                 continue;
 
-            var e = GameScheduler.CreateEvent(id => new SkillEvent(id)
-            {
-                SkillBindUnitId = u.Id,
-                SkillName = skill.SkillName,
-                Team = u.Team,
-                SkillArgs = args,
-                Turn = nextTurn,
-                Layer = SimulationLayer.Focused,
-            });
-            await GDTask.Delay(800);
-            e.Layer = SimulationLayer.Waiting;
+            _playerOperationSynchronizer.PushOperation(new PlayerSlowPrepareUnitSkill(
+                Id,
+                u.Coords,
+                skillIndex,
+                args,
+                800));
         }
-        await GDTask.Delay(800);
-        IsTurn = false;
+        await GDTask.Delay(800); 
+        _playerOperationSynchronizer.PushOperation(new PlayerEndTurn(Id));
     }
 }

@@ -19,6 +19,7 @@ public class RegionPhase : ITurnPhase
     }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; }
+    public TurnManager TurnManager { get; private set; }
     private TurnEvent _regionTurnEvent;
     public async GDTask Execute()
     {
@@ -28,11 +29,12 @@ public class RegionPhase : ITurnPhase
         await EventScheduler.WaitCompleteRunning();
     }
 
-    public ITurnPhase Init(int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;
         PhaseOrder = order;
+        TurnManager = turnManager;
         _regionTurnEvent = eventScheduler.CreateEvent(id => new TurnEvent(id)
         {
             Layer = SimulationLayer.Disabled,

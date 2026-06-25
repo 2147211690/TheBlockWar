@@ -2,6 +2,7 @@ using System.Linq;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
 using TheBlockWar.Scripts.Resources;
@@ -12,7 +13,7 @@ namespace TheBlockWar.Scripts.Games.Players;
 
 public partial class StatePlayer
 {
-    private class SkillingState(StatePlayer player) : State(player)
+    private class SkillState(StatePlayer player) : State(player)
     {
         public int CurrentSkillIndex { get; set; } = 0;
         private SkillEvent? _currentSkillEvent;
@@ -25,10 +26,17 @@ public partial class StatePlayer
         private HashSet<Vector2I> _validRegionCoords = new();
         public override void OnEnter()
         {
-            _unitState = GameState?.UnitMapState.GetUnit(FocusedUnitId) ?? UnitState.Null;
+            _unitState = GameState?.UnitMapState.GetUnit(Player.SelectedUnitId) ?? UnitState.Null;
+            if (_unitState.Team != Player.Team)
+            {
+                StateMachine.ChangeState(Player._selectState);
+            }
             _validSkills = GameState?.GetUnitValidSkills(_unitState.Name) ?? [];
             //从这里面通知SkillStates改变
-            TryBeginNewSkill(CurrentSkillIndex);
+            if (!TrySelectSkill(CurrentSkillIndex))
+            {
+                StateMachine.ChangeState(Player._selectState);
+            }
         }
 
         public override void OnExit()
@@ -37,13 +45,16 @@ public partial class StatePlayer
             Player.GameView.ClearRegion();
             _validSkills = [];
             _currentSkill = null!;
-            _currentSkillEvent = null;
+            if (_currentSkillEvent != null)
+            {
+                EventScheduler.DeleteEvent(_currentSkillEvent);
+                _currentSkillEvent = null;
+            }
             _unitState = UnitState.Null;
             _currentSkillArgs = null;
             _validRegionId = 0;
             _currentArgIndex = -1;
             _validRegionCoords.Clear();
-            NotifySkillStatesChanged();
         }
 
         public override void OnInput<T>(in T input)
@@ -52,7 +63,13 @@ public partial class StatePlayer
             switch (input)
             {
                 case PlayerInputClick { Button: MouseButtonMask.Left } click: //选定
-                    TryEnterToNextArg();
+                    if (IsCurrentValidArg())
+                        TryEnterToNextArg();
+                    else
+                    {
+                        StateMachine.ChangeState(Player._freeState);
+                        Player._freeState.OnInput(click);
+                    }
                     break;
                 case PlayerInputClick { Button: MouseButtonMask.Right } click: //取消
                     TryBackToPreviousArg();
@@ -64,7 +81,7 @@ public partial class StatePlayer
                     if (skill.Index < 0 || skill.Index >= _validSkills.Count ||
                         !_unitState.GetShouldUseSkill(GameState, _validSkills[skill.Index])) return;
                     Logger.Info("选择技能{skill}", skill.Index);
-                    EventScheduler!.DeleteEvent(_currentSkillEvent!);
+                    //EventScheduler!.DeleteEvent(_currentSkillEvent!);
                     Player.GameView.ClearRegion();
                     CurrentSkillIndex = skill.Index;
                     Player._stateMachine.ResetState();
@@ -72,28 +89,25 @@ public partial class StatePlayer
             }
         }
 
-        private void TryBeginNewSkill(int index)
+        private bool TryBeginNewSkill(int index)
         {
-            if (TrySelectSkill(index)) return;
+            if (TrySelectSkill(index)) return true;
             var i = 0;
             for (; i < _validSkills.Count; i++)
                 if (TrySelectSkill(i)) break;
             if (i == _validSkills.Count)
-                StateMachine.ChangeState(Player._freeState);
-
-            bool TrySelectSkill(int index)
-            {
-                _currentSkill = _validSkills[index];
-                if (_currentSkill.ArgCount == 0 || !_unitState.GetShouldUseSkill(GameState, _currentSkill)) return false;
-                for (var j = 0; j < Player._skillStates.Length; j++) 
-                    Player._skillStates[j].IsSelecting = false;
-                Player._skillStates[index].IsSelecting = true;
-                NotifySkillStatesChanged();
-                TryEnterToNextArg();
-                return true;
-            }
+                return false;
+            CurrentSkillIndex = i;
+            return true;
         }
-
+        bool TrySelectSkill(int index)
+        {
+            if (index < 0 || index >= _validSkills.Count) return false;
+            _currentSkill = _validSkills[index];
+            if (_currentSkill.ArgCount == 0 || !_unitState.GetShouldUseSkill(GameState, _currentSkill)) return false;
+            TryEnterToNextArg();
+            return true;
+        }
 
         private void TryEnterToNextArg()
         {
@@ -121,8 +135,16 @@ public partial class StatePlayer
                 if (!IsCurrentValidArg()) return;
                 //所有参数完成
                 Player.GameView.ClearRegion();
-                _currentSkillEvent!.Layer = SimulationLayer.Running;
-                StateMachine.ChangeState(Player._freeState);
+                
+                //EventScheduler.DeleteEvent(_currentSkillEvent);
+
+                Player._busyState.CallOperation = new PlayerSlowUseUnitSkill(Player.Id,
+                    _unitState.Coords,
+                    CurrentSkillIndex,
+                    (Vector2I?[])_currentSkillArgs.Clone(),
+                    800);
+                Player._busyState.NextState = Player._selectState;
+                StateMachine.ChangeState(Player._busyState);
             }
             else //进入下一个参数
             {
@@ -138,9 +160,9 @@ public partial class StatePlayer
             if (_currentArgIndex == 0) //如果已经在第一个参数，取消技能
             {
                 Player.GameView.ClearRegion();
-                EventScheduler.DeleteEvent(_currentSkillEvent!);
+                //EventScheduler.DeleteEvent(_currentSkillEvent!);
                 _currentArgIndex--;
-                StateMachine.ChangeState(Player._freeState);
+                StateMachine.ChangeState(Player._selectState);
             }
             else if (_currentArgIndex < 0) //未初始状态
             {
@@ -179,10 +201,6 @@ public partial class StatePlayer
 
         private bool IsArgGlobalValid(Vector2I? coords) => coords is not null &&
                                                            _validRegionCoords.Contains(coords.Value);
-
-        private void NotifySkillStatesChanged()
-        {
-            Player.OnPropertyChanged(nameof(Player.SkillingUnitSkillStates));
-        }
+        
     }
 }

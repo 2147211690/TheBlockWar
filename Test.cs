@@ -7,6 +7,7 @@ using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.GameStates.Datas;
 using TheBlockWar.Scripts.Games.Modes;
+using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
@@ -14,8 +15,8 @@ using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
-using TheBlockWar.View.Uis;
 using Yitter.IdGenerator;
+using CombatUi = TheBlockWar.Scripts.Views.Uis.CombatUi;
 
 namespace TheBlockWar;
 
@@ -59,9 +60,7 @@ public partial class Test : Node2D
     };
     public override void _Ready()
     {
-        InfoExtensions.InfoManager = ResourceLoader.Load<InfoManager>("uid://cidx5e6oa1bc8");
-        Registerer.Register(InfoExtensions.InfoManager);
-        
+
         //配置Yitter.IdGenerator.IdHelper
         var options = new IdGeneratorOptions
         {
@@ -78,42 +77,35 @@ public partial class Test : Node2D
             // BaseTime = new DateTime(2025, 1, 1),
         };
         YitIdHelper.SetIdGenerator(options);
-        var a = new DefaultIdGenerator(options);
-        a.NewLong();
         
-        TaskTracker.ShowTrackerWindow();
         
-        _currentGameState = new GameState(
-            new Vector2I(10, 10),
-            new Dictionary<string, ISkill[]>() 
-            {
-                [UnitNames.Unit0] = [SkillNames.一般移动.GetSkillInfo().Instance, SkillNames.Test1.GetSkillInfo().Instance],
-            },
-            new int[,] 
-            {
-                {0,1,3},
-                {1,0,3},
-                {3,3,0},
-            }
-            );
+        _currentGameState = 
         _gameState = _currentGameState;
         _eventScheduler = new EventScheduler(_currentGameState, 0);
         _snapshot = null;
 
-        _player = StatePlayer.Create(0, _view);
-        _player.GameScheduler = _eventScheduler;
+        var playerOperationSynchronizer = new OnlinePlayerOperationSynchronizer();
+        AddChild(playerOperationSynchronizer);
+        _player = StatePlayer.Create(_gameState.IdGenerator.NewLong(),  _view, _eventScheduler, playerOperationSynchronizer);
         AddChild(_player);
         
         _view.Init(_eventScheduler);
         _view.PlayerTeam = _player.Team;
         
-        _pvpMode = new PvpTurnStrategy([new PassPlayer(1){GameScheduler = _eventScheduler}, _player]);
+        _pvpMode = new PvpTurnStrategy(
+            playerOperationSynchronizer, 
+            [
+                new EasyAiPlayer(1, 1, _eventScheduler, playerOperationSynchronizer), 
+                _player,
+            ],
+            new FlatMapBuilder(TileNames.Soil0)
+            );
         _turnManager = new TurnManager(_eventScheduler, _pvpMode);
         _player.TurnManager = _turnManager;
         _combatUi.Bind(_eventScheduler, _view, _player);
         _turnManager.Start().Forget();
 
-        TestPlace();
+        //TestPlace();
     }
 
 

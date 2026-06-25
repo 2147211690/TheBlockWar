@@ -2,42 +2,42 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvut4"]
 bg_color = Color(0.060000002, 0.068, 0.1, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
 border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4bnpr"]
 bg_color = Color(0.141806, 0.16068244, 0.23603845, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
 border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ondq0"]
 bg_color = Color(0.19800001, 0.22440001, 0.33, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
 border_color = Color(0.11, 0.11, 0.11, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_duu4d"]
 bg_color = Color(0.141806, 0.16068244, 0.23603845, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
 border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cqnbv"]
 bg_color = Color(0.10800001, 0.12240001, 0.18, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
 border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kwtt4"]
@@ -56,12 +56,28 @@ border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.15575728, 0.56471676, 0.69902104, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u3idm"]
+bg_color = Color(0.20331857, 0.22881812, 0.3254537, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tdysh"]
+bg_color = Color(0.1981138, 0.22313243, 0.31797203, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ubeaa"]
 bg_color = Color(0.141806, 0.16068244, 0.23603845, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
 border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="ImageTexture" id="ImageTexture_ubeaa"]
@@ -94,6 +110,8 @@ ItemBox_Normal/base_type = &"PanelContainer"
 ItemBox_Normal/styles/panel = SubResource("StyleBoxFlat_kwtt4")
 ItemBox_Selected/base_type = &"PanelContainer"
 ItemBox_Selected/styles/panel = SubResource("StyleBoxFlat_ah3ab")
+LineEdit/styles/focus = SubResource("StyleBoxFlat_u3idm")
+LineEdit/styles/normal = SubResource("StyleBoxFlat_tdysh")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_ubeaa")
 PlayerHealth/base_type = &"HSlider"
 PlayerHealth/constants/center_grabber = 0

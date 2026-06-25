@@ -30,3 +30,13 @@ offset = Vector2(0.97, -100)
 [node name="ItemBox" parent="CanvasLayer" unique_id=1163128792 instance=ExtResource("7_74xl5")]
 
 [node name="CombatUi" parent="CanvasLayer" unique_id=100001026 instance=ExtResource("8_e3vl4")]
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=1499745479]
+size = Vector2i(40, 40)
+
+[node name="Camera2D" type="Camera2D" parent="SubViewport" unique_id=1804666432]
+limit_enabled = false
+limit_left = 0
+limit_top = 0
+limit_right = 1920
+limit_bottom = 1080

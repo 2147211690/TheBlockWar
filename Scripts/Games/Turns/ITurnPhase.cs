@@ -8,6 +8,7 @@ public interface ITurnPhase
     bool IsFocused { get; set; }
     int PhaseOrder { get; }
     IEventScheduler EventScheduler { get; }
+    TurnManager TurnManager { get; }
     GDTask Execute();
-    ITurnPhase Init(int turn, IEventScheduler eventScheduler, int order);
+    ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order);
 }

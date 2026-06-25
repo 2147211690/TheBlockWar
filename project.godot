@@ -29,7 +29,7 @@ config/name_localized={
 "zh": "荒芜烽火"
 }
 config/tags=PackedStringArray("main")
-run/main_scene="uid://c5lqvqedob4yx"
+run/main_scene="uid://dt5fmoyumujae"
 config/features=PackedStringArray("4.7", "C#")
 config/icon="uid://cf6td8qmy77qj"
 
@@ -37,6 +37,8 @@ config/icon="uid://cf6td8qmy77qj"
 
 CallHelper="*uid://fa1xktpsl2t3"
 ImGuiRoot="*uid://dugmpnsxaagba"
+AutoLoad="*uid://cs6qdsdplg56x"
+SceneManager="*uid://b0wufd6r3h8kk"
 
 [display]
 
@@ -57,7 +59,7 @@ naming/scene_name_casing=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/extendable_inspector_for_cs/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg")
+enabled=PackedStringArray("res://addons/extendable_inspector_for_cs/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg", "res://addons/rider-plugin/plugin.cfg")
 
 [rendering]
 

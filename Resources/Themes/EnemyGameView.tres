@@ -62,4 +62,5 @@ SplitColor = Color(0.06401862, 0.10175585, 0.13946006, 1)
 EffectTable = ExtResource("21_wu0k8")
 SkillRegionTexture = ExtResource("42_wu0k8")
 SkillRegionColor = Color(0.64, 0.095999986, 0, 0.36862746)
+PreviewRegionColor = Color(0.64, 0.095999986, 0, 0.19607843)
 metadata/_custom_type_script = "uid://slsetkd0kji2"

@@ -1,4 +1,4 @@
-namespace TheBlockWar.View.Uis;
+namespace TheBlockWar.Scripts.Views.Uis;
 [GlobalClass]
 public partial class TooltipManager : Control
 {

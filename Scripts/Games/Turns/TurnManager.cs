@@ -57,7 +57,7 @@ public class TurnManager
 
     private IEnumerable<ITurnPhase> GetTurnPhases(int turn)
     {
-        return TurnStrategy.GetTurnPhases(this, turn).Select((p, i) => p.Init(turn, EventScheduler, i));
+        return TurnStrategy.GetTurnPhases(this, turn).Select((p, i) => p.Init(this, turn, EventScheduler, i));
     }
     public void FocusNextTurn(int turn)
     {

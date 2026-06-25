@@ -1,17 +1,40 @@
 using System.Linq;
+using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Players;
 
 namespace TheBlockWar.Scripts.Games.Turns;
 
 public class PvpTurnStrategy : ITurnStrategy
 {
-    public PvpTurnStrategy(IPlayer[] players)
-    {
-        Players = (IPlayer[])players.Clone();
-    }
+    private readonly IPlayerOperationSynchronizer _operationSynchronizer;
+    private readonly MapBuilder _mapBuilder;
     public IPlayer[] Players { get; }
+
+    public PvpTurnStrategy(IPlayerOperationSynchronizer operationSynchronizer, IPlayer[] players, MapBuilder mapBuilder)
+    {
+        _operationSynchronizer = operationSynchronizer;
+        _mapBuilder = mapBuilder;
+        Players = (IPlayer[])players.Clone();
+        for (int i = 0; i < Players.Length; i++)
+        {
+            players[i].Team = i;
+        }
+    }
     public IEnumerable<ITurnPhase> GetTurnPhases(TurnManager turnManager, int turn)
     {
+        if (turn == 0)
+        {
+            return
+            [
+                new MapBuildPhase(_mapBuilder),
+                new BuffPhase(),
+                new RegionPhase(),
+                ..Players.Select(p => new TeamSkillPhase(p.Team)),
+                new ClearOutdateEventPhase(),
+                new ResetUnitPhase(),
+                ..Players.Select(player => new PlayerPhase(_operationSynchronizer, player)),
+            ];
+        }
         return
         [
             new BuffPhase(),
@@ -19,7 +42,7 @@ public class PvpTurnStrategy : ITurnStrategy
             ..Players.Select(p => new TeamSkillPhase(p.Team)),
             new ClearOutdateEventPhase(),
             new ResetUnitPhase(),
-            ..Players.Select(player => new PlayerPhase(player)),
+            ..Players.Select(player => new PlayerPhase(_operationSynchronizer, player)),
         ];
     }
 }

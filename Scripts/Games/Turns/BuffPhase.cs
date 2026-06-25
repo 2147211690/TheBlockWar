@@ -19,12 +19,14 @@ public class BuffPhase : ITurnPhase
     }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; }
+    public TurnManager TurnManager { get; private set; }
     private TurnEvent _buffTurnEvent;
-    public ITurnPhase Init(int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;
         PhaseOrder = order;
+        TurnManager = turnManager;
         _buffTurnEvent = eventScheduler.CreateEvent(id => new TurnEvent(id)
         {
             Layer = SimulationLayer.Disabled,

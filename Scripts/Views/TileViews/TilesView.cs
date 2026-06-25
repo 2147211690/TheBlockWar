@@ -108,7 +108,11 @@ public partial class TilesView : TileMapLayer
             var teamStyle = GameView.GameStyle[GameView.GetTeamType(team)];
             var sprite = GetSprite();
             sprite.GamePosition = GameView.CoordsToGamePosition(coords);
-            sprite.Modulate = teamStyle.SkillRegionColor;
+            sprite.Modulate = showTypeEnum switch
+            {
+                RegionShowTypeEnum.Skill => teamStyle.SkillRegionColor,
+                RegionShowTypeEnum.Preview => teamStyle.PreviewRegionColor,
+            };
             sprite.Texture = teamStyle.SkillRegionTexture;
             sprite.GameZIndex = -3;
         }

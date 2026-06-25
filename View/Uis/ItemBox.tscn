@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://bdvmqnfsqqedl" path="res://Resources/Themes/UiTheme.tres" id="1_ohqpj"]
 [ext_resource type="Texture2D" uid="uid://c5ayhd5fgh63i" path="res://icon.svg" id="1_us0sw"]
-[ext_resource type="Script" uid="uid://d4cltyu51ueg5" path="res://View/Uis/ItemBox.cs" id="1_yit01"]
+[ext_resource type="Script" uid="uid://d4cltyu51ueg5" path="res://Scripts/Views/Uis/ItemBox.cs" id="1_yit01"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_ohqpj"]
 font_size = 29

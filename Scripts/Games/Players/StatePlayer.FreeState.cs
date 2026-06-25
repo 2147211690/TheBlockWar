@@ -1,7 +1,9 @@
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Players;
 
@@ -9,8 +11,7 @@ public partial class StatePlayer
 {
     private class FreeState(StatePlayer player) : State(player)
     {
-        public IReadOnlyUnitState SelectedUnit { get; set; } = UnitState.Null;
-        public new long FocusedUnitId
+        public long FocusedUnitId
         {
             get => Player.FocusedUnitId;
             set
@@ -24,32 +25,10 @@ public partial class StatePlayer
                 
             }
         }
-        public long SelectedUnitId
-        {
-            get => Player.SelectedUnitId;
-            set
-            {
-                if (value == Player.SelectedUnitId) return;
-                SelectedUnit = GameState?.UnitMapState.GetUnit(value)!;
-                var skills = GameState?.GetUnitValidSkills(SelectedUnit.Name) ?? [];
-                Player._skillStates = new SkillState[skills.Count];
-                for (int i = 0; i < skills.Count; i++)
-                {
-                    Player._skillStates[i] = new SkillState()
-                    {
-                        Skill = skills[i],
-                        IsSelecting = false,
-                        RemainingUses = 1, //TODO:使用Info加载剩余次数
-                    };
-                }
-                Player.OnPropertyChanged(nameof(SkillingUnitSkillStates));
-                Player.SelectedUnitId = value;
-            }
-        }
         public override void OnEnter()
         {
+            Player.SelectedUnitId = 0;
             FocusCoords(Player.CurrentMouseCoords);
-            SelectedUnitId = 0;
         }
         public override void OnInput<T>(in T input)
         {
@@ -58,14 +37,19 @@ public partial class StatePlayer
             switch (input)
             {
                 case PlayerInputClick {Button: MouseButtonMask.Left} click:
-                    if (GameState?.UnitMapState.HasUnit(FocusedUnitId) == false) break;
-                    SelectedUnitId = FocusedUnitId;
+                    var u = EventScheduler?.GameState.UnitMapState.GetUnit(FocusedUnitId);
+                    if (u.IsNull()) break;
+                    Player.SelectedUnitId = FocusedUnitId;
                     var skill = EventScheduler?.GetUnitSkillEvent(FocusedUnitId);
-                    if (skill is null)
+                    if (skill == null && u.Team == Player.Team)
                     {
                         //单位没有等待中的技能
-                        Player._skillingState.CurrentSkillIndex = 0;
-                        StateMachine.ChangeState(Player._skillingState);
+                        Player._skillState.CurrentSkillIndex = 0;
+                        StateMachine.ChangeState(Player._skillState);
+                    }
+                    else
+                    {
+                        StateMachine.ChangeState(Player._selectState);
                     }
                     break;
                 case PlayerInputMouseCoords coords:
@@ -75,7 +59,11 @@ public partial class StatePlayer
                     if (stopTurn.Type == PlayerSotpTurnEnum.Click)
                     {
                         Player.TurnManager.FocusNextTurn(-1);
-                        Player.IsTurn = false;
+                        FocusedUnitId = 0;
+                        
+                        Player._busyState.CallOperation = new PlayerEndTurn(Player.Id);
+                        Player._busyState.NextState = Player._freeState;
+                        StateMachine.ChangeState(Player._busyState);
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverExit)
                     {
@@ -83,7 +71,6 @@ public partial class StatePlayer
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverEnter)
                     {
-                        FocusedUnitId = 0;
                         Player.TurnManager.FocusNextTurn(Player.TurnManager.CurrentTurn + 1);
                     }
                     break;
@@ -92,7 +79,7 @@ public partial class StatePlayer
 
         private void FocusCoords(in Vector2I coords)
         {
-            var unit = EventScheduler?.GameState?.UnitMapState.GetUnit(coords);
+            var unit = EventScheduler?.GameState.UnitMapState.GetUnit(coords);
             FocusedUnitId = unit?.Id ?? 0;
         }
     }

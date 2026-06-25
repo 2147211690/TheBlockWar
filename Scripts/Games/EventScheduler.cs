@@ -73,7 +73,7 @@ public class EventScheduler : IEventScheduler
 
     private void OnEventEnabledManagerUpdate(object? sender, EventArgs e)
     {
-        UpdateSimulationTest();
+        UpdateSimulation();
     }
     public void ReloadGameState()
     {

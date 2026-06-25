@@ -23,6 +23,7 @@ public partial class GameViewTeamStyle : Resource
     [ExportGroup("Regions")]
     [Export] public Texture2D SkillRegionTexture { get; set; } = null!;
     [Export] public Color SkillRegionColor { get; set; } = new Color("#3aa200");
+    [Export] public Color PreviewRegionColor { get; set; } = new Color("#3aa200");
     public Texture2D? GetBlockNumberTexture(int number)
     {
         if (number < 0 || number >= BlockNumberTextures.Length) return null;

@@ -8,6 +8,7 @@ public class ClearOutdateEventPhase : ITurnPhase
     public bool IsFocused { get; set; }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; }
+    public TurnManager TurnManager { get; private set; }
     public GDTask Execute()
     {
         foreach (var a in EventScheduler.Events.Values.Where(a => a.Turn <= Turn).ToList())
@@ -17,11 +18,12 @@ public class ClearOutdateEventPhase : ITurnPhase
         return GDTask.CompletedTask;
     }
 
-    public ITurnPhase Init(int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;
         PhaseOrder = order;
+        TurnManager = turnManager;
         return this;
     }
 }

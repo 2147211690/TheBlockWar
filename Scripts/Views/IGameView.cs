@@ -92,4 +92,5 @@ public interface IGameView
 public enum RegionShowTypeEnum
 {
     Skill,
+    Preview
 }
