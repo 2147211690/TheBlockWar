@@ -14,13 +14,13 @@ public abstract class GameMode : IGameMode
     public GameMode(){}
     public GameStateEnum State { get; protected set; } = GameStateEnum.Paused;
     
-    public abstract void EnterTurn(TurnManager turnManager, int turn);
+    public abstract void EnterTurn(ITurnManager turnManager, int turn);
 
-    public abstract GDTask Turn(TurnManager turnManager, int turn);
+    public abstract GDTask Turn(ITurnManager turnManager, int turn);
 
-    public abstract void ExitTurn(TurnManager turnManager, int turn);
+    public abstract void ExitTurn(ITurnManager turnManager, int turn);
     
-    protected async GDTask RunBuffRegionEventAndAddToNextTurnEvent(TurnManager turnManager, int turn, int delay = 800)
+    protected async GDTask RunBuffRegionEventAndAddToNextTurnEvent(ITurnManager turnManager, int turn, int delay = 800)
     {
 
     }

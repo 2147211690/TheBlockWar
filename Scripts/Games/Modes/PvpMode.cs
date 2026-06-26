@@ -17,7 +17,7 @@ public class PvpMode : GameMode
         _localPlayer = localPlayer;
     }
 
-    public override void EnterTurn(TurnManager turnManager, int turn)
+    public override void EnterTurn(ITurnManager turnManager, int turn)
     {
         turnManager.EventScheduler.CreateEvent(id => new TurnEvent(id)
         {
@@ -35,7 +35,7 @@ public class PvpMode : GameMode
         });
     }
 
-    public override async GDTask Turn(TurnManager turnManager, int turn)
+    public override async GDTask Turn(ITurnManager turnManager, int turn)
     {
         await RunBuffRegionEventAndAddToNextTurnEvent(turnManager, turn);
         
@@ -49,7 +49,7 @@ public class PvpMode : GameMode
         }
     }
 
-    public override void ExitTurn(TurnManager turnManager, int turn)
+    public override void ExitTurn(ITurnManager turnManager, int turn)
     {
     }
 }

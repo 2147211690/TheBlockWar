@@ -2,9 +2,12 @@ using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games.Turns;
-
+/// <summary>
+/// 区域回合
+/// </summary>
 public class RegionPhase : ITurnPhase
 {
+    public string PhaseName { get; } = "RegionPhase";
     public int Turn { get; private set; }
 
     public bool IsFocused
@@ -19,7 +22,7 @@ public class RegionPhase : ITurnPhase
     }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; }
-    public TurnManager TurnManager { get; private set; }
+    public ITurnManager TurnManager { get; private set; }
     private TurnEvent _regionTurnEvent;
     public async GDTask Execute()
     {
@@ -29,7 +32,7 @@ public class RegionPhase : ITurnPhase
         await EventScheduler.WaitCompleteRunning();
     }
 
-    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;

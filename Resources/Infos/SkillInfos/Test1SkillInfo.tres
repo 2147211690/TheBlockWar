@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="SkillInfo" format=3 uid="uid://bccsk3gsy0yr4"]
 
 [ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="1_asx24"]
+[ext_resource type="Texture2D" uid="uid://bws8b55d2xd55" path="res://Art/Img/advanced/weapons/Missiles_Shield.png" id="1_qal3m"]
 
 [resource]
 script = ExtResource("1_asx24")
+Icon = ExtResource("1_qal3m")
 Name = "Test1"
+Description = "发射十字火箭,并伤害己"

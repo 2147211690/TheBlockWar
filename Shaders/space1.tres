@@ -1,0 +1,12 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://c5v778obyo0ax"]
+
+[ext_resource type="Shader" uid="uid://cfprvxbej1iir" path="res://Shaders/space1.gdshader" id="1_umda5"]
+
+[resource]
+shader = ExtResource("1_umda5")
+shader_parameter/speed = 0.010000000475
+shader_parameter/brightness = 0.0010000000475
+shader_parameter/darkmatter = 0.690000032775
+shader_parameter/distfading = 0.7770000369075
+shader_parameter/saturation = 0.3370000160075
+shader_parameter/mouse = Vector2(0.5, 0.5)

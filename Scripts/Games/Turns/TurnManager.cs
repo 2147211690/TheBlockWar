@@ -1,16 +1,8 @@
 using System.Linq;
-using TheBlockWar.Scripts.Games.Buffs;
-using TheBlockWar.Scripts.Games.Events;
-using TheBlockWar.Scripts.Games.GameStates;
-using TheBlockWar.Scripts.Games.Modes;
-using TheBlockWar.Scripts.Games.Simulations;
-using TheBlockWar.Scripts.Tools;
-using TheBlockWar.Scripts.Views;
-using Wintellect.PowerCollections;
 
 namespace TheBlockWar.Scripts.Games.Turns;
 
-public class TurnManager
+public class TurnManager : ITurnManager
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     public TurnManager(IEventScheduler eventScheduler, ITurnStrategy turnStrategy)
@@ -21,6 +13,9 @@ public class TurnManager
     public IEventScheduler EventScheduler { get; }
     public ITurnStrategy TurnStrategy { get; }
     public int CurrentTurn { get => EventScheduler.CurrentTurn; set => EventScheduler.CurrentTurn = value; }
+    public IReadOnlyList<ITurnPhase> CurrentPhases => _currentPhases;
+    public IReadOnlyList<ITurnPhase> NextPhases => _nextPhases;
+    public event EventHandler<(int index, bool isEnter, ITurnPhase phase)> PhaseChanged;
     
     private List<ITurnPhase> _currentPhases = new();
     private List<ITurnPhase> _nextPhases = new();
@@ -31,11 +26,12 @@ public class TurnManager
         MoveNextPhases();
         while (!_stop)
         {
-            foreach (var phase in _currentPhases)
+            for (var index = 0; index < _currentPhases.Count; index++)
             {
-                Logger.Debug("阶段进入{0}", phase.GetType().Name);
+                var phase = _currentPhases[index];
+                PhaseChanged?.Invoke(this, (index, true, phase));
                 await phase.Execute();
-                Logger.Debug("阶段退出{0}", phase.GetType().Name);
+                PhaseChanged?.Invoke(this, (index, false, phase));
             }
             MoveNextPhases();
         }
@@ -50,7 +46,8 @@ public class TurnManager
             _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
             return;
         }
-        (_currentPhases, _nextPhases) = (_nextPhases, _currentPhases);
+        _currentPhases.Clear();
+        _currentPhases.AddRange(_nextPhases);
         _nextPhases.Clear();
         _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
     }
@@ -59,12 +56,14 @@ public class TurnManager
     {
         return TurnStrategy.GetTurnPhases(this, turn).Select((p, i) => p.Init(this, turn, EventScheduler, i));
     }
-    public void FocusNextTurn(int turn)
+    public void FocusNextTurn(bool focused)
     {
-        foreach (var phase in _nextPhases) phase.IsFocused = turn >= 0;
+        foreach (var phase in _nextPhases) phase.IsFocused = focused;
     }
     public void Stop()
     {
         _stop = true;
     }
+
+
 }

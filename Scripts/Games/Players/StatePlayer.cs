@@ -16,16 +16,19 @@ public partial class StatePlayer : Node2D, IPlayer
 
     public IEventScheduler? GameScheduler { get; set; }
     public int Power { get; set => SetField(ref field, value); }
-    public int Team { get; set; }
-    public IPlayerOperationSynchronizer PlayerOperationSynchronizer { get; private set; } = null!;
+    public int Team { get; set => SetField(ref field, value); }
     public bool IsTurn { get; set => SetField(ref field, value); }
-    public TurnManager TurnManager { get; set; }
+    public ITurnManager TurnManager { get; set; }
+    public int PhaseOrder { get; set => SetField(ref field, value); }
+    public int CurrentTurn { get; set => SetField(ref field, value); }
 
-    public int PhaseOrder { get; set; }
-    public int CurrentTurn { get; set; }
-    public bool WaitConfirm { get; set; } = true;
-    public Vector2I CurrentMouseCoords { get; private set; }
+    public int SelectedSkillIndex { get; set => SetField(ref field, value); } = -1;
+    public Vector2I? SelectedTileCoords { get; set => SetField(ref field, value); }
+    public bool WaitConfirm { get; set => SetField(ref field, value); } = true;
     public long SelectedUnitId { get; set => SetField(ref field, value); }
+    public Vector2I CurrentMouseCoords { get; private set; }
+    public IPlayerOperationSynchronizer PlayerOperationSynchronizer { get; private set; } = null!;
+    
     public long FocusedUnitId { get; set => SetField(ref field, value); }
     public IGameView GameView { get; private set; } = null!;
     
@@ -73,7 +76,10 @@ public partial class StatePlayer : Node2D, IPlayer
 
                 break;
             case InputEventMouseButton e:
-                OnInput(new PlayerInputClick(_currentCoords, e.ButtonMask));
+                if (e.Pressed && (e.ButtonMask.HasFlag(MouseButtonMask.Left) || e.ButtonMask.HasFlag(MouseButtonMask.Right)))
+                    OnInput(new PlayerInputClick(_currentCoords, 
+                        e.ButtonMask.HasFlag(MouseButtonMask.Left) ? 
+                            PlayerClickTypeEnum.Left : PlayerClickTypeEnum.Right));
                 break;
         }
     }

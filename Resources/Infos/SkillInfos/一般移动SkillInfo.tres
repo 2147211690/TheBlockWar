@@ -1,7 +1,10 @@
 [gd_resource type="Resource" script_class="SkillInfo" format=3 uid="uid://87qrmh2vl6el"]
 
 [ext_resource type="Script" uid="uid://b3daim64yrdpe" path="res://Scripts/Resources/SkillInfo.cs" id="1_58fnk"]
+[ext_resource type="Texture2D" uid="uid://bb6ls1ewor748" path="res://Art/Img/advanced/weapons/Storm_Generator_Passive.png" id="1_pvlo2"]
 
 [resource]
 script = ExtResource("1_58fnk")
+Icon = ExtResource("1_pvlo2")
 Name = "一般移动"
+Description = "移动到一个位置"

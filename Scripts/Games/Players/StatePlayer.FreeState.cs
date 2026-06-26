@@ -11,6 +11,7 @@ public partial class StatePlayer
 {
     private class FreeState(StatePlayer player) : State(player)
     {
+        private bool _lockTileCoords = false;
         public long FocusedUnitId
         {
             get => Player.FocusedUnitId;
@@ -28,6 +29,7 @@ public partial class StatePlayer
         public override void OnEnter()
         {
             Player.SelectedUnitId = 0;
+            _lockTileCoords = false;
             FocusCoords(Player.CurrentMouseCoords);
         }
         public override void OnInput<T>(in T input)
@@ -36,20 +38,28 @@ public partial class StatePlayer
             base.OnInput(in input);
             switch (input)
             {
-                case PlayerInputClick {Button: MouseButtonMask.Left} click:
-                    var u = EventScheduler?.GameState.UnitMapState.GetUnit(FocusedUnitId);
-                    if (u.IsNull()) break;
-                    Player.SelectedUnitId = FocusedUnitId;
-                    var skill = EventScheduler?.GetUnitSkillEvent(FocusedUnitId);
-                    if (skill == null && u.Team == Player.Team)
+                case PlayerInputClick click:
+                    if (click.Type == PlayerClickTypeEnum.Left)
                     {
-                        //单位没有等待中的技能
-                        Player._skillState.CurrentSkillIndex = 0;
-                        StateMachine.ChangeState(Player._skillState);
+                        var u = EventScheduler?.GameState.UnitMapState.GetUnit(FocusedUnitId);
+                        if (u.IsNull()) break;
+                        Player.SelectedUnitId = FocusedUnitId;
+                        var skill = EventScheduler?.GetUnitSkillEvent(FocusedUnitId);
+                        if (skill == null && u.Team == Player.Team)
+                        {
+                            //单位没有等待中的技能
+                            Player._skillState.CurrentSkillIndex = 0;
+                            StateMachine.ChangeState(Player._skillState);
+                        }
+                        else
+                        {
+                            StateMachine.ChangeState(Player._selectState);
+                        }
                     }
-                    else
+                    else if (click.Type == PlayerClickTypeEnum.Right)
                     {
-                        StateMachine.ChangeState(Player._selectState);
+                        _lockTileCoords = !_lockTileCoords;
+                        if (!_lockTileCoords) Player.SelectedTileCoords = Player.CurrentMouseCoords;
                     }
                     break;
                 case PlayerInputMouseCoords coords:
@@ -58,7 +68,7 @@ public partial class StatePlayer
                 case PlayerInputStopTurn stopTurn:
                     if (stopTurn.Type == PlayerSotpTurnEnum.Click)
                     {
-                        Player.TurnManager.FocusNextTurn(-1);
+                        Player.TurnManager.FocusNextTurn(false);
                         FocusedUnitId = 0;
                         
                         Player._busyState.CallOperation = new PlayerEndTurn(Player.Id);
@@ -67,11 +77,11 @@ public partial class StatePlayer
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverExit)
                     {
-                        Player.TurnManager.FocusNextTurn(-1);
+                        Player.TurnManager.FocusNextTurn(false);
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverEnter)
                     {
-                        Player.TurnManager.FocusNextTurn(Player.TurnManager.CurrentTurn + 1);
+                        Player.TurnManager.FocusNextTurn(true);
                     }
                     break;
             }
@@ -81,6 +91,7 @@ public partial class StatePlayer
         {
             var unit = EventScheduler?.GameState.UnitMapState.GetUnit(coords);
             FocusedUnitId = unit?.Id ?? 0;
+            if (!_lockTileCoords) Player.SelectedTileCoords = coords;
         }
     }
 }

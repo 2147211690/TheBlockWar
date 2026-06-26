@@ -17,7 +17,7 @@ public partial class Pvp : Node2D
     private IGameState? _gameState;
     private IEventScheduler? _eventScheduler;
     private ITurnStrategy? _pvpMode;
-    private TurnManager? _turnManager;
+    private ITurnManager? _turnManager;
     public void StartGame((long Id, PlayerInfo PlayerInfo)[] playerInfos, long localId, MultiplayerPeer? peer = null)
     {
         TaskTracker.ShowTrackerWindow();
@@ -55,15 +55,15 @@ public partial class Pvp : Node2D
             playerOperationSynchronizer, 
             players,
             new RandomMapBuilder(
-                [TileNames.Soil0], 
+                [TileNames.Soil0, TileNames.水块, TileNames.燃烧块], 
                 [UnitNames.Unit0, UnitNames.Unit1, UnitNames.Unit2],
                 playerInfos.Select((p, i) => (i, 5)).ToArray(),
-                0
+                1
                 )
         );
         _turnManager = new TurnManager(_eventScheduler, _pvpMode);
         
-        _combatUi.Bind(_eventScheduler, _gameView, players[localIndex]);
+        _combatUi.Bind(_eventScheduler, _turnManager, _gameView, players[localIndex]);
         
         _turnManager.Start().Forget();
     }

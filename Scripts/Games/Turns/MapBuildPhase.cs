@@ -3,7 +3,9 @@ using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Turns;
-
+/// <summary>
+/// 用来构建地图的回合
+/// </summary>
 public class MapBuildPhase : ITurnPhase
 {
     public MapBuildPhase(MapBuilder mapBuilder)
@@ -11,11 +13,12 @@ public class MapBuildPhase : ITurnPhase
         MapBuilder = mapBuilder;
     }
 
+    public string PhaseName { get; } = "MapBuildPhase";
     public int Turn { get; private set; }
     public bool IsFocused { get; set; }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; }
-    public TurnManager TurnManager { get; private set; }
+    public ITurnManager TurnManager { get; private set; }
     public MapBuilder MapBuilder { get; }
     public GDTask Execute()
     {
@@ -44,7 +47,7 @@ public class MapBuildPhase : ITurnPhase
         return EventScheduler.WaitCompleteRunning();
     }
 
-    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;

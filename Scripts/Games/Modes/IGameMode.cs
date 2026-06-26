@@ -5,9 +5,9 @@ namespace TheBlockWar.Scripts.Games.Modes;
 public interface IGameMode
 {
     GameStateEnum State { get; }
-    void EnterTurn(TurnManager turnManager, int turn);
-    GDTask Turn(TurnManager turnManager, int turn);
-    void ExitTurn(TurnManager turnManager, int turn);
+    void EnterTurn(ITurnManager turnManager, int turn);
+    GDTask Turn(ITurnManager turnManager, int turn);
+    void ExitTurn(ITurnManager turnManager, int turn);
 }
 
 public enum GameStateEnum

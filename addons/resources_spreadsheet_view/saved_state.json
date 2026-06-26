@@ -22,6 +22,17 @@
         "visibility": 0.0
       }
     },
+    "res://Resources/Infos/SkillInfos/": {
+      "metadata/_custom_type_script": {
+        "visibility": 0.0
+      },
+      "resource_local_to_scene": {
+        "visibility": 0.0
+      },
+      "resource_name": {
+        "visibility": 0.0
+      }
+    },
     "res://Resources/Infos/TileInfos/": {
       "metadata/_custom_type_script": {
         "visibility": 0.0
@@ -49,7 +60,8 @@
     "res://Resources/Infos/BuffInfos/",
     "res://Resources/Infos/RegionInfos/",
     "res://Resources/Infos/UnitInfos/",
-    "res://Resources/Infos/TileInfos/"
+    "res://Resources/Infos/TileInfos/",
+    "res://Resources/Infos/SkillInfos/"
   ],
   "table_functions": {
     "filter": [

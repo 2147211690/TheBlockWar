@@ -12,7 +12,7 @@ viewport_path = NodePath("../../../../../../../../SubViewport")
 [sub_resource type="LabelSettings" id="LabelSettings_68gct"]
 font_size = 183
 
-[node name="CombatUi" type="Control" unique_id=100001026 node_paths=PackedStringArray("_infoPanel", "_skillContainer", "_buffContainer", "_unitPanel", "_tooltipManager", "_stopTurnButton", "_unitPreviewRect", "_unitPreviewViewport", "_unitPreviewCamera", "_titleTip", "_titleTipLabel")]
+[node name="CombatUi" type="Control" unique_id=100001026 node_paths=PackedStringArray("_infoPanel", "_skillContainer", "_buffContainer", "_regionContainer", "_unitPanel", "_tilePanel", "_tooltipManager", "_stopTurnButton", "_unitPreviewRect", "_unitPreviewViewport", "_unitPreviewCamera", "_titleTip", "_titleTipLabel", "_healthSlider", "_shieldSlider", "_healthLabel", "_shieldLabel", "_turnLabel", "_phaseTitleLabel", "_tileXLabel", "_tileYLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -26,14 +26,24 @@ _infoPanel = NodePath("InfoPanel")
 _itemBoxScene = ExtResource("4_yg6ci")
 _skillContainer = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab")
 _buffContainer = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab")
+_regionContainer = NodePath("Main/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab")
 _unitPanel = NodePath("Main/Control/UnitPanel")
+_tilePanel = NodePath("Main/Control/TilePanel")
 _tooltipManager = NodePath("TooltipManager")
-_stopTurnButton = NodePath("Main/Control/Button")
+_stopTurnButton = NodePath("Main/Control/HBoxContainer/EndTurnButton")
 _unitPreviewRect = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer/AspectRatioContainer/TextureRect")
 _unitPreviewViewport = NodePath("SubViewport")
 _unitPreviewCamera = NodePath("SubViewport/Camera2D")
 _titleTip = NodePath("TitleTip")
 _titleTipLabel = NodePath("TitleTip/MarginContainer/Label")
+_healthSlider = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer/Health")
+_shieldSlider = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer/Shield")
+_healthLabel = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer/Health/Label")
+_shieldLabel = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer2/MarginContainer/VBoxContainer/Shield/Label")
+_turnLabel = NodePath("Main/Control/HBoxContainer/TurnBar/MarginContainer2/TurnLabel")
+_phaseTitleLabel = NodePath("Main/Control/PhaseBar/MarginContainer2/HBoxContainer/PhaseTitleLabel")
+_tileXLabel = NodePath("Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Up/MarginContainer/HBoxContainer/TileXLabel")
+_tileYLabel = NodePath("Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Up/MarginContainer/HBoxContainer/TileYLabel")
 
 [node name="TooltipManager" type="Control" parent="." unique_id=1180370096]
 anchors_preset = 0
@@ -186,17 +196,8 @@ theme_override_constants/margin_bottom = 2
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="ItemBox" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab" unique_id=2045452837 instance=ExtResource("4_yg6ci")]
+[node name="ItemBox" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab" unique_id=1060646227 instance=ExtResource("4_yg6ci")]
 layout_mode = 2
-CanClick = false
-
-[node name="ItemBox2" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab" unique_id=1476820055 instance=ExtResource("4_yg6ci")]
-layout_mode = 2
-CanClick = false
-
-[node name="ItemBox3" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/BuffTab" unique_id=1104979902 instance=ExtResource("4_yg6ci")]
-layout_mode = 2
-CanClick = false
 
 [node name="PanelContainer" type="PanelContainer" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer" unique_id=1284206198]
 layout_mode = 2
@@ -214,13 +215,7 @@ theme_override_constants/margin_bottom = 3
 [node name="SkillTab" type="HBoxContainer" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer" unique_id=209471003]
 layout_mode = 2
 
-[node name="ItemBox" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab" unique_id=964420473 instance=ExtResource("4_yg6ci")]
-layout_mode = 2
-
-[node name="ItemBox2" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab" unique_id=1648201849 instance=ExtResource("4_yg6ci")]
-layout_mode = 2
-
-[node name="ItemBox3" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab" unique_id=1297588899 instance=ExtResource("4_yg6ci")]
+[node name="ItemBox" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SkillTab" unique_id=1057566873 instance=ExtResource("4_yg6ci")]
 layout_mode = 2
 
 [node name="TilePanel" type="Control" parent="Main/Control" unique_id=445884549]
@@ -242,7 +237,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -430.0
-offset_top = -224.0
+offset_top = -283.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = -3
@@ -255,7 +250,7 @@ theme_override_constants/separation = -3
 [node name="Space" type="Control" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer" unique_id=2107686910]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 2.3
+size_flags_stretch_ratio = 3.2
 mouse_filter = 1
 
 [node name="PanelContainer2" type="PanelContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer" unique_id=290615629]
@@ -274,71 +269,129 @@ theme_override_constants/margin_bottom = 2
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="ItemBox" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab" unique_id=1865873670 instance=ExtResource("4_yg6ci")]
+[node name="ItemBox" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab" unique_id=147999972 instance=ExtResource("4_yg6ci")]
 layout_mode = 2
-CanClick = false
-
-[node name="ItemBox2" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab" unique_id=2104529457 instance=ExtResource("4_yg6ci")]
-layout_mode = 2
-CanClick = false
-
-[node name="ItemBox3" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer/PanelContainer2/MarginContainer/RegionTab" unique_id=1997635406 instance=ExtResource("4_yg6ci")]
-layout_mode = 2
-CanClick = false
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="Main/Control/TilePanel/HBoxContainer" unique_id=876437054]
 layout_mode = 2
 theme_override_constants/separation = -3
 
-[node name="PanelContainer" type="PanelContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2" unique_id=668597103]
+[node name="Control" type="Control" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2" unique_id=1404383375]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 5.71
+size_flags_stretch_ratio = 0.4
 
-[node name="MarginContainer" type="MarginContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer" unique_id=1703619974]
+[node name="Up" type="PanelContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2" unique_id=1590506892]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.66
+
+[node name="MarginContainer" type="MarginContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Up" unique_id=414738745]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Up/MarginContainer" unique_id=693438628]
+layout_mode = 2
+alignment = 1
+
+[node name="TileXLabel" type="Label" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Up/MarginContainer/HBoxContainer" unique_id=452856900]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 23
+text = "1"
+horizontal_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Up/MarginContainer/HBoxContainer" unique_id=1485740355]
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TileYLabel" type="Label" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Up/MarginContainer/HBoxContainer" unique_id=1294689997]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 23
+text = "1"
+horizontal_alignment = 1
+
+[node name="Down" type="PanelContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2" unique_id=668597103]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 3.2
+
+[node name="MarginContainer" type="MarginContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Down" unique_id=1703619974]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="ItemBox" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer" unique_id=488290554 instance=ExtResource("4_yg6ci")]
+[node name="ItemBox" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Down/MarginContainer" unique_id=488290554 instance=ExtResource("4_yg6ci")]
 layout_mode = 2
 CanClick = false
 
-[node name="Button" type="Button" parent="Main/Control" unique_id=2063061246]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -324.0
-offset_bottom = 120.0
-grow_horizontal = 0
-theme_override_font_sizes/font_size = 64
-text = "结束回合"
+[node name="PhaseBar" type="PanelContainer" parent="Main/Control" unique_id=915683738]
+layout_mode = 0
+offset_right = 399.0
+offset_bottom = 121.0
 
-[node name="PanelContainer" type="PanelContainer" parent="Main/Control" unique_id=915683738]
-layout_mode = 1
-offset_right = 403.0
-offset_bottom = 120.0
-
-[node name="MarginContainer2" type="MarginContainer" parent="Main/Control/PanelContainer" unique_id=2039760701]
+[node name="MarginContainer2" type="MarginContainer" parent="Main/Control/PhaseBar" unique_id=2039760701]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Main/Control/PanelContainer/MarginContainer2" unique_id=1836274531]
+[node name="HBoxContainer" type="HBoxContainer" parent="Main/Control/PhaseBar/MarginContainer2" unique_id=1054273697]
+layout_mode = 2
+
+[node name="PhaseTitleLabel" type="Label" parent="Main/Control/PhaseBar/MarginContainer2/HBoxContainer" unique_id=1836274531]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_font_sizes/font_size = 64
 text = "当前阶段:"
 
-[node name="ItemBox" parent="Main/Control/PanelContainer/MarginContainer2" unique_id=1263563737 instance=ExtResource("4_yg6ci")]
+[node name="ItemBox" parent="Main/Control/PhaseBar/MarginContainer2/HBoxContainer" unique_id=1263563737 instance=ExtResource("4_yg6ci")]
 layout_mode = 2
 size_flags_horizontal = 8
 CanClick = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Main/Control" unique_id=1748545865]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -341.0
+offset_bottom = 121.0
+grow_horizontal = 0
+theme_override_constants/separation = 20
+alignment = 2
+
+[node name="TurnBar" type="PanelContainer" parent="Main/Control/HBoxContainer" unique_id=373142162]
+custom_minimum_size = Vector2(121, 0)
+layout_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="Main/Control/HBoxContainer/TurnBar" unique_id=892615796]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TurnLabel" type="Label" parent="Main/Control/HBoxContainer/TurnBar/MarginContainer2" unique_id=1141983091]
+layout_mode = 2
+theme_override_constants/outline_size = 32
+theme_override_font_sizes/font_size = 64
+text = "1"
+horizontal_alignment = 1
+
+[node name="EndTurnButton" type="Button" parent="Main/Control/HBoxContainer" unique_id=2063061246]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "结束"
 
 [node name="TitleTip" type="PanelContainer" parent="." unique_id=61931431]
 visible = false
@@ -367,9 +420,10 @@ visible = false
 layout_mode = 0
 
 [node name="SubViewport" type="SubViewport" parent="." unique_id=779527425]
+canvas_item_default_texture_filter = 0
 size = Vector2i(50, 50)
 
 [node name="Camera2D" type="Camera2D" parent="SubViewport" unique_id=433798434]
 
 [editable path="Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]
-[editable path="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox"]
+[editable path="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Down/MarginContainer/ItemBox"]

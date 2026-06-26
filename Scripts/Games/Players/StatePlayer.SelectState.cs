@@ -25,6 +25,7 @@ public partial class StatePlayer
                 s.GetSkillArgs(EventScheduler.GameState, _selectedUnit, _selectedUnit.Coords, 0, [])
                     .Select(a => a + _selectedUnit.Coords),
                 _selectedUnit.Team, RegionShowTypeEnum.Preview);
+            Player.SelectedTileCoords = Player.CurrentMouseCoords;
         }
 
         public override void OnExit()
@@ -38,9 +39,15 @@ public partial class StatePlayer
             base.OnInput(in input);
             switch (input)
             {
-                case PlayerInputClick click when click.Button != 0:
+                case PlayerInputClick click:
                     StateMachine.ChangeState(Player._freeState);
-                    Player._freeState.OnInput(click);
+                    if (click.Type == PlayerClickTypeEnum.Left)
+                    {
+                        Player._freeState.OnInput(click);
+                    }
+                    break;
+                case PlayerInputMouseCoords coords:
+                    Player.SelectedTileCoords = coords.Coords;
                     break;
                 case PlayerInputSkill skill:
                     if (_selectedUnit.Team != Player.Team) break;
@@ -55,11 +62,11 @@ public partial class StatePlayer
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverExit)
                     {
-                        Player.TurnManager.FocusNextTurn(-1);
+                        Player.TurnManager.FocusNextTurn(false);
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverEnter)
                     {
-                        Player.TurnManager.FocusNextTurn(Player.TurnManager.CurrentTurn + 1);
+                        Player.TurnManager.FocusNextTurn(true);
                     }
                     break;
             }

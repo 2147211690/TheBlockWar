@@ -30,13 +30,18 @@ public partial class StatePlayer
             if (_unitState.Team != Player.Team)
             {
                 StateMachine.ChangeState(Player._selectState);
+                return;
             }
             _validSkills = GameState?.GetUnitValidSkills(_unitState.Name) ?? [];
             //从这里面通知SkillStates改变
             if (!TrySelectSkill(CurrentSkillIndex))
             {
                 StateMachine.ChangeState(Player._selectState);
+                return;
             }
+            Player.SelectedSkillIndex = CurrentSkillIndex;
+            TryEnterToNextArg();
+            Player.SelectedTileCoords = Player.CurrentMouseCoords;
         }
 
         public override void OnExit()
@@ -54,6 +59,7 @@ public partial class StatePlayer
             _currentSkillArgs = null;
             _validRegionId = 0;
             _currentArgIndex = -1;
+            Player.SelectedSkillIndex = -1;
             _validRegionCoords.Clear();
         }
 
@@ -62,7 +68,7 @@ public partial class StatePlayer
             base.OnInput(in input);
             switch (input)
             {
-                case PlayerInputClick { Button: MouseButtonMask.Left } click: //选定
+                case PlayerInputClick { Type: PlayerClickTypeEnum.Left } click: //选定
                     if (IsCurrentValidArg())
                         TryEnterToNextArg();
                     else
@@ -71,10 +77,11 @@ public partial class StatePlayer
                         Player._freeState.OnInput(click);
                     }
                     break;
-                case PlayerInputClick { Button: MouseButtonMask.Right } click: //取消
+                case PlayerInputClick { Type: PlayerClickTypeEnum.Right } click: //取消
                     TryBackToPreviousArg();
                     break;
                 case PlayerInputMouseCoords coords:
+                    Player.SelectedTileCoords = coords.Coords;
                     SetCurrentIndexArgGlobal(coords.Coords);
                     break;
                 case PlayerInputSkill skill:
@@ -105,7 +112,6 @@ public partial class StatePlayer
             if (index < 0 || index >= _validSkills.Count) return false;
             _currentSkill = _validSkills[index];
             if (_currentSkill.ArgCount == 0 || !_unitState.GetShouldUseSkill(GameState, _currentSkill)) return false;
-            TryEnterToNextArg();
             return true;
         }
 
@@ -114,6 +120,7 @@ public partial class StatePlayer
             if (_currentArgIndex == -1) //进入第一个参数
             {
                 //创建技能
+                EventScheduler.BlockUpdate();
                 _currentSkillEvent = EventScheduler!.CreateEvent(id => new SkillEvent(id)
                 {
                     SkillBindUnitId = Player.SelectedUnitId,
@@ -129,6 +136,7 @@ public partial class StatePlayer
 
                 UpdateCurrentValidSkillCoords();
                 SetCurrentIndexArgGlobal(Player.CurrentMouseCoords);
+                EventScheduler.UnblockUpdate();
             }
             else if (_currentArgIndex == _currentSkill.ArgCount - 1) //最后一个参数
             {

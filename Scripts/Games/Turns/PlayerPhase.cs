@@ -5,14 +5,17 @@ using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Turns;
-
+/// <summary>
+/// 玩家回合
+/// </summary>
 public class PlayerPhase : ITurnPhase
 {
+    public string PhaseName { get; } = "PlayerPhase";   
     public int Turn { get; private set; }
     public bool IsFocused { get; set; }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; } = null!;
-    public TurnManager TurnManager { get; private set; } = null!;
+    public ITurnManager TurnManager { get; private set; } = null!;
     public IPlayer Player { get; }
     private IPlayerOperationSynchronizer _operationSynchronizer;
     public PlayerPhase(IPlayerOperationSynchronizer operationSynchronizer, IPlayer player)
@@ -20,7 +23,7 @@ public class PlayerPhase : ITurnPhase
         _operationSynchronizer = operationSynchronizer;
         Player = player;
     }
-    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;

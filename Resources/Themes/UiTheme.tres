@@ -49,12 +49,12 @@ border_width_bottom = 3
 border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ah3ab"]
-bg_color = Color(0.35281152, 0.39000103, 0.528714, 1)
+bg_color = Color(0.20407102, 0.22826794, 0.32678238, 1)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
-border_color = Color(0.15575728, 0.56471676, 0.69902104, 1)
+border_color = Color(1.7808378e-06, 0.8691458, 0.32934272, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u3idm"]
 bg_color = Color(0.20331857, 0.22881812, 0.3254537, 1)
@@ -84,6 +84,8 @@ border_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_ah3ab"]
 color = Color(0, 1, 0, 1)
+grow_begin = 0.0
+grow_end = 0.0
 thickness = 26
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_kwtt4"]
@@ -94,6 +96,8 @@ thickness = 26
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_yvut4"]
 color = Color(0.62722766, 0.62722766, 0.6272276, 1)
+grow_begin = 0.0
+grow_end = 0.0
 thickness = 26
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_4bnpr"]
@@ -110,6 +114,8 @@ ItemBox_Normal/base_type = &"PanelContainer"
 ItemBox_Normal/styles/panel = SubResource("StyleBoxFlat_kwtt4")
 ItemBox_Selected/base_type = &"PanelContainer"
 ItemBox_Selected/styles/panel = SubResource("StyleBoxFlat_ah3ab")
+Label/colors/font_outline_color = Color(0, 0, 0, 1)
+Label/constants/outline_size = 10
 LineEdit/styles/focus = SubResource("StyleBoxFlat_u3idm")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_tdysh")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_ubeaa")

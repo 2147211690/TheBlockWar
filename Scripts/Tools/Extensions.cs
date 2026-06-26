@@ -484,6 +484,18 @@ public static class Extensions
             return clone;
         }
     }
+
+    extension(Node node)
+    {
+        public void FreeChildren()
+        {
+            var childCount = node.GetChildCount();
+            for (int i = childCount - 1; i >= 0; i--)
+            {
+                node.GetChild(i).Free();
+            }
+        }
+    }
 }
 
 public class ItemTabStyle

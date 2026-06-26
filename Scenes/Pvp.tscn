@@ -3,15 +3,35 @@
 [ext_resource type="Script" uid="uid://bggta4x7kf5v4" path="res://addons/mapcamera2d/MapCamera2D.gd" id="1_d54ji"]
 [ext_resource type="Script" uid="uid://cav3fiunigjjl" path="res://Scripts/Views/Scenes/Pvp.cs" id="1_opoqn"]
 [ext_resource type="PackedScene" uid="uid://deknlmtpc7g4t" path="res://View/GameView.tscn" id="2_opoqn"]
+[ext_resource type="Material" uid="uid://c5v778obyo0ax" path="res://Shaders/space1.tres" id="2_uu4ov"]
 [ext_resource type="PackedScene" uid="uid://clbp4km484ly4" path="res://View/Uis/CombatUi.tscn" id="3_uu4ov"]
+[ext_resource type="AudioStream" uid="uid://dxnk1xma7ihab" path="res://Art/Sounds/bgm.mp3" id="6_3eblm"]
 
 [node name="Pvp" type="Node2D" unique_id=1811319252 node_paths=PackedStringArray("_gameView", "_combatUi")]
 script = ExtResource("1_opoqn")
 _gameView = NodePath("GameView")
 _combatUi = NodePath("CanvasLayer/CombatUi")
 
+[node name="Background" type="ColorRect" parent="." unique_id=1466746463]
+visible = false
+material = ExtResource("2_uu4ov")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -941.0
+offset_top = -264.0
+offset_right = 979.0
+offset_bottom = 816.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="MapCamera2D" type="Camera2D" parent="." unique_id=657690164]
 zoom = Vector2(2.205, 2.205)
+limit_left = -900
+limit_top = -260
+limit_right = 900
+limit_bottom = 800
+editor_draw_limits = true
 script = ExtResource("1_d54ji")
 pan_speed = 0.0
 drag_inertia = 0.0
@@ -28,3 +48,7 @@ canvas_item_default_texture_filter = 0
 size = Vector2i(50, 50)
 
 [node name="Camera2D" type="Camera2D" parent="SubViewport" unique_id=1689032999]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1852320813]
+stream = ExtResource("6_3eblm")
+volume_db = 1.0

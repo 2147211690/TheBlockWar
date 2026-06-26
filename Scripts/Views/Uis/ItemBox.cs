@@ -2,10 +2,44 @@ namespace TheBlockWar.Scripts.Views.Uis;
 
 public partial class ItemBox : PanelContainer
 {
+    [Export] public bool CanClick { get; set; } = true;
+
+    [Export]
+    public bool Disabled
+    {
+        get => field;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            if (value)
+            {
+                OffsetTransformScale = Vector2.One;
+                Modulate = Colors.DarkGray;
+            }
+            else
+            {
+                Modulate = Colors.White;
+            }
+        }
+    }
+    [Export]
+    public bool IsSelected
+    {
+        get => field;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            ThemeTypeVariation = value ? "ItemBox_Selected" : "ItemBox_Normal";
+        }
+    }
+
+    [ExportGroup("Self")]
     [Export] private TextureRect _textureRect = null!;
     [Export] private Label _countLabel = null!;
     private Tween? _currentTween;
-    [Export] public bool CanClick { get; set; } = true;
+    
     public Texture2D Texture
     {
         get => _textureRect.Texture;
@@ -26,63 +60,25 @@ public partial class ItemBox : PanelContainer
     public static float MouseEnterScale = 1.04f;
     public static float AnimationDuration = 0.05f;
     public static float ClickScale = 0.96f;
-    public static float SelectedScale = 1.08f;
 
     [Signal] public delegate void ClickEventHandler();
-    public bool IsSelected
-    {
-        get => field;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            if (value)
-            {
-                ApplySelectedState();
-            }
-            else
-            {
-                ApplyNormalState();
-            }
-        }
-    }
-
-    private void ApplySelectedState()
-    {
-        _currentTween?.Kill();
-        _currentTween = CreateTween();
-        _currentTween.SetParallel(true);
-        _currentTween.TweenProperty(this, "offset_transform_scale", Vector2.One * SelectedScale, AnimationDuration)
-            .SetTrans(Tween.TransitionType.Cubic)
-            .SetEase(Tween.EaseType.Out);
-        _currentTween.TweenProperty(_textureRect, "modulate", new Color(1.3f, 1.3f, 1.3f), AnimationDuration)
-            .SetTrans(Tween.TransitionType.Cubic)
-            .SetEase(Tween.EaseType.Out);
-        
-        ThemeTypeVariation = "ItemBox_Selected";
-    }
-
-    private void ApplyNormalState()
-    {
-        _currentTween?.Kill();
-        _currentTween = CreateTween();
-        _currentTween.SetParallel(true);
-        _currentTween.TweenProperty(this, "offset_transform_scale", Vector2.One, AnimationDuration)
-            .SetTrans(Tween.TransitionType.Cubic)
-            .SetEase(Tween.EaseType.Out);
-        _currentTween.TweenProperty(_textureRect, "modulate", Colors.White, AnimationDuration)
-            .SetTrans(Tween.TransitionType.Cubic)
-            .SetEase(Tween.EaseType.Out);
-        
-        ThemeTypeVariation = "ItemBox_Normal";
-    }
 
     public override void _Ready()
     {
-        ApplyNormalState();
-
         MouseEntered += OnMouseEntered;
         MouseExited += OnMouseExited;
+    }
+
+    public void Reset()
+    {
+        MetaData = null;
+        IsSelected = false;
+        Texture = null;
+        CanClick = true;
+        Count = 0;
+        HasCount = false;
+        Disabled = false;
+        backing_Click = null;
     }
     
     public override void _GuiInput(InputEvent inputEvent)
@@ -97,7 +93,7 @@ public partial class ItemBox : PanelContainer
 
     private void OnClick()
     {
-        if (IsSelected) return;
+        if (Disabled) return;
 
         _currentTween?.Kill();
         _currentTween = CreateTween();
@@ -112,8 +108,8 @@ public partial class ItemBox : PanelContainer
 
     private void OnMouseExited()
     {
-        if (IsSelected) return;
-
+        if (Disabled) return;
+        
         _currentTween?.Kill();
         _currentTween = CreateTween();
         _currentTween.SetParallel(true);
@@ -127,7 +123,7 @@ public partial class ItemBox : PanelContainer
 
     private void OnMouseEntered()
     {
-        if (IsSelected) return;
+        if (Disabled) return;
 
         _currentTween?.Kill();
         _currentTween = CreateTween();

@@ -4,11 +4,12 @@ namespace TheBlockWar.Scripts.Games.Turns;
 
 public interface ITurnPhase
 {
+    string PhaseName { get; }
     int Turn { get; }
     bool IsFocused { get; set; }
     int PhaseOrder { get; }
     IEventScheduler EventScheduler { get; }
-    TurnManager TurnManager { get; }
+    ITurnManager TurnManager { get; }
     GDTask Execute();
-    ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order);
+    ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order);
 }

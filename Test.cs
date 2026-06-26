@@ -45,7 +45,7 @@ public partial class Test : Node2D
     private SchedulerEvent _follow;
     private StatePlayer _player;
     private PvpTurnStrategy _pvpMode;
-    private TurnManager _turnManager;
+    private ITurnManager _turnManager;
     private bool _checkNextTurn;
     private string _buffName = string.Empty;
     private int _editUnitIdInt;
@@ -102,7 +102,7 @@ public partial class Test : Node2D
             );
         _turnManager = new TurnManager(_eventScheduler, _pvpMode);
         _player.TurnManager = _turnManager;
-        _combatUi.Bind(_eventScheduler, _view, _player);
+        _combatUi.Bind(_eventScheduler, _turnManager, _view, _player);
         _turnManager.Start().Forget();
 
         //TestPlace();
@@ -397,7 +397,7 @@ public partial class Test : Node2D
 
         if (ImGui.Checkbox("关注结束回合", ref _checkNextTurn))
         {
-            _turnManager.FocusNextTurn(_checkNextTurn ? _turnManager.CurrentTurn + 1 : -1);
+            _turnManager.FocusNextTurn(_checkNextTurn);
         }
         
         ImGui.End();

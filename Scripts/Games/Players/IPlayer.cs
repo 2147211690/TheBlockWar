@@ -11,9 +11,11 @@ public interface IPlayer : INotifyPropertyChanged
     int Power { get; }
     int Team { get; set; }
     bool IsTurn { get; set; }
-    TurnManager TurnManager { get; set; }
+    ITurnManager TurnManager { get; set; }
     int PhaseOrder { get; set; }
     int CurrentTurn { get; set; }
+    int SelectedSkillIndex { get; set; }
+    Vector2I? SelectedTileCoords { get; set; }
     bool WaitConfirm { get; set; }
     void OnInput<T>(in T input);
     long Id { get; }

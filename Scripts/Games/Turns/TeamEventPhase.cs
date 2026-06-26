@@ -3,9 +3,12 @@ using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games.Turns;
-
-public class TeamSkillPhase : ITurnPhase
+/// <summary>
+/// 触发一个团队当前回合的所有事件
+/// </summary>
+public class TeamEventPhase : ITurnPhase
 {
+    public string PhaseName { get; } = "TeamEventPhase";
     public int Turn { get; private set; }
     public int Team { get; }
 
@@ -22,9 +25,9 @@ public class TeamSkillPhase : ITurnPhase
     }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; }
-    public TurnManager TurnManager { get; private set; }
+    public ITurnManager TurnManager { get; private set; }
     
-    public TeamSkillPhase(int team)
+    public TeamEventPhase(int team)
     {
         Team = team;
     }
@@ -41,7 +44,7 @@ public class TeamSkillPhase : ITurnPhase
         }
     }
 
-    public ITurnPhase Init(TurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         PhaseOrder = order;
         EventScheduler = eventScheduler;
@@ -52,6 +55,6 @@ public class TeamSkillPhase : ITurnPhase
 
     private IEnumerable<SchedulerEvent> GetTeamSkill()
     {
-        return EventScheduler.GetTurnEvents(Turn).Where(e => e is SkillEvent se && se.Team == Team);
+        return EventScheduler.GetTurnEvents(Turn).Where(e => e.Team == Team);
     }
 }

@@ -20,29 +20,29 @@ public class PvpTurnStrategy : ITurnStrategy
             players[i].Team = i;
         }
     }
-    public IEnumerable<ITurnPhase> GetTurnPhases(TurnManager turnManager, int turn)
+    public IEnumerable<ITurnPhase> GetTurnPhases(ITurnManager turnManager, int turn)
     {
         if (turn == 0)
         {
             return
             [
                 new MapBuildPhase(_mapBuilder),
+                ..GetNormalTurnPhases(),
+            ];
+        }
+        return GetNormalTurnPhases();
+
+        IEnumerable<ITurnPhase> GetNormalTurnPhases()
+        {
+            return
+            [
                 new BuffPhase(),
                 new RegionPhase(),
-                ..Players.Select(p => new TeamSkillPhase(p.Team)),
+                ..Players.Select(p => new TeamEventPhase(p.Team)),
                 new ClearOutdateEventPhase(),
                 new ResetUnitPhase(),
                 ..Players.Select(player => new PlayerPhase(_operationSynchronizer, player)),
             ];
         }
-        return
-        [
-            new BuffPhase(),
-            new RegionPhase(),
-            ..Players.Select(p => new TeamSkillPhase(p.Team)),
-            new ClearOutdateEventPhase(),
-            new ResetUnitPhase(),
-            ..Players.Select(player => new PlayerPhase(_operationSynchronizer, player)),
-        ];
     }
 }

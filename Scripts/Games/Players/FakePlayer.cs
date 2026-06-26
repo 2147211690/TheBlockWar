@@ -17,9 +17,11 @@ public class FakePlayer : IPlayer
     public int Power { get; }
     public int Team { get; set; }
     public bool IsTurn { get; set; }
-    public TurnManager TurnManager { get; set; }
+    public ITurnManager TurnManager { get; set; }
     public int PhaseOrder { get; set; }
     public int CurrentTurn { get; set; }
+    public int SelectedSkillIndex { get; set; }
+    public Vector2I? SelectedTileCoords { get; set; }
     public bool WaitConfirm { get; set; }
     public void OnInput<T>(in T input)
     {
