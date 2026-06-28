@@ -41,6 +41,8 @@ public class EasyAiPlayer : IPlayer
         }
     }
 
+    public PlayerTurnEnterEnum TurnEnter { get; set; }
+
     public ITurnManager TurnManager { get; set; }
 
     public int PhaseOrder { get; set; }

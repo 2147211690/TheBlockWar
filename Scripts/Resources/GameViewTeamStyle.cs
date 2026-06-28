@@ -11,6 +11,7 @@ public partial class GameViewTeamStyle : Resource
     [Export] public Texture2D[] BlockNumberTextures { get; set; } = null!;
     [Export] public Texture2D DeathTexture { get; set; } = null!;
     [Export] public Texture2D LinePointTexture { get; set; } = null!;
+    [Export] public Texture2D PlaceUnitTexture { get; set; } = null!;
     [ExportGroup("Units")]
     [Export] public Color OutlineColor { get; set; } = new Color("#3aa200");         // 绿色 - 单位轮廓线
     [Export] public Color HealthCurrentColor { get; set; } = new Color("#e74c3c");      // 鲜红 - 当前生命

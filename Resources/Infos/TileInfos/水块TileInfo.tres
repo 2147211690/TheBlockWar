@@ -29,6 +29,7 @@ animations = [{
 [resource]
 script = ExtResource("1_fqtcj")
 Name = "水块"
+Icon = ExtResource("1_7famj")
 Regions = PackedStringArray("水域")
 RegionDurations = PackedInt32Array(-1)
 ViewHeight = 25.0

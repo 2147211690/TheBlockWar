@@ -11,6 +11,7 @@ public interface IPlayer : INotifyPropertyChanged
     int Power { get; }
     int Team { get; set; }
     bool IsTurn { get; set; }
+    PlayerTurnEnterEnum TurnEnter { get; set; }
     ITurnManager TurnManager { get; set; }
     int PhaseOrder { get; set; }
     int CurrentTurn { get; set; }
@@ -20,4 +21,10 @@ public interface IPlayer : INotifyPropertyChanged
     void OnInput<T>(in T input);
     long Id { get; }
     void Init();
+}
+
+public enum PlayerTurnEnterEnum
+{
+    Free,
+    PlaceUnit,
 }

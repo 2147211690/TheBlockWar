@@ -25,6 +25,7 @@ public partial class CombatUi : Control
     [Export] private TooltipManager _tooltipManager = null!;
     [Export] private Button _stopTurnButton = null!;
     [Export] private TextureRect _unitPreviewRect = null!;
+    [Export] private TextureRect _tilePreviewRect = null!;
     [Export] private Viewport _unitPreviewViewport = null!;
     [Export] private Camera2D _unitPreviewCamera = null!;
     [Export] private Control _titleTip = null!;
@@ -128,6 +129,7 @@ public partial class CombatUi : Control
                 if (_tilePanel.Visible)
                 {
                     UpdateRegionTab();
+                    UpdateTilePreview();
                     _tileXLabel.Text = $"{player.SelectedTileCoords!.Value.X}";
                     _tileYLabel.Text = $"{player.SelectedTileCoords.Value.Y}";
                 }
@@ -175,6 +177,7 @@ public partial class CombatUi : Control
             UpdateBuffTab();
             UpdateSkillTab();
             UpdateRegionTab();
+            UpdateTilePreview();
         }
     }
 
@@ -188,7 +191,14 @@ public partial class CombatUi : Control
         _healthLabel.Text = $"{unit.Health}/{unit.MaxHealth}";
         _shieldLabel.Text = $"{unit.Shield}/{unit.MaxShield}";
     }
-    
+
+    private void UpdateTilePreview()
+    {
+        var coords = _player.SelectedTileCoords;
+        if (coords == null) return;
+        var info = _eventScheduler.GameState.TileMapState.GetTile(coords.Value).Name.GetTileInfo();
+        _tilePreviewRect.Texture = info.Icon;
+    }
     private void UpdateBuffTab()
     {
         var unit = _eventScheduler.GameState.UnitMapState.GetUnit(_player.SelectedUnitId);

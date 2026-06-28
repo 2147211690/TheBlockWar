@@ -10,20 +10,20 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// </summary>
 public class PlayerPhase : ITurnPhase
 {
-    public string PhaseName { get; } = "PlayerPhase";   
+    public virtual string PhaseName { get; } = "PlayerPhase";   
     public int Turn { get; private set; }
     public bool IsFocused { get; set; }
     public int PhaseOrder { get; private set; }
     public IEventScheduler EventScheduler { get; private set; } = null!;
     public ITurnManager TurnManager { get; private set; } = null!;
     public IPlayer Player { get; }
-    private IPlayerOperationSynchronizer _operationSynchronizer;
+    protected IPlayerOperationSynchronizer OperationSynchronizer { get; }
     public PlayerPhase(IPlayerOperationSynchronizer operationSynchronizer, IPlayer player)
     {
-        _operationSynchronizer = operationSynchronizer;
+        OperationSynchronizer = operationSynchronizer;
         Player = player;
     }
-    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    public virtual ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
     {
         Turn = turn;
         EventScheduler = eventScheduler;
@@ -32,7 +32,7 @@ public class PlayerPhase : ITurnPhase
         Player.TurnManager = turnManager;
         return this;
     }
-    public async GDTask Execute()
+    public virtual async GDTask Execute()
     {
         Player.PhaseOrder = PhaseOrder;
         Player.CurrentTurn = Turn;
@@ -40,7 +40,7 @@ public class PlayerPhase : ITurnPhase
         Player.WaitConfirm = false;
         while (true)
         {
-            var oper = await _operationSynchronizer.WaitOperationAsync();
+            var oper = await OperationSynchronizer.WaitOperationAsync();
             if (oper.PlayerId != Player.Id) continue;
             Player.WaitConfirm = true;
             if (await Handle(oper))
@@ -110,6 +110,11 @@ public class PlayerPhase : ITurnPhase
                 await GDTask.Delay(slowPrepareSkill.PrepareDelay);
                 e.Layer = SimulationLayer.Waiting;
             }
+        }
+        else if (operation is PlayerPlaceUnit placeUnit)
+        {
+            foreach (var place in placeUnit.Places)
+            { }
         }
         return false;
 

@@ -1,6 +1,6 @@
 namespace TheBlockWar.Scripts.Views.Uis;
 
-public partial class ItemBox : PanelContainer
+public partial class ItemBox : AspectRatioContainer
 {
     [Export] public bool CanClick { get; set; } = true;
 
@@ -31,13 +31,14 @@ public partial class ItemBox : PanelContainer
         {
             if (field == value) return;
             field = value;
-            ThemeTypeVariation = value ? "ItemBox_Selected" : "ItemBox_Normal";
+            _backPanel.ThemeTypeVariation = value ? "ItemBox_Selected" : "ItemBox_Normal";
         }
     }
 
     [ExportGroup("Self")]
     [Export] private TextureRect _textureRect = null!;
     [Export] private Label _countLabel = null!;
+    [Export] private PanelContainer _backPanel = null!;
     private Tween? _currentTween;
     
     public Texture2D Texture

@@ -27,6 +27,8 @@ public class PassPlayer : IPlayer
         }
     }
 
+    public PlayerTurnEnterEnum TurnEnter { get; set; }
+
     public ITurnManager TurnManager { get; set; }
     public int PhaseOrder { get; set; }
     public int CurrentTurn { get; set; }

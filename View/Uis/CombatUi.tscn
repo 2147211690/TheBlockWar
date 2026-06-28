@@ -12,7 +12,7 @@ viewport_path = NodePath("../../../../../../../../SubViewport")
 [sub_resource type="LabelSettings" id="LabelSettings_68gct"]
 font_size = 183
 
-[node name="CombatUi" type="Control" unique_id=100001026 node_paths=PackedStringArray("_infoPanel", "_skillContainer", "_buffContainer", "_regionContainer", "_unitPanel", "_tilePanel", "_tooltipManager", "_stopTurnButton", "_unitPreviewRect", "_unitPreviewViewport", "_unitPreviewCamera", "_titleTip", "_titleTipLabel", "_healthSlider", "_shieldSlider", "_healthLabel", "_shieldLabel", "_turnLabel", "_phaseTitleLabel", "_tileXLabel", "_tileYLabel")]
+[node name="CombatUi" type="Control" unique_id=100001026 node_paths=PackedStringArray("_infoPanel", "_skillContainer", "_buffContainer", "_regionContainer", "_unitPanel", "_tilePanel", "_tooltipManager", "_stopTurnButton", "_unitPreviewRect", "_tilePreviewRect", "_unitPreviewViewport", "_unitPreviewCamera", "_titleTip", "_titleTipLabel", "_healthSlider", "_shieldSlider", "_healthLabel", "_shieldLabel", "_turnLabel", "_phaseTitleLabel", "_tileXLabel", "_tileYLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,7 +31,8 @@ _unitPanel = NodePath("Main/Control/UnitPanel")
 _tilePanel = NodePath("Main/Control/TilePanel")
 _tooltipManager = NodePath("TooltipManager")
 _stopTurnButton = NodePath("Main/Control/HBoxContainer/EndTurnButton")
-_unitPreviewRect = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer/AspectRatioContainer/TextureRect")
+_unitPreviewRect = NodePath("Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/Background/MarginContainer/TextureRect")
+_tilePreviewRect = NodePath("Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Down/MarginContainer/ItemBox/Background/MarginContainer/TextureRect")
 _unitPreviewViewport = NodePath("SubViewport")
 _unitPreviewCamera = NodePath("SubViewport/Camera2D")
 _titleTip = NodePath("TitleTip")
@@ -164,11 +165,10 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="ItemBox" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer" unique_id=1163128792 instance=ExtResource("4_yg6ci")]
+[node name="ItemBox" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer" unique_id=1775412479 instance=ExtResource("4_yg6ci")]
 layout_mode = 2
-CanClick = false
 
-[node name="TextureRect" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/MarginContainer/AspectRatioContainer" parent_id_path=PackedInt32Array(1163128792, 1775412479) index="0" unique_id=408846773]
+[node name="TextureRect" parent="Main/Control/UnitPanel/HBoxContainer/VBoxContainer2/PanelContainer/MarginContainer/ItemBox/Background/MarginContainer" parent_id_path=PackedInt32Array(1775412479, 38520972) index="0" unique_id=408846773]
 texture = SubResource("ViewportTexture_68gct")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Main/Control/UnitPanel/HBoxContainer" unique_id=576262248]
@@ -317,6 +317,7 @@ text = "1"
 horizontal_alignment = 1
 
 [node name="Down" type="PanelContainer" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2" unique_id=668597103]
+custom_minimum_size = Vector2(218, 0)
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 3.2
@@ -328,9 +329,8 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="ItemBox" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Down/MarginContainer" unique_id=488290554 instance=ExtResource("4_yg6ci")]
+[node name="ItemBox" parent="Main/Control/TilePanel/HBoxContainer/VBoxContainer2/Down/MarginContainer" unique_id=1518738056 instance=ExtResource("4_yg6ci")]
 layout_mode = 2
-CanClick = false
 
 [node name="PhaseBar" type="PanelContainer" parent="Main/Control" unique_id=915683738]
 layout_mode = 0

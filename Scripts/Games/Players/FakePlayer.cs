@@ -17,6 +17,7 @@ public class FakePlayer : IPlayer
     public int Power { get; }
     public int Team { get; set; }
     public bool IsTurn { get; set; }
+    public PlayerTurnEnterEnum TurnEnter { get; set; }
     public ITurnManager TurnManager { get; set; }
     public int PhaseOrder { get; set; }
     public int CurrentTurn { get; set; }

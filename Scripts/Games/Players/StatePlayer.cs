@@ -18,6 +18,7 @@ public partial class StatePlayer : Node2D, IPlayer
     public int Power { get; set => SetField(ref field, value); }
     public int Team { get; set => SetField(ref field, value); }
     public bool IsTurn { get; set => SetField(ref field, value); }
+    public PlayerTurnEnterEnum TurnEnter { get; set; }
     public ITurnManager TurnManager { get; set; }
     public int PhaseOrder { get; set => SetField(ref field, value); }
     public int CurrentTurn { get; set => SetField(ref field, value); }

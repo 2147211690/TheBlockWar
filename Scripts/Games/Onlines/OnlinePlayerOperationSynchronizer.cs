@@ -16,6 +16,7 @@ public record PlayerPrepareUnitSkill(long PlayerId, Vector2I UnitCoords, int Ski
 public record PlayerUseUnitSkill(long PlayerId, Vector2I UnitCoords, int SkillIndex, Vector2I?[]? Args) : PlayerOperation(PlayerId);
 public record PlayerSlowUseUnitSkill(long PlayerId, Vector2I UnitCoords, int SkillIndex, Vector2I?[]? Args, int UseDelay) : PlayerOperation(PlayerId);
 public record PlayerSlowPrepareUnitSkill(long PlayerId, Vector2I UnitCoords, int SkillIndex, Vector2I?[]? Args, int PrepareDelay) : PlayerOperation(PlayerId);
+public record PlayerPlaceUnit(long PlayerId, (Vector2I coords, string unitName)[] Places) : PlayerOperation(PlayerId);
 
 [GlobalClass]
 public partial class OnlinePlayerOperationSynchronizer : Node, IPlayerOperationSynchronizer

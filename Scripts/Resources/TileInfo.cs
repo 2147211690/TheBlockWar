@@ -7,6 +7,7 @@ public partial class TileInfo : Resource, IInfo
 {
     public static readonly TileInfo Null = new();
     [Export] public string Name { get; set; } = "None";
+    [Export] public Texture2D? Icon { get; set; }
     [Export] public string[] Regions { get; set; } = [];
     [Export] public int[] RegionDurations { get; set; } = [];
     [ExportGroup("View")]
