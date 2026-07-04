@@ -11,20 +11,22 @@ public class SchedulerEventManager
     public ICollection<SchedulerEvent> DisabledEvents => _disabledEvents;
     public IReadOnlyDictionary<long, SchedulerEvent> SkillEvents => _skillEvents;
     public IReadOnlyDictionary<long, SchedulerEvent> Events => _eventScheduler.GameState.Events!;
-
+    
     private readonly OrderedSet<SchedulerEvent> _runningEvents = new();
     private readonly OrderedSet<SchedulerEvent> _waitingEvents = new();
     private readonly OrderedSet<SchedulerEvent> _focusedEvents = new();
     private readonly HashSet<SchedulerEvent> _disabledEvents = new();
     private IDictionary<long, SchedulerEvent> StateEvents => _getStateEvents();
-
+    
     private readonly Dictionary<long, SchedulerEvent> _skillEvents = new();
     private readonly Dictionary<int, List<SchedulerEvent>> _turnEvents = new();
+    private readonly Dictionary<Vector2I, List<SchedulerEvent>> _coordsEvents = new();
     private readonly ICollection<SchedulerEvent>[] _eventsList;
     private int _blockingCount = 0;
     private bool _needUpdate = false;
     private readonly Func<IDictionary<long, SchedulerEvent>> _getStateEvents;
     private readonly IEventScheduler _eventScheduler;
+    
     public event EventHandler? EnabledListUpdated;
 
     public SchedulerEventManager(IEventScheduler eventScheduler, Func<IDictionary<long, SchedulerEvent>> getStateEvents)
@@ -47,7 +49,17 @@ public class SchedulerEventManager
         r.Sort(SchedulerEvent.IgnoreLayerCompare);
         return r;
     }
-
+    public IReadOnlyList<SchedulerEvent> GetCoordsEvents(Vector2I coords)
+    {
+        if (_coordsEvents.TryGetValue(coords, out var events)) return events;
+        var r = _coordsEvents[coords] = new();
+        foreach (var ev in StateEvents.Values)
+        {
+            if (ev.Coords == coords) r.Add(ev);
+        }
+        r.Sort(SchedulerEvent.IgnoreLayerCompare);
+        return r;
+    }
     public void ReloadStateEvents()
     {
         _runningEvents.Clear();
@@ -70,6 +82,11 @@ public class SchedulerEventManager
     {
         if (turn == -1) _turnEvents.Clear();
         else _turnEvents.Remove(turn);
+    }
+    public void ClearCoordsEvents(Vector2I? coords = null)
+    {
+        if (coords == null) _coordsEvents.Clear();
+        else _coordsEvents.Remove(coords.Value);
     }
 
     public T CreateEvent<T>(Func<long, T> createEvent) where T : SchedulerEvent
@@ -136,60 +153,100 @@ public class SchedulerEventManager
     private void EvOnPropertyChange(object? sender, (string? PropertyName, bool IsChanging) e)
     {
         var ev = (SchedulerEvent)sender!;
-        switch (e.PropertyName)
+        if (e.PropertyName == nameof(SchedulerEvent.Layer)) //层级引发改变,需要调整在列表的位置
         {
-            case nameof(SchedulerEvent.Layer): //层级引发改变,需要调整在列表的位置
-                if (e.IsChanging)
-                {
-                    RemoveFromList(ev); //改变前先移除
-                }
-                else
-                {
-                    AddToList(ev); //改变后添加
-                    OnEnableListUpdate(); //通知列表更新
-                }
-
-                break;
-            default:
-                if (ev.Layer != SimulationLayer.Disabled) //如果不是层改变 且 处于激活状态的属性改变
-                {
-                    //如果引发在顺序相关的属性改变,则需要调整在列表的位置
-                    if (e.PropertyName is
-                        nameof(SchedulerEvent.Priority) or
-                        nameof(SchedulerEvent.Turn) or
-                        nameof(SkillEvent.SkillBindUnitId) or
-                        nameof(SchedulerEvent.PhaseOrder))
-                    {
-                        if (e.IsChanging)
-                        {
-                            RemoveFromList(ev);
-                        }
-                        else
-                        {
-                            AddToList(ev);
-                        }
-                    }
-
-                    if (!e.IsChanging) OnEnableListUpdate();
-                }
-
-                //如果引发在Turn相关的属性改变,则需要清除当前回合的事件
+            if (e.IsChanging)
+            {
+                RemoveFromListLayer(ev); //改变前先移除
+            }
+            else
+            {
+                AddToListLayer(ev); //改变后添加
+                OnEnableListUpdate(); //通知列表更新
+            }
+        }
+        else
+        {
+            if (ev.Layer != SimulationLayer.Disabled) //如果不是层改变 且 处于激活状态的属性改变
+            {
+                //如果引发在顺序相关的属性改变,则需要调整在列表的位置
                 if (e.PropertyName is
-                    nameof(SchedulerEvent.Turn) or
                     nameof(SchedulerEvent.Priority) or
+                    nameof(SchedulerEvent.Turn) or
                     nameof(SchedulerEvent.PhaseOrder))
                 {
                     if (e.IsChanging)
                     {
-                        ClearTurnEvents(ev.Turn);
+                        RemoveFromListLayer(ev);
                     }
                     else
                     {
-                        ClearTurnEvents(ev.Turn);
+                        AddToListLayer(ev);
                     }
                 }
 
-                break;
+                if (e.PropertyName is nameof(SkillEvent.SkillBindUnitId))
+                {
+                    if (e.IsChanging)
+                    {
+                        RemoveFromListSkill(ev);
+                    }
+                    else
+                    {
+                        AddToListSkill(ev);
+                    }
+                }
+
+                if (!e.IsChanging) OnEnableListUpdate();
+            }
+
+            //如果引发在Turn相关的属性改变,则需要清除当前回合的事件
+            if (e.PropertyName is
+                nameof(SchedulerEvent.Turn) or
+                nameof(SchedulerEvent.Priority) or
+                nameof(SchedulerEvent.PhaseOrder))
+            {
+                if (e.IsChanging)
+                {
+                    ClearTurnEvents(ev.Turn);
+                }
+                else
+                {
+                    ClearTurnEvents(ev.Turn);
+                }
+            }
+            else if (e.PropertyName is nameof(SchedulerEvent.Coords))
+            {
+                if (e.IsChanging)
+                {
+                    ClearCoordsEvents(ev.Coords);
+                }
+                else
+                {
+                    ClearCoordsEvents(ev.Coords);
+                }
+            }
+        }
+
+        void AddToListLayer(SchedulerEvent ev)
+        {
+            var bag = GetSet(ev.Layer);
+            bag.Add(ev);
+        }
+
+        void RemoveFromListLayer(SchedulerEvent ev)
+        {
+            var bag = GetSet(ev.Layer);
+            bag.Remove(ev);
+        }
+        void AddToListSkill(SchedulerEvent ev)
+        {
+            if (ev is SkillEvent sev) _skillEvents.Add(sev.SkillBindUnitId, ev);
+        }
+
+        void RemoveFromListSkill(SchedulerEvent ev)
+        {
+            if (ev is SkillEvent sev) _skillEvents.Remove(sev.SkillBindUnitId);
         }
     }
 

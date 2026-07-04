@@ -6,13 +6,12 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
 /// 触发一个团队当前回合的所有事件
 /// </summary>
-public class TeamEventPhase : ITurnPhase
+public class TeamEventPhase : TurnPhase
 {
-    public string PhaseName { get; } = "TeamEventPhase";
-    public int Turn { get; private set; }
+    public override string PhaseName { get; } = "TeamEventPhase";
     public int Team { get; }
 
-    public bool IsFocused
+    public override bool IsFocused
     {
         get => field;
         set
@@ -23,16 +22,12 @@ public class TeamEventPhase : ITurnPhase
                 se.Layer = field ? SimulationLayer.Focused : SimulationLayer.Waiting;
         }
     }
-    public int PhaseOrder { get; private set; }
-    public IEventScheduler EventScheduler { get; private set; }
-    public ITurnManager TurnManager { get; private set; }
-    
     public TeamEventPhase(int team)
     {
         Team = team;
     }
 
-    public async GDTask Execute()
+    public override async GDTask Execute()
     {
         foreach (var se in GetTeamSkill())
         {
@@ -44,13 +39,8 @@ public class TeamEventPhase : ITurnPhase
         }
     }
 
-    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    protected override void OnInit()
     {
-        PhaseOrder = order;
-        EventScheduler = eventScheduler;
-        Turn = turn;
-        TurnManager = turnManager;
-        return this;
     }
 
     private IEnumerable<SchedulerEvent> GetTeamSkill()

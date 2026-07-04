@@ -7,4 +7,5 @@
 script = ExtResource("1_58fnk")
 Icon = ExtResource("1_pvlo2")
 Name = "一般移动"
+Type = 0
 Description = "移动到一个位置"

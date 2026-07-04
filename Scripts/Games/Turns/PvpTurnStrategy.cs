@@ -27,6 +27,7 @@ public class PvpTurnStrategy : ITurnStrategy
             return
             [
                 new MapBuildPhase(_mapBuilder),
+                new TestPhase(),
                 ..GetNormalTurnPhases(),
             ];
         }
@@ -38,6 +39,7 @@ public class PvpTurnStrategy : ITurnStrategy
             [
                 new BuffPhase(),
                 new RegionPhase(),
+                new TeamEventPhase(-1),//自然事件
                 ..Players.Select(p => new TeamEventPhase(p.Team)),
                 new ClearOutdateEventPhase(),
                 new ResetUnitPhase(),

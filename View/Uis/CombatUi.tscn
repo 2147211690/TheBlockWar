@@ -404,6 +404,7 @@ offset_top = -154.0
 offset_bottom = 146.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="TitleTip" unique_id=451130893]
 layout_mode = 2

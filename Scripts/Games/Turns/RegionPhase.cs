@@ -5,12 +5,10 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
 /// 区域回合
 /// </summary>
-public class RegionPhase : ITurnPhase
+public class RegionPhase : TurnPhase
 {
-    public string PhaseName { get; } = "RegionPhase";
-    public int Turn { get; private set; }
-
-    public bool IsFocused
+    public override string PhaseName { get; } = "RegionPhase";
+    public override bool IsFocused
     {
         get => field;
         set
@@ -20,25 +18,17 @@ public class RegionPhase : ITurnPhase
             _regionTurnEvent?.Layer = field ? SimulationLayer.Focused : SimulationLayer.Disabled;
         }
     }
-    public int PhaseOrder { get; private set; }
-    public IEventScheduler EventScheduler { get; private set; }
-    public ITurnManager TurnManager { get; private set; }
     private TurnEvent _regionTurnEvent;
-    public async GDTask Execute()
+    public override async GDTask Execute()
     {
         _regionTurnEvent.Layer = SimulationLayer.Focused;
         await GDTask.Delay(800);
         _regionTurnEvent.Layer = SimulationLayer.Running;
         await EventScheduler.WaitCompleteRunning();
     }
-
-    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    protected override void OnInit()
     {
-        Turn = turn;
-        EventScheduler = eventScheduler;
-        PhaseOrder = order;
-        TurnManager = turnManager;
-        _regionTurnEvent = eventScheduler.CreateEvent(id => new TurnEvent(id)
+        _regionTurnEvent = EventScheduler.CreateEvent(id => new TurnEvent(id)
         {
             Layer = SimulationLayer.Disabled,
             Turn = Turn,
@@ -47,6 +37,5 @@ public class RegionPhase : ITurnPhase
             TurnType = TurnEvent.TypeEnum.Region,
             PhaseOrder = PhaseOrder,
         });
-        return this;
     }
 }

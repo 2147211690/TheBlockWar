@@ -7,15 +7,12 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
 /// 重置单位(技能使用次数)回合
 /// </summary>
-public class ResetUnitPhase : ITurnPhase
+public class ResetUnitPhase : TurnPhase
 {
-    public string PhaseName { get; } = "ResetUnitPhase";
-    public int Turn { get; private set; }
-    public bool IsFocused { get; set; }
-    public int PhaseOrder { get; private set; }
-    public IEventScheduler EventScheduler { get; private set; }
-    public ITurnManager TurnManager { get; private set; }
-    public GDTask Execute()
+    public override string PhaseName { get; } = "ResetUnitPhase";
+    public override bool IsFocused { get; set; }
+
+    public override GDTask Execute()
     {
         EventScheduler.RunAction(obj =>
         {
@@ -24,12 +21,7 @@ public class ResetUnitPhase : ITurnPhase
         return GDTask.CompletedTask;
     }
 
-    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    protected override void OnInit()
     {
-        Turn = turn;
-        EventScheduler = eventScheduler;
-        PhaseOrder = order;
-        TurnManager = turnManager;
-        return this;
     }
 }

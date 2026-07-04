@@ -24,10 +24,11 @@ public abstract class SchedulerEvent(long id) : IComparable<SchedulerEvent>
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     public long Id { get; } = id;
     public SimulationLayer Layer { get; set => SetField(ref field, value); } = SimulationLayer.Waiting;
-    public int Team { get; set => SetField(ref field, value); }
+    public int Team { get; set => SetField(ref field, value); } = -1;
     public int Turn { get; set => SetField(ref field, value); } //用于排序
     public int PhaseOrder { get; set => SetField(ref field, value); } //用于排序
     public int Priority { get; set => SetField(ref field, value); } //用于排序
+    public Vector2I? Coords { get; set => SetField(ref field, value); } //可能绑定的坐标
     public event EventHandler<(string? PropertyName, bool IsChanging)>? PropertyChange;
 
     public override string ToString() => 

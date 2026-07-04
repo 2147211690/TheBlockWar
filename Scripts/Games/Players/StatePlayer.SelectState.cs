@@ -48,10 +48,12 @@ public partial class StatePlayer
                     break;
                 case PlayerInputMouseCoords coords:
                     Player.SelectedTileCoords = coords.Coords;
+                    FocusEventCoords = coords.Coords;
                     break;
                 case PlayerInputSkill skill:
                     if (_selectedUnit.Team != Player.Team) break;
                     Player._skillState.CurrentSkillIndex = skill.Index;
+                    FocusEventCoords = null;
                     StateMachine.ChangeState(Player._skillState);
                     break;
                 case PlayerInputStopTurn stopTurn:

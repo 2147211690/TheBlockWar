@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.GameStates;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Views;
 using TheBlockWar.Scripts.Views.ViewNodes;
@@ -28,9 +29,9 @@ partial class Simulator
                 r.ReValid = true;
                 obj.State.UnitMapState.ModifyUnit(unit.Id, 
                     u => u.CanUseSkill &= 
-                        skillName.EndsWith("移动") ?
+                        skillName.GetSkillInfo().Type == SkillTypeEnum.Move ?
                             ~CanUseSkillMask.Move : 
-                            ~CanUseSkillMask.All);
+                            ~CanUseSkillMask.All);//移动技能后不能使用其他技能
                 skill.SkillCore(obj, unit, useCoords, args);
                 return r;
             }
@@ -42,7 +43,7 @@ partial class Simulator
         if (!result.ReValid) return;
         state.UnitMapState.ModifyUnit(result.UnitId, 
             u => u.CanUseSkill &= 
-                result.SkillName.EndsWith("移动") ?
+                result.SkillName.GetSkillInfo().Type == SkillTypeEnum.Move ?
                     ~CanUseSkillMask.Move : 
                     ~CanUseSkillMask.All);
     }

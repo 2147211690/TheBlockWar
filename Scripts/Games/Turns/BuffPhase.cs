@@ -5,12 +5,11 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
 /// 用来处理buff的回合
 /// </summary>
-public class BuffPhase : ITurnPhase
+public class BuffPhase : TurnPhase
 {
-    public string PhaseName { get; } = "BuffPhase";
-    public int Turn { get; private set; }
+    public override string PhaseName { get; } = "BuffPhase";
 
-    public bool IsFocused
+    public override bool IsFocused
     {
         get => field;
         set
@@ -20,17 +19,11 @@ public class BuffPhase : ITurnPhase
             _buffTurnEvent?.Layer = field ? SimulationLayer.Focused : SimulationLayer.Disabled;
         }
     }
-    public int PhaseOrder { get; private set; }
-    public IEventScheduler EventScheduler { get; private set; }
-    public ITurnManager TurnManager { get; private set; }
-    private TurnEvent _buffTurnEvent;
-    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+
+    private TurnEvent _buffTurnEvent = null!;
+    protected override void OnInit()
     {
-        Turn = turn;
-        EventScheduler = eventScheduler;
-        PhaseOrder = order;
-        TurnManager = turnManager;
-        _buffTurnEvent = eventScheduler.CreateEvent(id => new TurnEvent(id)
+        _buffTurnEvent = EventScheduler.CreateEvent(id => new TurnEvent(id)
         {
             Layer = SimulationLayer.Disabled,
             Turn = Turn,
@@ -39,15 +32,12 @@ public class BuffPhase : ITurnPhase
             TurnType = TurnEvent.TypeEnum.Buff,
             PhaseOrder = PhaseOrder,
         });
-        return this;
     }
-    public async GDTask Execute()
+    public override async GDTask Execute()
     {
         _buffTurnEvent.Layer = SimulationLayer.Focused;
         await GDTask.Delay(800);
         _buffTurnEvent.Layer = SimulationLayer.Running;
         await EventScheduler.WaitCompleteRunning();
     }
-
-
 }

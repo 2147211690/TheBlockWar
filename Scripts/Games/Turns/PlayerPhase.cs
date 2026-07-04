@@ -8,14 +8,10 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
 /// 玩家回合
 /// </summary>
-public class PlayerPhase : ITurnPhase
+public class PlayerPhase : TurnPhase
 {
-    public virtual string PhaseName { get; } = "PlayerPhase";   
-    public int Turn { get; private set; }
-    public bool IsFocused { get; set; }
-    public int PhaseOrder { get; private set; }
-    public IEventScheduler EventScheduler { get; private set; } = null!;
-    public ITurnManager TurnManager { get; private set; } = null!;
+    public override string PhaseName { get; } = "PlayerPhase";   
+    public override bool IsFocused { get; set; }
     public IPlayer Player { get; }
     protected IPlayerOperationSynchronizer OperationSynchronizer { get; }
     public PlayerPhase(IPlayerOperationSynchronizer operationSynchronizer, IPlayer player)
@@ -23,16 +19,11 @@ public class PlayerPhase : ITurnPhase
         OperationSynchronizer = operationSynchronizer;
         Player = player;
     }
-    public virtual ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    protected override void OnInit()
     {
-        Turn = turn;
-        EventScheduler = eventScheduler;
-        PhaseOrder = order;
-        TurnManager = turnManager;
-        Player.TurnManager = turnManager;
-        return this;
+        Player.TurnManager = TurnManager;
     }
-    public virtual async GDTask Execute()
+    public override async GDTask Execute()
     {
         Player.PhaseOrder = PhaseOrder;
         Player.CurrentTurn = Turn;

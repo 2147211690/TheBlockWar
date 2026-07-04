@@ -62,6 +62,7 @@ public class EventScheduler : IEventScheduler
     private GDTaskCompletionSource? _runningCompletionSource;
 
     private bool _isSimulating = false;
+    private IEventScheduler _eventSchedulerImplementation;
 
     public EventScheduler(IGameState gameState, int playerTeam)
     {
@@ -111,6 +112,7 @@ public class EventScheduler : IEventScheduler
         _eventManager.UnblockUpdate();
     }
     public IReadOnlyList<SchedulerEvent> GetTurnEvents(int turn) => _eventManager.GetTurnEvents(turn);
+    public IReadOnlyList<SchedulerEvent> GetCoordsEvents(Vector2I coords) => _eventManager.GetCoordsEvents(coords);
 
     public GDTask WaitCompleteRunning() => _runningCompletionSource?.Task ?? GDTask.CompletedTask;
     /// <summary>

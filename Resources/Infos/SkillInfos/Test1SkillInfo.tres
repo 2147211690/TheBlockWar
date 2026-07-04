@@ -7,4 +7,4 @@
 script = ExtResource("1_asx24")
 Icon = ExtResource("1_qal3m")
 Name = "Test1"
-Description = "发射十字火箭,并伤害己"
+Description = "发射十字火箭,并对自己造成10"

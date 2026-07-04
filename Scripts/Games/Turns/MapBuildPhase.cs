@@ -6,21 +6,16 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
 /// 用来构建地图的回合
 /// </summary>
-public class MapBuildPhase : ITurnPhase
+public class MapBuildPhase : TurnPhase
 {
     public MapBuildPhase(MapBuilder mapBuilder)
     {
         MapBuilder = mapBuilder;
     }
-
-    public string PhaseName { get; } = "MapBuildPhase";
-    public int Turn { get; private set; }
-    public bool IsFocused { get; set; }
-    public int PhaseOrder { get; private set; }
-    public IEventScheduler EventScheduler { get; private set; }
-    public ITurnManager TurnManager { get; private set; }
+    public override string PhaseName { get; } = "MapBuildPhase";
+    public override bool IsFocused { get; set; }
     public MapBuilder MapBuilder { get; }
-    public GDTask Execute()
+    public override GDTask Execute()
     {
         var size = EventScheduler.GameState.Size;
         var result = MapBuilder.BuildMap(size);
@@ -47,12 +42,7 @@ public class MapBuildPhase : ITurnPhase
         return EventScheduler.WaitCompleteRunning();
     }
 
-    public ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order)
+    protected override void OnInit()
     {
-        Turn = turn;
-        EventScheduler = eventScheduler;
-        PhaseOrder = order;
-        TurnManager = turnManager;
-        return this;
     }
 }

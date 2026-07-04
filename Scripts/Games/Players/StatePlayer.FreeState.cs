@@ -49,6 +49,7 @@ public partial class StatePlayer
                         {
                             //单位没有等待中的技能
                             Player._skillState.CurrentSkillIndex = 0;
+                            FocusEventCoords = null;
                             StateMachine.ChangeState(Player._skillState);
                         }
                         else
@@ -73,6 +74,7 @@ public partial class StatePlayer
                         
                         Player._busyState.CallOperation = new PlayerEndTurn(Player.Id);
                         Player._busyState.NextState = Player._freeState;
+                        FocusEventCoords = null;
                         StateMachine.ChangeState(Player._busyState);
                     }
                     else if (stopTurn.Type == PlayerSotpTurnEnum.HoverExit)
@@ -91,6 +93,7 @@ public partial class StatePlayer
         {
             var unit = EventScheduler?.GameState.UnitMapState.GetUnit(coords);
             FocusedUnitId = unit?.Id ?? 0;
+            FocusEventCoords = coords;
             if (!_lockTileCoords) Player.SelectedTileCoords = coords;
         }
     }

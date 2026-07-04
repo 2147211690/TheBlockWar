@@ -25,6 +25,7 @@ public interface IEventScheduler
     void BlockUpdate();
     void UnblockUpdate();
     IReadOnlyList<SchedulerEvent> GetTurnEvents(int turn);
+    IReadOnlyList<SchedulerEvent> GetCoordsEvents(Vector2I coords);
     GDTask WaitCompleteRunning();
 
     /// <summary>
