@@ -26,6 +26,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <AdditionalFiles Include="Resources\Registrys\*" />
     <Content Include="开发规范\添加新模拟操作步骤的规范流程.md" />
   </ItemGroup>
   <ItemGroup>
