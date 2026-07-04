@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="Registry" format=3 uid="uid://b4j5y8364fg8k"]
+
+[ext_resource type="Script" uid="uid://dqtv77mng5dyh" path="res://addons/yard/registry.gd" id="1_r0080"]
+
+[resource]
+script = ExtResource("1_r0080")
+_version = 2
+_scan_rulesets = Array[Dictionary]([{
+&"allowed_file_extensions": Array[String]([]),
+&"class_restrictions": Array[StringName]([&"\"res://Scripts/Resources/UnitInfo.cs\""]),
+&"recursive_scan": false,
+&"scan_directories": Array[String](["res://Resources/Infos/UnitInfos"]),
+&"scan_regex_exclude": "",
+&"scan_regex_include": ""
+}])
+_uids_to_string_ids = Dictionary[StringName, StringName]({
+&"uid://cdpppapttf5to": &"Unit0",
+&"uid://cok8erx75qwwg": &"Unit2",
+&"uid://d2mmc8ch7i1m": &"Unit1"
+})
+_string_ids_to_uids = Dictionary[StringName, StringName]({
+&"Unit0": &"uid://cdpppapttf5to",
+&"Unit1": &"uid://d2mmc8ch7i1m",
+&"Unit2": &"uid://cok8erx75qwwg"
+})

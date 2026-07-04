@@ -1,8 +1,14 @@
 [gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://l2uf5t4sej1l"]
 
 [ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_f5oac"]
+[ext_resource type="Script" uid="uid://4difoodnjw6n" path="res://Scripts/Resources/BuffInitInfo.cs" id="1_xj1g5"]
+
+[sub_resource type="Resource" id="Resource_3eblm"]
+script = ExtResource("1_xj1g5")
+BuffName = "水域"
+metadata/_custom_type_script = "uid://4difoodnjw6n"
 
 [resource]
 script = ExtResource("1_f5oac")
 Name = "水域"
-RegionBuffs = PackedStringArray("水域")
+RegionBuffs = [SubResource("Resource_3eblm")]

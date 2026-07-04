@@ -1,9 +1,12 @@
+using YARD;
+
 namespace TheBlockWar.Scripts.Resources;
 
 [GlobalClass, Tool]
 public partial class RegionInitInfo : Resource
 {
-    [Export] public string RegionName { get; set; } = "None";
-    [Export] public int Duration { get; set; } = 0;
+    [Export(RegistryPropertyHint.PROPERTY_HINT_CUSTOM, "res://Resources/Registrys/Regions.tres")]
+    public string RegionName { get; set; } = "None";
+    [Export] public int Duration { get; set; } = -1;
     [Export] public string Data { get; set; } = string.Empty;
 }

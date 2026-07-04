@@ -10,7 +10,6 @@
 [sub_resource type="Resource" id="Resource_6q631"]
 script = ExtResource("2_qc4h3")
 RegionName = "水域"
-Duration = -1
 metadata/_custom_type_script = "uid://bynqygp2bufcr"
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_fqtcj"]

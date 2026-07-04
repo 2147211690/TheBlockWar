@@ -59,7 +59,7 @@ naming/scene_name_casing=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/extendable_inspector_for_cs/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/resources_spreadsheet_view/plugin.cfg", "res://addons/rider-plugin/plugin.cfg")
+enabled=PackedStringArray("res://addons/extendable_inspector_for_cs/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/rider-plugin/plugin.cfg", "res://addons/yard/plugin.cfg")
 
 [rendering]
 

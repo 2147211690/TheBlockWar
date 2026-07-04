@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="Registry" format=3 uid="uid://k8kplft250s"]
+
+[ext_resource type="Script" uid="uid://dqtv77mng5dyh" path="res://addons/yard/registry.gd" id="1_fnbby"]
+
+[resource]
+script = ExtResource("1_fnbby")
+_version = 2
+_scan_rulesets = Array[Dictionary]([{
+&"allowed_file_extensions": Array[String]([]),
+&"class_restrictions": Array[StringName]([&"\"res://Scripts/Resources/SkillInfo.cs\""]),
+&"recursive_scan": false,
+&"scan_directories": Array[String](["res://Resources/Infos/SkillInfos"]),
+&"scan_regex_exclude": "",
+&"scan_regex_include": ""
+}])
+_uids_to_string_ids = Dictionary[StringName, StringName]({
+&"uid://87qrmh2vl6el": &"一般移动",
+&"uid://bccsk3gsy0yr4": &"Test1"
+})
+_string_ids_to_uids = Dictionary[StringName, StringName]({
+&"Test1": &"uid://bccsk3gsy0yr4",
+&"一般移动": &"uid://87qrmh2vl6el"
+})

@@ -65,7 +65,7 @@ partial class Simulator
                         {
                             var rbs = region.RegionName.GetRegionInfo().RegionBuffs;
                             // 如果结果为移除buff,但是当前所在区域是具有这个buff的区域,则无法移除
-                            if (rbs.IndexOf(buffName) == -1) continue;
+                            if (Array.FindIndex(rbs, b => b.BuffName == buffName) == -1) continue;
                             shouldRemove = false;
                             break;
                         }

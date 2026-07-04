@@ -355,7 +355,7 @@ public partial class CombatUi : Control
         _titleTipTween.SetEase(Tween.EaseType.InOut);
 
         // 快速淡入（0.1 秒变为不透明）
-        _titleTipTween.TweenProperty(_titleTip, "modulate:a", 1.0, 0.1);
+        _titleTipTween.TweenProperty(_titleTip, "modulate:a", 0.6, 0.1);
     
         // 停留显示
         _titleTipTween.TweenInterval(time);

@@ -19,8 +19,8 @@ partial class Simulator
             if (!fromTile.IsNull())
             {
                 foreach (var region in fromTile.Regions)
-                foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs ?? [])
-                    obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.RemoveBuff, 1, false, true);
+                foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs)
+                    obj.ApplyModifyUnitBuff(unit.Coords, buff.BuffName, BuffOperation.RemoveBuff, buff.Count, false, true);
                 Hook.RegionUnitLeave(coords, obj, unit, coords, false);
             }
 

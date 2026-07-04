@@ -32,8 +32,8 @@ partial class Simulator
                 {
                     Hook.RegionUnitEnter(coords, obj, unit, coords, false);
                     foreach (var region in toTile.Regions)
-                    foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs ?? [])
-                        obj.ApplyModifyUnitBuff(unit.Coords, buff, BuffOperation.AddBuff, 1, false, true);
+                    foreach (var buff in region.RegionName.GetRegionInfo().RegionBuffs)
+                        obj.ApplyModifyUnitBuff(unit.Coords, buff.BuffName, BuffOperation.AddBuff, buff.Count, false, true);
                 }
 
                 // 移除所有一次性区域

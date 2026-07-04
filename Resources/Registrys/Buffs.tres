@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="Registry" format=3 uid="uid://b6fydno8yyv0s"]
+
+[ext_resource type="Script" uid="uid://dqtv77mng5dyh" path="res://addons/yard/registry.gd" id="1_b6u8i"]
+
+[resource]
+script = ExtResource("1_b6u8i")
+_version = 2
+_scan_rulesets = Array[Dictionary]([{
+&"allowed_file_extensions": Array[String]([]),
+&"class_restrictions": Array[StringName]([&"\"res://Scripts/Resources/BuffInfo.cs\""]),
+&"recursive_scan": false,
+&"scan_directories": Array[String](["res://Resources/Infos/BuffInfos"]),
+&"scan_regex_exclude": "",
+&"scan_regex_include": ""
+}])
+_uids_to_string_ids = Dictionary[StringName, StringName]({
+&"uid://65d8untvel2g": &"荆棘1",
+&"uid://bk3kxxowetycd": &"屹立",
+&"uid://bu8qwr2us7204": &"水域",
+&"uid://by3lu2j5wyt5x": &"熔岩域",
+&"uid://c54tnbrh31dfe": &"贤者的庇护",
+&"uid://ca2eue7yies5h": &"火域",
+&"uid://cdkjb2nqtfpl4": &"不稳定",
+&"uid://cgep11qh1lv3p": &"贤者的庇护光环",
+&"uid://dfjdhy48bbbgk": &"力量1",
+&"uid://dh813h8xmpjg5": &"燃烧"
+})
+_string_ids_to_uids = Dictionary[StringName, StringName]({
+&"不稳定": &"uid://cdkjb2nqtfpl4",
+&"力量1": &"uid://dfjdhy48bbbgk",
+&"屹立": &"uid://bk3kxxowetycd",
+&"水域": &"uid://bu8qwr2us7204",
+&"火域": &"uid://ca2eue7yies5h",
+&"熔岩域": &"uid://by3lu2j5wyt5x",
+&"燃烧": &"uid://dh813h8xmpjg5",
+&"荆棘1": &"uid://65d8untvel2g",
+&"贤者的庇护": &"uid://c54tnbrh31dfe",
+&"贤者的庇护光环": &"uid://cgep11qh1lv3p"
+})
