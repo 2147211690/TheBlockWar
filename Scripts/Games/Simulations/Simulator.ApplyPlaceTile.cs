@@ -36,14 +36,14 @@ partial class Simulator
                     //初始化区域
                     var info = tileName.GetTileInfo();
                     var newTile = obj.State.TileMapState.GetTile(coords);
-                    if (info.Regions is { Length: > 0 })
+                    if (info.InitRegions is { Length: > 0 })
                     {
                         obj.State.TileMapState.ModifyTile(coords, t =>
                         {
-                            for (var i = 0; i < info.Regions.Length; i++)
+                            for (var i = 0; i < info.InitRegions.Length; i++)
                             {
-                                var regionName = info.Regions[i];
-                                t.AddRegion(regionName, info.RegionDurations[i]);
+                                var regionName = info.InitRegions[i].RegionName;
+                                t.AddRegion(regionName, info.InitRegions[i].Duration, info.InitRegions[i].Data);
                             }
                         });
                     }
@@ -62,14 +62,14 @@ partial class Simulator
         state.TileMapState.ModifyTile(result.Coords, t => t.Name = result.TileName);
         //初始化区域
         var info = result.TileName.GetTileInfo();
-        if (info.Regions is { Length: > 0 })
+        if (info.InitRegions is { Length: > 0 })
         {
             state.TileMapState.ModifyTile(result.Coords, t =>
             {
-                for (var i = 0; i < info.Regions.Length; i++)
+                for (var i = 0; i < info.InitRegions.Length; i++)
                 {
-                    var regionName = info.Regions[i];
-                    t.AddRegion(regionName, info.RegionDurations[i]);
+                    var regionName = info.InitRegions[i].RegionName; 
+                    t.AddRegion(regionName, info.InitRegions[i].Duration, info.InitRegions[i].Data);
                 }
             });
         }

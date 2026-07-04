@@ -8,11 +8,11 @@ public interface IRegion
 {
     string Name { get; }
     [RegionHook]
-    void OnUnitEnter(SimObject obj, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I enterCoords,
+    void OnUnitEnter(SimObject obj, Vector2I regionCoords, string regionData ,IReadOnlyUnitState unit, Vector2I enterCoords,
         bool isAddRegion);
     [RegionHook]
-    void OnUnitLeave(SimObject obj, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I leaveCoords,
+    void OnUnitLeave(SimObject obj, Vector2I regionCoords, string regionData, IReadOnlyUnitState unit, Vector2I leaveCoords,
         bool isRemoveRegion);
     [RegionHook]
-    void OnEnterTurn(SimObject obj, Vector2I regionCoords, int turn);
+    void OnEnterTurn(SimObject obj, Vector2I regionCoords, string regionData, int turn);
 }

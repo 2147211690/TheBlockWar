@@ -11,17 +11,17 @@ public abstract class Region(string name) : IRegion
 
     public string Name => name;
 
-    public virtual void OnUnitEnter(SimObject obj, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I enterCoords,
+    public virtual void OnUnitEnter(SimObject obj, Vector2I regionCoords, string regionData, IReadOnlyUnitState unit, Vector2I enterCoords,
         bool isAddRegion)
     {
     }
 
-    public virtual void OnUnitLeave(SimObject obj, Vector2I regionCoords, IReadOnlyUnitState unit, Vector2I leaveCoords,
+    public virtual void OnUnitLeave(SimObject obj, Vector2I regionCoords, string regionData, IReadOnlyUnitState unit, Vector2I leaveCoords,
         bool isRemoveRegion)
     {
     }
 
-    public virtual void OnEnterTurn(SimObject obj, Vector2I regionCoords, int turn)
+    public virtual void OnEnterTurn(SimObject obj, Vector2I regionCoords, string regionData, int turn)
     {
     }
 }

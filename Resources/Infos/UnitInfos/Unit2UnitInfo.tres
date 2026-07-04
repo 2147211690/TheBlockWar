@@ -2,7 +2,14 @@
 
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_34orb"]
 [ext_resource type="Texture2D" uid="uid://cejatw51v6ae1" path="res://Art/Img/units/player/mech_guard_broken.png" id="1_fitvi"]
+[ext_resource type="Script" uid="uid://4difoodnjw6n" path="res://Scripts/Resources/BuffInitInfo.cs" id="1_yxxkl"]
 [ext_resource type="Texture2D" uid="uid://bhuqfq1cysbkv" path="res://Art/Img/units/player/mech_guard_a.png" id="2_fitvi"]
+
+[sub_resource type="Resource" id="Resource_p5esa"]
+script = ExtResource("1_yxxkl")
+BuffName = "贤者的庇护"
+Count = 1
+metadata/_custom_type_script = "uid://4difoodnjw6n"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yxxkl"]
 atlas = ExtResource("2_fitvi")
@@ -54,7 +61,6 @@ Name = "Unit2"
 MovePower = 2
 MaxHealth = 30.0
 MaxShield = 30.0
-Buffs = PackedStringArray("贤者的庇护")
-BuffCounts = PackedInt32Array(1)
+InitBuffs = [SubResource("Resource_p5esa")]
 Skills = PackedStringArray("一般移动")
 ViewFrames = SubResource("SpriteFrames_ots65")

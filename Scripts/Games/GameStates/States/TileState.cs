@@ -53,7 +53,7 @@ public class TileState : IReadOnlyTileState
     /// <summary>
     /// 添加一个区域效果, 若已存在则累加持续时间
     /// </summary>
-    public int AddRegion(string regionName, int duration)
+    public int AddRegion(string regionName, int duration, string? data = null)
     {
         if (duration < 0) duration = int.MaxValue;
         var list = GetRegionList();
@@ -63,6 +63,7 @@ public class TileState : IReadOnlyTileState
         if (index >= 0)
         {
             span[index].Duration = duration == int.MaxValue ? int.MaxValue : span[index].Duration + duration;
+            if (data != null) span[index].RegionData = data;
             return index;
         }
         else
@@ -74,7 +75,8 @@ public class TileState : IReadOnlyTileState
             list.Insert(i, new RegionState()
             {
                 RegionName = regionName,
-                Duration = duration
+                Duration = duration,
+                RegionData = data ?? string.Empty,
             });
             return i;
         }
@@ -85,6 +87,24 @@ public class TileState : IReadOnlyTileState
         var index = FindRegion(regionName);
         if (index < 0) return -1;
         return RemoveRegion(index, duration);
+    }
+
+    public int ChangeRegionData(string regionName, string? regionData)
+    {
+        var index = FindRegion(regionName);
+        if (index < 0) return -1;
+        var span = CollectionsMarshal.AsSpan(_regions);
+        span[index].RegionData = regionData ?? string.Empty;
+        _isRegionStaticDirty = true;
+        return index;
+    }
+    public int ChangeRegionData(int index, string? regionData)
+    {
+        if (index < 0 || index >= Regions.Count) return -1;
+        var span = CollectionsMarshal.AsSpan(_regions);
+        span[index].RegionData = regionData ?? string.Empty;
+        _isRegionStaticDirty = true;
+        return index;
     }
     public int RemoveRegion(int index, int duration)
     {
@@ -131,13 +151,4 @@ public class TileState : IReadOnlyTileState
         tile._regionsStatic = _isRegionStaticDirty ? null : _regionsStatic;
         return tile;
     }
-
-
-}
-[Flags]
-public enum TileTag
-{
-    Empty = 1,
-    Water = 1 << 1,
-    Ground  = 1 << 2,
 }

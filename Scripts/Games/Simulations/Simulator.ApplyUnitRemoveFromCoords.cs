@@ -40,7 +40,7 @@ partial class Simulator
                 foreach (var region in toTile.RegionsStatic)
                 {
                     if (!region.RegionName.GetRegionInfo().IsOnece) continue;
-                    obj.ApplyModifyTileRegion(coords, region.RegionName, RegionOperation.RemoveRegion, -1);
+                    obj.ApplyModifyTileRegion(coords, region.RegionName, RegionOperation.RemoveRegion, -1, string.Empty);
                 }
             }
             ExitSimulation();

@@ -8,8 +8,7 @@ public partial class TileInfo : Resource, IInfo
     public static readonly TileInfo Null = new();
     [Export] public string Name { get; set; } = "None";
     [Export] public Texture2D? Icon { get; set; }
-    [Export] public string[] Regions { get; set; } = [];
-    [Export] public int[] RegionDurations { get; set; } = [];
+    [Export] public RegionInitInfo[] InitRegions { get; set; } = [];
     [ExportGroup("View")]
     [Export] public float ViewHeight { get; set; } = 34;
     [Export] public Vector2 ViewOffset { get; set; } = new (0, -16);

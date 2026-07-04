@@ -9,10 +9,10 @@ partial class Simulator
 {
     extension(SimObject obj)
     {
-        [Step(["Operation", "OldDuration", "NewDuration", "Result"],
-            [typeof(RegionOperation), typeof(int), typeof(int), typeof(RegionOperationResult)])]
+        [Step(["OldDuration", "NewDuration", "Result"],
+            [typeof(int), typeof(int), typeof(RegionOperationResult)])]
         public ApplyModifyTileRegionResult ApplyModifyTileRegion(Vector2I coords, string regionName, RegionOperation operation,
-            int duration, bool draw = true)
+            int duration, string? regionData, bool draw = true)
         {
             EnterSimulation();
             var r = Main();
@@ -23,8 +23,8 @@ partial class Simulator
             {
                 var r = obj.Steps.AddResult(
                     new ApplyModifyTileRegionResult(CurrentDeep, CurrentTeam, coords, regionName,
-                    operation, duration, draw, 
-                    operation, 0, 0, RegionOperationResult.None));
+                    operation, duration, regionData, draw, 
+                    0, 0, RegionOperationResult.None));
                 if (obj.Layer == SimulationLayer.Waiting) return r;
 
                 var tile = obj.State.TileMapState.GetTile(coords);
@@ -33,10 +33,20 @@ partial class Simulator
                 var index = tile.FindRegion(regionName);
                 r.ReOldDuration = index == -1 ? 0 : tile.Regions[index].Duration;
 
-                if (operation == RegionOperation.AddRegion)
+                if (operation == RegionOperation.ChangeRegionData)
+                {
+                    obj.State.TileMapState.ModifyTile(coords, 
+                        t => t.ChangeRegionData(regionName, regionData));
+                    r.ReResult = RegionOperationResult.RegionDataChanged;
+                    r.ReNewDuration = r.ReOldDuration;
+                }
+                else if (operation == RegionOperation.AddRegion)
                 {
                     var newIndex = 0;
-                    obj.State.TileMapState.ModifyTile(coords, t => newIndex = t.AddRegion(regionName, duration));
+                    obj.State.TileMapState.ModifyTile(coords, t =>
+                    {
+                        newIndex = t.AddRegion(regionName, duration, regionData);
+                    });
                     r.ReNewDuration = newIndex < 0 ? 0 : tile.Regions[newIndex].Duration;
                     if (r.ReOldDuration == 0 && r.ReNewDuration > r.ReOldDuration) r.ReResult = RegionOperationResult.RegionAdded;
                     else if (r.ReNewDuration != r.ReOldDuration) r.ReResult = RegionOperationResult.RegionDurationChanged;
@@ -68,11 +78,11 @@ partial class Simulator
                         {
                             case RegionOperationResult.RegionAdded:
                                 NotifyTileRegion(tile, regionName,
-                                    reg => reg.OnUnitEnter(obj, coords, unit, coords, true));
+                                    reg => reg.OnUnitEnter(obj, coords, regionData, unit, coords, true));
                                 break;
                             case RegionOperationResult.RegionRemoved:
                                 NotifyTileRegion(tile, regionName,
-                                    reg => reg.OnUnitLeave(obj, coords, unit, coords, true));
+                                    reg => reg.OnUnitLeave(obj, coords, tile.Regions[index].RegionData ,unit, coords, true));
                                 break;
                         }
                     }
@@ -101,16 +111,20 @@ partial class Simulator
             {
                 case RegionOperationResult.None:
                     break;
-                case not RegionOperationResult.None:
+                case RegionOperationResult.RegionAdded or RegionOperationResult.RegionRemoved or RegionOperationResult.RegionDurationChanged:
                     var change = result.ReNewDuration - result.ReOldDuration;
                     if (change > 0)
                     {
-                        t.AddRegion(result.RegionName, change);
+                        var index = t.AddRegion(result.RegionName, change);
+                        t.ChangeRegionData(index, result.RegionData);
                     }
                     else if (change < 0)
                     {
                         t.RemoveRegion(result.RegionName, -change);
                     }
+                    break;
+                case RegionOperationResult.RegionDataChanged:
+                    t.ChangeRegionData(result.RegionName, result.RegionData);
                     break;
             }
         });

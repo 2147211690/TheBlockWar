@@ -9,4 +9,5 @@ public struct RegionState
     /// 回合为单位
     /// </summary>
     public int Duration { get; set; }
+    public string RegionData { get; set; }
 }

@@ -181,7 +181,6 @@ namespace TheBlockWar.Scripts.Games.Simulations
 
     private static HookMethod? ExtractRegionHook(IMethodSymbol symbol, ImmutableArray<IParameterSymbol> parameters)
     {
-        // 查找 Vector2I regionCoords（接口定义中的名字）
         IParameterSymbol? regionCoordsParam = null;
         foreach (var p in parameters)
         {
@@ -194,7 +193,6 @@ namespace TheBlockWar.Scripts.Games.Simulations
         }
         if (regionCoordsParam is null) return null;
 
-        // 查找 SimObject obj
         IParameterSymbol? objParam = null;
         foreach (var p in parameters)
         {
@@ -207,10 +205,19 @@ namespace TheBlockWar.Scripts.Games.Simulations
         }
         if (objParam is null) return null;
 
+        IParameterSymbol? regionDataParam = null;
+        foreach (var p in parameters)
+        {
+            if (p.Type.SpecialType == SpecialType.System_String && p.Name == "regionData")
+            {
+                regionDataParam = p;
+                break;
+            }
+        }
+
         var hookParameters = new List<Parameter>();
         var callArguments = new List<CallArgument>();
 
-        // Hook 签名第一位：tileCoords（接口里叫 regionCoords）
         hookParameters.Add(new Parameter(
             regionCoordsParam.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             "tileCoords",
@@ -220,7 +227,6 @@ namespace TheBlockWar.Scripts.Games.Simulations
         {
             if (p == regionCoordsParam)
             {
-                // 调用接口时，regionCoords 参数传入 tileCoords
                 callArguments.Add(new CallArgument("tileCoords", RefKind.None));
                 continue;
             }
@@ -231,6 +237,11 @@ namespace TheBlockWar.Scripts.Games.Simulations
                     "simObj",
                     p.RefKind));
                 callArguments.Add(new CallArgument("simObj", RefKind.None));
+                continue;
+            }
+            if (p == regionDataParam)
+            {
+                callArguments.Add(new CallArgument("regionState.RegionData", RefKind.None));
                 continue;
             }
 

@@ -27,6 +27,7 @@ public enum RegionOperation
 {
     AddRegion,
     RemoveRegion,
+    ChangeRegionData,
 }
 public enum RegionOperationResult
 {
@@ -34,6 +35,7 @@ public enum RegionOperationResult
     RegionAdded,
     RegionRemoved,
     RegionDurationChanged,
+    RegionDataChanged,
 }
 
 public enum StepsRunningMode

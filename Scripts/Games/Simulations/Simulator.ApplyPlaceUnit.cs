@@ -40,14 +40,14 @@ partial class Simulator
                     //单位buff初始化
                     var info = unitName.GetUnitInfo();
                     var newUnit = obj.State.UnitMapState.GetUnit(unitState.Id);
-                    if (info.Buffs is { Length: > 0 })
+                    if (info.InitBuffs is { Length: > 0 })
                     {
                         obj.State.UnitMapState.ModifyUnit(newUnit.Id, u =>
                         {
-                            for (var i = 0; i < info.Buffs.Length; i++)
+                            for (var i = 0; i < info.InitBuffs.Length; i++)
                             {
-                                var buffName = info.Buffs[i];
-                                u.AddBuff(buffName, info.BuffCounts[i]);
+                                var buffInit = info.InitBuffs[i];
+                                u.AddBuff(buffInit.BuffName, buffInit.Count);
                             }
                         });
                         Hook.BuffAddToUnit(newUnit, obj);
@@ -71,14 +71,14 @@ partial class Simulator
         state.UnitMapState.AddUnit(unitState);
         var info = result.UnitName.GetUnitInfo();
         var newUnit = state.UnitMapState.GetUnit(result.ReUnitState.Id);
-        if (info.Buffs is { Length: > 0 })
+        if (info.InitBuffs is { Length: > 0 })
         {
             state.UnitMapState.ModifyUnit(newUnit.Id, u =>
             {
-                for (var i = 0; i < info.Buffs.Length; i++)
+                for (var i = 0; i < info.InitBuffs.Length; i++)
                 {
-                    var buffName = info.Buffs[i];
-                    u.AddBuff(buffName, info.BuffCounts[i]);
+                    var buffInit = info.InitBuffs[i];
+                    u.AddBuff(buffInit.BuffName, buffInit.Count);
                 }
             });
         }
@@ -96,8 +96,8 @@ partial class Simulator
                 result.ReUnitState);
             if (uv == null) return GDTask.CompletedTask;
             //初始化buff视图
-            foreach (var a in result.UnitName.GetUnitInfo().Buffs)
-                uv.BuffView.AddVisibleBuff(a);
+            foreach (var a in result.UnitName.GetUnitInfo().InitBuffs)
+                uv.BuffView.AddVisibleBuff(a.BuffName);
             return AnimationHelper.DropInHeavyAsync(uv, 35);
         }
         return GDTask.CompletedTask;

@@ -2,6 +2,13 @@
 
 [ext_resource type="Texture2D" uid="uid://qtpx4mfm2r5i" path="res://Art/Img/combat/tiles_grass/lava_1.png" id="1_52i7v"]
 [ext_resource type="Script" uid="uid://cojfmsgn544fv" path="res://Scripts/Resources/TileInfo.cs" id="1_kccq1"]
+[ext_resource type="Script" uid="uid://bynqygp2bufcr" path="res://Scripts/Resources/RegionInitInfo.cs" id="2_71coo"]
+
+[sub_resource type="Resource" id="Resource_6q631"]
+script = ExtResource("2_71coo")
+RegionName = "火域"
+Duration = -1
+metadata/_custom_type_script = "uid://bynqygp2bufcr"
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_71coo"]
 animations = [{
@@ -18,7 +25,6 @@ animations = [{
 script = ExtResource("1_kccq1")
 Name = "燃烧块"
 Icon = ExtResource("1_52i7v")
-Regions = PackedStringArray("火域")
-RegionDurations = PackedInt32Array(-1)
+InitRegions = [SubResource("Resource_6q631")]
 ViewHeight = 32.0
 ViewFrames = SubResource("SpriteFrames_71coo")

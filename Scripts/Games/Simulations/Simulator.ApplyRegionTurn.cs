@@ -46,7 +46,8 @@ partial class Simulator
                     foreach (var region in pair.regions)
                     {
                         if (region.Duration is 0 or int.MaxValue) continue;
-                        obj.ApplyModifyTileRegion(pair.coords, region.RegionName, RegionOperation.RemoveRegion, -1);
+                        obj.ApplyModifyTileRegion(
+                            pair.coords, region.RegionName, RegionOperation.RemoveRegion, -1, string.Empty);
                     }
                 }
                 obj.EndSteps();
