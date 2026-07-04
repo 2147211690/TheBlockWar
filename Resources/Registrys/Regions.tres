@@ -15,11 +15,13 @@ _scan_rulesets = Array[Dictionary]([{
 }])
 _uids_to_string_ids = Dictionary[StringName, StringName]({
 &"uid://ccjjrf25ocs1j": &"熔岩域",
+&"uid://d3av0s7yqxp8n": &"生成单位域",
 &"uid://jj5iiqei77o7": &"火域",
 &"uid://l2uf5t4sej1l": &"水域"
 })
 _string_ids_to_uids = Dictionary[StringName, StringName]({
 &"水域": &"uid://l2uf5t4sej1l",
 &"火域": &"uid://jj5iiqei77o7",
-&"熔岩域": &"uid://ccjjrf25ocs1j"
+&"熔岩域": &"uid://ccjjrf25ocs1j",
+&"生成单位域": &"uid://d3av0s7yqxp8n"
 })

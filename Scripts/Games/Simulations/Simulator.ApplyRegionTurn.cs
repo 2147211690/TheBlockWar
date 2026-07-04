@@ -47,7 +47,7 @@ partial class Simulator
                     {
                         if (region.Duration is 0 or int.MaxValue) continue;
                         obj.ApplyModifyTileRegion(
-                            pair.coords, region.RegionName, RegionOperation.RemoveRegion, -1, string.Empty);
+                            pair.coords, region.RegionName, RegionOperation.RemoveRegion, 1, string.Empty);
                     }
                 }
                 obj.EndSteps();

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://d3av0s7yqxp8n"]
+
+[ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_a4amu"]
+[ext_resource type="Texture2D" uid="uid://51eif3urw50q" path="res://Art/Img/ui/strategy/swap.png" id="1_totwk"]
+
+[resource]
+script = ExtResource("1_a4amu")
+Name = "生成单位域"
+Icon = ExtResource("1_totwk")
+Description = "下一回合生成一个单位"
+metadata/_custom_type_script = "uid://6ogmwabfqvx"
