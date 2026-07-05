@@ -74,7 +74,7 @@ public partial class PvpRoom : Control
         var peer = OnlineRoom.Peer;
         SceneManager.ChangeSceneToPacked(PvpScene, p =>
         {
-            ((Pvp)p).StartGame(players, netId, peer);
+            ((Pvp)p).StartGame(players,1, netId, peer);
         });
     }
 

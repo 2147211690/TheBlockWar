@@ -12,16 +12,18 @@ public partial class StatePlayer
     private class FreeState(StatePlayer player) : State(player)
     {
         private bool _lockTileCoords = false;
+        private IReadOnlyList<EventState>? unitEvents;
         public long FocusedUnitId
         {
             get => Player.FocusedUnitId;
             set
             {
                 if (value == Player.FocusedUnitId) return;
-                EventScheduler?.GetUnitSkillEvent(Player.FocusedUnitId)?.Layer = SimulationLayer.Waiting;
+                unitEvents?.SetLayer(SimulationLayer.Waiting);
                 Player.GameView.GetUnitView(FocusedUnitId)?.IsFocused = false;
                 Player.FocusedUnitId = value;
-                EventScheduler?.GetUnitSkillEvent(Player.FocusedUnitId)?.Layer = SimulationLayer.Focused;
+                unitEvents = EventScheduler?.GetUnitEvents(value);
+                unitEvents?.SetLayer(SimulationLayer.Focused);
                 Player.GameView.GetUnitView(FocusedUnitId)?.IsFocused = true;
                 
             }
@@ -44,8 +46,8 @@ public partial class StatePlayer
                         var u = EventScheduler?.GameState.UnitMapState.GetUnit(FocusedUnitId);
                         if (u.IsNull()) break;
                         Player.SelectedUnitId = FocusedUnitId;
-                        var skill = EventScheduler?.GetUnitSkillEvent(FocusedUnitId);
-                        if (skill == null && u.Team == Player.Team)
+                        unitEvents = EventScheduler?.GetUnitEvents(FocusedUnitId);
+                        if (unitEvents.Count == 0 && u.Team == Player.Team)
                         {
                             //单位没有等待中的技能
                             Player._skillState.CurrentSkillIndex = 0;

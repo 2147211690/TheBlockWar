@@ -85,8 +85,11 @@ partial class Simulator
                         r.ReNewCount = r.ReOldCount;
                     }
                 }
-
-                if (obj.ComplexSimulationRegion(1))
+                foreach (var ev in obj.State.EventManagerState.GetUnitEvents(unit.Id))
+                {
+                    if (!ev.CheckIsValid(obj.State)) obj.ApplyRemoveEvent(ev.Id);
+                }
+                if (obj.ComplexSimulationRegion(3))
                 {
                     switch (r.ReResult)
                     {

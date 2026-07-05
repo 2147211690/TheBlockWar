@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://l2uf5t4sej1l"]
 
 [ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_f5oac"]
+[ext_resource type="Texture2D" uid="uid://cmko0pqdw7tul" path="res://Art/Img/advanced/effects/shotup_swapother.png" id="1_p6jsf"]
 [ext_resource type="Script" uid="uid://4difoodnjw6n" path="res://Scripts/Resources/BuffInitInfo.cs" id="1_xj1g5"]
 
 [sub_resource type="Resource" id="Resource_3eblm"]
@@ -12,3 +13,4 @@ metadata/_custom_type_script = "uid://4difoodnjw6n"
 script = ExtResource("1_f5oac")
 Name = "水域"
 RegionBuffs = [SubResource("Resource_3eblm")]
+Icon = ExtResource("1_p6jsf")

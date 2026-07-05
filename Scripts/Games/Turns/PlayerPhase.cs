@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.Events;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Players;
 using TheBlockWar.Scripts.Games.Simulations;
@@ -109,7 +110,7 @@ public class PlayerPhase : TurnPhase
         }
         return false;
 
-        async GDTask<SchedulerEvent?> UnitSkill(Vector2I coords, int skillIndex, Vector2I?[]? args,
+        async GDTask<EventState?> UnitSkill(Vector2I coords, int skillIndex, Vector2I?[]? args,
             SimulationLayer layer, int turn)
         {
             var unit = EventScheduler.GameState.UnitMapState.GetUnit(coords);
@@ -125,17 +126,7 @@ public class PlayerPhase : TurnPhase
             }
 
             var skill = skills[skillIndex];
-            var e = EventScheduler.CreateEvent(id => new SkillEvent(id)
-            {
-                Layer = layer,
-                PhaseOrder = Player.PhaseOrder,
-                Priority = 0,
-                SkillArgs = args,
-                SkillBindUnitId = unit.Id,
-                SkillName = skill.SkillName,
-                Team = unit.Team,
-                Turn = turn,
-            });
+            var e = EventScheduler.CreateEvent(new SkillEventCore(skill.SkillName, unit.Id, args), turn, Player.PhaseOrder, unit.Team, layer);
             await EventScheduler.WaitCompleteRunning();
             return e;
         }

@@ -16,7 +16,7 @@ public partial class StatePlayer
     private class SkillState(StatePlayer player) : State(player)
     {
         public int CurrentSkillIndex { get; set; } = 0;
-        private SkillEvent? _currentSkillEvent;
+        private EventState? _currentSkillEvent;
         private IReadOnlyList<ISkill> _validSkills = [];
         private ISkill _currentSkill = null!;
         private int _currentArgIndex = -1;
@@ -52,7 +52,7 @@ public partial class StatePlayer
             _currentSkill = null!;
             if (_currentSkillEvent != null)
             {
-                EventScheduler.DeleteEvent(_currentSkillEvent);
+                EventScheduler.RemoveEvent(_currentSkillEvent.Id);
                 _currentSkillEvent = null;
             }
             _unitState = UnitState.Null;
@@ -121,17 +121,11 @@ public partial class StatePlayer
             {
                 //创建技能
                 EventScheduler.BlockUpdate();
-                _currentSkillEvent = EventScheduler!.CreateEvent(id => new SkillEvent(id)
-                {
-                    SkillBindUnitId = Player.SelectedUnitId,
-                    SkillName = _currentSkill.SkillName,
-                    Team = _unitState.Team,
-                    PhaseOrder = Player.PhaseOrder,
-                });
-
                 _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
-                _currentSkillEvent.SkillArgs = _currentSkillArgs;
-                _currentSkillEvent.Layer = SimulationLayer.Focused;
+
+                _currentSkillEvent = EventScheduler.CreateEvent(
+                    new SkillEventCore(_currentSkill.SkillName, Player.SelectedUnitId, _currentSkillArgs), Player.CurrentTurn, Player.PhaseOrder, _unitState.Team, SimulationLayer.Focused);
+                
                 _currentArgIndex++;
 
                 UpdateCurrentValidSkillCoords();
@@ -188,7 +182,8 @@ public partial class StatePlayer
         private void SetCurrentIndexArgGlobal(in Vector2I arg)
         {
             _currentSkillArgs![_currentArgIndex] = IsArgGlobalValid(arg) ? arg - _unitState.Coords : null;
-            _currentSkillEvent?.SkillArgs = _currentSkillArgs;
+            _currentSkillEvent?.Core = 
+                new SkillEventCore(_currentSkill.SkillName, Player.SelectedUnitId, (Vector2I?[])_currentSkillArgs.Clone());
         }
 
         private void UpdateCurrentValidSkillCoords()

@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.Events;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games.Turns;
@@ -16,22 +17,18 @@ public class BuffPhase : TurnPhase
         { 
             if (field == value) return;
             field = value;
-            _buffTurnEvent?.Layer = field ? SimulationLayer.Focused : SimulationLayer.Disabled;
+            _buffTurnEvent.Layer = field ? SimulationLayer.Focused : SimulationLayer.Disabled;
         }
     }
-
-    private TurnEvent _buffTurnEvent = null!;
+    private EventState _buffTurnEvent = null!;
     protected override void OnInit()
     {
-        _buffTurnEvent = EventScheduler.CreateEvent(id => new TurnEvent(id)
-        {
-            Layer = SimulationLayer.Disabled,
-            Turn = Turn,
-            Priority = -1000,
-            Team = -1,
-            TurnType = TurnEvent.TypeEnum.Buff,
-            PhaseOrder = PhaseOrder,
-        });
+        _buffTurnEvent = EventScheduler.CreateEvent(new StepsEventCore(
+            null,
+            [
+                new ApplyBuffTurnStep(Turn)
+            ]
+        ), Turn, PhaseOrder, -1, SimulationLayer.Disabled, -100);
     }
     public override async GDTask Execute()
     {

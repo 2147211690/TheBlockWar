@@ -7,6 +7,7 @@ using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Resources;
 using TheBlockWar.Scripts.Views;
 
 namespace TheBlockWar.Scripts.Tools;
@@ -61,6 +62,25 @@ public static class Extensions
         }
     }
 
+    extension(IGameState gameState)
+    {
+        public EventState CreateEvent(EventCore core,
+            int turn, int phaseOrder, int team,
+            SimulationLayer layer,
+            int priority = 0)
+        {
+            var e = new EventState(gameState.IdGenerator.NewLong())
+            {
+                Team = team,
+                Layer = layer,
+                Turn = turn,
+                PhaseOrder = phaseOrder,
+                Priority = priority,
+                Core = core,
+            };
+            return gameState.EventManagerState.AddEvent(e);
+        }
+    }
     extension(SimObject obj)
     {
         public (Vector2I coords, bool isHit) MoveHit(in Vector2I start, DirMask dir, float damage, int length, bool checkGround,
@@ -266,8 +286,8 @@ public static class Extensions
         }
         public bool GetShouldUseSkill(IReadOnlyGameState state, ISkill skill)
         {
-            if (unit.IsDead || 
-                !(skill.SkillName.EndsWith("移动") ? 
+            if (unit.IsNull() || unit.IsDead ||
+                !(skill.SkillName.GetSkillInfo().Type == SkillTypeEnum.Move ? 
                     unit.CanUseSkill.HasFlag(CanUseSkillMask.Move) : 
                     unit.CanUseSkill.HasFlag(CanUseSkillMask.Skill))) 
                 return false;
@@ -441,15 +461,22 @@ public static class Extensions
         }
     }
 
+    extension(IEnumerable<EventState>? events)
+    {
+        public void SetLayer(SimulationLayer layer)
+        {
+            if (events is null) return;
+            foreach (var ev in events)
+            {
+                ev.Layer = layer;
+            }
+        }
+    }
     extension(IEventScheduler eventScheduler)
     {
-        public void RunAction(Action<SimObject> action)
+        public void RunAction(Action<EventState, SimObject> action)
         {
-            eventScheduler.CreateEvent(id => new ActionEvent(id)
-            {
-                ActionCore = (_, o) => action(o),
-                Layer = SimulationLayer.Running,
-            });
+            eventScheduler.CreateEvent(new ActionEventCore(null, action), 0, 0, -1, SimulationLayer.Running);
         }
         public async GDTask RunTurnEvents(int turn, int focusDelay = 800, int runAfterDelay = 100)
         {

@@ -58,7 +58,9 @@ public class TurnManager : ITurnManager
     }
     public void FocusNextTurn(bool focused)
     {
+        EventScheduler.BlockUpdate();
         foreach (var phase in _nextPhases) phase.IsFocused = focused;
+        EventScheduler.UnblockUpdate();
     }
     public void Stop()
     {

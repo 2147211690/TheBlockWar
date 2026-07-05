@@ -5,9 +5,8 @@ namespace TheBlockWar.Scripts.Games.Players;
 
 public class FakePlayer : IPlayer
 {
-    public FakePlayer(int team, long id)
+    public FakePlayer(long id)
     {
-        Team = team;
         Id = id;
     }
 

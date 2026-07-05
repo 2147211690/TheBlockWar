@@ -44,6 +44,8 @@ partial class Simulator
                     buff.BuffName.GetBuffInfo().Hook.OnRemoveFromUnit(obj, unit, buff.Count, buff.Count);
                 }
                 obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.ClearBuff());
+                foreach (var ev in obj.State.EventManagerState.GetUnitEvents(unit.Id))
+                    obj.ApplyRemoveEvent(ev.Id);
                 ExitSimulation();
                 //TODO:可能引入区域相关事件
                 return r;

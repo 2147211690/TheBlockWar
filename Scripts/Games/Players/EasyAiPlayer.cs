@@ -13,9 +13,8 @@ namespace TheBlockWar.Scripts.Games.Players;
 public class EasyAiPlayer : IPlayer
 {
     private IPlayerOperationSynchronizer _playerOperationSynchronizer;
-    public EasyAiPlayer(int team, long id, IEventScheduler gameScheduler, IPlayerOperationSynchronizer playerOperationSynchronizer)
+    public EasyAiPlayer(long id, IEventScheduler gameScheduler, IPlayerOperationSynchronizer playerOperationSynchronizer)
     {
-        Team = team;
         Id = id;
         _playerOperationSynchronizer = playerOperationSynchronizer;
         GameScheduler = gameScheduler;
@@ -67,7 +66,7 @@ public class EasyAiPlayer : IPlayer
 
         foreach (var u in units)
         {
-            if (GameScheduler.GetUnitSkillEvent(u.Id) is not null)
+            if (GameScheduler.GameState.EventManagerState.GetUnitEvents(u.Id).Count > 0)
                 continue;
 
             var skills = state.GetUnitValidSkills(u.Name);

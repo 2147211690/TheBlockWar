@@ -68,6 +68,7 @@ partial class Simulator
 
     public static partial void ApplyCureReplayCore(IGameState state, ApplyCureResult result)
     {
+        if (result.ReUnitId == 0) return;
         state.UnitMapState.ModifyUnit(result.ReUnitId, u => u.Health += result.ReValidCure);
     }
 

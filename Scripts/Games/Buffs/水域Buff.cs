@@ -19,7 +19,7 @@ public class 水域Buff() : Buff(BuffNames.水域)
     public override void OnUnitShouldUseSkill(IReadOnlyGameState state, IReadOnlyUnitState unit, int buffCount, ISkill skill,
         ref bool shouldUseSkill)
     {
-        if (skill.SkillName.EndsWith("移动")) return;
+        if (skill.SkillName.GetSkillInfo().Type == SkillTypeEnum.Move) return;
         shouldUseSkill = false;
     }
 }

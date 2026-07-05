@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://ccjjrf25ocs1j"]
 
+[ext_resource type="Texture2D" uid="uid://cqnqy7y6l4xf5" path="res://Art/Img/effects/laser1_start.png" id="1_4w5wd"]
 [ext_resource type="Script" uid="uid://4difoodnjw6n" path="res://Scripts/Resources/BuffInitInfo.cs" id="1_gl5ee"]
 [ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="1_iwgau"]
 
@@ -12,3 +13,4 @@ metadata/_custom_type_script = "uid://4difoodnjw6n"
 script = ExtResource("1_iwgau")
 Name = "熔岩域"
 RegionBuffs = [SubResource("Resource_oo63n")]
+Icon = ExtResource("1_4w5wd")

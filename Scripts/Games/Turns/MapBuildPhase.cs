@@ -19,7 +19,7 @@ public class MapBuildPhase : TurnPhase
     {
         var size = EventScheduler.GameState.Size;
         var result = MapBuilder.BuildMap(size);
-        EventScheduler.RunAction(obj =>
+        EventScheduler.RunAction((es, obj) =>
         {
             obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);
             for (int i = 0; i < size.X; i++)

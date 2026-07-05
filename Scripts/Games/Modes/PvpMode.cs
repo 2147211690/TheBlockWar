@@ -19,20 +19,7 @@ public class PvpMode : GameMode
 
     public override void EnterTurn(ITurnManager turnManager, int turn)
     {
-        turnManager.EventScheduler.CreateEvent(id => new TurnEvent(id)
-        {
-            TurnType = TurnEvent.TypeEnum.Region,
-            Turn = turn + 1,
-            Priority = int.MinValue,
-            Layer = SimulationLayer.Disabled,
-        });
-        turnManager.EventScheduler.CreateEvent(id => new TurnEvent(id)
-        {
-            TurnType = TurnEvent.TypeEnum.Buff,
-            Turn = turn + 1,
-            Priority = int.MinValue + 1,
-            Layer = SimulationLayer.Disabled,
-        });
+
     }
 
     public override async GDTask Turn(ITurnManager turnManager, int turn)

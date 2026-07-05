@@ -18,14 +18,14 @@ public partial class Pvp : Node2D
     private IEventScheduler? _eventScheduler;
     private ITurnStrategy? _pvpMode;
     private ITurnManager? _turnManager;
-    public void StartGame((long Id, PlayerInfo PlayerInfo)[] playerInfos, long localId, MultiplayerPeer? peer = null)
+    public void StartGame((long Id, PlayerInfo PlayerInfo)[] playerInfos, int aiCount, long localId, MultiplayerPeer? peer = null)
     {
         TaskTracker.ShowTrackerWindow();
-        var localIndex = Array.FindIndex(playerInfos, p => p.Id == localId);
+        var localIndex = Array.FindIndex(playerInfos, p => p.Id == localId) + aiCount;
         
         _gameState = new GameState(
             new Vector2I(10, 10),
-            TeamRelationTool.GetAllTeamEnemy(playerInfos.Length)
+            TeamRelationTool.GetAllTeamEnemy(playerInfos.Length + aiCount)
         );
         _eventScheduler = new EventScheduler(_gameState, localIndex);
         
@@ -36,28 +36,32 @@ public partial class Pvp : Node2D
         AddChild(playerOperationSynchronizer);
         playerOperationSynchronizer.Multiplayer.MultiplayerPeer = peer;
         
-        var players = new IPlayer[playerInfos.Length];
-        for (int i = 0; i < playerInfos.Length; i++)
+        var players = new IPlayer[playerInfos.Length + aiCount];
+        for (int i = 0; i < playerInfos.Length + aiCount; i++)
         {
-            if (i == localIndex)
+            if (i < aiCount)
             {
-                var sp = StatePlayer.Create(playerInfos[i].Id, _gameView, _eventScheduler, playerOperationSynchronizer);
+                players[i] = new EasyAiPlayer(100, _eventScheduler, playerOperationSynchronizer);
+            }
+            else if (i == localIndex)
+            {
+                var sp = StatePlayer.Create(playerInfos[i - aiCount].Id, _gameView, _eventScheduler, playerOperationSynchronizer);
                 AddChild(sp);
                 players[i] = sp;
             }
             else
             {
-                players[i] = new FakePlayer(i, playerInfos[i].Id);
+                players[i] = new FakePlayer(playerInfos[i - aiCount].Id);
             }
         }
-        
+            
         _pvpMode = new PvpTurnStrategy(
             playerOperationSynchronizer, 
             players,
             new RandomMapBuilder(
                 [TileNames.Soil0, TileNames.水块, TileNames.燃烧块], 
                 [UnitNames.Unit0, UnitNames.Unit1, UnitNames.Unit2],
-                playerInfos.Select((p, i) => (i, 5)).ToArray(),
+                Enumerable.Range(0, players.Length).Select((p, i) => (i, 8)).ToArray(),
                 1
                 )
         );

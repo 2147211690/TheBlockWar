@@ -11,5 +11,5 @@ public class GameStateData
     public required BuffGlobalStateData BuffGlobalState { get; init; }
     public required TeamStateData TeamState { get; init; }
     public required TurnStateData TurnState { get; init; }
-    public required List<SchedulerEvent> Events { get; init; }
+    public required EventManagerData EventManagerState { get; init; }
 }

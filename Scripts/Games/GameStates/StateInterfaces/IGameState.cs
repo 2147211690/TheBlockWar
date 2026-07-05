@@ -6,10 +6,10 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IGameState : IReadOnlyGameState, IGameDataState
 {
-    new IDictionary<long, SchedulerEvent>? Events { get; }
     new ITileMapState TileMapState { get; }
     new IUnitMapState UnitMapState { get; }
     new IBuffGlobalState BuffGlobalState { get; }
     new ITurnState TurnState { get; }
+    new IEventManagerState EventManagerState { get; }
     void LoadGameData(GameStateData data);
 }

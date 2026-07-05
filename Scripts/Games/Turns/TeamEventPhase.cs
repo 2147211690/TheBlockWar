@@ -1,6 +1,8 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games.Events;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
@@ -10,16 +12,17 @@ public class TeamEventPhase : TurnPhase
 {
     public override string PhaseName { get; } = "TeamEventPhase";
     public int Team { get; }
-
+    private List<EventState>? _teamSkillEvents;
     public override bool IsFocused
     {
         get => field;
         set
         {
             if (field == value) return;
+            _teamSkillEvents?.SetLayer(field ? SimulationLayer.Waiting : SimulationLayer.Disabled);
             field = value;
-            foreach (var se in GetTeamSkill())
-                se.Layer = field ? SimulationLayer.Focused : SimulationLayer.Waiting;
+            _teamSkillEvents = GetTeamSkill();
+            _teamSkillEvents?.SetLayer(field ? SimulationLayer.Focused : SimulationLayer.Waiting);
         }
     }
     public TeamEventPhase(int team)
@@ -29,13 +32,15 @@ public class TeamEventPhase : TurnPhase
 
     public override async GDTask Execute()
     {
-        foreach (var se in GetTeamSkill())
+        var teamSkillEvents = GetTeamSkill();
+        foreach (var se in teamSkillEvents)
         {
             if (!se.CheckIsValid(EventScheduler.GameState)) continue;
             se.Layer = SimulationLayer.Focused;
             await GDTask.Delay(800);
             se.Layer = SimulationLayer.Running;
             await EventScheduler.WaitCompleteRunning();
+            await GDTask.Delay(100);
         }
     }
 
@@ -43,8 +48,8 @@ public class TeamEventPhase : TurnPhase
     {
     }
 
-    private IEnumerable<SchedulerEvent> GetTeamSkill()
+    private List<EventState> GetTeamSkill()
     {
-        return EventScheduler.GetTurnEvents(Turn).Where(e => e.Team == Team);
+        return EventScheduler.GetTurnEvents(Turn).Where(e => e.Team == Team).ToList();
     }
 }

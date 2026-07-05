@@ -7,7 +7,6 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 
 public interface IReadOnlyGameState : IReadOnlyGameDataState<IGameState, GameStateData>
 {
-    IReadOnlyDictionary<long, SchedulerEvent>? Events { get; }
     bool IsSnapshot { get; }
     Vector2I Size { get; }
     DefaultIdGenerator IdGenerator { get; }
@@ -17,6 +16,7 @@ public interface IReadOnlyGameState : IReadOnlyGameDataState<IGameState, GameSta
     IReadOnlyUnitMapState UnitMapState { get; }
     IReadOnlyBuffGlobalState BuffGlobalState { get; }
     IReadOnlyTurnState TurnState { get; }
+    IReadOnlyEventManagerState EventManagerState { get; }
     TeamState TeamState { get; }
     IReadOnlyList<ISkill> GetUnitValidSkills(string unitName);
 }

@@ -10,10 +10,12 @@ public class ClearOutdateEventPhase : TurnPhase
     public override bool IsFocused { get; set; }
     public override GDTask Execute()
     {
+        EventScheduler.BlockUpdate();
         foreach (var a in EventScheduler.Events.Values.Where(a => a.Turn <= Turn).ToList())
         {
-            EventScheduler.DeleteEvent(a);
+            EventScheduler.RemoveEvent(a.Id);
         }
+        EventScheduler.UnblockUpdate();
         return GDTask.CompletedTask;
     }
     protected override void OnInit()

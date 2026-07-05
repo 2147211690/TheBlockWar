@@ -24,8 +24,6 @@ partial class Simulator
                     CurrentDeep, CurrentTeam, unitId, skillName, useCoords, args));
                 var unit = obj.State.UnitMapState.GetUnit(unitId);
                 var skill = skillName.GetSkillInfo().Instance;
-                if (unit.IsNull() || !unit.GetShouldUseSkill(obj.State, skill))
-                    return r;
                 r.ReValid = true;
                 obj.State.UnitMapState.ModifyUnit(unit.Id, 
                     u => u.CanUseSkill &= 

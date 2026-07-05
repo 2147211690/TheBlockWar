@@ -14,29 +14,17 @@ public partial class StatePlayer
         public IEventScheduler? EventScheduler => Player.GameScheduler;
         public StateMachine<State> StateMachine => Player._stateMachine;
 
+        private IReadOnlyList<EventState>? _focusEvents;
         public Vector2I? FocusEventCoords
         {
             get => field;
             set
             {
                 if (field == value) return;
-                Focus(field, SimulationLayer.Waiting);
+                _focusEvents.SetLayer(SimulationLayer.Waiting);
                 field = value;
-                Focus(field, SimulationLayer.Focused);
-                
-                void Focus(in Vector2I? focusEventCoordsField, SimulationLayer layer)
-                {
-                    if (focusEventCoordsField != null)
-                    {
-                        var prevEvents = EventScheduler.GetCoordsEvents(focusEventCoordsField.Value);
-                        EventScheduler.BlockUpdate();
-                        foreach (var e in prevEvents)
-                        {
-                            e.Layer = layer;
-                        }
-                        EventScheduler.UnblockUpdate();
-                    }
-                }
+                _focusEvents = field == null ? null : EventScheduler!.GetCoordsEvents(field.Value);
+                _focusEvents.SetLayer(SimulationLayer.Focused);
             }
         }
 

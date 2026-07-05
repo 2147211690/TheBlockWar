@@ -1,4 +1,5 @@
 using TheBlockWar.Scripts.Games.Events;
+using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 
 namespace TheBlockWar.Scripts.Games.Turns;
@@ -15,10 +16,10 @@ public class RegionPhase : TurnPhase
         { 
             if (field == value) return;
             field = value;
-            _regionTurnEvent?.Layer = field ? SimulationLayer.Focused : SimulationLayer.Disabled;
+            _regionTurnEvent.Layer = field ? SimulationLayer.Focused : SimulationLayer.Disabled;
         }
     }
-    private TurnEvent _regionTurnEvent;
+    private EventState _regionTurnEvent;
     public override async GDTask Execute()
     {
         _regionTurnEvent.Layer = SimulationLayer.Focused;
@@ -28,14 +29,10 @@ public class RegionPhase : TurnPhase
     }
     protected override void OnInit()
     {
-        _regionTurnEvent = EventScheduler.CreateEvent(id => new TurnEvent(id)
-        {
-            Layer = SimulationLayer.Disabled,
-            Turn = Turn,
-            Priority = -1000,
-            Team = -1,
-            TurnType = TurnEvent.TypeEnum.Region,
-            PhaseOrder = PhaseOrder,
-        });
+        _regionTurnEvent = EventScheduler.CreateEvent(new StepsEventCore(
+            null,
+        [
+            new ApplyRegionTurnStep(Turn)
+        ]), Turn, PhaseOrder, -1, SimulationLayer.Disabled, -100);
     }
 }

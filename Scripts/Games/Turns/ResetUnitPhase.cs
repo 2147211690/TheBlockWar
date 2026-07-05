@@ -14,7 +14,7 @@ public class ResetUnitPhase : TurnPhase
 
     public override GDTask Execute()
     {
-        EventScheduler.RunAction(obj =>
+        EventScheduler.RunAction((es, obj) =>
         {
             obj.ApplyResetUnit();
         });
