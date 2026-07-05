@@ -5,6 +5,55 @@ using TheBlockWar.Scripts.Views.ViewNodes;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
 
+public abstract class AnimationLineFunc
+{
+    protected readonly Vector3 NormalizedStart;
+    protected readonly Vector3 NormalizedEnd;
+    public float Length => _length ??= GetLength();
+    private readonly float _gridHeight;
+    private float? _length;
+
+    protected AnimationLineFunc(Vector3 start, Vector3 end, float gridHeight)
+    {
+        _gridHeight = gridHeight;
+        NormalizedStart = start with { Z = start.Z / gridHeight };
+        NormalizedEnd = end with { Z = end.Z / gridHeight };
+    }
+    protected abstract float GetLength();
+    public abstract Vector3 GetPoint(float t);
+    protected Vector3 Denormalize(Vector3 pos) => pos with { Z = pos.Z * _gridHeight };
+}
+
+public class LinearLineFunc(Vector3 start, Vector3 end, float gridHeight) : AnimationLineFunc(start, end, gridHeight)
+{
+    protected override float GetLength() => (NormalizedEnd - NormalizedStart).Length();
+
+    public override Vector3 GetPoint(float t) => Denormalize(NormalizedStart.Lerp(NormalizedEnd, t));
+}
+
+public class ThrowLineFunc : AnimationLineFunc
+{
+    private readonly Vector3 _center;
+    public ThrowLineFunc(Vector3 start, Vector3 end, float gridHeight, float heightRatio) : base(start, end, gridHeight)
+    {
+        var c = (NormalizedStart + NormalizedEnd) / 2;
+        c.Z += NormalizedStart.DistanceTo(NormalizedEnd) * heightRatio;
+        _center = c;
+    }
+
+    protected override float GetLength()
+    {
+        return NormalizedStart.DistanceTo(_center) + NormalizedEnd.DistanceTo(_center);
+    }
+
+    public override Vector3 GetPoint(float t)
+    {
+        var l1 = NormalizedStart.Lerp(_center, t);
+        var l2 = _center.Lerp(NormalizedEnd, t);
+        return Denormalize(l1.Lerp(l2, t));
+    }
+}
+
 partial class Simulator
 {
     extension(SimObject obj)
@@ -25,34 +74,39 @@ partial class Simulator
     
     public static partial void ApplyAnimationViewDraw(IGameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
     {
-        /*if (result.Animation is ShotSomethingAnim shot)
+        if (result.Animation is ShotSomethingAnim shot)
         {
             var h = view.GetTileHeight(shot.Coords);
             var start = new Vector3(shot.Coords.X, shot.Coords.Y, h);
             var end = new Vector3(shot.To.X, shot.To.Y, h);
-            view.EventsView.DrawPointLine(AnimationLine, start, end, 0.5f, Colors.Yellow);
+            view.EventTopDraw(n =>
+            {
+                DrawPointLine(n, view, new LinearLineFunc(start, end, view.NormalGridHeight), sim.IsFocused);
+            });
         }
         else if (result.Animation is ThrowSomethingAnim thr)
         {
-            var throwStart = new Vector3(thr.Coords.X, thr.Coords.Y, view.TilesView.GetTileHeight(thr.Coords));
-            var throwEnd = new Vector3(thr.To.X, thr.To.Y, view.TilesView.GetTileHeight(thr.To));
-            view.EventsView.DrawPointLine(AnimationThrowLine, throwStart, throwEnd, 0.5f, Colors.Yellow);
-        }*/
+            var throwStart = thr.Coords.ToUnderVec3(view);
+            var throwEnd = thr.To.ToUnderVec3(view);
+            view.EventTopDraw(n =>
+            {
+                DrawPointLine(n, view, new ThrowLineFunc(throwStart, throwEnd, view.NormalGridHeight, thr.ThrowHeight), sim.IsFocused);
+            });
+        }
     }
 
-
-
-    private static Vector3 AnimationLine(Vector3 v1, Vector3 v2, float arg3)
+    private static void DrawPointLine(ViewNode2D node, IGameView view,
+        AnimationLineFunc line, bool isFocused)
     {
-        return v1.Lerp(v2, arg3);
-    }
-    private static Vector3 AnimationThrowLine(Vector3 v1, Vector3 v2, float v)
-    {
-        var center = (v1 + v2) / 2;
-        center.Z += 200;
-        var l1 = v1.Lerp(center, v);
-        var l2 = center.Lerp(v2, v);
-        return l1.Lerp(l2, v);
+        if (line.Length < 0.5f) return;
+        var step = 1f / line.Length * 1.2f;
+        var color = Colors.Yellow with { A = isFocused ? 1f : view.CurrentStyle.WaitAlpha };
+        for (var i = 0f; i <= 1f + step / 2; i += step)
+        {
+            var pos = line.GetPoint(i);
+            node.DrawTextureCentered(view.CurrentStyle.LinePointTexture,
+                view.GamePositionToNodePosition(pos), color);
+        }
     }
 
     public static async partial GDTask ApplyAnimationViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyAnimationResult result)
@@ -76,13 +130,14 @@ partial class Simulator
             if (v == null) return;
             var startPosition = view.CoordsToGamePosition(thr.Coords);
             var endPosition = view.CoordsToGamePosition(thr.To);
+            var line = new ThrowLineFunc(startPosition, endPosition, view.NormalGridHeight, thr.ThrowHeight);
             v.GamePosition = startPosition;
             var timer = new RecordTimer(thr.Time);
             while (timer.HasTime)
             {
                 var nTime = timer.GetNormalizedTime();
-                var pos = AnimationThrowLine(startPosition, endPosition, nTime);
-                var nPos = AnimationThrowLine(startPosition, endPosition, nTime + 0.03f);
+                var pos = line.GetPoint(nTime);
+                var nPos = line.GetPoint(nTime + 0.03f);
                 v.GamePosition = pos;
                 v.SetGameRotation(nPos - pos);
                 await GDTask.Yield();

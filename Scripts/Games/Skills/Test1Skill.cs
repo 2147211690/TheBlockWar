@@ -39,7 +39,7 @@ public class Test1Skill() : Skill(SkillNames.Test1, 1)
         if (args.TryGetArgs(0, out var v1))
         {
             obj.ApplyDamage(unit.Coords, 10);
-            obj.ApplyAnimation(new ThrowSomethingAnim(unit.Coords, useCoords + v1, "Test", 200, 1f));
+            obj.ApplyAnimation(new ThrowSomethingAnim(unit.Coords, useCoords + v1, "Test", 1.2f, 1f));
             obj.ApplyDamage(v1 + useCoords, 20);
             var coords = v1 + useCoords;
             obj.BeginSteps(0, 0, StepsRunningMode.ParallelWaitAll);

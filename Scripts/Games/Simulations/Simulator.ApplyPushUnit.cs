@@ -68,7 +68,7 @@ partial class Simulator
         {
             (true, true) => Colors.Yellow,
             (true, false) => Colors.White,
-            _ => new Color(1,1,1,0.5f),
+            _ => new Color(1,1,1,view.CurrentStyle.WaitAlpha),
         };
     }
 

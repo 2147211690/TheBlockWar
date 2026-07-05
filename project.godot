@@ -36,9 +36,9 @@ config/icon="uid://cf6td8qmy77qj"
 [autoload]
 
 CallHelper="*uid://fa1xktpsl2t3"
-ImGuiRoot="*uid://dugmpnsxaagba"
 AutoLoad="*uid://cs6qdsdplg56x"
 SceneManager="*uid://b0wufd6r3h8kk"
+ImGuiRoot="*uid://dugmpnsxaagba"
 
 [display]
 

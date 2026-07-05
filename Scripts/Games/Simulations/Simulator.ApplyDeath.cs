@@ -71,6 +71,7 @@ partial class Simulator
             tex.Texture = view.CurrentStyle.DeathTexture;
             tex.GamePosition = result.Coords.ToUnderVec3(view);
             tex.GameZIndex = 3;
+            tex.Modulate = Colors.White with { A = sim.IsFocused ? 1f : view.CurrentStyle.WaitAlpha };
         }
         
         var uv = view.EventUnit(result.ReUnitId);

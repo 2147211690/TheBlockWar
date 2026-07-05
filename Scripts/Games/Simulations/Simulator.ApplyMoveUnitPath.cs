@@ -82,7 +82,7 @@ partial class Simulator
             var sprite = view.EventSprite();
             sprite.GamePosition = view.CoordsToGamePosition(coords, 0, maxTileHeight);
             sprite.Texture = tex;
-            sprite.Modulate = Colors.White with { A = sim.IsFocused ? 1 : 0.6f };
+            sprite.Modulate = Colors.White with { A = sim.IsFocused ? 1 : view.CurrentStyle.WaitAlpha };
             sprite.GameZIndex = -1;
         }
     }

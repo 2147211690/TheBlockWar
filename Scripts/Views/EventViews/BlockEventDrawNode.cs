@@ -139,7 +139,7 @@ public partial class BlockEventDrawNode : ViewNode2D
             }
             _itemTabStyle.Layout = hasHelath == hasTab ? -1 : 0;
             _itemTabStyle.ItemSize = TabSizes[i];
-            _itemTabStyle.Modulate = _itemTabStyle.Modulate with { A = IsFocused ? 1 : 0.5f };
+            _itemTabStyle.Modulate = _itemTabStyle.Modulate with { A = IsFocused ? 1 : GameView.CurrentStyle.WaitAlpha };
             var spacing = TabSizes[i].Y + 1;
             
             var startPos = tabPos + new Vector2(0, -spacing * (tabCount - 1) / 2);
