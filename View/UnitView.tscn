@@ -60,7 +60,6 @@ animations = [{
 
 [node name="UnitView" type="Node2D" unique_id=1880059611 node_paths=PackedStringArray("Center", "HealthBar", "BuffView", "MainSprite")]
 script = ExtResource("1_hq4fu")
-DrawDebug = true
 Center = NodePath("Center")
 HealthBar = NodePath("Center/HealthBar")
 BuffView = NodePath("Center/BuffView")

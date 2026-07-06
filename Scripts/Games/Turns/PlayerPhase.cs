@@ -58,16 +58,18 @@ public class PlayerPhase : TurnPhase
         }
         else if (operation is PlayerUseUnitSkill useSkill)
         {
-            await UnitSkill(
+            var e = UnitSkill(
                 useSkill.UnitCoords,
                 useSkill.SkillIndex,
                 useSkill.Args,
-                SimulationLayer.Running,
+                SimulationLayer.Disabled,
                 Player.CurrentTurn);
+            e.Layer = SimulationLayer.Running;
+            await EventScheduler.WaitCompleteRunning();
         }
         else if (operation is PlayerPrepareUnitSkill prepareSkill)
         {
-            await UnitSkill(
+            var e = UnitSkill(
                 prepareSkill.UnitCoords,
                 prepareSkill.SkillIndex,
                 prepareSkill.Args,
@@ -76,7 +78,7 @@ public class PlayerPhase : TurnPhase
         }
         else if (operation is PlayerSlowUseUnitSkill slowUseSkill)
         {
-            var e = await UnitSkill(
+            var e = UnitSkill(
                 slowUseSkill.UnitCoords,
                 slowUseSkill.SkillIndex,
                 slowUseSkill.Args,
@@ -85,13 +87,14 @@ public class PlayerPhase : TurnPhase
             if (e != null)
             {
                 await GDTask.Delay(slowUseSkill.UseDelay);
+                e.Layer = SimulationLayer.Disabled;
                 e.Layer = SimulationLayer.Running;
                 await EventScheduler.WaitCompleteRunning();
             }
         }
         else if (operation is PlayerSlowPrepareUnitSkill slowPrepareSkill)
         {
-            var e = await UnitSkill(
+            var e = UnitSkill(
                 slowPrepareSkill.UnitCoords,
                 slowPrepareSkill.SkillIndex,
                 slowPrepareSkill.Args,
@@ -110,7 +113,7 @@ public class PlayerPhase : TurnPhase
         }
         return false;
 
-        async GDTask<EventState?> UnitSkill(Vector2I coords, int skillIndex, Vector2I?[]? args,
+        EventState? UnitSkill(Vector2I coords, int skillIndex, Vector2I?[]? args,
             SimulationLayer layer, int turn)
         {
             var unit = EventScheduler.GameState.UnitMapState.GetUnit(coords);
@@ -124,10 +127,8 @@ public class PlayerPhase : TurnPhase
             {
                 return null;
             }
-
             var skill = skills[skillIndex];
             var e = EventScheduler.CreateEvent(new SkillEventCore(skill.SkillName, unit.Id, args), turn, Player.PhaseOrder, unit.Team, layer);
-            await EventScheduler.WaitCompleteRunning();
             return e;
         }
     }

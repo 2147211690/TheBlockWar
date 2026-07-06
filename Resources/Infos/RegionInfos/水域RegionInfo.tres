@@ -14,3 +14,4 @@ script = ExtResource("1_f5oac")
 Name = "水域"
 RegionBuffs = [SubResource("Resource_3eblm")]
 Icon = ExtResource("1_p6jsf")
+Description = "单位进入会浸水"

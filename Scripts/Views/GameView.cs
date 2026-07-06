@@ -18,14 +18,13 @@ public partial class GameView : Node2D, IGameView
     [Export] public PackedScene TileViewScene { get; private set; } = null!;
     [Export] public float NormalGridHeight { get; set; } = 34;
     [Export] public GameViewStyle GameStyle { get; set; } = null!;
-    
+    [Export] public float EventDrawInterval { get; set; } = 0.1f;
     
     [ExportGroup("Self")]
     [Export] public GameViewNodeContainer DrawContainer { get; private set; } = null!;
     [Export] public TilesView TilesView { get; set; } = null!;
     [Export] public UnitsView UnitsView { get; set; } = null!;
     [Export] public EventsView EventsView { get; set; } = null!;
-    [Export] public Timer DrawEventTimer { get; set; } = null!;
     Node2D IGameView.DrawContainer => DrawContainer;
     public ViewPools Pools { get; private set; }
     public bool IsRunning => _runningQueue.IsRunning;
@@ -33,7 +32,7 @@ public partial class GameView : Node2D, IGameView
     public IEventScheduler Scheduler { get; private set; }
     public GameViewTeamStyle CurrentStyle { get; private set; } = null!;
     public int PlayerTeam { get; set; }
-
+    private float _remainingDrawTime = 0;
     public TeamTypeEnum CurrentTeamType
     {
         get => field;
@@ -69,7 +68,6 @@ public partial class GameView : Node2D, IGameView
         EventsView.GameView = this;
         TilesView.GameView = this;
         CurrentStyle = GameStyle[CurrentTeamType];
-        DrawEventTimer.Timeout += CheckDrawEvent;
     }
 
     public void Init(IEventScheduler scheduler)
@@ -132,7 +130,7 @@ public partial class GameView : Node2D, IGameView
 
         if (e.RunningCount > 0)
         {
-            ClearEventViews();
+            //ClearEventViews();
             var running = e.Sims.GetRange(0, e.RunningCount);
             _runningQueue.AddTask(() => _resultHandler.HandleAsync(running));
         }
@@ -145,10 +143,18 @@ public partial class GameView : Node2D, IGameView
     }
 
     #endregion
-    
+
+    public override void _Process(double delta)
+    {
+        _remainingDrawTime -= (float)delta;
+        if (_remainingDrawTime > 0) return;
+        _remainingDrawTime = EventDrawInterval;
+        CheckDrawEvent();
+    }
+
     private void CheckDrawEvent()
     {
-        if (_isEventDirty && !_runningQueue.IsRunning)
+        if (_isEventDirty)
         {
             _isEventDirty = false;
             ClearEventViews();
@@ -159,6 +165,7 @@ public partial class GameView : Node2D, IGameView
     {
         if (_isEventDrawn) return;
         _isEventDrawn = true;
+        Logger.Debug($"绘制事件{_eventQueue.Count}");
         foreach (var e in _eventQueue)
         {
             foreach (var s in e.Steps)

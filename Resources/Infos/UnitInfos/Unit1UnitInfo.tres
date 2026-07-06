@@ -3,12 +3,18 @@
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_2tv20"]
 [ext_resource type="Texture2D" uid="uid://61431cbqm4te" path="res://Art/Img/units/player/mech_charge_broken.png" id="1_wltvs"]
 [ext_resource type="Script" uid="uid://4difoodnjw6n" path="res://Scripts/Resources/BuffInitInfo.cs" id="1_xh5ri"]
+[ext_resource type="Script" uid="uid://cw68rl2w5y3tc" path="res://Scripts/Resources/SkillInitInfo.cs" id="2_pm0y8"]
 [ext_resource type="Texture2D" uid="uid://b65sbi1rljx4p" path="res://Art/Img/units/player/mech_charge_a.png" id="2_xh5ri"]
 
 [sub_resource type="Resource" id="Resource_3eblm"]
 script = ExtResource("1_xh5ri")
 BuffName = "不稳定"
 metadata/_custom_type_script = "uid://4difoodnjw6n"
+
+[sub_resource type="Resource" id="Resource_71coo"]
+script = ExtResource("2_pm0y8")
+SkillName = "一般移动"
+metadata/_custom_type_script = "uid://cw68rl2w5y3tc"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pm0y8"]
 atlas = ExtResource("2_xh5ri")
@@ -61,6 +67,6 @@ MovePower = 3
 MaxHealth = 40.0
 MaxShield = 40.0
 InitBuffs = [SubResource("Resource_3eblm")]
-Skills = PackedStringArray("一般移动")
+InitSkills = [SubResource("Resource_71coo")]
 ViewOffset = Vector2(0, -3)
 ViewFrames = SubResource("SpriteFrames_wltvs")

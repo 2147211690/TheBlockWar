@@ -55,6 +55,7 @@ PushTextures = Array[Texture2D]([ExtResource("36_uf5r4"), ExtResource("37_sm57t"
 BlockNumberTextures = Array[Texture2D]([ExtResource("1_qkx4c"), ExtResource("2_w04ar"), ExtResource("3_kcbxx"), ExtResource("4_0xpdv"), ExtResource("5_f1ya0"), ExtResource("6_s2rxd"), ExtResource("7_e1di1"), ExtResource("8_hcqwb"), ExtResource("9_iqxvk"), ExtResource("10_t6dig"), ExtResource("11_uqs5k"), ExtResource("12_ra38w"), ExtResource("13_cwvqp"), ExtResource("14_3loa8"), ExtResource("15_obu33"), ExtResource("16_dsgbk"), ExtResource("17_tnvw6"), ExtResource("18_g2ic4"), ExtResource("19_1dp28")])
 DeathTexture = ExtResource("20_kcbxx")
 LinePointTexture = ExtResource("21_w04ar")
+WaitAlpha = 0.2
 HealthCurrentColor = Color(0.2027216, 0.6880478, 0.4521318, 1)
 ShieldCurrentColor = Color(0.7857211, 0.5788141, 0.45463789, 1)
 HealthBarColor = Color(0.06401862, 0.10175585, 0.13946006, 1)

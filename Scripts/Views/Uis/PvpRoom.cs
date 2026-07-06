@@ -69,12 +69,17 @@ public partial class PvpRoom : Control
 
     private void OnlineRoomOnGameStart()
     {
-        var players = OnlineRoom.Players.Select(p => (p.Key, p.Value)).ToArray();
+        var players = OnlineRoom.Players.Select(p => (p.Key, p.Value))
+            .Prepend((2, new PlayerInfo()
+        {
+            Name = "ai玩家1",
+            Type = PlayerType.AiPlayer
+        })).ToArray();
         var netId = OnlineRoom.NetId;
         var peer = OnlineRoom.Peer;
         SceneManager.ChangeSceneToPacked(PvpScene, p =>
         {
-            ((Pvp)p).StartGame(players,1, netId, peer);
+            ((Pvp)p).StartGame(players, netId, peer);
         });
     }
 

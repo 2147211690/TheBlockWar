@@ -18,14 +18,14 @@ public partial class Pvp : Node2D
     private IEventScheduler? _eventScheduler;
     private ITurnStrategy? _pvpMode;
     private ITurnManager? _turnManager;
-    public void StartGame((long Id, PlayerInfo PlayerInfo)[] playerInfos, int aiCount, long localId, MultiplayerPeer? peer = null)
+    public void StartGame((long Id, PlayerInfo PlayerInfo)[] playerInfos, long localId, MultiplayerPeer? peer = null)
     {
         TaskTracker.ShowTrackerWindow();
-        var localIndex = Array.FindIndex(playerInfos, p => p.Id == localId) + aiCount;
+        var localIndex = Array.FindIndex(playerInfos, p => p.Id == localId);
         
         _gameState = new GameState(
             new Vector2I(10, 10),
-            TeamRelationTool.GetAllTeamEnemy(playerInfos.Length + aiCount)
+            TeamRelationTool.GetAllTeamEnemy(playerInfos.Length)
         );
         _eventScheduler = new EventScheduler(_gameState, localIndex);
         
@@ -36,28 +36,52 @@ public partial class Pvp : Node2D
         AddChild(playerOperationSynchronizer);
         playerOperationSynchronizer.Multiplayer.MultiplayerPeer = peer;
         
-        var players = new IPlayer[playerInfos.Length + aiCount];
-        for (int i = 0; i < playerInfos.Length + aiCount; i++)
+        var players = new IPlayer?[playerInfos.Length];
+        var isServer = localId == 1;
+        for (int i = 0; i < playerInfos.Length; i++)
         {
-            if (i < aiCount)
+            var playerInfo = playerInfos[i].PlayerInfo;
+            var playerId = playerInfos[i].Id;
+            
+            if (isServer)
             {
-                players[i] = new EasyAiPlayer(100, _eventScheduler, playerOperationSynchronizer);
-            }
-            else if (i == localIndex)
-            {
-                var sp = StatePlayer.Create(playerInfos[i - aiCount].Id, _gameView, _eventScheduler, playerOperationSynchronizer);
-                AddChild(sp);
-                players[i] = sp;
+                if (playerInfo.Type == PlayerType.OnlinePlayer)
+                {
+                    if (i == localIndex)
+                    {
+                        var sp = StatePlayer.Create(playerId, _gameView, _eventScheduler, playerOperationSynchronizer);
+                        AddChild(sp);
+                        players[i] = sp;
+                    }
+                }
+                else if (playerInfo.Type == PlayerType.AiPlayer)
+                {
+                    players[i] = new EasyAiPlayer(playerId, _eventScheduler, playerOperationSynchronizer);
+                }
             }
             else
             {
-                players[i] = new FakePlayer(playerInfos[i - aiCount].Id);
+                if (playerInfo.Type == PlayerType.OnlinePlayer)
+                {
+                    if (i == localIndex)
+                    {
+                        var sp = StatePlayer.Create(playerId, _gameView, _eventScheduler, playerOperationSynchronizer);
+                        AddChild(sp);
+                        players[i] = sp;
+                    }
+                }
+                else if (playerInfo.Type == PlayerType.AiPlayer)
+                {
+                    
+                }
             }
-        }
             
+            players[i] ??= new FakePlayer(playerId);
+        }
+
         _pvpMode = new PvpTurnStrategy(
             playerOperationSynchronizer, 
-            players,
+            players!,
             new RandomMapBuilder(
                 [TileNames.Soil0, TileNames.水块, TileNames.燃烧块], 
                 [UnitNames.Unit0, UnitNames.Unit1, UnitNames.Unit2],

@@ -33,7 +33,7 @@ public class GameState : IGameState
     public IReadOnlyList<ISkill> GetUnitValidSkills(string unitName)
     {
         //TODO: 根据单位名称获取有效技能
-        return unitName.GetUnitInfo().Skills.Select(a => a.GetSkillInfo().Instance).ToList();
+        return unitName.GetUnitInfo().InitSkills.Select(a => a.SkillName.GetSkillInfo().Instance).ToList();
     }
 
     public IGameState GetSnapshot() => new GameStateSnapshot(this);

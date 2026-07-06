@@ -14,16 +14,16 @@ tile_shape = 1
 tile_layout = 5
 tile_size = Vector2i(56, 42)
 
-[node name="GameView" type="Node2D" unique_id=1885583899 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView", "DrawEventTimer")]
+[node name="GameView" type="Node2D" unique_id=1885583899 node_paths=PackedStringArray("DrawContainer", "TilesView", "UnitsView", "EventsView")]
 script = ExtResource("1_c8q0r")
 UnitViewScene = ExtResource("2_t4jah")
 TileViewScene = ExtResource("3_tjm1i")
 GameStyle = ExtResource("4_mccl8")
+EventDrawInterval = 0.017
 DrawContainer = NodePath("DrawContainer")
 TilesView = NodePath("TilesView")
 UnitsView = NodePath("UnitsView")
 EventsView = NodePath("EventsView")
-DrawEventTimer = NodePath("DrawEventTimer")
 
 [node name="TilesView" type="TileMapLayer" parent="." unique_id=723753831]
 enabled = false
@@ -42,7 +42,3 @@ y_sort_enabled = true
 rotation = -3.1415927
 script = ExtResource("9_dgx78")
 metadata/_custom_type_script = "uid://ble1upceejr4q"
-
-[node name="DrawEventTimer" type="Timer" parent="." unique_id=836843991]
-wait_time = 0.001
-autostart = true

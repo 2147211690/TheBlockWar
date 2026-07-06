@@ -2,7 +2,18 @@
 
 [ext_resource type="Script" uid="uid://bfaciqkxrbslg" path="res://Scripts/Resources/UnitInfo.cs" id="1_cqclv"]
 [ext_resource type="Texture2D" uid="uid://gf7mc7a37h3a" path="res://Art/Img/units/player/mech_artillery_broken.png" id="1_jg4oj"]
+[ext_resource type="Script" uid="uid://cw68rl2w5y3tc" path="res://Scripts/Resources/SkillInitInfo.cs" id="1_kpvns"]
 [ext_resource type="Texture2D" uid="uid://cl0afqqdmas1o" path="res://Art/Img/units/player/mech_artillery_a.png" id="1_oc4v6"]
+
+[sub_resource type="Resource" id="Resource_ots65"]
+script = ExtResource("1_kpvns")
+SkillName = "一般移动"
+metadata/_custom_type_script = "uid://cw68rl2w5y3tc"
+
+[sub_resource type="Resource" id="Resource_3eblm"]
+script = ExtResource("1_kpvns")
+SkillName = "Test1"
+metadata/_custom_type_script = "uid://cw68rl2w5y3tc"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0q3gl"]
 atlas = ExtResource("1_oc4v6")
@@ -53,6 +64,6 @@ script = ExtResource("1_cqclv")
 Name = "Unit0"
 MaxHealth = 50.0
 MaxShield = 50.0
-Skills = PackedStringArray("一般移动", "Test1")
+InitSkills = [SubResource("Resource_ots65"), SubResource("Resource_3eblm")]
 ViewOffset = Vector2(7, -6)
 ViewFrames = SubResource("SpriteFrames_cqclv")
