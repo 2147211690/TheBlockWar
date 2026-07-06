@@ -3,7 +3,7 @@ using YARD;
 
 namespace TheBlockWar.Scripts.Resources;
 
-[GlobalClass, Tool, Icon("res://addons/at-icons/node/tank.svg")]
+[GlobalClass, Icon("res://addons/at-icons/node/tank.svg")]
 public partial class UnitInfo : Resource, IInfo
 {
     public static readonly UnitInfo Null = new();

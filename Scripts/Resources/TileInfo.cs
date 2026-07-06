@@ -2,7 +2,7 @@ using TheBlockWar.Scripts.Games.GameStates;
 
 namespace TheBlockWar.Scripts.Resources;
 
-[GlobalClass, Tool, Icon ("res://addons/at-icons/node/box.svg")]
+[GlobalClass, Icon ("res://addons/at-icons/node/box.svg")]
 public partial class TileInfo : Resource, IInfo
 {
     public static readonly TileInfo Null = new();

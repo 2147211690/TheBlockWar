@@ -2,7 +2,7 @@ using YARD;
 
 namespace TheBlockWar.Scripts.Resources;
 
-[GlobalClass, Tool]
+[GlobalClass]
 public partial class BuffInitInfo : Resource
 {
     [Export(RegistryPropertyHint.PROPERTY_HINT_CUSTOM, "res://Resources/Registrys/Buffs.tres")]

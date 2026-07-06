@@ -1,7 +1,7 @@
 using YARD;
 
 namespace TheBlockWar.Scripts.Resources;
-[GlobalClass, Tool]
+[GlobalClass]
 public partial class SkillInitInfo : Resource
 {
     [Export(RegistryPropertyHint.PROPERTY_HINT_CUSTOM, "res://Resources/Registrys/Skills.tres")]

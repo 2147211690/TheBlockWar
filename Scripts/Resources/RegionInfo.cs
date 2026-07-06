@@ -1,7 +1,7 @@
 using TheBlockWar.Scripts.Games.Regions;
 
 namespace TheBlockWar.Scripts.Resources;
-[GlobalClass, Tool, Icon("res://addons/at-icons/node/vertex.svg")]
+[GlobalClass, Icon("res://addons/at-icons/node/vertex.svg")]
 public partial class RegionInfo : Resource, IInfo
 {
     public static readonly RegionInfo Null = new RegionInfo()
