@@ -106,6 +106,23 @@ public class TileState : IReadOnlyTileState
         _isRegionStaticDirty = true;
         return index;
     }
+    public int ChangeRegionEventId(string regionName, long eventId)
+    {
+        var index = FindRegion(regionName);
+        if (index < 0) return -1;
+        var span = CollectionsMarshal.AsSpan(_regions);
+        span[index].RegionEventId = eventId;
+        _isRegionStaticDirty = true;
+        return index;
+    }
+    public int ChangeRegionEventId(int index, long eventId)
+    {
+        if (index < 0 || index >= Regions.Count) return -1;
+        var span = CollectionsMarshal.AsSpan(_regions);
+        span[index].RegionEventId = eventId;
+        _isRegionStaticDirty = true;
+        return index;
+    }
     public int RemoveRegion(int index, int duration)
     {
         if (index < 0 || index >= Regions.Count) return -1;

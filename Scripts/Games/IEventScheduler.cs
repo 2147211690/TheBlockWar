@@ -9,6 +9,7 @@ public interface IEventScheduler
     IReadOnlyGameState GameState { get; }
     int PlayerTeam { get; }
     int CurrentTurn { get; set; }
+    Dictionary<int, Dictionary<string, int>> PhaseOrders { get; }
     bool IsRunning { get; set; }
     event EventHandler<SchedulerResult>? SimulationUpdated;
     event EventHandler<IReadOnlyGameState>? GameStateReload;
@@ -21,8 +22,8 @@ public interface IEventScheduler
     IReadOnlyList<EventState> GetCoordsEvents(Vector2I coords);
     IReadOnlyList<EventState> GetUnitEvents(long unitId);
     IReadOnlyList<EventState> GetTeamEvents(int team);
-    IReadOnlyList<EventState> GetTurnEvents(int turn);
-    EventState CreateEvent(EventCore core, int turn, int phaseOrder, int team, SimulationLayer layer, int priority = 0);
+    EventState CreateEvent(EventCore core, int phaseOrder, int team, SimulationLayer layer, int priority = 0,
+        EventAfterRunMode afterRunMode = EventAfterRunMode.Remove);
     void RemoveEvent(long id);
     
     /// <summary>

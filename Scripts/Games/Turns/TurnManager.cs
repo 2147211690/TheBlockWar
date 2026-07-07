@@ -44,12 +44,24 @@ public class TurnManager : ITurnManager
         {
             _currentPhases.AddRange(GetTurnPhases(CurrentTurn));
             _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
+            SetPhaseOrders();
             return;
         }
         _currentPhases.Clear();
+        EventScheduler.PhaseOrders.Remove(CurrentTurn - 1);
         _currentPhases.AddRange(_nextPhases);
         _nextPhases.Clear();
         _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
+        
+        SetPhaseOrders();
+    }
+
+    private void SetPhaseOrders()
+    {
+        EventScheduler.PhaseOrders[CurrentTurn] =
+            _currentPhases.Select(a => (a.PhaseName, a.PhaseOrder)).ToDictionary();
+        EventScheduler.PhaseOrders[CurrentTurn + 1] =
+            _nextPhases.Select(a => (a.PhaseName, a.PhaseOrder)).ToDictionary();
     }
 
     private IEnumerable<ITurnPhase> GetTurnPhases(int turn)

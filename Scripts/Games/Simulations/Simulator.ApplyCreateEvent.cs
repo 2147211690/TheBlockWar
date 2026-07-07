@@ -10,10 +10,11 @@ partial class Simulator
     extension(SimObject obj)
     {
         [Step(["Event"], [typeof(EventState)])]
-        public ApplyCreateEventResult ApplyCreateEvent(EventCore core,
-            int turn, int phaseOrder, int eventTeam,
+        public ApplyCreateEventResult ApplyCreateEvent(IEventCore core,
+            int phaseOrder, int eventTeam,
             SimulationLayer layer,
-            int priority = 0)
+            int priority = 0,
+            EventAfterRunMode afterRunMode = EventAfterRunMode.Remove)
         {
             EnterSimulation();
             var r = Main();
@@ -23,9 +24,9 @@ partial class Simulator
             ApplyCreateEventResult Main()
             {
                 var r = obj.Steps.AddResult(new ApplyCreateEventResult(
-                    CurrentDeep, CurrentTeam, core, turn, phaseOrder, eventTeam, layer, priority));
+                    CurrentDeep, CurrentTeam, core, phaseOrder, eventTeam, layer, priority, afterRunMode));
                 if (obj.Layer == SimulationLayer.Waiting) return r;
-                r.ReEvent = obj.State.CreateEvent(core, turn, phaseOrder, eventTeam, layer, priority).Clone();
+                r.ReEvent = obj.State.CreateEvent(core, phaseOrder, eventTeam, layer, priority, afterRunMode).Clone();
                 return r;
             }
         }

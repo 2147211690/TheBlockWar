@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RegionInfo" format=3 uid="uid://cdkqnhhccwje5"]
+
+[ext_resource type="Texture2D" uid="uid://51eif3urw50q" path="res://Art/Img/ui/strategy/swap.png" id="1_30oy6"]
+[ext_resource type="Script" uid="uid://6ogmwabfqvx" path="res://Scripts/Resources/RegionInfo.cs" id="2_o6app"]
+
+[resource]
+script = ExtResource("2_o6app")
+Name = "测试域"
+Icon = ExtResource("1_30oy6")
+Description = "测试:存在时放置伤害命令"
+metadata/_custom_type_script = "uid://6ogmwabfqvx"

@@ -43,36 +43,20 @@ public partial class Pvp : Node2D
             var playerInfo = playerInfos[i].PlayerInfo;
             var playerId = playerInfos[i].Id;
             
-            if (isServer)
+            if (playerInfo.Type == PlayerType.OnlinePlayer)
             {
-                if (playerInfo.Type == PlayerType.OnlinePlayer)
+                if (i == localIndex)
                 {
-                    if (i == localIndex)
-                    {
-                        var sp = StatePlayer.Create(playerId, _gameView, _eventScheduler, playerOperationSynchronizer);
-                        AddChild(sp);
-                        players[i] = sp;
-                    }
-                }
-                else if (playerInfo.Type == PlayerType.AiPlayer)
-                {
-                    players[i] = new EasyAiPlayer(playerId, _eventScheduler, playerOperationSynchronizer);
+                    var sp = StatePlayer.Create(playerId, _gameView, _eventScheduler, playerOperationSynchronizer);
+                    AddChild(sp);
+                    players[i] = sp;
                 }
             }
-            else
+            else if (isServer)
             {
-                if (playerInfo.Type == PlayerType.OnlinePlayer)
+                if (playerInfo.Type == PlayerType.AiPlayer)
                 {
-                    if (i == localIndex)
-                    {
-                        var sp = StatePlayer.Create(playerId, _gameView, _eventScheduler, playerOperationSynchronizer);
-                        AddChild(sp);
-                        players[i] = sp;
-                    }
-                }
-                else if (playerInfo.Type == PlayerType.AiPlayer)
-                {
-                    
+                    players[i] = new EasyAiPlayer(playerId, 1, _eventScheduler, playerOperationSynchronizer);
                 }
             }
             
@@ -85,7 +69,7 @@ public partial class Pvp : Node2D
             new RandomMapBuilder(
                 [TileNames.Soil0, TileNames.水块, TileNames.燃烧块], 
                 [UnitNames.Unit0, UnitNames.Unit1, UnitNames.Unit2],
-                Enumerable.Range(0, players.Length).Select((p, i) => (i, 8)).ToArray(),
+                Enumerable.Range(0, players.Length).Select((p, i) => (i, 5)).ToArray(),
                 1
                 )
         );

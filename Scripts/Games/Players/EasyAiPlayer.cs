@@ -13,9 +13,11 @@ namespace TheBlockWar.Scripts.Games.Players;
 public class EasyAiPlayer : IPlayer
 {
     private IPlayerOperationSynchronizer _playerOperationSynchronizer;
-    public EasyAiPlayer(long id, IEventScheduler gameScheduler, IPlayerOperationSynchronizer playerOperationSynchronizer)
+    private Random _random;
+    public EasyAiPlayer(long id, int seed, IEventScheduler gameScheduler, IPlayerOperationSynchronizer playerOperationSynchronizer)
     {
         Id = id;
+        _random = new(seed);
         _playerOperationSynchronizer = playerOperationSynchronizer;
         GameScheduler = gameScheduler;
     }
@@ -74,7 +76,7 @@ public class EasyAiPlayer : IPlayer
             if (validSkills.Count == 0)
                 continue;
 
-            var skillIndex = Random.Shared.Next(validSkills.Count);
+            var skillIndex = _random.Next(validSkills.Count);
             var skill = validSkills[skillIndex];
             var args = new Vector2I?[skill.ArgCount];
             var success = true;
@@ -87,7 +89,7 @@ public class EasyAiPlayer : IPlayer
                     break;
                 }
 
-                args[i] = validArgs[Random.Shared.Next(validArgs.Count)];
+                args[i] = validArgs[_random.Next(validArgs.Count)];
             }
 
             if (!success)

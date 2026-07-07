@@ -39,9 +39,8 @@ public class PvpTurnStrategy : ITurnStrategy
             [
                 new BuffPhase(),
                 new RegionPhase(),
-                new TeamEventPhase(-1),//自然事件
-                ..Players.Select(p => new TeamEventPhase(p.Team)),
-                new ClearOutdateEventPhase(),
+                //new NaturePhase(),//自然事件
+                ..Players.Select(p => new TeamEventPhase(p.Team, $"{p.Team}Phase")),
                 new ResetUnitPhase(),
                 ..Players.Select(player => new PlayerPhase(_operationSynchronizer, player)),
             ];

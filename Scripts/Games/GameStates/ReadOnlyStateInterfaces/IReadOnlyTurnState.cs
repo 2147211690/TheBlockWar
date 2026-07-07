@@ -5,4 +5,5 @@ namespace TheBlockWar.Scripts.Games.GameStates;
 public interface IReadOnlyTurnState : IReadOnlyGameDataState<ITurnState, TurnStateData>
 {
     int CurrentTurn { get; }
+    int GetPhaseOrder(int turn, string phaseName);
 }

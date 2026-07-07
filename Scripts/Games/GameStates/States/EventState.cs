@@ -16,10 +16,10 @@ public class EventState
     public long BindUnitId => Core?.GetBindUnitId(this) ?? 0;
     public int Team { get; set => SetProperty(ref field, value); }
     public SimulationLayer Layer { get; set => SetProperty(ref field, value); }
-    public int Turn { get; set => SetProperty(ref field, value); }
     public int PhaseOrder { get; set => SetProperty(ref field, value); }
     public int Priority { get; set => SetProperty(ref field, value); }
     public IEventCore? Core { get; set => SetProperty(ref field, value); }
+    public EventAfterRunMode AfterRunMode { get; set; }
     
     public event EventHandler<(string PropertyName, bool IsChanging)>? PropertyChanged;
 
@@ -47,8 +47,6 @@ public class EventState
     
     public static int OrderCompare(EventState a, EventState b)
     {
-        var turnCompare = a.Turn.CompareTo(b.Turn);
-        if (turnCompare != 0) return turnCompare;
         var phaseOrderCompare = a.PhaseOrder.CompareTo(b.PhaseOrder);
         if (phaseOrderCompare != 0) return phaseOrderCompare;
         return a.Priority.CompareTo(b.Priority);
@@ -70,10 +68,10 @@ public class EventState
         target.Id = Id;
         target.Team = Team;
         target.Layer = Layer;
-        target.Turn = Turn;
         target.PhaseOrder = PhaseOrder;
         target.Priority = Priority;
         target.Core = Core;
+        target.AfterRunMode = AfterRunMode;
     }
     public EventState Clone()
     {
@@ -81,4 +79,11 @@ public class EventState
         CloneTo(result);
         return result;
     }
+}
+public enum EventAfterRunMode
+{
+    Remove,
+    ToFocused,
+    ToWaiting,
+    ToDisabled,
 }

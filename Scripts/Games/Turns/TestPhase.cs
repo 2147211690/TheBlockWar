@@ -11,11 +11,11 @@ public class TestPhase : TurnPhase
     public override bool IsFocused { get; set; }
     public override GDTask Execute()
     {
-        EventScheduler.CreateEvent(new StepsEventCore(
-            new(3,3),
-        [
-            new ApplyDamageStep(new Vector2I(3, 3), 20),
-        ]), Turn + 1, PhaseOrder, -1, SimulationLayer.Waiting);
+        EventScheduler.RunAction((es, obj) =>
+        {
+            obj.ApplyModifyTileRegion(new(3,3), RegionNames.测试域,
+                RegionOperation.AddRegion, 6, null);
+        });
         EventScheduler.RunAction((es, obj) =>
         {
             obj.ApplyModifyTileRegion(new Vector2I(0,0), 

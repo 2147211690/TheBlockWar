@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
@@ -15,4 +16,10 @@ public interface IRegion
         bool isRemoveRegion);
     [RegionHook]
     void OnEnterTurn(SimObject obj, Vector2I regionCoords, string regionData, int turn);
+    [RegionHook]
+    void OnAddToTile(SimObject obj, Vector2I regionCoords, string regionData);    
+    [RegionHook]
+    void OnRemoveFromTile(SimObject obj, Vector2I regionCoords, string regionData);
+    [RegionHook]
+    void OnCreateRegionEvent(SimObject obj, Vector2I regionCoords, string regionData, ref IEventCore eventCore);
 }

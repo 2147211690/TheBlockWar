@@ -16,7 +16,6 @@ public class EventManagerState : IEventManagerState
     private Dictionary<Vector2I, IReadOnlyList<EventState>?> _coordsEventsCache = new();
     private Dictionary<long, IReadOnlyList<EventState>?> _unitEventsCache = new();
     private Dictionary<int, IReadOnlyList<EventState>?> _teamEventsCache = new();
-    private Dictionary<int, IReadOnlyList<EventState>?> _turnEventsCache = new();
     public event EventHandler? EnabledEventUpdated;
 
     public EventManagerState(Vector2I size)
@@ -46,7 +45,6 @@ public class EventManagerState : IEventManagerState
         }
        
         _teamEventsCache.Remove(eventState.Team);
-        _turnEventsCache.Remove(eventState.Turn);
         eventState.PropertyChanged += OnEventPropertyChanged;
         
         if (eventState.Layer != SimulationLayer.Disabled) EnabledEventUpdated?.Invoke(this, EventArgs.Empty);
@@ -67,7 +65,6 @@ public class EventManagerState : IEventManagerState
             _unitEventsCache.Remove(bindId);
         }
         _teamEventsCache.Remove(eventState.Team);
-        _turnEventsCache.Remove(eventState.Turn);
         eventState.PropertyChanged -= OnEventPropertyChanged;
         if (eventState.Layer != SimulationLayer.Disabled) EnabledEventUpdated?.Invoke(this, EventArgs.Empty);
     }
@@ -95,10 +92,6 @@ public class EventManagerState : IEventManagerState
             {
                 _teamEventsCache.Remove(eventState.Team);
             }
-            else if (e.PropertyName is nameof(EventState.Turn))
-            {
-                _turnEventsCache.Remove(eventState.Turn);
-            }
         }
         else
         {
@@ -121,10 +114,7 @@ public class EventManagerState : IEventManagerState
             {
                 _teamEventsCache.Remove(eventState.Team);
             }
-            else if (e.PropertyName is nameof(EventState.Turn))
-            {
-                _turnEventsCache.Remove(eventState.Turn);
-            }
+
         }
         if (!e.IsChanging && (e.PropertyName is nameof(EventState.Layer) || eventState.Layer != SimulationLayer.Disabled)) 
             EnabledEventUpdated?.Invoke(this, EventArgs.Empty);
@@ -173,24 +163,6 @@ public class EventManagerState : IEventManagerState
                 }
             }
             _teamEventsCache.Add(team, list.Count > 0 ? list : null);
-            events = list;
-        }
-        return events ?? [];
-    }
-
-    public IReadOnlyList<EventState> GetTurnEvents(int turn)
-    {
-        if (!_turnEventsCache.TryGetValue(turn, out var events))
-        {
-            var list = new List<EventState>();
-            foreach (var eventState in _events.Values)
-            {
-                if (eventState.Turn == turn)
-                {
-                    list.Add(eventState);
-                }
-            }
-            _turnEventsCache.Add(turn, list.Count > 0 ? list : null);
             events = list;
         }
         return events ?? [];
@@ -338,17 +310,7 @@ public class EventManagerState : IEventManagerState
             }
             return list;
         }
-
-        public IReadOnlyList<EventState> GetTurnEvents(int turn)
-        {
-            var list = new List<EventState>();
-            foreach (var eventState in _events.Values)
-            {
-                if (eventState.Turn == turn)
-                    list.Add(eventState);
-            }
-            return list;
-        }
+        
 
         public EventState? PeekFirstNotConsumed(ICollection<long> consumedIds)
         {

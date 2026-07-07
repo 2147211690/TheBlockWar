@@ -9,7 +9,6 @@ public interface IReadOnlyEventManagerState : IReadOnlyGameDataState<IEventManag
     IReadOnlyList<EventState> GetCoordsEvents(Vector2I coords);
     IReadOnlyList<EventState> GetUnitEvents(long unitId);
     IReadOnlyList<EventState> GetTeamEvents(int team);
-    IReadOnlyList<EventState> GetTurnEvents(int turn);
     EventState? PeekFirstNotConsumed(ICollection<long> consumedIds);
     event EventHandler? EnabledEventUpdated;
 }

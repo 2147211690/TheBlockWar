@@ -25,7 +25,7 @@ public partial class OnlinePlayerOperationSynchronizer : Node, IPlayerOperationS
     
     public void PushOperation(PlayerOperation operation)
     {
-        var json = GameJson.ToJson(operation);
+        var json = operation.ToJson();
         Rpc(MethodName.PushOperationRpc, json);
     }
 
@@ -38,7 +38,7 @@ public partial class OnlinePlayerOperationSynchronizer : Node, IPlayerOperationS
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void PushOperationRpc(string operationJson)
     {
-        var operation = GameJson.FromJson<PlayerOperation>(operationJson);
+        var operation = operationJson.FromJson<PlayerOperation>()!;
         _operations.Enqueue(operation);
     }
 }

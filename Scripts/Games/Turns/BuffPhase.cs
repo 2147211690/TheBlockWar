@@ -28,7 +28,7 @@ public class BuffPhase : TurnPhase
             [
                 new ApplyBuffTurnStep(Turn)
             ]
-        ), Turn, PhaseOrder, -1, SimulationLayer.Disabled, -100);
+        ), PhaseOrder, -1, SimulationLayer.Disabled, -100, EventAfterRunMode.Remove);
     }
     public override async GDTask Execute()
     {

@@ -124,7 +124,7 @@ public partial class StatePlayer
                 _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
 
                 _currentSkillEvent = EventScheduler.CreateEvent(
-                    new SkillEventCore(_currentSkill.SkillName, Player.SelectedUnitId, _currentSkillArgs), Player.CurrentTurn, Player.PhaseOrder, _unitState.Team, SimulationLayer.Focused);
+                    new SkillEventCore(_currentSkill.SkillName, Player.SelectedUnitId, _currentSkillArgs), Player.PhaseOrder, _unitState.Team, SimulationLayer.Focused);
                 
                 _currentArgIndex++;
 

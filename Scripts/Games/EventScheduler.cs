@@ -32,6 +32,8 @@ public class EventScheduler : IEventScheduler
     public event EventHandler<SchedulerResult>? SimulationUpdated;
     public event EventHandler<IReadOnlyGameState>? GameStateReload;
 
+    public Dictionary<int, Dictionary<string, int>> PhaseOrders => _gameState.TurnState.PhaseOrders;
+
     public bool IsRunning
     {
         get;
@@ -97,13 +99,12 @@ public class EventScheduler : IEventScheduler
         => _gameState.EventManagerState.GetUnitEvents(unitId);
     public IReadOnlyList<EventState> GetTeamEvents(int team)
         => _gameState.EventManagerState.GetTeamEvents(team);
-    public IReadOnlyList<EventState> GetTurnEvents(int turn)
-        => _gameState.EventManagerState.GetTurnEvents(turn);
     public EventState CreateEvent(EventCore core,
-        int turn, int phaseOrder, int team,
+        int phaseOrder, int team,
         SimulationLayer layer,
-        int priority = 0)
-        => _gameState.CreateEvent(core, turn, phaseOrder, team, layer, priority);
+        int priority = 0,
+        EventAfterRunMode afterRunMode = EventAfterRunMode.Remove)
+        => _gameState.CreateEvent(core,phaseOrder, team, layer, priority, afterRunMode);
     public void RemoveEvent(long id)
         => _gameState.EventManagerState.RemoveEvent(id);
 
@@ -118,61 +119,89 @@ public class EventScheduler : IEventScheduler
         
         _isSimulating = true;
         _runningSchedulers.Push(this);
-        
-        Logger.Info("触发更新");
-        var result = new SchedulerResult();
-        
-        // 创建快照，用于焦点层和等待层事件执行
-        var snapshot = _snapshotChache =
-            (_snapshotChache is null || _snapshotChache.Owner != GameState)
-                ? _gameState.GetSnapshot()
-                : _snapshotChache;
-        snapshot.ClearIfSnapshot();
-        // 开始更新
-        var consumed = new HashSet<long>();
-        var currentEvent = snapshot.EventManagerState.PeekFirstNotConsumed(consumed);
-        while (currentEvent != null)
-        {
-            if (currentEvent.Layer == SimulationLayer.Disabled)
-            {
-                break;
-            }
-            
-            if (!currentEvent.CheckIsValid(snapshot))
-            {
-                consumed.Add(currentEvent.Id);
-                continue;
-            }
-            
-            //执行一个事件
-            var obj = new SimObject(snapshot, currentEvent.Layer, new(), currentEvent.Id);
-            obj.PushContext(new SimContext(currentEvent.BindUnitId));
-            currentEvent.Apply(obj);
-            //如果是运行层,删除
-            if (currentEvent.Layer == SimulationLayer.Running) obj.ApplyRemoveEvent(currentEvent.Id);
-            obj.PopContext();
-            consumed.Add(currentEvent.Id); //标记为已执行
-                       
-            //记录结果
-            result.Sims.Add(obj);
-            result.RunningCount += currentEvent.Layer == SimulationLayer.Running ? 1 : 0;
-            
-            //获取下一个事件
-            currentEvent = snapshot.EventManagerState.PeekFirstNotConsumed(consumed);
-        }
 
-        //结果应用到游戏状态
-        for (var i = 0; i < result.RunningCount; i++)
-        {
-            result.Sims[i].Steps.Replay(_gameState);
-        }
         
-        //做一些清理
+        var needUpdate = false;
+        do
+        {
+            needUpdate = false;
+            Logger.Info("触发更新");
+            var result = new SchedulerResult();
+            // 创建快照，用于焦点层和等待层事件执行
+            var snapshot = _snapshotChache =
+                (_snapshotChache is null || _snapshotChache.Owner != GameState)
+                    ? _gameState.GetSnapshot()
+                    : _snapshotChache;
+            snapshot.ClearIfSnapshot();
+            // 开始更新
+            var consumed = new HashSet<long>();
+            var currentEvent = snapshot.EventManagerState.PeekFirstNotConsumed(consumed);
+            while (currentEvent != null)
+            {
+                if (currentEvent.Layer == SimulationLayer.Disabled)
+                {
+                    break;
+                }
+
+                if (!currentEvent.CheckIsValid(snapshot))
+                {
+                    consumed.Add(currentEvent.Id);
+                    continue;
+                }
+
+                //执行一个事件
+                var obj = new SimObject(snapshot, currentEvent.Layer, new(), currentEvent.Id);
+                obj.PushContext(new SimContext(currentEvent.BindUnitId));
+                currentEvent.Apply(obj);
+                result.RunningCount += currentEvent.Layer == SimulationLayer.Running ? 1 : 0;
+                //如果是运行层,删除
+                if (currentEvent.Layer == SimulationLayer.Running)
+                {
+                    switch (currentEvent.AfterRunMode)
+                    {
+                        case EventAfterRunMode.ToFocused:
+                            obj.ApplyModifyEventLayer(currentEvent.Id, SimulationLayer.Focused);
+                            needUpdate = true;
+                            break;
+                        case EventAfterRunMode.ToWaiting:
+                            obj.ApplyModifyEventLayer(currentEvent.Id, SimulationLayer.Waiting);
+                            needUpdate = true;
+                            break;
+                        case EventAfterRunMode.ToDisabled:
+                            obj.ApplyModifyEventLayer(currentEvent.Id, SimulationLayer.Disabled);
+                            needUpdate = true;
+                            break;
+                        case EventAfterRunMode.Remove:
+                            obj.ApplyRemoveEvent(currentEvent.Id);
+                            break;
+                    }
+                }
+
+                obj.PopContext();
+                consumed.Add(currentEvent.Id); //标记为已执行
+
+                //记录结果
+                result.Sims.Add(obj);
+
+                //获取下一个事件
+                currentEvent = snapshot.EventManagerState.PeekFirstNotConsumed(consumed);
+            }
+
+            //结果应用到游戏状态
+            for (var i = 0; i < result.RunningCount; i++)
+            {
+                result.Sims[i].Steps.Replay(_gameState);
+            }
+
+            //做一些清理
+            
+            Logger.Trace(result.Sims.ToTree());
+            SimulationUpdated?.Invoke(this, result);
+        }
+        while (needUpdate);
         _runningSchedulers.Pop();
         _isSimulating = false;
         _blockCount = 0;
         _updateCount = 0;
-        Logger.Trace(result.Sims.ToTree());
-        SimulationUpdated?.Invoke(this, result);
     }
 }

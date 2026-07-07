@@ -64,19 +64,20 @@ public static class Extensions
 
     extension(IGameState gameState)
     {
-        public EventState CreateEvent(EventCore core,
-            int turn, int phaseOrder, int team,
+        public EventState CreateEvent(IEventCore core,
+            int phaseOrder, int team,
             SimulationLayer layer,
-            int priority = 0)
+            int priority = 0,
+            EventAfterRunMode afterRunMode = EventAfterRunMode.Remove)
         {
             var e = new EventState(gameState.IdGenerator.NewLong())
             {
                 Team = team,
                 Layer = layer,
-                Turn = turn,
                 PhaseOrder = phaseOrder,
                 Priority = priority,
                 Core = core,
+                AfterRunMode = afterRunMode,
             };
             return gameState.EventManagerState.AddEvent(e);
         }
@@ -476,21 +477,9 @@ public static class Extensions
     {
         public void RunAction(Action<EventState, SimObject> action)
         {
-            eventScheduler.CreateEvent(new ActionEventCore(null, action), 0, 0, -1, SimulationLayer.Running);
+            eventScheduler.CreateEvent(new ActionEventCore(null, action), 0, -1, SimulationLayer.Running);
         }
-        public async GDTask RunTurnEvents(int turn, int focusDelay = 800, int runAfterDelay = 100)
-        {
-            var turnEvents = eventScheduler.GetTurnEvents(turn);
-            foreach (var ev in turnEvents)
-            {
-                if (!ev.CheckIsValid(eventScheduler.GameState)) continue;
-                ev.Layer = SimulationLayer.Focused;
-                await GDTask.Delay(focusDelay);
-                ev.Layer = SimulationLayer.Running;
-                await eventScheduler.WaitCompleteRunning();
-                await GDTask.Delay(runAfterDelay);
-            }
-        }
+
     }
 
     extension(IEnumerable<Vector2I> coords)

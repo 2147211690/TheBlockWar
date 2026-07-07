@@ -10,7 +10,7 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// </summary>
 public class TeamEventPhase : TurnPhase
 {
-    public override string PhaseName { get; } = "TeamEventPhase";
+    public override string PhaseName { get; }
     public int Team { get; }
     private List<EventState>? _teamSkillEvents;
     public override bool IsFocused
@@ -25,9 +25,10 @@ public class TeamEventPhase : TurnPhase
             _teamSkillEvents?.SetLayer(field ? SimulationLayer.Focused : SimulationLayer.Waiting);
         }
     }
-    public TeamEventPhase(int team)
+    public TeamEventPhase(int team, string phaseName)
     {
         Team = team;
+        PhaseName = phaseName;
     }
 
     public override async GDTask Execute()
@@ -50,6 +51,6 @@ public class TeamEventPhase : TurnPhase
 
     private List<EventState> GetTeamSkill()
     {
-        return EventScheduler.GetTurnEvents(Turn).Where(e => e.Team == Team).ToList();
+        return EventScheduler.Events.Values.Where(e => e.Team == Team).ToList();
     }
 }

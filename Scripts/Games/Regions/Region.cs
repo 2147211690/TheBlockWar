@@ -1,3 +1,4 @@
+using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
@@ -22,6 +23,18 @@ public abstract class Region(string name) : IRegion
     }
 
     public virtual void OnEnterTurn(SimObject obj, Vector2I regionCoords, string regionData, int turn)
+    {
+    }
+
+    public virtual void OnAddToTile(SimObject obj, Vector2I regionCoords, string regionData)
+    {
+    }
+
+    public virtual void OnRemoveFromTile(SimObject obj, Vector2I regionCoords, string regionData)
+    {
+    }
+
+    public virtual void OnCreateRegionEvent(SimObject obj, Vector2I regionCoords, string regionData, ref IEventCore eventCore)
     {
     }
 }

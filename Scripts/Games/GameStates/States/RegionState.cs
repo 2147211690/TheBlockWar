@@ -10,4 +10,5 @@ public struct RegionState
     /// </summary>
     public int Duration { get; set; }
     public string RegionData { get; set; }
+    public long RegionEventId { get; set; }
 }

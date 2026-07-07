@@ -12,14 +12,13 @@ public static class GameJson
         IgnoreReadOnlyFields = true,
         IgnoreReadOnlyProperties = true,
     };
-    extension<T>(T obj)
+
+    public static string ToJson<T>(this T obj)
     {
-        public string ToJson()
-        {
-            return JsonSerializer.Serialize(obj, JsonOptions);
-        }
+        return JsonSerializer.Serialize(obj, JsonOptions);
     }
-    public static T? FromJson<T>(string json)
+
+    public static T? FromJson<T>(this string json)
     {
         return JsonSerializer.Deserialize<T>(json, JsonOptions);
     }

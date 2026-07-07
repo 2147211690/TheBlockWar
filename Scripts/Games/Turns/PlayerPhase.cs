@@ -11,7 +11,7 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// </summary>
 public class PlayerPhase : TurnPhase
 {
-    public override string PhaseName { get; } = "PlayerPhase";   
+    public override string PhaseName { get; }
     public override bool IsFocused { get; set; }
     public IPlayer Player { get; }
     protected IPlayerOperationSynchronizer OperationSynchronizer { get; }
@@ -19,6 +19,7 @@ public class PlayerPhase : TurnPhase
     {
         OperationSynchronizer = operationSynchronizer;
         Player = player;
+        PhaseName = $"Player{Player.Team}Phase";
     }
     protected override void OnInit()
     {
@@ -35,7 +36,7 @@ public class PlayerPhase : TurnPhase
             var oper = await OperationSynchronizer.WaitOperationAsync();
             if (oper.PlayerId != Player.Id) continue;
             Player.WaitConfirm = true;
-            if (await Handle(oper))
+            if (await HandleNext(oper))
             {
                 Player.IsTurn = false;
                 Player.WaitConfirm = false;
@@ -50,7 +51,7 @@ public class PlayerPhase : TurnPhase
     /// </summary>
     /// <param name="operation"></param>
     /// <returns>是否应该结束处理</returns>
-    public async GDTask<bool> Handle(PlayerOperation operation)
+    public async GDTask<bool> HandleNext(PlayerOperation operation)
     {
         if (operation is PlayerEndTurn endTurn)
         {
@@ -64,7 +65,7 @@ public class PlayerPhase : TurnPhase
                 useSkill.Args,
                 SimulationLayer.Disabled,
                 Player.CurrentTurn);
-            e.Layer = SimulationLayer.Running;
+            e?.Layer = SimulationLayer.Running;
             await EventScheduler.WaitCompleteRunning();
         }
         else if (operation is PlayerPrepareUnitSkill prepareSkill)
@@ -128,7 +129,8 @@ public class PlayerPhase : TurnPhase
                 return null;
             }
             var skill = skills[skillIndex];
-            var e = EventScheduler.CreateEvent(new SkillEventCore(skill.SkillName, unit.Id, args), turn, Player.PhaseOrder, unit.Team, layer);
+            var e = EventScheduler.CreateEvent(new SkillEventCore(skill.SkillName, unit.Id, args ?? []),
+                EventScheduler.PhaseOrders[Turn + 1][PhaseName], unit.Team, layer);
             return e;
         }
     }
