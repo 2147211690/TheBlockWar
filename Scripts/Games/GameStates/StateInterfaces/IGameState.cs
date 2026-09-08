@@ -11,5 +11,7 @@ public interface IGameState : IReadOnlyGameState, IGameDataState
     new IBuffGlobalState BuffGlobalState { get; }
     new ITurnState TurnState { get; }
     new IEventManagerState EventManagerState { get; }
+    new IEnvState EnvState { get; }
+    
     void LoadGameData(GameStateData data);
 }

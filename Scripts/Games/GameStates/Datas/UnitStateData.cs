@@ -12,6 +12,7 @@ public class UnitStateData
     public float MaxShield { get; set; } = 100;
     public bool IsDead { get; set; }
     public bool IsFlying { get; set; } = false;
+    public SkillPrepareInfo? PreparedSkill { get; set; }
     public CanUseSkillMask CanUseSkillMask { get; set; } = CanUseSkillMask.All;
     public List<BuffState>? Buffs { get; set; }
 }

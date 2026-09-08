@@ -29,6 +29,12 @@ public class EventScheduler : IEventScheduler
     public int CurrentTurn { get => _gameState.TurnState.CurrentTurn; set => _gameState.TurnState.CurrentTurn = value; }
     private IGameState _gameState;
     private IGameState? _snapshotChache;
+
+    private int _runSkillsTeam;
+    private long _runSkillUnitId;
+    private int _runTeamPlaceUnitTeam;
+    private RunType _runType;
+    
     public event EventHandler<SchedulerResult>? SimulationUpdated;
     public event EventHandler<IReadOnlyGameState>? GameStateReload;
 
@@ -108,6 +114,91 @@ public class EventScheduler : IEventScheduler
     public void RemoveEvent(long id)
         => _gameState.EventManagerState.RemoveEvent(id);
 
+    public void UpdateSimulation2()
+    {
+        if (_isSimulating) return;
+        if (_blockCount > 0)
+        {
+            _updateCount++;
+            return;
+        }
+        
+        _isSimulating = true;
+        _runningSchedulers.Push(this);
+
+        
+        var needUpdate = false;
+        do
+        {
+            needUpdate = false;
+            Logger.Info("触发更新");
+            var result = new SchedulerResult();
+            // 创建快照，用于焦点层和等待层事件执行
+            var snapshot = _snapshotChache =
+                (_snapshotChache is null || _snapshotChache.Owner != GameState)
+                    ? _gameState.GetSnapshot()
+                    : _snapshotChache;
+            snapshot.ClearIfSnapshot();
+            // 开始更新
+            while (true)
+            {
+                //PlaceUnit
+                
+                //Env
+                foreach(var env in snapshot.EnvState.EnvSteps)
+                {
+                    var envObj = new SimObject(snapshot, SimulationLayer.Waiting, new(), 0);
+                    envObj.PushContext(new SimContext(0));
+                    env.Step.Apply(envObj);
+                    envObj.PopContext();
+                    result.Sims.Add(envObj);
+                }
+                //Region
+                var regionObj = new SimObject(snapshot, SimulationLayer.Waiting, new(), 0);
+                regionObj.PushContext(new SimContext(0));
+                regionObj.ApplyRegionTurn(snapshot.TurnState.CurrentTurn + 1);
+                regionObj.PopContext();
+                result.Sims.Add(regionObj);
+                //Buff
+                if (false)
+                {
+                    var buffObj = new SimObject(snapshot, SimulationLayer.Waiting, new(), 0);
+                    buffObj.PushContext(new SimContext(0));
+                    buffObj.ApplyBuffTurn(snapshot.TurnState.CurrentTurn + 1);
+                    buffObj.PopContext();
+                    result.Sims.Add(buffObj);
+                }
+                //TeamUnitSkill
+                foreach (var unit in snapshot.UnitMapState.GetAllUnits())
+                {
+                    var pSkill = unit.PreparedSkill;
+                    if (pSkill == null) continue;
+                    var skillObj = new SimObject(snapshot, SimulationLayer.Waiting, new(), 0);
+                    skillObj.PushContext(new SimContext(0));
+                    skillObj.ApplyUnitSkill(unit.Id, pSkill.SkillName, unit.Coords, pSkill.Args);
+                    skillObj.PopContext();
+                    result.Sims.Add(skillObj);
+                }
+            }
+
+            //结果应用到游戏状态
+            for (var i = 0; i < result.RunningCount; i++)
+            {
+                result.Sims[i].Steps.Replay(_gameState);
+            }
+
+            //做一些清理
+            
+            Logger.Trace(result.Sims.ToTree());
+            SimulationUpdated?.Invoke(this, result);
+        }
+        while (needUpdate);
+        _runningSchedulers.Pop();
+        _isSimulating = false;
+        _blockCount = 0;
+        _updateCount = 0;
+    }
+    
     public void UpdateSimulation()
     {
         if (_isSimulating) return;
@@ -203,5 +294,86 @@ public class EventScheduler : IEventScheduler
         _isSimulating = false;
         _blockCount = 0;
         _updateCount = 0;
+    }
+    
+    public void PrepareUnitSkill(long unitId, SkillPrepareInfo? skillPrepareInfo)
+    {
+        var unit = _gameState.UnitMapState.GetUnit(unitId);
+        if (unit.IsNull()) return;
+        _gameState.UnitMapState.ModifyUnit(unit.Id, u =>
+        {
+            u.PreparedSkill = skillPrepareInfo;
+        });
+        UpdateSimulation2();
+    }
+
+    public ApplyStep PrepareEnv(Vector2I coords, ApplyStep step)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void PrepareTeamPlaceUnit(Vector2I coords, int team, int index, TeamPreparePlaceUnitInfo? placeUnitInfo)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ApplyStep PrepareEnv(Vector2I coords, int team, ApplyStep step)
+    {
+        
+    }
+
+    public Vector2I? FocusedEnvCoords { get; set; }
+    public long FocusedUnitId { get; set; }
+    public Vector2I? FocusedTileCoords { get; set; }
+    public EventFocusedModeMask FocusedMode { get; set; }
+    
+    public void RunBuffs()
+    {
+        _runType = RunType.Buffs;
+        UpdateSimulation2();
+    }
+
+    public void RunRegions()
+    {
+        _runType = RunType.Regions;
+        UpdateSimulation2();
+    }
+
+    public void RunEnvs()
+    {
+        _runType = RunType.Envs;
+        UpdateSimulation2();
+    }
+
+    public void RunSkills(int team)
+    {
+        _runType = RunType.Skills;
+        _runSkillsTeam = team;
+        UpdateSimulation2();
+    }
+
+    public void RunSkill(long unitId)
+    {
+        _runType = RunType.Skill;
+        _runSkillUnitId = unitId;
+        UpdateSimulation2();
+    }
+
+    public void RunTeamPlaceUnit(int team)
+    {
+        _runType = RunType.TeamPlaceUnit;
+        _runTeamPlaceUnitTeam = team;
+        UpdateSimulation2();
+    }
+
+    enum RunType
+    {
+        None,
+        Buffs,
+        Regions,
+        Envs,
+        Skills,
+        Skill,
+        TeamPlaceUnit,
     }
 }

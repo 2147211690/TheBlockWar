@@ -12,4 +12,5 @@ public class GameStateData
     public required TeamStateData TeamState { get; init; }
     public required TurnStateData TurnState { get; init; }
     public required EventManagerData EventManagerState { get; init; }
+    public required EnvStateData EnvState { get; init; }
 }

@@ -20,6 +20,7 @@ public interface IReadOnlyUnitState : IReadOnlyGameDataState<UnitState, UnitStat
     float MaxShield { get; }
     bool IsDead { get; }
     bool IsFlying { get; }
+    SkillPrepareInfo? PreparedSkill { get; }
     CanUseSkillMask CanUseSkill { get; }
     IReadOnlyList<BuffState> Buffs { get; }
     /// <summary>
