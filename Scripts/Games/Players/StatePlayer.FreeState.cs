@@ -12,20 +12,17 @@ public partial class StatePlayer
     private class FreeState(StatePlayer player) : State(player)
     {
         private bool _lockTileCoords = false;
-        private IReadOnlyList<EventState>? unitEvents;
         public long FocusedUnitId
         {
             get => Player.FocusedUnitId;
             set
             {
                 if (value == Player.FocusedUnitId) return;
-                unitEvents?.SetLayer(SimulationLayer.Waiting);
                 Player.GameView.GetUnitView(FocusedUnitId)?.IsFocused = false;
                 Player.FocusedUnitId = value;
-                unitEvents = EventScheduler?.GetUnitEvents(value);
-                unitEvents?.SetLayer(SimulationLayer.Focused);
+                // 新框架:设置调度器的关注单位触发全量收集,收集器自动把该单位的 buff/技能触发者标记为 Focused
+                EventScheduler!.FocusedUnitId = value == 0 ? null : value;
                 Player.GameView.GetUnitView(FocusedUnitId)?.IsFocused = true;
-                
             }
         }
         public override void OnEnter()
@@ -44,20 +41,19 @@ public partial class StatePlayer
                     if (click.Type == PlayerClickTypeEnum.Left)
                     {
                         var u = EventScheduler?.GameState.UnitMapState.GetUnit(FocusedUnitId);
-                        if (u.IsNull()) break;
-                        Player.SelectedUnitId = FocusedUnitId;
-                        unitEvents = EventScheduler?.GetUnitEvents(FocusedUnitId);
-                        if (unitEvents.Count == 0 && u.Team == Player.Team)
-                        {
-                            //单位没有等待中的技能
-                            Player._skillState.CurrentSkillIndex = 0;
-                            FocusEventCoords = null;
-                            StateMachine.ChangeState(Player._skillState);
-                        }
-                        else
-                        {
-                            StateMachine.ChangeState(Player._selectState);
-                        }
+                    if (u.IsNull()) break;
+                    Player.SelectedUnitId = FocusedUnitId;
+                    if (u.PrepareSkill is null && u.Team == Player.Team)
+                    {
+                        //单位还没有准备下回合技能,进入技能选择
+                        Player._skillState.CurrentSkillIndex = 0;
+                        FocusEventCoords = null;
+                        StateMachine.ChangeState(Player._skillState);
+                    }
+                    else
+                    {
+                        StateMachine.ChangeState(Player._selectState);
+                    }
                     }
                     else if (click.Type == PlayerClickTypeEnum.Right)
                     {

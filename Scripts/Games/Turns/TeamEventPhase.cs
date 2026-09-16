@@ -12,17 +12,11 @@ public class TeamEventPhase : TurnPhase
 {
     public override string PhaseName { get; }
     public int Team { get; }
-    private List<EventState>? _teamSkillEvents;
     public override bool IsFocused
     {
         get => field;
         set
         {
-            if (field == value) return;
-            _teamSkillEvents?.SetLayer(field ? SimulationLayer.Waiting : SimulationLayer.Disabled);
-            field = value;
-            _teamSkillEvents = GetTeamSkill();
-            _teamSkillEvents?.SetLayer(field ? SimulationLayer.Focused : SimulationLayer.Waiting);
         }
     }
     public TeamEventPhase(int team, string phaseName)
@@ -33,16 +27,9 @@ public class TeamEventPhase : TurnPhase
 
     public override async GDTask Execute()
     {
-        var teamSkillEvents = GetTeamSkill();
-        foreach (var se in teamSkillEvents)
-        {
-            if (!se.CheckIsValid(EventScheduler.GameState)) continue;
-            se.Layer = SimulationLayer.Focused;
-            await GDTask.Delay(800);
-            se.Layer = SimulationLayer.Running;
-            await EventScheduler.WaitCompleteRunning();
-            await GDTask.Delay(100);
-        }
+        EventScheduler.RunTeamUnitSkillTurn(Team);
+        await EventScheduler.WaitCompleteRunning();
+        await GDTask.Delay(800);
     }
 
     protected override void OnInit()

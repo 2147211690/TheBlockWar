@@ -473,14 +473,6 @@ public static class Extensions
             }
         }
     }
-    extension(IEventScheduler eventScheduler)
-    {
-        public void RunAction(Action<EventState, SimObject> action)
-        {
-            eventScheduler.CreateEvent(new ActionEventCore(null, action), 0, -1, SimulationLayer.Running);
-        }
-
-    }
 
     extension(IEnumerable<Vector2I> coords)
     {

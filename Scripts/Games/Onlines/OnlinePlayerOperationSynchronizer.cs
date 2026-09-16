@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Threading.Channels;
 using TheBlockWar.Scripts.Tools.Jsons;
 
 namespace TheBlockWar.Scripts.Games.Onlines;
@@ -9,6 +10,7 @@ namespace TheBlockWar.Scripts.Games.Onlines;
 [JsonDerivedType(typeof(PlayerUseUnitSkill), nameof(PlayerUseUnitSkill))]
 [JsonDerivedType(typeof(PlayerSlowUseUnitSkill), nameof(PlayerSlowUseUnitSkill))]
 [JsonDerivedType(typeof(PlayerSlowPrepareUnitSkill), nameof(PlayerSlowPrepareUnitSkill))]
+[JsonDerivedType(typeof(PlayerPlaceUnit), nameof(PlayerPlaceUnit))]
 
 public record PlayerOperation(long PlayerId);
 public record PlayerEndTurn(long PlayerId) : PlayerOperation(PlayerId);
@@ -21,7 +23,7 @@ public record PlayerPlaceUnit(long PlayerId, (Vector2I coords, string unitName)[
 [GlobalClass]
 public partial class OnlinePlayerOperationSynchronizer : Node, IPlayerOperationSynchronizer
 {
-    private Queue<PlayerOperation> _operations = new();
+    private readonly Channel<PlayerOperation> _operations = Channel.CreateUnbounded<PlayerOperation>();
     
     public void PushOperation(PlayerOperation operation)
     {
@@ -29,16 +31,15 @@ public partial class OnlinePlayerOperationSynchronizer : Node, IPlayerOperationS
         Rpc(MethodName.PushOperationRpc, json);
     }
 
-    public async GDTask<PlayerOperation> WaitOperationAsync()
+    public IAsyncEnumerable<PlayerOperation> GetAllOperationAsync()
     {
-        await GDTask.WaitUntil(() => _operations.Count > 0);
-        return _operations.Dequeue();
+        return _operations.Reader.ReadAllAsync();
     }
     
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void PushOperationRpc(string operationJson)
     {
         var operation = operationJson.FromJson<PlayerOperation>()!;
-        _operations.Enqueue(operation);
+        _operations.Writer.TryWrite(operation);
     }
 }

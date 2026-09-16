@@ -1,4 +1,3 @@
-using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Players;
@@ -11,6 +10,7 @@ namespace TheBlockWar.Scripts.Games.Turns;
 /// </summary>
 public class PlayerPhase : TurnPhase
 {
+    private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     public override string PhaseName { get; }
     public override bool IsFocused { get; set; }
     public IPlayer Player { get; }
@@ -25,15 +25,15 @@ public class PlayerPhase : TurnPhase
     {
         Player.TurnManager = TurnManager;
     }
+
     public override async GDTask Execute()
     {
         Player.PhaseOrder = PhaseOrder;
         Player.CurrentTurn = Turn;
         Player.IsTurn = true;
         Player.WaitConfirm = false;
-        while (true)
+        await foreach (var oper in OperationSynchronizer.GetAllOperationAsync())
         {
-            var oper = await OperationSynchronizer.WaitOperationAsync();
             if (oper.PlayerId != Player.Id) continue;
             Player.WaitConfirm = true;
             if (await HandleNext(oper))
@@ -42,6 +42,7 @@ public class PlayerPhase : TurnPhase
                 Player.WaitConfirm = false;
                 break;
             }
+
             Player.WaitConfirm = false;
         }
     }
@@ -53,85 +54,69 @@ public class PlayerPhase : TurnPhase
     /// <returns>是否应该结束处理</returns>
     public async GDTask<bool> HandleNext(PlayerOperation operation)
     {
-        if (operation is PlayerEndTurn endTurn)
+        if (operation is PlayerEndTurn)
         {
             return true;
         }
         else if (operation is PlayerUseUnitSkill useSkill)
         {
-            var e = UnitSkill(
-                useSkill.UnitCoords,
-                useSkill.SkillIndex,
-                useSkill.Args,
-                SimulationLayer.Disabled,
-                Player.CurrentTurn);
-            e?.Layer = SimulationLayer.Running;
-            await EventScheduler.WaitCompleteRunning();
+            SetAndRun(useSkill.UnitCoords, useSkill.SkillIndex, useSkill.Args, 0f);
         }
         else if (operation is PlayerPrepareUnitSkill prepareSkill)
         {
-            var e = UnitSkill(
-                prepareSkill.UnitCoords,
-                prepareSkill.SkillIndex,
-                prepareSkill.Args,
-                SimulationLayer.Waiting,
-                Player.CurrentTurn + 1);
+            await PrepareOnly(prepareSkill.UnitCoords, prepareSkill.SkillIndex, prepareSkill.Args, 0f);
         }
         else if (operation is PlayerSlowUseUnitSkill slowUseSkill)
         {
-            var e = UnitSkill(
-                slowUseSkill.UnitCoords,
-                slowUseSkill.SkillIndex,
-                slowUseSkill.Args,
-                SimulationLayer.Focused,
-                Player.CurrentTurn + 1);
-            if (e != null)
-            {
-                await GDTask.Delay(slowUseSkill.UseDelay);
-                e.Layer = SimulationLayer.Disabled;
-                e.Layer = SimulationLayer.Running;
-                await EventScheduler.WaitCompleteRunning();
-            }
+            SetAndRun(slowUseSkill.UnitCoords, slowUseSkill.SkillIndex, slowUseSkill.Args, slowUseSkill.UseDelay / 1000f);
         }
         else if (operation is PlayerSlowPrepareUnitSkill slowPrepareSkill)
         {
-            var e = UnitSkill(
-                slowPrepareSkill.UnitCoords,
-                slowPrepareSkill.SkillIndex,
-                slowPrepareSkill.Args,
-                SimulationLayer.Focused,
-                Player.CurrentTurn + 1);
-            if (e != null)
-            {
-                await GDTask.Delay(slowPrepareSkill.PrepareDelay);
-                e.Layer = SimulationLayer.Waiting;
-            }
+            await PrepareOnly(slowPrepareSkill.UnitCoords, slowPrepareSkill.SkillIndex, slowPrepareSkill.Args, 
+                slowPrepareSkill.PrepareDelay / 1000f);
         }
         else if (operation is PlayerPlaceUnit placeUnit)
         {
-            foreach (var place in placeUnit.Places)
-            { }
+            // TODO: 单位放置的新 API (ApplyPlaceUnit) 接入到事件调度器的写入口后实现
+            Logger.Warn("PlayerPlaceUnit 暂未接新 API");
         }
         return false;
 
-        EventState? UnitSkill(Vector2I coords, int skillIndex, Vector2I?[]? args,
-            SimulationLayer layer, int turn)
+        // 立即设置技能并施放:写入 PrepareSkill 后运行
+        void SetAndRun(Vector2I coords, int skillIndex, Vector2I?[]? args, float delay)
+        {
+            var unitId = ResolveUnitId(coords);
+            if (unitId == 0 || !TryResolveSkill(coords, skillIndex, out var skillName)) return;
+            EventScheduler.SetUnitPrepareSkill(unitId, new PrepareSkillInfo(skillName, args ?? []));
+            EventScheduler.RunUnitPrepareSkill(unitId, delay);
+        }
+
+        // 仅预备下回合技能(设置 PrepareSkill)
+        async GDTask PrepareOnly(Vector2I coords, int skillIndex, Vector2I?[]? args, float delay)
+        {
+            var unitId = ResolveUnitId(coords);
+            if (unitId == 0 || !TryResolveSkill(coords, skillIndex, out var skillName)) return;
+            EventScheduler.SetUnitPrepareSkill(unitId, new PrepareSkillInfo(skillName, args ?? []));
+            EventScheduler.FocusedUnitId = unitId;
+            await GDTask.Delay((int)(delay * 1000));
+            EventScheduler.FocusedUnitId = 0;
+        }
+
+        long ResolveUnitId(Vector2I coords)
         {
             var unit = EventScheduler.GameState.UnitMapState.GetUnit(coords);
-            if (unit.IsNull() || unit.IsDead)
-            {
-                return null;
-            }
+            return unit.IsNull() || unit.IsDead ? 0 : unit.Id;
+        }
 
+        bool TryResolveSkill(Vector2I coords, int skillIndex, out string skillName)
+        {
+            skillName = string.Empty;
+            var unit = EventScheduler.GameState.UnitMapState.GetUnit(coords);
+            if (unit.IsNull()) return false;
             var skills = EventScheduler.GameState.GetUnitValidSkills(unit.Name);
-            if (skillIndex < 0 || skillIndex >= skills.Count)
-            {
-                return null;
-            }
-            var skill = skills[skillIndex];
-            var e = EventScheduler.CreateEvent(new SkillEventCore(skill.SkillName, unit.Id, args ?? []),
-                EventScheduler.PhaseOrders[Turn + 1][PhaseName], unit.Team, layer);
-            return e;
+            if (skillIndex < 0 || skillIndex >= skills.Count) return false;
+            skillName = skills[skillIndex].SkillName;
+            return true;
         }
     }
 }

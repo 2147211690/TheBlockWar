@@ -30,6 +30,7 @@ partial class Simulator
                         skillName.GetSkillInfo().Type == SkillTypeEnum.Move ?
                             ~CanUseSkillMask.Move : 
                             ~CanUseSkillMask.All);//移动技能后不能使用其他技能
+                obj.State.UnitMapState.ModifyUnit(unit.Id, u => u.PrepareSkill = null);
                 skill.SkillCore(obj, unit, useCoords, args);
                 return r;
             }
@@ -44,6 +45,7 @@ partial class Simulator
                 result.SkillName.GetSkillInfo().Type == SkillTypeEnum.Move ?
                     ~CanUseSkillMask.Move : 
                     ~CanUseSkillMask.All);
+        state.UnitMapState.ModifyUnit(result.UnitId, u => u.PrepareSkill = null);
     }
 
     public static partial void ApplyUnitSkillViewDraw(IGameView view, ReadOnlySimObject sim, ApplyUnitSkillResult result)

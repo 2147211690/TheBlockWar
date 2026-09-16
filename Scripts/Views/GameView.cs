@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Channels;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
@@ -50,12 +52,14 @@ public partial class GameView : Node2D, IGameView
     public Vector2 NodeDown => -TilesView.LocalUp;
 
     #region EventUpdate
+    private Channel<SchedulerResult> _resultChannel = Channel.CreateUnbounded<SchedulerResult>();
     private TaskQueue _runningQueue = new();
     private Queue<ReadOnlySimObject> _eventQueue = new();
     private int _prevEventQueueCount = 0;
     private SimResultHandler _resultHandler;
     private bool _isEventDirty = true;
     private bool _isEventDrawn = false;
+    private CancellationTokenSource _readResultCltSource = new();
     #endregion
     
     #region Init
@@ -68,6 +72,13 @@ public partial class GameView : Node2D, IGameView
         EventsView.GameView = this;
         TilesView.GameView = this;
         CurrentStyle = GameStyle[CurrentTeamType];
+        TreeExiting += OnTreeExiting;
+    }
+
+    private void OnTreeExiting()
+    {
+        _readResultCltSource.Cancel();
+        _resultChannel.Writer.Complete();
     }
 
     public void Init(IEventScheduler scheduler)
@@ -77,6 +88,7 @@ public partial class GameView : Node2D, IGameView
         Scheduler.GameStateReload += SchedulerOnGameStateReload;
         _resultHandler = new SimResultHandler(HandleActionAsync);
         _runningQueue.IsRunningChanged += IsRunningChanged;
+        ReadResult(_readResultCltSource.Token).Forget();
 
         void IsRunningChanged(object? sender, bool e)
         {
@@ -94,6 +106,32 @@ public partial class GameView : Node2D, IGameView
         }
     }
 
+    private async GDTask ReadResult(CancellationToken clt = default)
+    {
+        await foreach (var e in _resultChannel.Reader.ReadAllAsync(clt))
+        {
+            Logger.Debug("收到结果{result}", e);
+            int eventCount = e.Sims.Count - e.RunningCount;
+            if (eventCount != 0 || _prevEventQueueCount != 0) 
+                _isEventDirty = true;
+
+            if (e.RunningCount > 0)
+            {
+                //ClearEventViews();
+                var running = e.Sims.GetRange(0, e.RunningCount);
+                _runningQueue.AddTask(() => _resultHandler.HandleAsync(running));
+            }
+
+            _eventQueue.Clear();
+            for (int i = e.RunningCount; i < e.Sims.Count; i++)
+            {
+                _eventQueue.Enqueue(e.Sims[i]);
+            }
+            await GDTask.WaitUntil(() => !_runningQueue.IsRunning, clt);
+            await GDTask.Delay((int)(e.DelayTime * 1000), clt);
+        }
+    }
+    
     private void SchedulerOnGameStateReload(object? sender, IReadOnlyGameState e)
     {
         ClearEventViews();
@@ -124,8 +162,9 @@ public partial class GameView : Node2D, IGameView
 
     private void SchedulerOnSimulationUpdated(object? sender, SchedulerResult e)
     {
-        int eventCount = e.Sims.Count - e.RunningCount;
-        if (eventCount != 0 || _prevEventQueueCount != 0) 
+        _resultChannel.Writer.TryWrite(e);
+        /*int eventCount = e.Sims.Count - e.RunningCount;
+        if (eventCount != 0 || _prevEventQueueCount != 0)
             _isEventDirty = true;
 
         if (e.RunningCount > 0)
@@ -139,7 +178,7 @@ public partial class GameView : Node2D, IGameView
         for (int i = e.RunningCount; i < e.Sims.Count; i++)
         {
             _eventQueue.Enqueue(e.Sims[i]);
-        }
+        }*/
     }
 
     #endregion

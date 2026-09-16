@@ -14,17 +14,15 @@ public partial class StatePlayer
         public IEventScheduler? EventScheduler => Player.GameScheduler;
         public StateMachine<State> StateMachine => Player._stateMachine;
 
-        private IReadOnlyList<EventState>? _focusEvents;
         public Vector2I? FocusEventCoords
         {
             get => field;
             set
             {
                 if (field == value) return;
-                _focusEvents.SetLayer(SimulationLayer.Waiting);
                 field = value;
-                _focusEvents = field == null ? null : EventScheduler!.GetCoordsEvents(field.Value);
-                _focusEvents.SetLayer(SimulationLayer.Focused);
+                // 新框架:设置调度器的关注坐标触发全量收集,收集器自动把该坐标的区域触发者标记为 Focused
+                EventScheduler!.FocusedCoords = value;
             }
         }
 

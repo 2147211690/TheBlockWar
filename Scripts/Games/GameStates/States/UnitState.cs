@@ -19,6 +19,7 @@ public class UnitState : IReadOnlyUnitState
     public bool IsDead { get; set; }
     public bool IsFlying { get; set; } = false;
     public CanUseSkillMask CanUseSkill { get; set; } = CanUseSkillMask.All;
+    public PrepareSkillInfo? PrepareSkill { get; set; }
     public IReadOnlyList<BuffState> Buffs => _buffs ?? [];
     public IReadOnlyList<BuffState> BuffsStatic
     {
@@ -159,6 +160,7 @@ public class UnitState : IReadOnlyUnitState
         unit._buffs = _buffs.CloneToListOrNullWhenCountZero();
         unit._isBuffStaticDirty = _isBuffStaticDirty;
         unit.CanUseSkill = CanUseSkill;
+        unit.PrepareSkill = PrepareSkill;
         unit._buffsStatic = _isBuffStaticDirty ? null : _buffsStatic;
         return unit;
     }

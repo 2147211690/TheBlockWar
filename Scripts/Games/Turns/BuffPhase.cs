@@ -1,10 +1,6 @@
-using TheBlockWar.Scripts.Games.Events;
-using TheBlockWar.Scripts.Games.GameStates;
-using TheBlockWar.Scripts.Games.Simulations;
-
 namespace TheBlockWar.Scripts.Games.Turns;
 /// <summary>
-/// 用来处理buff的回合
+/// 处理 buff 的回合(新框架:阶段只切换调度器的聚焦标记,收集与执行由调度器负责)
 /// </summary>
 public class BuffPhase : TurnPhase
 {
@@ -14,27 +10,24 @@ public class BuffPhase : TurnPhase
     {
         get => field;
         set
-        { 
+        {
             if (field == value) return;
             field = value;
-            _buffTurnEvent.Layer = field ? SimulationLayer.Focused : SimulationLayer.Disabled;
+            // 聚焦/失焦时,让调度器把整类 buff 触发者标记为 Focused/Running
+            EventScheduler.IsFocusedBuffTurn = value;
         }
     }
-    private EventState _buffTurnEvent = null!;
+
     protected override void OnInit()
     {
-        _buffTurnEvent = EventScheduler.CreateEvent(new StepsEventCore(
-            null,
-            [
-                new ApplyBuffTurnStep(Turn)
-            ]
-        ), PhaseOrder, -1, SimulationLayer.Disabled, -100, EventAfterRunMode.Remove);
+        // 新框架:不再创建全局 buff 回合事件;由调度器收到 IsFocusedBuffTurn 标记后触发全量收集。
     }
+
     public override async GDTask Execute()
     {
-        _buffTurnEvent.Layer = SimulationLayer.Focused;
-        await GDTask.Delay(800);
-        _buffTurnEvent.Layer = SimulationLayer.Running;
+        // 新框架:阶段只切换调度器标记,触发全量收集与执行。
+        EventScheduler.RunBuffTurn();
         await EventScheduler.WaitCompleteRunning();
+        await GDTask.Delay(800);
     }
 }
