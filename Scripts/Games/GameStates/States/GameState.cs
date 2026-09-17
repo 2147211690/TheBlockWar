@@ -20,8 +20,6 @@ public class GameState : IGameState
     public IUnitMapState UnitMapState { get; private set; }
     public IBuffGlobalState BuffGlobalState { get; private set; }
     public ITurnState TurnState { get; private set; }
-    IReadOnlyEventManagerState IReadOnlyGameState.EventManagerState => EventManagerState;
-    public IEventManagerState EventManagerState { get; private set; }
     IReadOnlyTurnState IReadOnlyGameState.TurnState => TurnState;
 
     public TeamState TeamState { get; private set; }
@@ -57,7 +55,6 @@ public class GameState : IGameState
         BuffGlobalState = new BuffGlobalState();
         TeamState = new TeamState(teamRelations);
         TurnState = new TurnState(currentTurn);
-        EventManagerState = new EventManagerState(mapSize);
     }
 
     public void LoadGameData(GameStateData data)
@@ -74,7 +71,6 @@ public class GameState : IGameState
         TeamState = new TeamState(data.TeamState);
         BuffGlobalState = new BuffGlobalState(data.BuffGlobalState);
         TurnState = new TurnState(data.TurnState);
-        EventManagerState = new EventManagerState(data.EventManagerState);
     }
 
     public void ClearIfSnapshot()
@@ -91,7 +87,6 @@ public class GameState : IGameState
             TeamState = TeamState.ToData(),
             BuffGlobalState = BuffGlobalState.ToData(),
             TurnState = TurnState.ToData(),
-            EventManagerState = EventManagerState.ToData(),
         };
     }
     /// <summary>
@@ -112,12 +107,10 @@ public class GameState : IGameState
 
         public TeamState TeamState => Owner.TeamState;
         public ITurnState TurnState { get; }
-        public IEventManagerState EventManagerState { get; }
         IReadOnlyTurnState IReadOnlyGameState.TurnState => TurnState;
         IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
         IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
         IReadOnlyBuffGlobalState IReadOnlyGameState.BuffGlobalState => BuffGlobalState;
-        IReadOnlyEventManagerState IReadOnlyGameState.EventManagerState => EventManagerState;
         
         public GameStateSnapshot(IReadOnlyGameState owner)
         {
@@ -127,7 +120,6 @@ public class GameState : IGameState
             TileMapState = owner.TileMapState.GetSnapshot();
             UnitMapState = owner.UnitMapState.GetSnapshot();
             BuffGlobalState = owner.BuffGlobalState.GetSnapshot();
-            EventManagerState = owner.EventManagerState.GetSnapshot();
         }
         public GameStateData ToData()
         {
@@ -140,7 +132,6 @@ public class GameState : IGameState
                 Size = Size,
                 BuffGlobalState = BuffGlobalState.ToData(),
                 TurnState = TurnState.ToData(),
-                EventManagerState = EventManagerState.ToData(),
             };
         }
 
@@ -153,7 +144,6 @@ public class GameState : IGameState
             UnitMapState.ClearIfSnapshot();
             BuffGlobalState.ClearIfSnapshot();
             TurnState.ClearIfSnapshot();
-            EventManagerState.ClearIfSnapshot();
         }
         public IGameState GetSnapshot()
         {

@@ -1,8 +1,6 @@
 using TheBlockWar.Scripts.Games.Simulations;
-using TheBlockWar.Scripts.Resources;
-using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games.Turns;
+namespace TheBlockWar.Scripts.Games.Turns.Phases;
 /// <summary>
 /// 用来构建地图的回合
 /// </summary>
@@ -13,6 +11,8 @@ public class MapBuildPhase : TurnPhase
         MapBuilder = mapBuilder;
     }
     public override string PhaseName { get; } = "MapBuildPhase";
+    public override PhaseEnum PhaseType { get; } = PhaseEnum.MapBuild;
+    public override int Team { get; } = 0;
     public override bool IsFocused { get; set; }
     public MapBuilder MapBuilder { get; }
     public override GDTask Execute()

@@ -1,4 +1,5 @@
 using System.Linq;
+using TheBlockWar.Scripts.Games.Turns.Phases;
 
 namespace TheBlockWar.Scripts.Games.Turns;
 
@@ -43,16 +44,20 @@ public class TurnManager : ITurnManager
         if (CurrentTurn == 0)
         {
             _currentPhases.AddRange(GetTurnPhases(CurrentTurn));
+            EventScheduler.SetCurrentTurnPhaseOrder(_currentPhases);
             _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
+            EventScheduler.SetNextTurnPhaseOrder(_nextPhases);
             SetPhaseOrders();
             return;
         }
         _currentPhases.Clear();
         EventScheduler.PhaseOrders.Remove(CurrentTurn - 1);
         _currentPhases.AddRange(_nextPhases);
+        EventScheduler.SetCurrentTurnPhaseOrder(_currentPhases);
+        
         _nextPhases.Clear();
         _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
-        
+        EventScheduler.SetNextTurnPhaseOrder(_nextPhases);
         SetPhaseOrders();
     }
 

@@ -139,13 +139,15 @@ public sealed class SkillTurnTrigger : TurnTrigger
     private long _unitId;
     /// <summary>对应的单位Id。</summary>
     public long UnitId => _unitId;
+    public int UnitTeam { get; private set; }
     private string _skillName = string.Empty;
     private Vector2I?[]? _args;
 
     public SkillTurnTrigger Init(SimulationLayer layer, int phaseOrder, int priority,
-        long unitId, string skillName, Vector2I?[]? args)
+        long unitId, int unitTeam, string skillName, Vector2I?[]? args)
     {
         base.Init(layer, phaseOrder, priority, $"技能:{skillName}@{unitId}");
+        UnitTeam = unitTeam;
         _unitId = unitId;
         _skillName = skillName;
         _args = args;
@@ -207,12 +209,12 @@ public static class TurnTriggerCollector
     extension(IReadOnlyGameState state)
     {
         /// <summary>收集"下回合区域触发者"。</summary>
-        public IReadOnlyList<RegionTurnTrigger> CollectRegionTurnTriggers(
+        public List<RegionTurnTrigger> CollectRegionTurnTriggers(
             bool isFocusedRegionTurn = false, Vector2I? focusCoords = null)
         {
             var turn = state.TurnState.CurrentTurn + 1;
             var list = new List<RegionTurnTrigger>();
-            var regionOrder = state.TurnState.GetPhaseOrder(turn, "RegionPhase");
+            //var regionOrder = state.TurnState.GetPhaseOrder(turn, "RegionPhase");
 
             for (int x = 0; x < state.TileMapState.Size.X; x++)
             {
@@ -225,7 +227,7 @@ public static class TurnTriggerCollector
                         var layer = isFocusedRegionTurn || (focusCoords.HasValue && focusCoords.Value == coords)
                             ? SimulationLayer.Focused
                             : SimulationLayer.Waiting;
-                        list.Add((RegionTurnTrigger)RegionTriggerPool.Get().Init(layer, regionOrder, info.Priority,
+                        list.Add((RegionTurnTrigger)RegionTriggerPool.Get().Init(layer, 0, info.Priority,
                             coords, region.RegionName, region.RegionData, turn, info.Hook));
                     }
                 }
@@ -235,19 +237,19 @@ public static class TurnTriggerCollector
         }
 
         /// <summary>收集"下回合单位Buff触发者"。进入层由 <paramref name="isFocusedBuffTurn"/> 决定(聚焦时为 Focused)。</summary>
-        public IReadOnlyList<BuffTurnTrigger> CollectBuffTurnTriggers(bool isFocusedBuffTurn = false)
+        public List<BuffTurnTrigger> CollectBuffTurnTriggers(bool isFocusedBuffTurn = false)
         {
             var turn = state.TurnState.CurrentTurn + 1;
             var list = new List<BuffTurnTrigger>();
             if (!isFocusedBuffTurn) return list;
 
-            var buffOrder = state.TurnState.GetPhaseOrder(turn, "BuffPhase");
+            //var buffOrder = state.TurnState.GetPhaseOrder(turn, "BuffPhase");
             foreach (var unit in state.UnitMapState.GetAllUnits())
             {
                 foreach (var buff in unit.Buffs)
                 {
                     var info = buff.BuffName.GetBuffInfo();
-                    list.Add(BuffTriggerPool.Get().Init(SimulationLayer.Focused, buffOrder,
+                    list.Add(BuffTriggerPool.Get().Init(SimulationLayer.Focused, 0,
                         info.Priority,
                         unit.Id, buff.BuffName, buff.Count, turn, info.Hook));
                 }
@@ -260,16 +262,16 @@ public static class TurnTriggerCollector
         /// 收集"下回合单位技能触发者"。
         /// <para>team 非空时仅收集该队伍单位的准备技能。</para>
         /// </summary>
-        public IReadOnlyList<SkillTurnTrigger> CollectSkillTurnTriggers(bool isFocusedSkillTurn = false, long? focusUnitId = null, int? team = null)
+        public List<SkillTurnTrigger> CollectSkillTurnTriggers(bool isFocusedSkillTurn = false, long? focusUnitId = null, int? team = null)
         {
             var turn = state.TurnState.CurrentTurn + 1;
             var list = new List<SkillTurnTrigger>();
 
             // 分组到 NaturePhase (未注册时安全回退到末位)
-            var skillOrder = state.TurnState.PhaseOrders.TryGetValue(turn, out var skillPhases) &&
+            /*var skillOrder = state.TurnState.PhaseOrders.TryGetValue(turn, out var skillPhases) &&
                              skillPhases.TryGetValue("NaturePhase", out var so)
                 ? so
-                : int.MaxValue;
+                : int.MaxValue;*/
 
             foreach (var unit in state.UnitMapState.GetAllUnits())
             {
@@ -279,7 +281,7 @@ public static class TurnTriggerCollector
                     ? SimulationLayer.Focused
                     : SimulationLayer.Waiting;
                 list.Add(SkillTriggerPool.Get()
-                    .Init(layer, skillOrder, 0, unit.Id, skill.SkillName, skill.Args));
+                    .Init(layer, 0, 0, unit.Id, unit.Team, skill.SkillName, skill.Args));
             }
 
             return list;
@@ -290,7 +292,7 @@ public static class TurnTriggerCollector
         /// <para>返回列表中可能包含失效触发者,调用方应执行前用 <see cref="TurnTrigger.CheckIsValid"/> 过滤。</para>
         /// <para>实例来自对象池;调用方使用完需主动 <see cref="ReturnTrigger"/> 归还。不归还也不会泄漏。</para>
         /// </summary>
-        public IReadOnlyList<TurnTrigger> CollectNextTurnTriggers(
+        public List<TurnTrigger> CollectNextTurnTriggers(
             Vector2I? focusCoords = null, long? focusUnitId = null,
             bool isFocusedRegionTurn = false,
             bool isFocusedBuffTurn = false,
@@ -300,14 +302,6 @@ public static class TurnTriggerCollector
             list.AddRange(CollectRegionTurnTriggers(state, isFocusedRegionTurn, focusCoords));
             list.AddRange(CollectBuffTurnTriggers(state, isFocusedBuffTurn));
             list.AddRange(CollectSkillTurnTriggers(state, isFocusedSkillTurn, focusUnitId));
-            list.Sort(static (a, b) =>
-            {
-                var l = a.Layer.CompareTo(b.Layer);
-                if (l != 0) return l;
-                var po = a.PhaseOrder.CompareTo(b.PhaseOrder);
-                if (po != 0) return po;
-                return a.Priority.CompareTo(b.Priority);
-            });
             return list;
         }
     }

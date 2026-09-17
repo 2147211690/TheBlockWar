@@ -64,23 +64,7 @@ public static class Extensions
 
     extension(IGameState gameState)
     {
-        public EventState CreateEvent(IEventCore core,
-            int phaseOrder, int team,
-            SimulationLayer layer,
-            int priority = 0,
-            EventAfterRunMode afterRunMode = EventAfterRunMode.Remove)
-        {
-            var e = new EventState(gameState.IdGenerator.NewLong())
-            {
-                Team = team,
-                Layer = layer,
-                PhaseOrder = phaseOrder,
-                Priority = priority,
-                Core = core,
-                AfterRunMode = afterRunMode,
-            };
-            return gameState.EventManagerState.AddEvent(e);
-        }
+
     }
     extension(SimObject obj)
     {

@@ -8,5 +8,6 @@ public enum PhaseEnum
     MapBuild,
     Player,
     ResetUnit,
-    Test
+    PlaceUnit,
+    Test,
 }

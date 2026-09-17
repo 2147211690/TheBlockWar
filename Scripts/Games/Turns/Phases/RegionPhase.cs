@@ -1,21 +1,17 @@
-namespace TheBlockWar.Scripts.Games.Turns;
+namespace TheBlockWar.Scripts.Games.Turns.Phases;
 /// <summary>
 /// 区域回合(新框架:阶段只切换调度器的聚焦标记,收集与执行由调度器负责)
 /// </summary>
 public class RegionPhase : TurnPhase
 {
     public override string PhaseName { get; } = "RegionPhase";
+    public override PhaseEnum PhaseType { get; } = PhaseEnum.Region;
+    public override int Team { get; } = 0;
 
     public override bool IsFocused
     {
-        get => field;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            // 聚焦/失焦时,让调度器把整类区域触发者标记为 Focused/Running
-            EventScheduler.IsFocusedRegionTurn = value;
-        }
+        get => EventScheduler.IsFocusedRegionTurn;
+        set => EventScheduler.IsFocusedRegionTurn = value;
     }
 
     protected override void OnInit()

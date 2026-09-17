@@ -7,6 +7,8 @@ using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Games.Turns;
+using TheBlockWar.Scripts.Games.Turns.Phases;
 using TheBlockWar.Scripts.Tools;
 using TheBlockWar.Scripts.Tools.Jsons;
 
@@ -131,24 +133,13 @@ public class EventScheduler : IEventScheduler
         }
     }
 
-    /// <summary>
-    /// 最近一次更新收集到的"下回合触发者"列表。
-    /// </summary>
-    public IReadOnlyList<TurnTrigger> NextTurnTriggers { get; private set; } = [];
-
-    /// <summary>
-    /// 统一阶段事件查询:返回指定阶段(phaseOrder)的"下回合触发者"(区域/单位buff/单位技能)。
-    /// 只从最近一次(已全量收集的) NextTurnTriggers 中过滤,不触发新一轮收集;
-    /// Running 真实回合执行尚未实现。
-    /// </summary>
-    public IReadOnlyList<TurnTrigger> QueryPhaseTriggers(int phaseOrder)
-        => NextTurnTriggers.Where(t => t.PhaseOrder == phaseOrder).ToList();
+    private IComparer<TurnTrigger> _nextTriggerComparer = TriggerComparer.Default;
+    private IComparer<TurnTrigger> _currentTriggerComparer = TriggerComparer.Default;
 
     public EventScheduler(IGameState gameState, int playerTeam)
     {
         _gameState = gameState;
         PlayerTeam = playerTeam;
-        _gameState.EventManagerState.EnabledEventUpdated += OnEnabledEventUpdated;
     }
 
     private void OnEnabledEventUpdated(object? sender, EventArgs e)
@@ -176,23 +167,18 @@ public class EventScheduler : IEventScheduler
         }
     }
 
-    public GDTask WaitCompleteRunning() => _runningCompletionSource?.Task ?? GDTask.CompletedTask;
-    public IReadOnlyDictionary<long, EventState> Events => _gameState.EventManagerState.Events;
-    public IReadOnlyList<EventState> GetCoordsEvents(Vector2I coords)
-        => _gameState.EventManagerState.GetCoordsEvents(coords);
-    public IReadOnlyList<EventState> GetUnitEvents(long unitId)
-        => _gameState.EventManagerState.GetUnitEvents(unitId);
-    public IReadOnlyList<EventState> GetTeamEvents(int team)
-        => _gameState.EventManagerState.GetTeamEvents(team);
-    public EventState CreateEvent(EventCore core,
-        int phaseOrder, int team,
-        SimulationLayer layer,
-        int priority = 0,
-        EventAfterRunMode afterRunMode = EventAfterRunMode.Remove)
-        => _gameState.CreateEvent(core,phaseOrder, team, layer, priority, afterRunMode);
-    public void RemoveEvent(long id)
-        => _gameState.EventManagerState.RemoveEvent(id);
+    public void SetNextTurnPhaseOrder(IEnumerable<ITurnPhase> phases)
+    {
+        _nextTriggerComparer = TriggerComparer.FromPhase(phases);
+        UpdateSimulation();
+    }
 
+    public void SetCurrentTurnPhaseOrder(IEnumerable<ITurnPhase> phases)
+    {
+        _currentTriggerComparer = TriggerComparer.FromPhase(phases);
+    }
+
+    public GDTask WaitCompleteRunning() => _runningCompletionSource?.Task ?? GDTask.CompletedTask;
     /// <summary>
     /// 设置单位下回合准备使用的技能；会触发一次更新。
     /// </summary>
@@ -224,7 +210,7 @@ public class EventScheduler : IEventScheduler
             // 直接在真数据上运行技能(真实执行,不需要再 Replay)
             var sim = new SimObject(_gameState, SimulationLayer.Running, new(), 0);
             new SkillTurnTrigger().Init(
-                SimulationLayer.Running, 0, 0, unitId, skill.SkillName, skill.Args).Invoke(sim);
+                SimulationLayer.Running, 0, 0, unitId, unit.Team, skill.SkillName, skill.Args).Invoke(sim);
             res.RunningCount++;
             res.Sims.Add(sim);
         });
@@ -243,6 +229,7 @@ public class EventScheduler : IEventScheduler
         DoUpdate(result, res =>
         {
             var buffs = _gameState.CollectBuffTurnTriggers(true);
+            buffs.Sort(_currentTriggerComparer);
             foreach (var buff in buffs)
             {
                 var sim = new SimObject(_gameState, SimulationLayer.Running, new(), 0);
@@ -268,6 +255,7 @@ public class EventScheduler : IEventScheduler
         DoUpdate(result, res =>
         {
             var regions = _gameState.CollectRegionTurnTriggers(true);
+            regions.Sort(_currentTriggerComparer);
             foreach (var region in regions)
             {
                 var sim = new SimObject(_gameState, SimulationLayer.Running, new(), 0);
@@ -289,6 +277,7 @@ public class EventScheduler : IEventScheduler
     {
         var result = new SchedulerResult();
         var skills = _gameState.CollectSkillTurnTriggers(true, null, team);
+        skills.Sort(_currentTriggerComparer);
         foreach (var skill in skills)
         {
             RunUnitPrepareSkill(skill.UnitId, 0.5f, 0.5f);
@@ -349,11 +338,12 @@ public class EventScheduler : IEventScheduler
         var obj = new SimObject(snapshot, SimulationLayer.Focused, new(), 0);
 
 
-        NextTurnTriggers = snapshot.CollectNextTurnTriggers(FocusedCoords, FocusedUnitId,
+        var nextTurnTriggers = snapshot.CollectNextTurnTriggers(FocusedCoords, FocusedUnitId,
             IsFocusedRegionTurn, IsFocusedBuffTurn, IsFocusedSkillTurn);
+        nextTurnTriggers.Sort(_nextTriggerComparer);
 
         // 开始模拟：执行每个有效触发者,把产生的步骤存入 result
-        foreach (var trigger in NextTurnTriggers)
+        foreach (var trigger in nextTurnTriggers)
         {
             if (!trigger.CheckIsValid(obj)) continue; // 失效舍弃
             var sim = new SimObject(snapshot, trigger.Layer, new(), 0);
@@ -363,7 +353,7 @@ public class EventScheduler : IEventScheduler
         }
         
         // 使用完主动归还,复用池对象(不归还也不会泄漏:池空时下次 Get 会新建)
-        TurnTriggerCollector.ReturnTriggers(NextTurnTriggers);
+        TurnTriggerCollector.ReturnTriggers(nextTurnTriggers);
 
         // 通知外部更新完成
         SimulationUpdated?.Invoke(this, result);

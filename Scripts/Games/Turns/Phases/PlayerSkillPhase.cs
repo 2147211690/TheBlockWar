@@ -1,25 +1,25 @@
 using System.Linq;
-using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
-using TheBlockWar.Scripts.Games.Simulations;
-using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games.Turns;
+namespace TheBlockWar.Scripts.Games.Turns.Phases;
 /// <summary>
 /// 触发一个团队当前回合的所有事件
 /// </summary>
-public class TeamEventPhase : TurnPhase
+public class PlayerSkillPhase : TurnPhase
 {
     public override string PhaseName { get; }
-    public int Team { get; }
+    public override PhaseEnum PhaseType { get; } = PhaseEnum.Skill;
+    public override int Team { get; }
+
     public override bool IsFocused
     {
-        get => field;
+        get => EventScheduler.IsFocusedSkillTurn;
         set
-        {
+        { 
+            EventScheduler.IsFocusedSkillTurn = value;
         }
     }
-    public TeamEventPhase(int team, string phaseName)
+    public PlayerSkillPhase(int team, string phaseName)
     {
         Team = team;
         PhaseName = phaseName;
@@ -34,10 +34,5 @@ public class TeamEventPhase : TurnPhase
 
     protected override void OnInit()
     {
-    }
-
-    private List<EventState> GetTeamSkill()
-    {
-        return EventScheduler.Events.Values.Where(e => e.Team == Team).ToList();
     }
 }

@@ -1,6 +1,7 @@
 using System.Linq;
 using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Players;
+using TheBlockWar.Scripts.Games.Turns.Phases;
 
 namespace TheBlockWar.Scripts.Games.Turns;
 
@@ -28,6 +29,7 @@ public class PvpTurnStrategy : ITurnStrategy
             [
                 new MapBuildPhase(_mapBuilder),
                 new TestPhase(),
+                //..Players.Select(p => new PlayerPlaceUnitPhase(_operationSynchronizer, p)),
                 ..GetNormalTurnPhases(),
             ];
         }
@@ -39,8 +41,7 @@ public class PvpTurnStrategy : ITurnStrategy
             [
                 new BuffPhase(),
                 new RegionPhase(),
-                //new NaturePhase(),//自然事件
-                ..Players.Select(p => new TeamEventPhase(p.Team, $"{p.Team}Phase")),
+                ..Players.Select(p => new PlayerSkillPhase(p.Team, $"{p.Team}Phase")),
                 new ResetUnitPhase(),
                 ..Players.Select(player => new PlayerPhase(_operationSynchronizer, player)),
             ];

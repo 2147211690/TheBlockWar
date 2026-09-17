@@ -1,17 +1,19 @@
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Onlines;
 using TheBlockWar.Scripts.Games.Players;
-using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games.Turns;
+namespace TheBlockWar.Scripts.Games.Turns.Phases;
 /// <summary>
 /// 玩家回合
 /// </summary>
 public class PlayerPhase : TurnPhase
 {
     private static readonly Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    private int _team;
     public override string PhaseName { get; }
+    public override PhaseEnum PhaseType { get; } = PhaseEnum.Player;
+    public override int Team => _team;
     public override bool IsFocused { get; set; }
     public IPlayer Player { get; }
     protected IPlayerOperationSynchronizer OperationSynchronizer { get; }
@@ -24,14 +26,17 @@ public class PlayerPhase : TurnPhase
     protected override void OnInit()
     {
         Player.TurnManager = TurnManager;
+        _team = Player.Team;
     }
 
     public override async GDTask Execute()
     {
         Player.PhaseOrder = PhaseOrder;
         Player.CurrentTurn = Turn;
-        Player.IsTurn = true;
         Player.WaitConfirm = false;
+        Player.TurnEnter = PlayerTurnEnterEnum.Free;
+        
+        Player.IsTurn = true;
         await foreach (var oper in OperationSynchronizer.GetAllOperationAsync())
         {
             if (oper.PlayerId != Player.Id) continue;

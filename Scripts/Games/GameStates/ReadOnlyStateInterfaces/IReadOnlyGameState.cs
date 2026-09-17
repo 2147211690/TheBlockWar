@@ -16,7 +16,6 @@ public interface IReadOnlyGameState : IReadOnlyGameDataState<IGameState, GameSta
     IReadOnlyUnitMapState UnitMapState { get; }
     IReadOnlyBuffGlobalState BuffGlobalState { get; }
     IReadOnlyTurnState TurnState { get; }
-    IReadOnlyEventManagerState EventManagerState { get; }
     TeamState TeamState { get; }
     IReadOnlyList<ISkill> GetUnitValidSkills(string unitName);
 }

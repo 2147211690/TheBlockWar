@@ -1,13 +1,13 @@
-using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.Simulations;
 using TheBlockWar.Scripts.Resources;
-using TheBlockWar.Scripts.Tools;
 
-namespace TheBlockWar.Scripts.Games.Turns;
+namespace TheBlockWar.Scripts.Games.Turns.Phases;
 
 public class TestPhase : TurnPhase
 {
     public override string PhaseName => "TestPhase";
+    public override PhaseEnum PhaseType { get; } = PhaseEnum.Test;
+    public override int Team { get; } = 0;
     public override bool IsFocused { get; set; }
     public override GDTask Execute()
     {
