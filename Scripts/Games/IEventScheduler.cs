@@ -1,6 +1,8 @@
 using TheBlockWar.Scripts.Games.Events;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
+using TheBlockWar.Scripts.Games.Turns;
+using TheBlockWar.Scripts.Games.Turns.Phases;
 
 namespace TheBlockWar.Scripts.Games;
 
@@ -9,65 +11,83 @@ public interface IEventScheduler
     IReadOnlyGameState GameState { get; }
     int PlayerTeam { get; }
     int CurrentTurn { get; set; }
-    Dictionary<int, Dictionary<string, int>> PhaseOrders { get; }
     bool IsRunning { get; set; }
     event EventHandler<SchedulerResult>? SimulationUpdated;
     event EventHandler<IReadOnlyGameState>? GameStateReload;
     void ReloadGameState();
     void BlockUpdate();
     void UnblockUpdate();
+    
+    PhaseOrderTable CurrentTurnPhaseOrder { get; set; }
+    PhaseOrderTable NextTurnPhaseOrder { get; set; }
+    
     GDTask WaitCompleteRunning();
 
-    IReadOnlyDictionary<long, EventState> Events { get; }
-    IReadOnlyList<EventState> GetCoordsEvents(Vector2I coords);
-    IReadOnlyList<EventState> GetUnitEvents(long unitId);
-    IReadOnlyList<EventState> GetTeamEvents(int team);
-    EventState CreateEvent(EventCore core, int phaseOrder, int team, SimulationLayer layer, int priority = 0,
-        EventAfterRunMode afterRunMode = EventAfterRunMode.Remove);
-    void RemoveEvent(long id);
-    
     /// <summary>
-    /// 更新模拟
+    /// 当前关注的目标单位(悬停的单位)。变化时触发一次更新。
     /// </summary>
-    void UpdateSimulation();
-    
+    long? FocusedUnitId { get; set; }
     /// <summary>
-    /// 设置单位将要使用的技能
+    /// 当前关注的目标坐标(悬停的格子)。变化时触发一次更新。
     /// </summary>
-    void PrepareUnitSkill(long unitId, SkillPrepareInfo? skillPrepareInfo);
-    /// <summary>
-    /// 设置环境事件将要执行的操作
-    /// </summary>
-    ApplyStep PrepareEnv(Vector2I coords, ApplyStep step);
-    /// <summary>
-    /// 设置团队将要放置的单位
-    /// </summary>
-    void PrepareTeamPlaceUnit(Vector2I coords, int team, int index, TeamPreparePlaceUnitInfo? placeUnitInfo);
-    
-    Vector2I? FocusedEnvCoords { get; set; }
-    long FocusedUnitId { get; set; }
-    Vector2I? FocusedTileCoords { get; set; }
-    EventFocusedModeMask FocusedMode { get; set; }
+    Vector2I? FocusedCoords { get; set; }
 
-    void RunBuffs();
-    void RunRegions();
-    void RunEnvs();
-    void RunSkills(int team);
-    void RunSkill(long unitId);
-    void RunTeamPlaceUnit(int team);
-}
+    /// <summary>
+    /// 布尔聚焦标记:为 true 时,收集器把对应的整类触发者标记为 Focus(仅预览),否则 Running。
+    /// 变化时触发一次全量更新。
+    /// </summary>
+    bool IsFocusedRegionTurn { get; set; }
+    bool IsFocusedBuffTurn { get; set; }
+    int FocusedSkillTeamMask { get; set; }
+    int FocusedPlaceUnitTeamMask { get; set; }
 
-[Flags]
-public enum EventFocusedModeMask
-{
-    None = 0,
-    SelectedUnit = 1 << 0,
-    SelectedTile = 1 << 1,
-    SelectedCoordsEnv = 1 << 2,
-    AllRegion = 1 << 3,
-    AllBuff = 1 << 4,
-    AllUnit = 1 << 5,
-    AllTile = 1 << 6,
-    AllEnvt = 1 << 7,
-    All = SelectedUnit | SelectedTile | SelectedCoordsEnv | AllRegion | AllBuff | AllUnit | AllTile | AllEnvt,
+    /// <summary>
+    /// 设置单位下回合准备使用的技能；会触发一次更新。
+    /// </summary>
+    void SetUnitPrepareSkill(long unitId, PrepareSkillInfo? skill);
+
+    /// <summary>
+    /// 设置队伍的本回合待放置单位(null 表示清除该队待放置)；会触发一次更新。
+    /// </summary>
+    void SetTeamPreparePlaceUnit(int team, int index, PreparePlaceUnitInfo? placeInfo);
+    /// <summary>
+    /// 清空某队伍全部待放置单位槽位；会触发一次更新。
+    /// </summary>
+    void ClearTeamPreparePlaceUnits(int team);
+
+    /// <summary>
+    /// 读取某队伍第 index 个待放置单位槽位。
+    /// </summary>
+    PreparePlaceUnitInfo? GetTeamPreparePlaceUnit(int team, int index);
+
+    /// <summary>
+    /// 在快照上执行单位下回合准备使用的技能,重放到真数据,清理该单位的 Prepare,并存入 result;随后走一次更新。
+    /// </summary>
+    void RunUnitPrepareSkill(long unitId, float focusTime = 0.5f, float afterTime = 0.5f);
+
+    /// <summary>
+    /// 在快照上执行所有Buff的下回合(执行其 OnEnterTurn 钩子),存入 result 并走一次更新。
+    /// </summary>
+    void RunBuffTurn(float delayTime = 0.5f);
+
+    /// <summary>
+    /// 在快照上执行所有区域的下回合(执行其 OnEnterTurn 钩子),存入 result 并走一次更新。
+    /// </summary>
+    void RunRegionTurn(float delayTime = 0.5f);
+
+    /// <summary>
+    /// 在快照上执行某队伍所有单位下回合准备使用的技能,存入 result 并走一次更新。
+    /// </summary>
+    void RunTeamUnitSkillTurn(int team, float delayTime = 0.5f);
+
+    /// <summary>
+    /// 直接在真数据上执行一次性动作,存入 result 并走一次更新。
+    /// </summary>
+    void RunAction(Action<SimObject> action);
+
+    /// <summary>
+    /// 在快照上执行某队伍所有单位下回合准备使用的技能,存入 result 并走一次更新。
+    /// 仿照 <see cref="EventScheduler.RunBuffTurn"/>:先做一次整类聚焦预览,再在真数据上 Running 执行全部技能。
+    /// </summary>
+    void RunTeamUnitPlaceTurn(int team, float delayTime = 0.5f);
 }

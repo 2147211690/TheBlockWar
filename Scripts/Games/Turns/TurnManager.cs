@@ -1,4 +1,5 @@
 using System.Linq;
+using TheBlockWar.Scripts.Games.Turns.Phases;
 
 namespace TheBlockWar.Scripts.Games.Turns;
 
@@ -48,20 +49,17 @@ public class TurnManager : ITurnManager
             return;
         }
         _currentPhases.Clear();
-        EventScheduler.PhaseOrders.Remove(CurrentTurn - 1);
         _currentPhases.AddRange(_nextPhases);
+        
         _nextPhases.Clear();
         _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
-        
         SetPhaseOrders();
     }
 
     private void SetPhaseOrders()
     {
-        EventScheduler.PhaseOrders[CurrentTurn] =
-            _currentPhases.Select(a => (a.PhaseName, a.PhaseOrder)).ToDictionary();
-        EventScheduler.PhaseOrders[CurrentTurn + 1] =
-            _nextPhases.Select(a => (a.PhaseName, a.PhaseOrder)).ToDictionary();
+        EventScheduler.CurrentTurnPhaseOrder = GetPhaseOrderTable(_currentPhases);
+        EventScheduler.NextTurnPhaseOrder = GetPhaseOrderTable(_nextPhases);
     }
 
     private IEnumerable<ITurnPhase> GetTurnPhases(int turn)
@@ -79,5 +77,14 @@ public class TurnManager : ITurnManager
         _stop = true;
     }
 
-
+    public PhaseOrderTable GetPhaseOrderTable(IEnumerable<ITurnPhase> phases)
+    {
+        var orderTable = new PhaseOrderTable();
+        foreach (var phase in phases)
+        {
+            phase.OnSetOrderTable(orderTable);
+        }
+        return orderTable;
+    }
+    
 }

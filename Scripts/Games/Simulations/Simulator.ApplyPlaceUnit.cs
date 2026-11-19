@@ -85,6 +85,16 @@ partial class Simulator
     }
     public static partial void ApplyPlaceUnitViewDraw(IGameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)
     {
+        var s = view.EventSprite();
+        var pos = result.Coords.ToVec2();
+        s.GamePosition = pos.ToVec3(view.GetTileHeight(result.Coords));
+        s.Texture = view.CurrentStyle.PlaceDownTexture;
+        s.Modulate = (sim.IsFocused , result.ReValid) switch
+        {
+            (true, true) => Colors.Yellow,
+            (true, false) => Colors.White,
+            _ => new Color(1,1,1,view.CurrentStyle.WaitAlpha),
+        };
     }
     
     public static partial GDTask ApplyPlaceUnitViewRunAsync(IGameView view, ReadOnlySimObject sim, ApplyPlaceUnitResult result)

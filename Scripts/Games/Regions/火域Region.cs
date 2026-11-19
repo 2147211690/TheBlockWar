@@ -11,4 +11,9 @@ public class 火域Region() : Region(RegionNames.火域)
     {
         obj.ApplyModifyUnitBuff(unit.Coords, BuffNames.燃烧, BuffOperation.AddBuff, 1, false);
     }
+
+    public override void OnEnterTurn(SimObject obj, Vector2I regionCoords, string regionData, int turn)
+    {
+        obj.ApplyModifyUnitBuff(regionCoords, BuffNames.燃烧, BuffOperation.AddBuff, 1, false);
+    }
 }

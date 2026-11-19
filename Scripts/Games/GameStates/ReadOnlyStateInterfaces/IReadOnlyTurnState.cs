@@ -6,4 +6,5 @@ public interface IReadOnlyTurnState : IReadOnlyGameDataState<ITurnState, TurnSta
 {
     int CurrentTurn { get; }
     int GetPhaseOrder(int turn, string phaseName);
+    Dictionary<int, Dictionary<string, int>> PhaseOrders { get; }
 }

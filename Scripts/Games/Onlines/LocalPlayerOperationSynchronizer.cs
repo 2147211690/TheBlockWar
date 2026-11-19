@@ -9,10 +9,11 @@ public class LocalPlayerOperationSynchronizer : IPlayerOperationSynchronizer
         _operations.Enqueue(operation);
     }
 
-    public async GDTask<PlayerOperation> WaitOperationAsync()
+    public async IAsyncEnumerable<PlayerOperation> GetAllOperationAsync()
     {
-        await GDTask.WaitUntil(() => _operations.Count > 0);
-        return _operations.Dequeue();
+        while (_operations.Count > 0)
+        {
+            yield return _operations.Dequeue();
+        }
     }
-    
 }

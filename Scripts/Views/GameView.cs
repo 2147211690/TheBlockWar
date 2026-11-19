@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Channels;
 using TheBlockWar.Scripts.Games;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Simulations;
@@ -50,12 +52,15 @@ public partial class GameView : Node2D, IGameView
     public Vector2 NodeDown => -TilesView.LocalUp;
 
     #region EventUpdate
+    private Channel<SchedulerResult> _resultChannel = Channel.CreateUnbounded<SchedulerResult>();
+    private int _resultCount = 0;
     private TaskQueue _runningQueue = new();
     private Queue<ReadOnlySimObject> _eventQueue = new();
     private int _prevEventQueueCount = 0;
     private SimResultHandler _resultHandler;
     private bool _isEventDirty = true;
     private bool _isEventDrawn = false;
+    private CancellationTokenSource _readResultCltSource = new();
     #endregion
     
     #region Init
@@ -68,6 +73,13 @@ public partial class GameView : Node2D, IGameView
         EventsView.GameView = this;
         TilesView.GameView = this;
         CurrentStyle = GameStyle[CurrentTeamType];
+        TreeExiting += OnTreeExiting;
+    }
+
+    private void OnTreeExiting()
+    {
+        _readResultCltSource.Cancel();
+        _resultChannel.Writer.Complete();
     }
 
     public void Init(IEventScheduler scheduler)
@@ -76,16 +88,7 @@ public partial class GameView : Node2D, IGameView
         Scheduler.SimulationUpdated += SchedulerOnSimulationUpdated;
         Scheduler.GameStateReload += SchedulerOnGameStateReload;
         _resultHandler = new SimResultHandler(HandleActionAsync);
-        _runningQueue.IsRunningChanged += IsRunningChanged;
-
-        void IsRunningChanged(object? sender, bool e)
-        {
-            Scheduler.IsRunning = e;
-            Logger.Debug("运行状态改变{isRunning}", e);
-            if (e) return;
-            //运行结束
-            
-        }
+        ReadResult(_readResultCltSource.Token).Forget();
 
         GDTask HandleActionAsync(ReadOnlySimObject arg1, StepResult arg2)
         {
@@ -94,6 +97,33 @@ public partial class GameView : Node2D, IGameView
         }
     }
 
+    private async GDTask ReadResult(CancellationToken clt = default)
+    {
+        await foreach (var e in _resultChannel.Reader.ReadAllAsync(clt))
+        {
+            _resultCount--;
+            Logger.Debug("收到结果{result}", e);
+            int eventCount = e.Sims.Count - e.RunningCount;
+            if (eventCount != 0 || _prevEventQueueCount != 0) 
+                _isEventDirty = true;
+
+            if (e.RunningCount > 0)
+            {
+                //ClearEventViews();
+                var running = e.Sims.GetRange(0, e.RunningCount);
+                _runningQueue.AddTask(() => _resultHandler.HandleAsync(running));
+            }
+
+            _eventQueue.Clear();
+            for (int i = e.RunningCount; i < e.Sims.Count; i++)
+            {
+                _eventQueue.Enqueue(e.Sims[i]);
+            }
+            await GDTask.WaitUntil(() => !_runningQueue.IsRunning, clt);
+            await GDTask.Delay((int)(e.DelayTime * 1000), clt);
+        }
+    }
+    
     private void SchedulerOnGameStateReload(object? sender, IReadOnlyGameState e)
     {
         ClearEventViews();
@@ -124,32 +154,22 @@ public partial class GameView : Node2D, IGameView
 
     private void SchedulerOnSimulationUpdated(object? sender, SchedulerResult e)
     {
-        int eventCount = e.Sims.Count - e.RunningCount;
-        if (eventCount != 0 || _prevEventQueueCount != 0) 
-            _isEventDirty = true;
-
-        if (e.RunningCount > 0)
-        {
-            //ClearEventViews();
-            var running = e.Sims.GetRange(0, e.RunningCount);
-            _runningQueue.AddTask(() => _resultHandler.HandleAsync(running));
-        }
-
-        _eventQueue.Clear();
-        for (int i = e.RunningCount; i < e.Sims.Count; i++)
-        {
-            _eventQueue.Enqueue(e.Sims[i]);
-        }
+        _resultCount++;
+        Scheduler.IsRunning = _resultCount > 0 || _runningQueue.IsRunning;
+        _resultChannel.Writer.TryWrite(e);
     }
 
     #endregion
 
     public override void _Process(double delta)
     {
+        Scheduler.IsRunning = _resultCount > 0 || _runningQueue.IsRunning;
+        
         _remainingDrawTime -= (float)delta;
         if (_remainingDrawTime > 0) return;
         _remainingDrawTime = EventDrawInterval;
         CheckDrawEvent();
+        
     }
 
     private void CheckDrawEvent()

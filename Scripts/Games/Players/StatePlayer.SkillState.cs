@@ -16,7 +16,7 @@ public partial class StatePlayer
     private class SkillState(StatePlayer player) : State(player)
     {
         public int CurrentSkillIndex { get; set; } = 0;
-        private EventState? _currentSkillEvent;
+        private bool _keepPrepareSkill;
         private IReadOnlyList<ISkill> _validSkills = [];
         private ISkill _currentSkill = null!;
         private int _currentArgIndex = -1;
@@ -26,6 +26,7 @@ public partial class StatePlayer
         private HashSet<Vector2I> _validRegionCoords = new();
         public override void OnEnter()
         {
+            _keepPrepareSkill = false;
             _unitState = GameState?.UnitMapState.GetUnit(Player.SelectedUnitId) ?? UnitState.Null;
             if (_unitState.Team != Player.Team)
             {
@@ -50,11 +51,13 @@ public partial class StatePlayer
             Player.GameView.ClearRegion();
             _validSkills = [];
             _currentSkill = null!;
-            if (_currentSkillEvent != null)
+            //未确认完成的退出视为取消,清掉已写入的 PrepareSkill;确认完成(施放前)则保留供下回合执行
+            if (!_keepPrepareSkill)
             {
-                EventScheduler.RemoveEvent(_currentSkillEvent.Id);
-                _currentSkillEvent = null;
+                var id = _unitState.Id;
+                if (id != 0) EventScheduler?.SetUnitPrepareSkill(id, null);
             }
+            _keepPrepareSkill = false;
             _unitState = UnitState.Null;
             _currentSkillArgs = null;
             _validRegionId = 0;
@@ -119,13 +122,9 @@ public partial class StatePlayer
         {
             if (_currentArgIndex == -1) //进入第一个参数
             {
-                //创建技能
+                //创建技能(写入 PrepareSkill,供下回合收集/施放)
                 EventScheduler.BlockUpdate();
                 _currentSkillArgs = new Vector2I?[_currentSkill.ArgCount];
-
-                _currentSkillEvent = EventScheduler.CreateEvent(
-                    new SkillEventCore(_currentSkill.SkillName, Player.SelectedUnitId, _currentSkillArgs), Player.PhaseOrder, _unitState.Team, SimulationLayer.Focused);
-                
                 _currentArgIndex++;
 
                 UpdateCurrentValidSkillCoords();
@@ -135,16 +134,15 @@ public partial class StatePlayer
             else if (_currentArgIndex == _currentSkill.ArgCount - 1) //最后一个参数
             {
                 if (!IsCurrentValidArg()) return;
-                //所有参数完成
+                //所有参数完成:PrepareSkill 已在 SetCurrentIndexArgGlobal 中写入,保留供下回合施放
                 Player.GameView.ClearRegion();
-                
-                //EventScheduler.DeleteEvent(_currentSkillEvent);
-
-                Player._busyState.CallOperation = new PlayerSlowUseUnitSkill(Player.Id,
+                _keepPrepareSkill = true;
+                Player._busyState.CallOperation = new PlayerSlowUseUnitSkill(
+                    Player.Id,
                     _unitState.Coords,
                     CurrentSkillIndex,
-                    (Vector2I?[])_currentSkillArgs.Clone(),
-                    800);
+                    _currentSkillArgs!,
+                    500);
                 Player._busyState.NextState = Player._selectState;
                 StateMachine.ChangeState(Player._busyState);
             }
@@ -162,7 +160,7 @@ public partial class StatePlayer
             if (_currentArgIndex == 0) //如果已经在第一个参数，取消技能
             {
                 Player.GameView.ClearRegion();
-                //EventScheduler.DeleteEvent(_currentSkillEvent!);
+                EventScheduler?.SetUnitPrepareSkill(_unitState.Id, null);
                 _currentArgIndex--;
                 StateMachine.ChangeState(Player._selectState);
             }
@@ -182,8 +180,11 @@ public partial class StatePlayer
         private void SetCurrentIndexArgGlobal(in Vector2I arg)
         {
             _currentSkillArgs![_currentArgIndex] = IsArgGlobalValid(arg) ? arg - _unitState.Coords : null;
-            _currentSkillEvent?.Core = 
-                new SkillEventCore(_currentSkill.SkillName, Player.SelectedUnitId, (Vector2I?[])_currentSkillArgs.Clone());
+            if (_unitState.Id != 0)
+            {
+                EventScheduler?.SetUnitPrepareSkill(_unitState.Id,
+                    new PrepareSkillInfo(_currentSkill.SkillName, (Vector2I?[])_currentSkillArgs.Clone()));
+            }
         }
 
         private void UpdateCurrentValidSkillCoords()

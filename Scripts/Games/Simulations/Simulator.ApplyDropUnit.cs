@@ -27,8 +27,6 @@ partial class Simulator
 
                 var unit = obj.State.UnitMapState.GetUnit(coords);
                 r.ReUnitId = unit.Id;
-                foreach (var ev in obj.State.EventManagerState.GetUnitEvents(unit.Id))
-                    obj.ApplyRemoveEvent(ev.Id);
                 obj.State.UnitMapState.RemoveUnit(unit.Id);
                 return r;
             }

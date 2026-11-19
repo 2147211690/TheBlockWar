@@ -68,8 +68,7 @@ public class EasyAiPlayer : IPlayer
 
         foreach (var u in units)
         {
-            if (GameScheduler.GameState.EventManagerState.GetUnitEvents(u.Id).Count > 0)
-                continue;
+            if (u.PrepareSkill is not null) continue;
 
             var skills = state.GetUnitValidSkills(u.Name);
             var validSkills = skills.Where(s => u.GetShouldUseSkill(state, s)).ToList();

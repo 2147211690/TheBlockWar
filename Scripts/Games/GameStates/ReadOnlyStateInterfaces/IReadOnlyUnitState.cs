@@ -22,6 +22,10 @@ public interface IReadOnlyUnitState : IReadOnlyGameDataState<UnitState, UnitStat
     bool IsFlying { get; }
     SkillPrepareInfo? PreparedSkill { get; }
     CanUseSkillMask CanUseSkill { get; }
+    /// <summary>
+    /// 单位在下回合准备使用的技能(为空表示本回合无技能使用)
+    /// </summary>
+    PrepareSkillInfo? PrepareSkill { get; }
     IReadOnlyList<BuffState> Buffs { get; }
     /// <summary>
     /// 获取buff的静态列表,更新buff时不会改变列表中的元素

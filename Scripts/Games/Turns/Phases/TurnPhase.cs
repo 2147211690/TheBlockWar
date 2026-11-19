@@ -1,8 +1,10 @@
-namespace TheBlockWar.Scripts.Games.Turns;
+namespace TheBlockWar.Scripts.Games.Turns.Phases;
 
 public abstract class TurnPhase : ITurnPhase
 {
     public abstract string PhaseName { get; }
+    public abstract PhaseEnum PhaseType { get; }
+    public abstract int Team { get; }
     public int Turn { get; private set; }
     public abstract bool IsFocused { get; set; }
     public int PhaseOrder { get; private set; }
@@ -18,5 +20,6 @@ public abstract class TurnPhase : ITurnPhase
         OnInit();
         return this;
     }
+    public virtual void OnSetOrderTable(PhaseOrderTable orderTable){}
     protected abstract void OnInit();
 }

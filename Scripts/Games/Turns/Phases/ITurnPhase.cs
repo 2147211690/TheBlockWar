@@ -1,10 +1,10 @@
-using TheBlockWar.Scripts.Games.Events;
-
-namespace TheBlockWar.Scripts.Games.Turns;
+namespace TheBlockWar.Scripts.Games.Turns.Phases;
 
 public interface ITurnPhase
 {
     string PhaseName { get; }
+    PhaseEnum PhaseType { get; }
+    int Team { get; }
     int Turn { get; }
     bool IsFocused { get; set; }
     int PhaseOrder { get; }
@@ -12,4 +12,5 @@ public interface ITurnPhase
     ITurnManager TurnManager { get; }
     GDTask Execute();
     ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order);
+    void OnSetOrderTable(PhaseOrderTable orderTable);
 }
