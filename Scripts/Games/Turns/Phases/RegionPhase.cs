@@ -14,6 +14,11 @@ public class RegionPhase : TurnPhase
         set => EventScheduler.IsFocusedRegionTurn = value;
     }
 
+    public override void OnSetOrderTable(PhaseOrderTable orderTable)
+    {
+        orderTable.SetRegionOrder(PhaseOrder);
+    }
+    
     protected override void OnInit()
     {
         // 新框架:不再创建全局区域回合事件;由调度器收到 IsFocusedRegionTurn 标记后触发全量收集。

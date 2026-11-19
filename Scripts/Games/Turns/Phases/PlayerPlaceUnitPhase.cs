@@ -7,6 +7,8 @@ namespace TheBlockWar.Scripts.Games.Turns.Phases;
 /// </summary>
 public class PlayerPlaceUnitPhase : PlayerPhase
 {
+    public override PhaseEnum PhaseType { get; } = PhaseEnum.Test;
+
     public PlayerPlaceUnitPhase(IPlayerOperationSynchronizer operationSynchronizer, IPlayer player) : base(operationSynchronizer, player)
     {
     }

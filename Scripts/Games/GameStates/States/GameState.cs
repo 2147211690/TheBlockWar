@@ -22,7 +22,9 @@ public class GameState : IGameState
     public ITurnState TurnState { get; private set; }
     IReadOnlyTurnState IReadOnlyGameState.TurnState => TurnState;
 
-    public TeamState TeamState { get; private set; }
+    public ITeamState TeamState { get; private set; }
+    
+    IReadOnlyTeamState IReadOnlyGameState.TeamState => TeamState;
     
     IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
     IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
@@ -104,10 +106,10 @@ public class GameState : IGameState
         public ITileMapState TileMapState { get; }
         public IUnitMapState UnitMapState { get; }
         public IBuffGlobalState BuffGlobalState { get; }
-
-        public TeamState TeamState => Owner.TeamState;
+        public ITeamState TeamState { get; }
         public ITurnState TurnState { get; }
         IReadOnlyTurnState IReadOnlyGameState.TurnState => TurnState;
+        IReadOnlyTeamState IReadOnlyGameState.TeamState => TeamState;
         IReadOnlyUnitMapState IReadOnlyGameState.UnitMapState => UnitMapState;
         IReadOnlyTileMapState IReadOnlyGameState.TileMapState => TileMapState;
         IReadOnlyBuffGlobalState IReadOnlyGameState.BuffGlobalState => BuffGlobalState;
@@ -119,6 +121,7 @@ public class GameState : IGameState
             TurnState = owner.TurnState.GetSnapshot();
             TileMapState = owner.TileMapState.GetSnapshot();
             UnitMapState = owner.UnitMapState.GetSnapshot();
+            TeamState = owner.TeamState.GetSnapshot();
             BuffGlobalState = owner.BuffGlobalState.GetSnapshot();
         }
         public GameStateData ToData()
@@ -142,6 +145,7 @@ public class GameState : IGameState
         {
             TileMapState.ClearIfSnapshot();
             UnitMapState.ClearIfSnapshot();
+            TeamState.ClearIfSnapshot();
             BuffGlobalState.ClearIfSnapshot();
             TurnState.ClearIfSnapshot();
         }

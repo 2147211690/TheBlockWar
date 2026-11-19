@@ -5,7 +5,7 @@ namespace TheBlockWar.Scripts.Games.Turns.Phases;
 /// <summary>
 /// 触发一个团队当前回合的所有事件
 /// </summary>
-public class PlayerSkillPhase : TurnPhase
+public class SkillRunPhase : TurnPhase
 {
     public override string PhaseName { get; }
     public override PhaseEnum PhaseType { get; } = PhaseEnum.Skill;
@@ -13,18 +13,30 @@ public class PlayerSkillPhase : TurnPhase
 
     public override bool IsFocused
     {
-        get => EventScheduler.IsFocusedSkillTurn;
+        get => field;
         set
-        { 
-            EventScheduler.IsFocusedSkillTurn = value;
+        {
+            if (field == value) return;
+            field = value;
+            if (field)
+            {
+                EventScheduler.FocusedSkillTeamMask |= 1 << Team;
+            }
+            else
+            {
+                EventScheduler.FocusedSkillTeamMask &= ~(1 << Team);
+            }
         }
     }
-    public PlayerSkillPhase(int team, string phaseName)
+    public SkillRunPhase(int team, string phaseName)
     {
         Team = team;
         PhaseName = phaseName;
     }
-
+    public override void OnSetOrderTable(PhaseOrderTable orderTable)
+    {
+        orderTable.SetSkillOrder(Team, PhaseOrder);
+    }
     public override async GDTask Execute()
     {
         EventScheduler.RunTeamUnitSkillTurn(Team);

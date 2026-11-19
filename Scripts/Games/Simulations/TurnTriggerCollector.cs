@@ -2,6 +2,7 @@ using TheBlockWar.Scripts.Games.Buffs;
 using TheBlockWar.Scripts.Games.GameStates;
 using TheBlockWar.Scripts.Games.Regions;
 using TheBlockWar.Scripts.Games.Skills;
+using TheBlockWar.Scripts.Games.Turns;
 using TheBlockWar.Scripts.Tools;
 
 namespace TheBlockWar.Scripts.Games.Simulations;
@@ -176,8 +177,53 @@ public sealed class SkillTurnTrigger : TurnTrigger
     }
 }
 
+/// <summary>放置触发者：某队伍本回合计划在某个格子放置一个单位。</summary>
+public sealed class PlaceUnitTurnTrigger : TurnTrigger
+{
+    /// <summary>放置单位所属队伍。</summary>
+    public int Team { get; private set; }
+    private int _index;
+    public PlaceUnitTurnTrigger Init(SimulationLayer layer, int phaseOrder, int priority,
+        int team, int index, Vector2I coords, string unitName)
+    {
+        base.Init(layer, phaseOrder, priority, $"放置:{unitName}@{coords}");
+        Team = team;
+        _index = index;
+        return this;
+    }
+
+    public override void Reset()
+    {
+        base.Reset();
+        _index = 0;
+    }
+
+    public override bool CheckIsValid(SimObject obj)
+    {
+        var place = obj.State.TeamState.GetTeamPreparePlaceUnit(Team, _index);
+        return place is { };
+    }
+
+    public override void Invoke(SimObject obj)
+    {
+        obj.ApplyPlacePrepareUnit(Team, _index);
+    }
+}
+
 public static class TurnTriggerCollector
 {
+    /// <summary>共享默认顺序表(未传入时使用;不会填充 PhaseOrder 时按 int.MaxValue)。</summary>
+    private static readonly PhaseOrderTable DefaultPhaseOrderTable = new();
+
+    /// <summary>简单排序:先 Layer,再 PhaseOrder,最后 Priority。</summary>
+    private static readonly IComparer<TurnTrigger> OrderComparer = Comparer<TurnTrigger>.Create((a, b) =>
+    {
+        var c = a.Layer.CompareTo(b.Layer);
+        if (c != 0) return c;
+        c = a.PhaseOrder.CompareTo(b.PhaseOrder);
+        if (c != 0) return c;
+        return a.Priority.CompareTo(b.Priority);
+    });
     /// <summary>各触发者的对象池;AfterReturn 时清空引用以安全复用。</summary>
     private static readonly TypedPool<RegionTurnTrigger> RegionTriggerPool = new(
         () => new RegionTurnTrigger(), 16, afterReturn: static t => t.Reset());
@@ -188,6 +234,9 @@ public static class TurnTriggerCollector
     private static readonly TypedPool<SkillTurnTrigger> SkillTriggerPool = new(
         () => new SkillTurnTrigger(), 16, afterReturn: static t => t.Reset());
 
+    private static readonly TypedPool<PlaceUnitTurnTrigger> PlaceTriggerPool = new(
+        () => new PlaceUnitTurnTrigger(), 16, afterReturn: static t => t.Reset());
+
     /// <summary>外部使用完触发者后主动归还到池。不归还也不会泄漏:池空时下次 Get 有害新建,借出对象由外部释放。</summary>
     public static void ReturnTrigger(TurnTrigger trigger)
     {
@@ -196,6 +245,7 @@ public static class TurnTriggerCollector
             case RegionTurnTrigger r: RegionTriggerPool.Return(r); break;
             case BuffTurnTrigger b: BuffTriggerPool.Return(b); break;
             case SkillTurnTrigger s: SkillTriggerPool.Return(s); break;
+            case PlaceUnitTurnTrigger p: PlaceTriggerPool.Return(p); break;
         }
     }
     public static void ReturnTriggers(IEnumerable<TurnTrigger> triggers)
@@ -210,9 +260,11 @@ public static class TurnTriggerCollector
     {
         /// <summary>收集"下回合区域触发者"。</summary>
         public List<RegionTurnTrigger> CollectRegionTurnTriggers(
-            bool isFocusedRegionTurn = false, Vector2I? focusCoords = null)
+            PhaseOrderTable orderTable, bool isFocusedRegionTurn = false, Vector2I? focusCoords = null)
         {
+            var table = orderTable ?? DefaultPhaseOrderTable;
             var turn = state.TurnState.CurrentTurn + 1;
+            var order = table.GetRegionOrder();
             var list = new List<RegionTurnTrigger>();
             //var regionOrder = state.TurnState.GetPhaseOrder(turn, "RegionPhase");
 
@@ -227,19 +279,22 @@ public static class TurnTriggerCollector
                         var layer = isFocusedRegionTurn || (focusCoords.HasValue && focusCoords.Value == coords)
                             ? SimulationLayer.Focused
                             : SimulationLayer.Waiting;
-                        list.Add((RegionTurnTrigger)RegionTriggerPool.Get().Init(layer, 0, info.Priority,
+                        list.Add((RegionTurnTrigger)RegionTriggerPool.Get().Init(layer, order, info.Priority,
                             coords, region.RegionName, region.RegionData, turn, info.Hook));
                     }
                 }
             }
 
+            list.Sort(OrderComparer);
             return list;
         }
 
         /// <summary>收集"下回合单位Buff触发者"。进入层由 <paramref name="isFocusedBuffTurn"/> 决定(聚焦时为 Focused)。</summary>
-        public List<BuffTurnTrigger> CollectBuffTurnTriggers(bool isFocusedBuffTurn = false)
+        public List<BuffTurnTrigger> CollectBuffTurnTriggers(PhaseOrderTable orderTable, bool isFocusedBuffTurn = false)
         {
+            var table = orderTable ?? DefaultPhaseOrderTable;
             var turn = state.TurnState.CurrentTurn + 1;
+            var order = table.GetBuffOrder();
             var list = new List<BuffTurnTrigger>();
             if (!isFocusedBuffTurn) return list;
 
@@ -249,21 +304,24 @@ public static class TurnTriggerCollector
                 foreach (var buff in unit.Buffs)
                 {
                     var info = buff.BuffName.GetBuffInfo();
-                    list.Add(BuffTriggerPool.Get().Init(SimulationLayer.Focused, 0,
+                    list.Add(BuffTriggerPool.Get().Init(SimulationLayer.Focused, order,
                         info.Priority,
                         unit.Id, buff.BuffName, buff.Count, turn, info.Hook));
                 }
             }
 
+            list.Sort(OrderComparer);
             return list;
         }
 
         /// <summary>
         /// 收集"下回合单位技能触发者"。
-        /// <para>team 非空时仅收集该队伍单位的准备技能。</para>
+        /// <para>聚焦判定:命中的队伍(掩码位)或指定单位 → Focused,其余 → Waiting。</para>
+        /// <para>team 非空时仅收集该队伍的触发者。</para>
         /// </summary>
-        public List<SkillTurnTrigger> CollectSkillTurnTriggers(bool isFocusedSkillTurn = false, long? focusUnitId = null, int? team = null)
+        public List<SkillTurnTrigger> CollectSkillTurnTriggers(PhaseOrderTable orderTable, int focusedSkillTeamMask = 0, long? focusUnitId = null, int? team = null)
         {
+            var table = orderTable ?? DefaultPhaseOrderTable;
             var turn = state.TurnState.CurrentTurn + 1;
             var list = new List<SkillTurnTrigger>();
 
@@ -277,31 +335,72 @@ public static class TurnTriggerCollector
             {
                 if (team.HasValue && unit.Team != team.Value) continue;
                 if (unit.PrepareSkill is not { } skill) continue;
-                var layer = isFocusedSkillTurn || (focusUnitId.HasValue && focusUnitId.Value == unit.Id)
+                var layer = ((focusedSkillTeamMask & (1 << unit.Team)) != 0) ||
+                            (focusUnitId.HasValue && focusUnitId.Value == unit.Id)
                     ? SimulationLayer.Focused
                     : SimulationLayer.Waiting;
+                var order = table.GetSkillOrder(unit.Team);
                 list.Add(SkillTriggerPool.Get()
-                    .Init(layer, 0, 0, unit.Id, unit.Team, skill.SkillName, skill.Args));
+                    .Init(layer, order, 0, unit.Id, unit.Team, skill.SkillName, skill.Args));
             }
 
+            list.Sort(OrderComparer);
             return list;
         }
 
         /// <summary>
-        /// 收集"下回合触发者"（区域 + 单位Buff + 单位技能）的合并结果,供 DoUpdate 一次性执行。
+        /// 收集"下回合队伍放置触发者"。
+        /// <para>聚焦判定:命中的队伍(掩码位) → Focused,其余 → Waiting。</para>
+        /// <para>team 非空时仅收集该队伍的放置。</para>
+        /// </summary>
+        public List<PlaceUnitTurnTrigger> CollectPlaceUnitTurnTriggers(PhaseOrderTable orderTable,Vector2I? focusCoords
+            ,int focusedPlaceUnitTeamMask = 0, int? team = null)
+        {
+            var table = orderTable ?? DefaultPhaseOrderTable;
+            var turn = state.TurnState.CurrentTurn + 1;
+            var list = new List<PlaceUnitTurnTrigger>();
+            // 阶段序号:接入 PlaceUnit 阶段(未注册时安全回退到末位,此处以 0 占位,排序由 TriggerComparer 决定)
+            foreach (var t in state.TeamState.GetPrepareTeams())
+            {
+                if (team.HasValue && t != team.Value) continue;
+                var layer = (focusedPlaceUnitTeamMask & (1 << t)) != 0
+                    ? SimulationLayer.Focused
+                    : SimulationLayer.Waiting;
+                var places = state.TeamState.GetTeamPreparePlaceUnits(t);
+                var order = table.GetPlaceUnitOrder(t);
+                for (int i = 0; i < places.Count; i++)
+                {
+                    if (places[i] is not { } info) continue;
+                    list.Add(PlaceTriggerPool.Get().Init(focusCoords is {} a && a == info.Coords ?
+                            SimulationLayer.Focused : 
+                            layer, order,
+                        0, t, i, info.Coords, info.UnitName));
+                }
+            }
+
+            list.Sort(OrderComparer);
+            return list;
+        }
+
+        /// <summary>
+        /// 收集"下回合触发者"（区域 + 单位Buff + 单位技能 + 队伍放置）的合并结果,按 (Layer, PhaseOrder, Priority) 排序后返回。
         /// <para>返回列表中可能包含失效触发者,调用方应执行前用 <see cref="TurnTrigger.CheckIsValid"/> 过滤。</para>
         /// <para>实例来自对象池;调用方使用完需主动 <see cref="ReturnTrigger"/> 归还。不归还也不会泄漏。</para>
         /// </summary>
         public List<TurnTrigger> CollectNextTurnTriggers(
+            PhaseOrderTable orderTable,
             Vector2I? focusCoords = null, long? focusUnitId = null,
             bool isFocusedRegionTurn = false,
             bool isFocusedBuffTurn = false,
-            bool isFocusedSkillTurn = false)
+            int focusedSkillTeamMask = 0,
+            int focusedPlaceUnitTeamMask = 0)
         {
             var list = new List<TurnTrigger>(32);
-            list.AddRange(CollectRegionTurnTriggers(state, isFocusedRegionTurn, focusCoords));
-            list.AddRange(CollectBuffTurnTriggers(state, isFocusedBuffTurn));
-            list.AddRange(CollectSkillTurnTriggers(state, isFocusedSkillTurn, focusUnitId));
+            list.AddRange(CollectRegionTurnTriggers(state, orderTable, isFocusedRegionTurn, focusCoords));
+            list.AddRange(CollectBuffTurnTriggers(state, orderTable, isFocusedBuffTurn));
+            list.AddRange(CollectSkillTurnTriggers(state, orderTable, focusedSkillTeamMask, focusUnitId));
+            list.AddRange(CollectPlaceUnitTurnTriggers(state, orderTable, focusCoords, focusedPlaceUnitTeamMask));
+            list.Sort(OrderComparer);
             return list;
         }
     }

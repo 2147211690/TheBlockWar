@@ -52,7 +52,7 @@ public class EventScheduler : IEventScheduler
             }
             else
             {
-                _runningCompletionSource!.TrySetResult();
+                _runningCompletionSource?.TrySetResult();
                 _runningCompletionSource = null;
             }
         }
@@ -70,12 +70,7 @@ public class EventScheduler : IEventScheduler
     public long? FocusedUnitId
     {
         get => _focusedUnitId;
-        set
-        {
-            if (_focusedUnitId == value) return;
-            _focusedUnitId = value;
-            UpdateSimulation();
-        }
+        set => SetUpdateProperty(ref _focusedUnitId, value);
     }
 
     /// <summary>
@@ -84,12 +79,7 @@ public class EventScheduler : IEventScheduler
     public Vector2I? FocusedCoords
     {
         get => _focusedCoords;
-        set
-        {
-            if (_focusedCoords == value) return;
-            _focusedCoords = value;
-            UpdateSimulation();
-        }
+        set => SetUpdateProperty(ref _focusedCoords, value);
     }
     private long? _focusedUnitId;
     private Vector2I? _focusedCoords;
@@ -103,38 +93,32 @@ public class EventScheduler : IEventScheduler
     public bool IsFocusedRegionTurn
     {
         get => _isFocusedRegionTurn;
-        set
-        {
-            if (_isFocusedRegionTurn == value) return;
-            _isFocusedRegionTurn = value;
-            UpdateSimulation();
-        }
+        set => SetUpdateProperty(ref _isFocusedRegionTurn, value);
     }
 
     public bool IsFocusedBuffTurn
     {
         get => _isFocusedBuffTurn;
-        set
-        {
-            if (_isFocusedBuffTurn == value) return;
-            _isFocusedBuffTurn = value;
-            UpdateSimulation();
-        }
+        set => SetUpdateProperty(ref _isFocusedBuffTurn, value);
+    }
+    public int FocusedSkillTeamMask
+    {
+        get => _focusedSkillTeamMask;
+        set => SetUpdateProperty(ref _focusedSkillTeamMask, value);
     }
 
-    public bool IsFocusedSkillTurn
+    public int FocusedPlaceUnitTeamMask
     {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            UpdateSimulation();
-        }
+        get => _focusedPlaceUnitTeamMask;
+        set => SetUpdateProperty(ref _focusedPlaceUnitTeamMask, value);
     }
+    public PhaseOrderTable CurrentTurnPhaseOrder { get; set => SetUpdateProperty(ref field, value); }
+    public PhaseOrderTable NextTurnPhaseOrder { get; set => SetUpdateProperty(ref field, value); }
 
     private IComparer<TurnTrigger> _nextTriggerComparer = TriggerComparer.Default;
     private IComparer<TurnTrigger> _currentTriggerComparer = TriggerComparer.Default;
+    private int _focusedPlaceUnitTeamMask;
+    private int _focusedSkillTeamMask;
 
     public EventScheduler(IGameState gameState, int playerTeam)
     {
@@ -177,7 +161,15 @@ public class EventScheduler : IEventScheduler
     {
         _currentTriggerComparer = TriggerComparer.FromPhase(phases);
     }
-
+    
+    
+    private void SetUpdateProperty<T>(ref T field, T value)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return;
+        field = value;
+        UpdateSimulation();
+    }
+    
     public GDTask WaitCompleteRunning() => _runningCompletionSource?.Task ?? GDTask.CompletedTask;
     /// <summary>
     /// 设置单位下回合准备使用的技能；会触发一次更新。
@@ -187,6 +179,26 @@ public class EventScheduler : IEventScheduler
         _gameState.UnitMapState.ModifyUnit(unitId, u => u.PrepareSkill = skill);
         UpdateSimulation();
     }
+
+    /// <summary>
+    /// 设置队伍第 index 个待放置单位槽位(null 将该槽位置空),并触发一次全量更新。
+    /// </summary>
+    public void SetTeamPreparePlaceUnit(int team, int index, PreparePlaceUnitInfo? placeInfo)
+    {
+        _gameState.TeamState.SetTeamPreparePlaceUnit(team, index, placeInfo);
+        UpdateSimulation();
+    }
+
+    /// <summary>清空某队伍全部待放置单位槽位,并触发一次全量更新。</summary>
+    public void ClearTeamPreparePlaceUnits(int team)
+    {
+        _gameState.TeamState.ClearTeamPreparePlaceUnits(team);
+        UpdateSimulation();
+    }
+
+    /// <summary>读取某队伍第 index 个待放置单位槽位。</summary>
+    public PreparePlaceUnitInfo? GetTeamPreparePlaceUnit(int team, int index)
+        => _gameState.TeamState.GetTeamPreparePlaceUnit(team, index);
 
     /// <summary>
     /// 在快照上执行单位下回合准备使用的技能,重放到真数据,清理该单位的 Prepare,并存入 result;随后走一次更新。
@@ -228,8 +240,7 @@ public class EventScheduler : IEventScheduler
         _isFocusedBuffTurn = false;
         DoUpdate(result, res =>
         {
-            var buffs = _gameState.CollectBuffTurnTriggers(true);
-            buffs.Sort(_currentTriggerComparer);
+            var buffs = _gameState.CollectBuffTurnTriggers(CurrentTurnPhaseOrder, true);
             foreach (var buff in buffs)
             {
                 var sim = new SimObject(_gameState, SimulationLayer.Running, new(), 0);
@@ -254,8 +265,7 @@ public class EventScheduler : IEventScheduler
         _isFocusedRegionTurn = false;
         DoUpdate(result, res =>
         {
-            var regions = _gameState.CollectRegionTurnTriggers(true);
-            regions.Sort(_currentTriggerComparer);
+            var regions = _gameState.CollectRegionTurnTriggers(CurrentTurnPhaseOrder, true);
             foreach (var region in regions)
             {
                 var sim = new SimObject(_gameState, SimulationLayer.Running, new(), 0);
@@ -276,8 +286,7 @@ public class EventScheduler : IEventScheduler
     public void RunTeamUnitSkillTurn(int team, float delayTime = 0.5f)
     {
         var result = new SchedulerResult();
-        var skills = _gameState.CollectSkillTurnTriggers(true, null, team);
-        skills.Sort(_currentTriggerComparer);
+        var skills = _gameState.CollectSkillTurnTriggers(CurrentTurnPhaseOrder, 1 << team, null, team);
         foreach (var skill in skills)
         {
             RunUnitPrepareSkill(skill.UnitId, 0.5f, 0.5f);
@@ -285,7 +294,30 @@ public class EventScheduler : IEventScheduler
         TurnTriggerCollector.ReturnTriggers(skills);
     }
     
-    
+    /// <summary>
+    /// 在快照上执行某队伍所有单位下回合准备使用的技能,存入 result 并走一次更新。
+    /// 仿照 <see cref="RunBuffTurn"/>:先做一次整类聚焦预览,再在真数据上 Running 执行全部技能。
+    /// </summary>
+    public void RunTeamUnitPlaceTurn(int team, float delayTime = 0.5f)
+    {
+        var result = new SchedulerResult();
+        _focusedPlaceUnitTeamMask = 1 << team;
+        DoUpdate(new SchedulerResult() { DelayTime = delayTime }, null);
+        _focusedPlaceUnitTeamMask = 0;
+        DoUpdate(result, res =>
+        {
+            var places = _gameState.CollectPlaceUnitTurnTriggers(CurrentTurnPhaseOrder, FocusedCoords ,1 << team, team);
+            foreach (var place in places)
+            {
+                var sim = new SimObject(_gameState, SimulationLayer.Running, new(), 0);
+                if (!place.CheckIsValid(sim)) continue;
+                place.Invoke(sim);
+                res.RunningCount++;
+                res.Sims.Add(sim);
+            }
+            TurnTriggerCollector.ReturnTriggers(places);
+        });
+    }
     
 
     /// <summary>
@@ -338,9 +370,8 @@ public class EventScheduler : IEventScheduler
         var obj = new SimObject(snapshot, SimulationLayer.Focused, new(), 0);
 
 
-        var nextTurnTriggers = snapshot.CollectNextTurnTriggers(FocusedCoords, FocusedUnitId,
-            IsFocusedRegionTurn, IsFocusedBuffTurn, IsFocusedSkillTurn);
-        nextTurnTriggers.Sort(_nextTriggerComparer);
+        var nextTurnTriggers = snapshot.CollectNextTurnTriggers(NextTurnPhaseOrder, FocusedCoords, FocusedUnitId,
+            IsFocusedRegionTurn, IsFocusedBuffTurn, FocusedSkillTeamMask, FocusedPlaceUnitTeamMask);
 
         // 开始模拟：执行每个有效触发者,把产生的步骤存入 result
         foreach (var trigger in nextTurnTriggers)

@@ -14,6 +14,11 @@ public class BuffPhase : TurnPhase
         set => EventScheduler.IsFocusedBuffTurn = value;
     }
 
+    public override void OnSetOrderTable(PhaseOrderTable orderTable)
+    {
+        orderTable.SetBuffOrder(PhaseOrder);
+    }
+
     protected override void OnInit()
     {
     }

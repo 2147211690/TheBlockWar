@@ -12,4 +12,5 @@ public interface ITurnPhase
     ITurnManager TurnManager { get; }
     GDTask Execute();
     ITurnPhase Init(ITurnManager turnManager, int turn, IEventScheduler eventScheduler, int order);
+    void OnSetOrderTable(PhaseOrderTable orderTable);
 }

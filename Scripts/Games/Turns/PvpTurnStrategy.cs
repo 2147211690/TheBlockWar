@@ -29,8 +29,6 @@ public class PvpTurnStrategy : ITurnStrategy
             [
                 new MapBuildPhase(_mapBuilder),
                 new TestPhase(),
-                //..Players.Select(p => new PlayerPlaceUnitPhase(_operationSynchronizer, p)),
-                ..GetNormalTurnPhases(),
             ];
         }
         return GetNormalTurnPhases();
@@ -41,9 +39,11 @@ public class PvpTurnStrategy : ITurnStrategy
             [
                 new BuffPhase(),
                 new RegionPhase(),
-                ..Players.Select(p => new PlayerSkillPhase(p.Team, $"{p.Team}Phase")),
+                ..Players.Select(p => new SkillRunPhase(p.Team, $"{p.Team}Phase")),
                 new ResetUnitPhase(),
-                ..Players.Select(player => new PlayerPhase(_operationSynchronizer, player)),
+                ..Players.SelectMany<IPlayer, TurnPhase>(player => 
+                    [/*new UnitPlacePhase(player.Team),*/
+                        new PlayerPhase(_operationSynchronizer, player)]),
             ];
         }
     }

@@ -9,6 +9,6 @@ public class 生成单位域Region() : Region(RegionNames.生成单位域)
 {
     public override void OnEnterTurn(SimObject obj, Vector2I regionCoords, string regionData, int turn)
     {
-        obj.ApplyPushUnit(regionCoords, DirMask.Down);
+        obj.ApplyPlaceUnit(regionCoords, UnitNames.Unit0, 0);
     }
 }

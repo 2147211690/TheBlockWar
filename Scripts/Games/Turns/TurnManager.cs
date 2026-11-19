@@ -44,29 +44,22 @@ public class TurnManager : ITurnManager
         if (CurrentTurn == 0)
         {
             _currentPhases.AddRange(GetTurnPhases(CurrentTurn));
-            EventScheduler.SetCurrentTurnPhaseOrder(_currentPhases);
             _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
-            EventScheduler.SetNextTurnPhaseOrder(_nextPhases);
             SetPhaseOrders();
             return;
         }
         _currentPhases.Clear();
-        EventScheduler.PhaseOrders.Remove(CurrentTurn - 1);
         _currentPhases.AddRange(_nextPhases);
-        EventScheduler.SetCurrentTurnPhaseOrder(_currentPhases);
         
         _nextPhases.Clear();
         _nextPhases.AddRange(GetTurnPhases(CurrentTurn + 1));
-        EventScheduler.SetNextTurnPhaseOrder(_nextPhases);
         SetPhaseOrders();
     }
 
     private void SetPhaseOrders()
     {
-        EventScheduler.PhaseOrders[CurrentTurn] =
-            _currentPhases.Select(a => (a.PhaseName, a.PhaseOrder)).ToDictionary();
-        EventScheduler.PhaseOrders[CurrentTurn + 1] =
-            _nextPhases.Select(a => (a.PhaseName, a.PhaseOrder)).ToDictionary();
+        EventScheduler.CurrentTurnPhaseOrder = GetPhaseOrderTable(_currentPhases);
+        EventScheduler.NextTurnPhaseOrder = GetPhaseOrderTable(_nextPhases);
     }
 
     private IEnumerable<ITurnPhase> GetTurnPhases(int turn)
@@ -84,5 +77,14 @@ public class TurnManager : ITurnManager
         _stop = true;
     }
 
-
+    public PhaseOrderTable GetPhaseOrderTable(IEnumerable<ITurnPhase> phases)
+    {
+        var orderTable = new PhaseOrderTable();
+        foreach (var phase in phases)
+        {
+            phase.OnSetOrderTable(orderTable);
+        }
+        return orderTable;
+    }
+    
 }

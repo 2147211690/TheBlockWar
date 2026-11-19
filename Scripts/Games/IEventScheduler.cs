@@ -11,15 +11,16 @@ public interface IEventScheduler
     IReadOnlyGameState GameState { get; }
     int PlayerTeam { get; }
     int CurrentTurn { get; set; }
-    Dictionary<int, Dictionary<string, int>> PhaseOrders { get; }
     bool IsRunning { get; set; }
     event EventHandler<SchedulerResult>? SimulationUpdated;
     event EventHandler<IReadOnlyGameState>? GameStateReload;
     void ReloadGameState();
     void BlockUpdate();
     void UnblockUpdate();
-    void SetNextTurnPhaseOrder(IEnumerable<ITurnPhase> phases);
-    void SetCurrentTurnPhaseOrder(IEnumerable<ITurnPhase> phases);
+    
+    PhaseOrderTable CurrentTurnPhaseOrder { get; set; }
+    PhaseOrderTable NextTurnPhaseOrder { get; set; }
+    
     GDTask WaitCompleteRunning();
 
     /// <summary>
@@ -37,12 +38,27 @@ public interface IEventScheduler
     /// </summary>
     bool IsFocusedRegionTurn { get; set; }
     bool IsFocusedBuffTurn { get; set; }
-    bool IsFocusedSkillTurn { get; set; }
+    int FocusedSkillTeamMask { get; set; }
+    int FocusedPlaceUnitTeamMask { get; set; }
 
     /// <summary>
     /// 设置单位下回合准备使用的技能；会触发一次更新。
     /// </summary>
     void SetUnitPrepareSkill(long unitId, PrepareSkillInfo? skill);
+
+    /// <summary>
+    /// 设置队伍的本回合待放置单位(null 表示清除该队待放置)；会触发一次更新。
+    /// </summary>
+    void SetTeamPreparePlaceUnit(int team, int index, PreparePlaceUnitInfo? placeInfo);
+    /// <summary>
+    /// 清空某队伍全部待放置单位槽位；会触发一次更新。
+    /// </summary>
+    void ClearTeamPreparePlaceUnits(int team);
+
+    /// <summary>
+    /// 读取某队伍第 index 个待放置单位槽位。
+    /// </summary>
+    PreparePlaceUnitInfo? GetTeamPreparePlaceUnit(int team, int index);
 
     /// <summary>
     /// 在快照上执行单位下回合准备使用的技能,重放到真数据,清理该单位的 Prepare,并存入 result;随后走一次更新。
@@ -68,5 +84,10 @@ public interface IEventScheduler
     /// 直接在真数据上执行一次性动作,存入 result 并走一次更新。
     /// </summary>
     void RunAction(Action<SimObject> action);
-    
+
+    /// <summary>
+    /// 在快照上执行某队伍所有单位下回合准备使用的技能,存入 result 并走一次更新。
+    /// 仿照 <see cref="EventScheduler.RunBuffTurn"/>:先做一次整类聚焦预览,再在真数据上 Running 执行全部技能。
+    /// </summary>
+    void RunTeamUnitPlaceTurn(int team, float delayTime = 0.5f);
 }

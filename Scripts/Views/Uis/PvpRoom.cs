@@ -92,7 +92,7 @@ public partial class PvpRoom : Control
 
     private void PlayerAdded(long arg1, PlayerInfo arg2)
     {
-        var item = PlayerInfoItemPrefab.Instantiate() as TheBlockWar.Scripts.Views.Uis.PlayerInfoItem;
+        var item = PlayerInfoItemPrefab.Instantiate() as PlayerInfoItem;
         PlayerInfoItemContainer.AddChild(item);
         item.Name = arg2.Name;
         item.Id = arg1;

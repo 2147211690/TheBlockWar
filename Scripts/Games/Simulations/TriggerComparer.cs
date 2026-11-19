@@ -26,18 +26,23 @@ public static class TriggerComparer
         /// <summary>阶段类型 → 在阶段迭代器中的顺序索引。</summary>
         private readonly IReadOnlyDictionary<PhaseEnum, int> _phaseTypeIndex;
 
-        /// <summary>队伍 → 顺序索引(来自 Player 阶段的枚举顺序,供技能比较)。</summary>
-        private readonly IReadOnlyDictionary<int, int> _teamOrder;
+        /// <summary>队伍 → 顺序索引(来自 Skill 阶段的枚举顺序,供技能间比较)。</summary>
+        private readonly IReadOnlyDictionary<int, int> _skillTeamOrder;
+
+        /// <summary>队伍 → 顺序索引(来自 PlaceUnit 阶段的枚举顺序,供放置间比较)。</summary>
+        private readonly IReadOnlyDictionary<int, int> _placeTeamOrder;
 
         /// <summary>
-        /// 从阶段集合构造比较器:提取阶段类型的顺序(供 Phase 比较)与 Player 阶段的队伍顺序(供技能比较)。
+        /// 从阶段集合构造比较器:提取阶段类型的顺序(供 Phase 比较)与各玩家侧阶段的队伍顺序(供技能/放置按各自阶段比较)。
         /// </summary>
         public FromPhaseComparer(IEnumerable<ITurnPhase> phases)
         {
             var phaseTypeIndex = new Dictionary<PhaseEnum, int>();
-            var teamOrder = new Dictionary<int, int>();
+            var skillTeamOrder = new Dictionary<int, int>();
+            var placeTeamOrder = new Dictionary<int, int>();
             var phaseOrder = 0;
-            var teamOrder2 = 0;
+            var skillTeamOrder2 = 0;
+            var placeTeamOrder2 = 0;
             foreach (var phase in phases)
             {
                 if (!phaseTypeIndex.ContainsKey(phase.PhaseType))
@@ -45,14 +50,20 @@ public static class TriggerComparer
                     phaseTypeIndex[phase.PhaseType] = phaseOrder++;
                 }
 
-                // Player 阶段(如技能/队伍阶段)按队伍顺序登记,供 Skill 触发者比较
-                if (phase.PhaseType == PhaseEnum.Skill && !teamOrder.ContainsKey(phase.Team))
+                // Skill 阶段按队伍顺序登记,供技能触发者比较
+                if (phase.PhaseType == PhaseEnum.Skill && !skillTeamOrder.ContainsKey(phase.Team))
                 {
-                    teamOrder[phase.Team] = teamOrder2++;
+                    skillTeamOrder[phase.Team] = skillTeamOrder2++;
+                }
+                // PlaceUnit 阶段按队伍顺序登记,供放置触发者比较
+                else if (phase.PhaseType == PhaseEnum.PlaceUnit && !placeTeamOrder.ContainsKey(phase.Team))
+                {
+                    placeTeamOrder[phase.Team] = placeTeamOrder2++;
                 }
             }
             _phaseTypeIndex = phaseTypeIndex;
-            _teamOrder = teamOrder;
+            _skillTeamOrder = skillTeamOrder;
+            _placeTeamOrder = placeTeamOrder;
         }
 
         public int Compare(TurnTrigger? x, TurnTrigger? y)
@@ -69,10 +80,13 @@ public static class TriggerComparer
             c = PhaseIndex(x).CompareTo(PhaseIndex(y));
             if (c != 0) return c;
 
-            // 3. 技能按 Player 阶段的 Team 顺序
-            if (x is SkillTurnTrigger sx && y is SkillTurnTrigger sy)
+            // 3. 技能/放置各自按对应玩家侧阶段的 Team 顺序比较(类型须一致)
+            var tx = TeamOf(x);
+            var ty = TeamOf(y);
+            if (tx is { } ea && ty is { } eb && ea.Kind == eb.Kind)
             {
-                c = TeamIndex(sx.UnitTeam).CompareTo(TeamIndex(sy.UnitTeam));
+                var order = ea.Kind == PhaseEnum.Skill ? _skillTeamOrder : _placeTeamOrder;
+                c = TeamIndex(order, ea.Team).CompareTo(TeamIndex(order, eb.Team));
                 if (c != 0) return c;
             }
 
@@ -86,6 +100,7 @@ public static class TriggerComparer
             BuffTurnTrigger => PhaseEnum.Buff,
             RegionTurnTrigger => PhaseEnum.Region,
             SkillTurnTrigger => PhaseEnum.Skill,
+            PlaceUnitTurnTrigger => PhaseEnum.PlaceUnit,
             _ => null,
         };
 
@@ -95,7 +110,15 @@ public static class TriggerComparer
             return pt is { } value && _phaseTypeIndex.TryGetValue(value, out var index) ? index : _phaseTypeIndex.Count;
         }
 
-        private int TeamIndex(int team)
-            => _teamOrder.TryGetValue(team, out var index) ? index : _teamOrder.Count;
+        private int TeamIndex(IReadOnlyDictionary<int, int> order, int team)
+            => order.TryGetValue(team, out var index) ? index : order.Count;
+
+        /// <summary>玩家侧行动类型(技能/放置)取队伍及其阶段类型;其余返回 null(不参与 Team 排序)。</summary>
+        private static (PhaseEnum Kind, int Team)? TeamOf(TurnTrigger t) => t switch
+        {
+            SkillTurnTrigger s => (PhaseEnum.Skill, s.UnitTeam),
+            PlaceUnitTurnTrigger p => (PhaseEnum.PlaceUnit, p.Team),
+            _ => null,
+        };
     }
 }

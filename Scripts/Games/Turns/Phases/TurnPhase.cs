@@ -20,5 +20,6 @@ public abstract class TurnPhase : ITurnPhase
         OnInit();
         return this;
     }
+    public virtual void OnSetOrderTable(PhaseOrderTable orderTable){}
     protected abstract void OnInit();
 }
